@@ -19,31 +19,36 @@
  *
  */
 
-#include <map>
-
-#include "XBDateTime.h"
+#include "pvr/channels/PVRChannel.h" // PVR_INVALID_CHANNEL_UID
 #include "settings/dialogs/GUIDialogSettingsManualBase.h"
+
+#include <memory>
+#include <vector>
+#include <map>
 
 class CFileItem;
 class CSetting;
-class CSettingGroup;
 
 namespace PVR
 {
   class CPVRTimerInfoTag;
+  typedef std::shared_ptr<CPVRTimerInfoTag> CPVRTimerInfoTagPtr;
+
+  class CPVRTimerType;
+  typedef std::shared_ptr<CPVRTimerType> CPVRTimerTypePtr;
 
   class CGUIDialogPVRTimerSettings : public CGUIDialogSettingsManualBase
   {
   public:
     CGUIDialogPVRTimerSettings();
-    virtual ~CGUIDialogPVRTimerSettings() { }
+    virtual ~CGUIDialogPVRTimerSettings();
 
     void SetTimer(CFileItem *item);
 
   protected:
-    // implementations of ISettingCallback
+    // implementation of ISettingCallback
     virtual void OnSettingChanged(const CSetting *setting);
-    virtual void OnSettingAction(const CSetting *setting);
+    virtual void OnSettingAction (const CSetting *setting);
 
     // specialization of CGUIDialogSettingsBase
     virtual bool AllowResettingSettings() const { return false; }
@@ -53,28 +58,87 @@ namespace PVR
     // specialization of CGUIDialogSettingsManualBase
     virtual void InitializeSettings();
     
-    virtual CSetting* AddChannelNames(CSettingGroup *group, bool bRadio);
-    virtual void SetWeekdaySettingFromTimer(const CPVRTimerInfoTag &timer);
-    virtual void SetTimerFromWeekdaySetting(CPVRTimerInfoTag &timer);
+  private:
+    void InitializeTypesList();
+    void InitializeChannelsList();
+    static int InitializeDay(const CDateTime &datetime);
+    void SetButtonLabels();
 
-    void getChannelNames(bool bRadio, std::vector< std::pair<std::string, int> > &list, int &current, bool updateChannelEntries = false);
-    void setButtonLabels();
+    static void TypesFiller(
+      const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
+    static void ChannelsFiller(
+      const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
+    static void DaysFiller(
+      const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
 
-    static bool IsTimerDayRepeating(const std::string &condition, const std::string &value, const CSetting *setting);
+    void AddCondition(
+      CSetting *setting, const std::string &identifier, SettingConditionCheck condition,
+      SettingDependencyType depType, const std::string &settingId);
 
-    static void ChannelNamesOptionsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
-    static void DaysOptionsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
+    void AddTypeDependentEnableCondition(CSetting *setting, const std::string &identifier);
+    static bool TypeReadOnlyCondition(
+      const std::string &condition, const std::string &value, const CSetting *setting, void *data);
 
-    SYSTEMTIME                          m_timerStartTime;
-    SYSTEMTIME                          m_timerEndTime;
-    std::string                         m_timerStartTimeStr;
-    std::string                         m_timerEndTimeStr;
-    int                                 m_tmp_iFirstDay;
-    int                                 m_tmp_day;
-    bool                                m_bTimerActive;
-    int                                 m_selectedChannelEntry;
-    std::map<std::pair<bool, int>, int> m_channelEntries;
+    void AddTypeDependentVisibilityCondition(CSetting *setting, const std::string &identifier);
+    static bool TypeSupportsCondition(
+      const std::string &condition, const std::string &value, const CSetting *setting, void *data);
 
-    CFileItem                          *m_timerItem;
+    void AddAnytimeDependentVisibilityCondition(CSetting *setting, const std::string &identifier);
+    static bool AnytimeSetCondition(
+      const std::string &condition, const std::string &value, const CSetting *setting, void *data);
+
+    typedef std::map<int, CPVRTimerTypePtr>  TypeEntriesMap;
+
+    typedef struct ChannelDescriptor
+    {
+      int         channelUid;
+      int         clientId;
+      std::string description;
+
+      ChannelDescriptor(int _channelUid = PVR_INVALID_CHANNEL_UID,
+                        int _clientId   = -1,
+                        const std::string& _description = "")
+      : channelUid(_channelUid),
+        clientId(_clientId),
+        description(_description)
+      {}
+
+      inline bool operator ==(const ChannelDescriptor& right) const
+      {
+        return (channelUid  == right.channelUid &&
+                clientId    == right.clientId   &&
+                description == right.description);
+      }
+
+    } ChannelDescriptor;
+
+    typedef std::map <int, ChannelDescriptor> ChannelEntriesMap;
+
+    CPVRTimerInfoTagPtr m_timerInfoTag;
+    TypeEntriesMap      m_typeEntries;
+    ChannelEntriesMap   m_channelEntries;
+    std::string         m_timerStartTimeStr;
+    std::string         m_timerEndTimeStr;
+
+    CPVRTimerTypePtr    m_timerType;
+    bool                m_bIsRadio;
+    bool                m_bIsNewTimer;
+    bool                m_bTimerActive;
+    bool                m_bAnytime;
+    std::string         m_strTitle;
+    std::string         m_strEpgSearchString;
+    bool                m_bFullTextEpgSearch;
+    ChannelDescriptor   m_channel;
+    int                 m_iDay; // days since "today" (0 == "today", 1 == "tomorrow", ...)
+    SYSTEMTIME          m_timerStartTime;
+    SYSTEMTIME          m_timerEndTime;
+    unsigned int        m_iWeekdays;
+    int                 m_iFirstDay;
+    bool                m_bNewEpisodesOnly;
+    unsigned int        m_iMarginStart;
+    unsigned int        m_iMarginEnd;
+    int                 m_iPriority;
+    int                 m_iLifetime;
+    std::string         m_strDirectory;
   };
-}
+} // namespace PVR
