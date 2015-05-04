@@ -80,15 +80,19 @@ void CGUIWindowPVRGuide::GetContextButtons(int itemNumber, CContextButtons &butt
   {
     if (timer->GetPVRTimerInfoTag()->IsRecording())
       buttons.Add(CONTEXT_BUTTON_STOP_RECORD, 19059);  /* stop recording */
-    else
+    else if (timer->GetPVRTimerInfoTag()->HasTimerType() &&
+             !timer->GetPVRTimerInfoTag()->GetTimerType()->IsReadOnly())
       buttons.Add(CONTEXT_BUTTON_STOP_RECORD, 19060);  /* delete timer */
   }
   else if (pItem->HasEPGInfoTag() && pItem->GetEPGInfoTag()->EndAsLocalTime() > CDateTime::GetCurrentDateTime())
   {
     if (pItem->GetEPGInfoTag()->StartAsLocalTime() < CDateTime::GetCurrentDateTime())
       buttons.Add(CONTEXT_BUTTON_START_RECORD, 264);   /* record */
-    else
+    else if (timer->GetPVRTimerInfoTag()->HasTimerType())
       buttons.Add(CONTEXT_BUTTON_START_RECORD, 19061); /* add timer */
+
+    if (timer->GetPVRTimerInfoTag()->HasTimerType())
+      buttons.Add(CONTEXT_BUTTON_ADVANCED_RECORD, 841);  /* add custom timer */
   }
 
   buttons.Add(CONTEXT_BUTTON_INFO, 19047);              /* epg info */
@@ -481,9 +485,10 @@ bool CGUIWindowPVRGuide::OnContextButtonStartRecord(CFileItem *item, CONTEXT_BUT
 {
   bool bReturn = false;
 
-  if (button == CONTEXT_BUTTON_START_RECORD)
+  if ((button == CONTEXT_BUTTON_START_RECORD) ||
+      (button == CONTEXT_BUTTON_ADVANCED_RECORD))
   {
-    StartRecordFile(*item);
+    StartRecordFile(item, button == CONTEXT_BUTTON_ADVANCED_RECORD);
     bReturn = true;
   }
 
@@ -496,7 +501,7 @@ bool CGUIWindowPVRGuide::OnContextButtonStopRecord(CFileItem *item, CONTEXT_BUTT
 
   if (button == CONTEXT_BUTTON_STOP_RECORD)
   {
-    StopRecordFile(*item);
+    StopRecordFile(item);
     bReturn = true;
   }
 

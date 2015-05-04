@@ -250,7 +250,8 @@ bool CPVRManager::IsPVRWindowActive(void) const
       g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_OSD_GUIDE) ||
       g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_GUIDE_SEARCH) ||
       g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_RECORDING_INFO) ||
-      g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_TIMER_SETTING);
+      g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_TIMER_SETTING) ||
+      g_windowManager.IsWindowActive(WINDOW_DIALOG_PVR_TIMER_WEEKDAYS_SETTING);
 }
 
 bool CPVRManager::IsPVRWindow(int windowId)
@@ -899,7 +900,7 @@ bool CPVRManager::ToggleRecordingOnChannel(unsigned int iChannelId)
     else
     {
       /* delete active timers */
-      bReturn = m_timers->DeleteTimersOnChannel(channel, false, true);
+      bReturn = m_timers->DeleteTimersOnChannel(channel, true, true);
     }
   }
 

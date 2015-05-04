@@ -1434,6 +1434,11 @@
             <formatlabel>14044</formatlabel>
           </control>
         </setting>
+        <setting id="pvrrecord.onlynewepisodes" type="boolean" label="19295" help="36423">
+          <level>2</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
       </group>
       <group id="2">
         <setting id="pvrrecord.timernotifications" type="boolean" label="19233" help="36239">
@@ -1559,6 +1564,14 @@
         <setting id="pvrclient.menuhook" type="action" label="19280" help="36252">
           <level>1</level>
           <control type="button" format="action" />
+        </setting>
+      </group>
+    </category>
+    <category id="pvrtimers" label="" help="">
+      <group id="1">
+        <setting id="pvrtimers.timertypefilter" type="boolean" label="" help="">
+          <level>4</level>
+          <default>true</default>
         </setting>
       </group>
     </category>
