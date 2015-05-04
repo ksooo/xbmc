@@ -131,6 +131,7 @@
 #include "pvr/dialogs/GUIDialogPVRGuideSearch.h"
 #include "pvr/dialogs/GUIDialogPVRRecordingInfo.h"
 #include "pvr/dialogs/GUIDialogPVRTimerSettings.h"
+#include "pvr/dialogs/GUIDialogPVRTimerWeekdaysSettings.h"
 
 #include "video/dialogs/GUIDialogFullScreenInfo.h"
 #include "video/dialogs/GUIDialogTeletext.h"
@@ -270,6 +271,7 @@ void CGUIWindowManager::CreateWindows()
   Add(new CGUIDialogPVRGuideInfo);
   Add(new CGUIDialogPVRRecordingInfo);
   Add(new CGUIDialogPVRTimerSettings);
+  Add(new CGUIDialogPVRTimerWeekdaysSettings);
   Add(new CGUIDialogPVRGroupManager);
   Add(new CGUIDialogPVRChannelManager);
   Add(new CGUIDialogPVRGuideSearch);
@@ -363,6 +365,7 @@ bool CGUIWindowManager::DestroyWindows()
     Delete(WINDOW_DIALOG_PVR_GUIDE_INFO);
     Delete(WINDOW_DIALOG_PVR_RECORDING_INFO);
     Delete(WINDOW_DIALOG_PVR_TIMER_SETTING);
+    Delete(WINDOW_DIALOG_PVR_TIMER_WEEKDAYS_SETTING);
     Delete(WINDOW_DIALOG_PVR_GROUP_MANAGER);
     Delete(WINDOW_DIALOG_PVR_CHANNEL_MANAGER);
     Delete(WINDOW_DIALOG_PVR_GUIDE_SEARCH);

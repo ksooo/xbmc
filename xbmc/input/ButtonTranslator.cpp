@@ -303,6 +303,7 @@ static const ActionMapping windows[] =
         {"pvrguideinfo"             , WINDOW_DIALOG_PVR_GUIDE_INFO},
         {"pvrrecordinginfo"         , WINDOW_DIALOG_PVR_RECORDING_INFO},
         {"pvrtimersetting"          , WINDOW_DIALOG_PVR_TIMER_SETTING},
+        {"pvrtimerweekdayssetting"  , WINDOW_DIALOG_PVR_TIMER_WEEKDAYS_SETTING},
         {"pvrgroupmanager"          , WINDOW_DIALOG_PVR_GROUP_MANAGER},
         {"pvrchannelmanager"        , WINDOW_DIALOG_PVR_CHANNEL_MANAGER},
         {"pvrguidesearch"           , WINDOW_DIALOG_PVR_GUIDE_SEARCH},

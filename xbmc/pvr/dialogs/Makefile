@@ -5,7 +5,8 @@ SRCS=GUIDialogPVRChannelManager.cpp \
      GUIDialogPVRGuideOSD.cpp \
      GUIDialogPVRGuideSearch.cpp \
      GUIDialogPVRRecordingInfo.cpp \
-     GUIDialogPVRTimerSettings.cpp
+     GUIDialogPVRTimerSettings.cpp \
+     GUIDialogPVRTimerWeekdaysSettings.cpp
 
 LIB=pvrdialogs.a
 
