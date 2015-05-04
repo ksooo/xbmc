@@ -50,7 +50,7 @@ void CGUIRadioButtonControl::Render()
 {
   CGUIButtonControl::Render();
 
-  if ( IsSelected() && !IsDisabled() )
+  if (IsSelected())
   {
     if (HasFocus())
       m_imgRadioOnFocus.Render();
