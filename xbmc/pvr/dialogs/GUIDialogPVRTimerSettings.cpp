@@ -544,10 +544,6 @@ void CGUIDialogPVRTimerSettings::Save()
       bEndSet = true;
     }
   }
-  else
-  {
-    if (m_timerType->IsOnetime() || m_timerType->IsManual())
-      CLog::Log(LOGERROR, "CGUIDialogPVRTimerSettings::Save - No channel");
 
   if (!bStartSet || !bEndSet)
   {
