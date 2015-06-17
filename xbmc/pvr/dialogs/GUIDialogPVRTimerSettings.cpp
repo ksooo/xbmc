@@ -320,12 +320,12 @@ void CGUIDialogPVRTimerSettings::InitializeSettings()
   AddTypeDependentEnableCondition(setting, SETTING_TMR_END_POST);
 
   // Priority
-  setting = AddSpinner(group, SETTING_TMR_PRIORITY, 19082, 0, m_iPriority, PrioritiesFiller);
+  setting = AddList(group, SETTING_TMR_PRIORITY, 19082, 0, m_iPriority, PrioritiesFiller, 19082);
   AddTypeDependentVisibilityCondition(setting, SETTING_TMR_PRIORITY);
   AddTypeDependentEnableCondition(setting, SETTING_TMR_PRIORITY);
 
   // Lifetime
-  setting = AddSpinner(group, SETTING_TMR_LIFETIME, 19083, 0, m_iLifetime, LifetimesFiller);
+  setting = AddList(group, SETTING_TMR_LIFETIME, 19083, 0, m_iLifetime, LifetimesFiller, 19083);
   AddTypeDependentVisibilityCondition(setting, SETTING_TMR_LIFETIME);
   AddTypeDependentEnableCondition(setting, SETTING_TMR_LIFETIME);
 
@@ -527,14 +527,29 @@ void CGUIDialogPVRTimerSettings::Save()
   }
 
   // Begin and end time
-  if (m_bStartAnytime && m_timerType->IsRepeatingEpgBased())
+  bool bStartSet(false);
+  bool bEndSet(false);
+  if ((m_bStartAnytime || m_bEndAnytime) && m_timerType->IsRepeatingEpgBased())
   {
     time_t time = 0;
     CDateTime datetime(time);
-    m_timerInfoTag->SetStartFromLocalTime(datetime);
-    m_timerInfoTag->SetEndFromLocalTime(datetime);
+    if (m_bStartAnytime)
+    {
+      m_timerInfoTag->SetStartFromUTC(datetime);
+      bStartSet = true;
+    }
+    if (m_bEndAnytime)
+    {
+      m_timerInfoTag->SetEndFromUTC(datetime);
+      bEndSet = true;
+    }
   }
   else
+  {
+    if (m_timerType->IsOnetime() || m_timerType->IsManual())
+      CLog::Log(LOGERROR, "CGUIDialogPVRTimerSettings::Save - No channel");
+
+  if (!bStartSet || !bEndSet)
   {
     CDateTime now(CDateTime::GetCurrentDateTime());
     tm time_now; now.GetAsTm(time_now);
@@ -555,8 +570,11 @@ void CGUIDialogPVRTimerSettings::Save()
     if (newEnd < newStart)
       newEnd += CDateTimeSpan(1, 0, 0, 0);
 
-    m_timerInfoTag->SetStartFromLocalTime(newStart);
-    m_timerInfoTag->SetEndFromLocalTime(newEnd);
+    if (!bStartSet)
+      m_timerInfoTag->SetStartFromLocalTime(newStart);
+
+    if (!bEndSet)
+      m_timerInfoTag->SetEndFromLocalTime(newEnd);
   }
 
   // Days of week (only for repeating timers)

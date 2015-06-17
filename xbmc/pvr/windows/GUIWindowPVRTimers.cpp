@@ -84,7 +84,8 @@ void CGUIWindowPVRTimers::GetContextButtons(int itemNumber, CContextButtons &but
 
     buttons.Add(CONTEXT_BUTTON_FIND, 19003);            /* Find similar program */
 
-    if (!pItem->GetPVRTimerInfoTag()->GetTimerType()->IsReadOnly())
+    if (pItem->GetPVRTimerInfoTag()->HasTimerType() &&
+        !pItem->GetPVRTimerInfoTag()->GetTimerType()->IsReadOnly())
     {
       if (pItem->GetPVRTimerInfoTag()->GetTimerType()->SupportsEnableDisable())
       {
