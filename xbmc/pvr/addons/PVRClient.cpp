@@ -295,6 +295,7 @@ void CPVRClient::WriteClientTimerInfo(const CPVRTimerInfoTag &xbmcTimer, PVR_TIM
   addonTimer.iPriority                 = xbmcTimer.m_iPriority;
   addonTimer.iLifetime                 = xbmcTimer.m_iLifetime;
   addonTimer.iPreventDuplicateEpisodes = xbmcTimer.m_iPreventDupEpisodes;
+  addonTimer.iRecordingGroup           = xbmcTimer.m_iRecordingGroup;
   addonTimer.iWeekdays                 = xbmcTimer.m_iWeekdays;
   addonTimer.startTime                 = start - g_advancedSettings.m_iPVRTimeCorrection;
   addonTimer.endTime                   = end - g_advancedSettings.m_iPVRTimeCorrection;

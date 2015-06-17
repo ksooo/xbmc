@@ -3414,7 +3414,11 @@ msgctxt "#810"
 msgid "Any time"
 msgstr ""
 
-# empty string with id 811
+# Label of "Recording Group" list in the PVR timer setting dialog
+#: xbmc/pvr/dialogs/GUIDialogPVRTimerSettings.cpp
+msgctxt "#811"
+msgid "Recording Group"
+msgstr ""
 
 #. Label for setting TV->Recordings->Prevent duplicate episodes
 #: system/settings/settings.xml

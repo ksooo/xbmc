@@ -48,6 +48,7 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(bool bRadio /* = false */) :
   m_iPriority           = CSettings::Get().GetInt("pvrrecord.defaultpriority");
   m_iLifetime           = CSettings::Get().GetInt("pvrrecord.defaultlifetime");
   m_iPreventDupEpisodes = CSettings::Get().GetInt("pvrrecord.preventduplicateepisodes");
+  m_iRecordingGroup     = 0;
   m_iChannelNumber      = 0;
   m_bIsRadio            = bRadio;
   m_iMarginStart        = CSettings::Get().GetInt("pvrrecord.marginstart");
@@ -94,6 +95,7 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(const PVR_TIMER &timer, const CPVRChannelPtr 
   m_StartTime           = timer.startTime + g_advancedSettings.m_iPVRTimeCorrection;
   m_StopTime            = timer.endTime + g_advancedSettings.m_iPVRTimeCorrection;
   m_iPreventDupEpisodes = timer.iPreventDuplicateEpisodes;
+  m_iRecordingGroup     = timer.iRecordingGroup;
   m_FirstDay            = timer.firstDay + g_advancedSettings.m_iPVRTimeCorrection;
   m_iWeekdays           = timer.iWeekdays;
   m_iPriority           = timer.iPriority;
@@ -168,6 +170,7 @@ bool CPVRTimerInfoTag::operator ==(const CPVRTimerInfoTag& right) const
           m_iClientChannelUid   == right.m_iClientChannelUid &&
           m_bIsRadio            == right.m_bIsRadio &&
           m_iPreventDupEpisodes == right.m_iPreventDupEpisodes &&
+          m_iRecordingGroup     == m_iRecordingGroup &&
           m_StartTime           == right.m_StartTime &&
           m_StopTime            == right.m_StopTime &&
           m_FirstDay            == right.m_FirstDay &&
@@ -184,7 +187,7 @@ bool CPVRTimerInfoTag::operator ==(const CPVRTimerInfoTag& right) const
           m_iMarginEnd          == right.m_iMarginEnd &&
           m_state               == right.m_state &&
           m_timerType           == right.m_timerType &&
-          m_iTimerId            == right.m_iTimerId);
+          m_iTimerId            == right.m_iTimerId );
 }
 
 CPVRTimerInfoTag::~CPVRTimerInfoTag(void)
@@ -537,6 +540,7 @@ bool CPVRTimerInfoTag::UpdateEntry(const CPVRTimerInfoTagPtr &tag)
   m_iLifetime           = tag->m_iLifetime;
   m_state               = tag->m_state;
   m_iPreventDupEpisodes = tag->m_iPreventDupEpisodes;
+  m_iRecordingGroup     = tag->m_iRecordingGroup;
   m_iWeekdays           = tag->m_iWeekdays;
   m_iChannelNumber      = tag->m_iChannelNumber;
   m_bIsRadio            = tag->m_bIsRadio;

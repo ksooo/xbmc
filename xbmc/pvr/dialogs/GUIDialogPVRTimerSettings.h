@@ -78,6 +78,8 @@ namespace PVR
       const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
     static void LifetimesFiller(
       const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
+    static void RecordingGroupFiller(
+      const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
 
     void AddCondition(
       CSetting *setting, const std::string &identifier, SettingConditionCheck condition,
@@ -150,5 +152,6 @@ namespace PVR
     int                 m_iPriority;
     int                 m_iLifetime;
     std::string         m_strDirectory;
+    unsigned int        m_iRecordingGroup;
   };
 } // namespace PVR

@@ -230,6 +230,7 @@ namespace PVR
     int                   m_iLifetime;           /*!< @brief lifetime of the timer in days */
     unsigned int          m_iWeekdays;           /*!< @brief bit based store of weekdays for repeating timers */
     unsigned int          m_iPreventDupEpisodes; /*!< @brief only record new episodes for repeating epg based timers */
+    unsigned int          m_iRecordingGroup;     /*!< @brief (optional) if set, the addon/backend stores the recording to a group (sub-folder) */
     std::string           m_strFileNameAndPath;  /*!< @brief file name is only for reference */
     int                   m_iChannelNumber;      /*!< @brief integer value of the channel number */
     bool                  m_bIsRadio;            /*!< @brief is radio channel if set */
