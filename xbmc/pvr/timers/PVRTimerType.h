@@ -218,6 +218,12 @@ namespace PVR
     bool SupportsRecordingFolders() const { return m_iAttributes & PVR_TIMER_TYPE_SUPPORTS_RECORDING_FOLDERS; }
 
     /*!
+     * @brief Check whether this type supports recording groups.
+     * @return True if recording groups are supported, false otherwise.
+     */
+    bool SupportsRecordingGroup() const { return m_iAttributes & PVR_TIMER_TYPE_SUPPORTS_RECORDING_GROUP; }
+
+    /*!
      * @brief Obtain a list with all possible values for the priority attribute.
      * @param list out, the list with the values or an empty list, if priority is not supported by this type.
      */
@@ -253,6 +259,19 @@ namespace PVR
      */
     int GetPreventDuplicateEpisodesDefault() const { return m_iPreventDupEpisodesDefault; }
 
+    /*!
+     * @brief Obtain a list with all possible values for the recording group attribute.
+     * @param list out, the list with the values or an empty list, if recording group is not supported by this type.
+     */
+    void GetRecordingGroupValues(std::vector< std::pair<std::string, int> > &list) const;
+
+    /*!
+     * @brief Obtain the default value for the Recording Group attribute.
+     * @return the default value.
+     */
+    int GetRecordingGroupDefault() const { return m_iRecordingGroupDefault; }
+
+
   private:
     CPVRTimerType(const PVR_TIMER_TYPE &type, int iClientId);
 
@@ -260,6 +279,7 @@ namespace PVR
     void InitPriorityValues(const PVR_TIMER_TYPE &type);
     void InitLifetimeValues(const PVR_TIMER_TYPE &type);
     void InitPreventDuplicateEpisodesValues(const PVR_TIMER_TYPE &type);
+    void InitRecordingGroupValues(const PVR_TIMER_TYPE &type);
 
     int           m_iClientId;
     unsigned int  m_iTypeId;
@@ -271,5 +291,7 @@ namespace PVR
     int           m_iLifetimeDefault;
     std::vector< std::pair<std::string, int> > m_preventDupEpisodesValues;
     unsigned int  m_iPreventDupEpisodesDefault;
+    std::vector< std::pair<std::string, int> > m_recordingGroupValues;
+    unsigned int  m_iRecordingGroupDefault;
   };
 }

@@ -58,6 +58,7 @@ using namespace PVR;
 #define SETTING_TMR_PRIORITY      "timer.priority"
 #define SETTING_TMR_LIFETIME      "timer.lifetime"
 #define SETTING_TMR_DIR           "timer.directory"
+#define SETTING_TMR_REC_GROUP     "timer.recgroup"
 
 #define TYPE_DEP_VISIBI_COND_ID_POSTFIX     "visibi.typedep"
 #define TYPE_DEP_ENABLE_COND_ID_POSTFIX     "enable.typedep"
@@ -82,7 +83,8 @@ CGUIDialogPVRTimerSettings::CGUIDialogPVRTimerSettings() :
   m_iMarginStart(0),
   m_iMarginEnd(0),
   m_iPriority(0),
-  m_iLifetime(0)
+  m_iLifetime(0),
+  m_iRecordingGroup(0)
 {
   m_loadType = LOAD_EVERY_TIME;
 }
@@ -145,6 +147,7 @@ void CGUIDialogPVRTimerSettings::SetTimer(CFileItem *item)
   m_iPriority           = m_timerInfoTag->m_iPriority;
   m_iLifetime           = m_timerInfoTag->m_iLifetime;
   m_strDirectory        = m_timerInfoTag->m_strDirectory;
+  m_iRecordingGroup     = m_timerInfoTag->m_iRecordingGroup;
 
   InitializeChannelsList();
   InitializeTypesList();
@@ -333,6 +336,11 @@ void CGUIDialogPVRTimerSettings::InitializeSettings()
   setting = AddEdit(group, SETTING_TMR_DIR, 19076, 0, m_strDirectory, true, false, 19104);
   AddTypeDependentVisibilityCondition(setting, SETTING_TMR_DIR);
   AddTypeDependentEnableCondition(setting, SETTING_TMR_DIR);
+
+  // Recording Group
+  setting = AddList(group, SETTING_TMR_REC_GROUP, 811, 0, m_iRecordingGroup, RecordingGroupFiller, 811);
+  AddTypeDependentVisibilityCondition(setting, SETTING_TMR_REC_GROUP);
+  AddTypeDependentEnableCondition(setting, SETTING_TMR_REC_GROUP);
 }
 
 // virtual
@@ -453,6 +461,10 @@ void CGUIDialogPVRTimerSettings::OnSettingChanged(const CSetting *setting)
   else if (settingId == SETTING_TMR_DIR)
   {
     m_strDirectory = dynamic_cast<const CSettingString*>(setting)->GetValue();
+  }
+  else if (settingId == SETTING_TMR_REC_GROUP)
+  {
+    m_iRecordingGroup = dynamic_cast<const CSettingInt*>(setting)->GetValue();
   }
 }
 
@@ -601,6 +613,9 @@ void CGUIDialogPVRTimerSettings::Save()
 
   // Recording folder
   m_timerInfoTag->m_strDirectory = m_strDirectory;
+
+  // Recording Group
+  m_timerInfoTag->m_iRecordingGroup = m_iRecordingGroup;
 
   // Set the timer's title to the channel name if it's empty or 'New Timer'
   if (channel && (m_strTitle.empty() || m_strTitle == g_localizeStrings.Get(19056)))
@@ -885,6 +900,22 @@ void CGUIDialogPVRTimerSettings::LifetimesFiller(
   current = pThis->m_iLifetime;
 }
 
+// static
+void CGUIDialogPVRTimerSettings::RecordingGroupFiller(
+  const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data)
+{
+  CGUIDialogPVRTimerSettings *pThis = static_cast<CGUIDialogPVRTimerSettings*>(data);
+  if (pThis == NULL)
+  {
+    CLog::Log(LOGERROR, "CGUIDialogPVRTimerSettings::RecordingGroupFiller - No dialog");
+    return;
+  }
+
+  list.clear();
+  pThis->m_timerType->GetRecordingGroupValues(list);
+  current = pThis->m_iRecordingGroup;
+}
+
 void CGUIDialogPVRTimerSettings::AddTypeDependentEnableCondition(CSetting *setting, const std::string &identifier)
 {
   // Enable setting depending on read-only attribute of the selected timer type
@@ -1014,6 +1045,8 @@ bool CGUIDialogPVRTimerSettings::TypeSupportsCondition(const std::string &condit
       return entry->second->SupportsLifetime();
     else if (cond == SETTING_TMR_DIR)
       return entry->second->SupportsRecordingFolders();
+    else if (cond == SETTING_TMR_REC_GROUP)
+      return entry->second->SupportsRecordingGroup();
     else
       CLog::Log(LOGERROR, "CGUIDialogPVRTimerSettings::TypeSupportsCondition - Unknown condition");
   }

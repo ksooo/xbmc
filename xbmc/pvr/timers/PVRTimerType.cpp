@@ -128,7 +128,8 @@ CPVRTimerType::CPVRTimerType() :
   m_iAttributes(PVR_TIMER_TYPE_ATTRIBUTE_NONE),
   m_iPriorityDefault(50),
   m_iLifetimeDefault(365),
-  m_iPreventDupEpisodesDefault(0)
+  m_iPreventDupEpisodesDefault(0),
+  m_iRecordingGroupDefault(0)
 {
 }
 
@@ -157,7 +158,9 @@ bool CPVRTimerType::operator ==(const CPVRTimerType& right) const
           m_lifetimeValues             == right.m_lifetimeValues &&
           m_iLifetimeDefault           == right.m_iLifetimeDefault &&
           m_preventDupEpisodesValues   == right.m_preventDupEpisodesValues &&
-          m_iPreventDupEpisodesDefault == right.m_iPreventDupEpisodesDefault);
+          m_iPreventDupEpisodesDefault == right.m_iPreventDupEpisodesDefault &&
+          m_recordingGroupValues       == right.m_recordingGroupValues &&
+          m_iRecordingGroupDefault     == right.m_iRecordingGroupDefault);
 }
 
 bool CPVRTimerType::operator !=(const CPVRTimerType& right) const
@@ -170,6 +173,7 @@ void CPVRTimerType::InitAttributeValues(const PVR_TIMER_TYPE &type)
   InitPriorityValues(type);
   InitLifetimeValues(type);
   InitPreventDuplicateEpisodesValues(type);
+  InitRecordingGroupValues(type);
 
 }
 
@@ -247,6 +251,32 @@ void CPVRTimerType::InitLifetimeValues(const PVR_TIMER_TYPE &type)
 void CPVRTimerType::GetLifetimeValues(std::vector< std::pair<std::string, int> > &list) const
 {
   for (auto it = m_lifetimeValues.begin(); it != m_lifetimeValues.end(); ++it)
+    list.push_back(*it);
+}
+
+void CPVRTimerType::InitRecordingGroupValues(const PVR_TIMER_TYPE &type)
+{
+  if (type.iRecordingGroupSize > 0)
+  {
+    for (unsigned int i = 0; i < type.iRecordingGroupSize; ++i)
+    {
+      std::string strDescr(type.recordingGroup[i].strDescription);
+      if (strDescr.size() == 0)
+      {
+        // No description given by addon. Create one from value.
+        strDescr = g_localizeStrings.Get(811) + " " ; // Recording Group
+        strDescr += StringUtils::Format("%d", type.recordingGroup[i].iValue);
+      }
+      m_recordingGroupValues.push_back(std::make_pair(strDescr, type.recordingGroup[i].iValue));
+    }
+
+    m_iRecordingGroupDefault = type.iRecordingGroupDefault;
+  }
+}
+
+void CPVRTimerType::GetRecordingGroupValues(std::vector< std::pair<std::string, int> > &list) const
+{
+  for (auto it = m_recordingGroupValues.begin(); it != m_recordingGroupValues.end(); ++it)
     list.push_back(*it);
 }
 
