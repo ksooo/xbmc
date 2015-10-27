@@ -888,6 +888,9 @@ void CSettings::InitializeOptionFillers()
   m_settingsManager->RegisterSettingOptionsFiller("keyboardlayouts", CKeyboardLayoutManager::SettingOptionsKeyboardLayoutsFiller);
   m_settingsManager->RegisterSettingOptionsFiller("loggingcomponents", CAdvancedSettings::SettingOptionsLoggingComponentsFiller);
   m_settingsManager->RegisterSettingOptionsFiller("pvrrecordmargins", PVR::CPVRSettings::MarginTimeFiller);
+  m_settingsManager->RegisterSettingOptionsFiller("pvrrecordpriority", PVR::CPVRSettings::PriorityFiller);
+  m_settingsManager->RegisterSettingOptionsFiller("pvrrecordlifetime", PVR::CPVRSettings::LifetimeFiller);
+  m_settingsManager->RegisterSettingOptionsFiller("pvrrecordprevdups", PVR::CPVRSettings::PreventDuplicatesFiller);
 }
 
 void CSettings::UninitializeOptionFillers()
@@ -938,6 +941,9 @@ void CSettings::UninitializeOptionFillers()
   m_settingsManager->UnregisterSettingOptionsFiller("verticalsyncs");
   m_settingsManager->UnregisterSettingOptionsFiller("keyboardlayouts");
   m_settingsManager->UnregisterSettingOptionsFiller("pvrrecordmargins");
+  m_settingsManager->UnregisterSettingOptionsFiller("pvrrecordpriority");
+  m_settingsManager->UnregisterSettingOptionsFiller("pvrrecordlifetime");
+  m_settingsManager->UnregisterSettingOptionsFiller("pvrrecordprevdups");
 }
 
 void CSettings::InitializeConditions()

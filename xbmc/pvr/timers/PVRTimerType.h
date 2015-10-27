@@ -25,7 +25,7 @@
 #include <utility>
 #include <vector>
 
-struct PVR_TIMER_TYPE;
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 
 namespace PVR
 {
@@ -327,11 +327,10 @@ namespace PVR
     void GetRecordingGroupValues(std::vector< std::pair<std::string, int> > &list) const;
 
     /*!
-     * @brief Obtain the default value for the Recording Group attribute.
+     * @brief Obtain the default value for the recording group attribute.
      * @return the default value.
      */
     int GetRecordingGroupDefault() const { return m_iRecordingGroupDefault; }
-
 
   private:
     void InitAttributeValues(const PVR_TIMER_TYPE &type);

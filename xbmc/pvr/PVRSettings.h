@@ -30,9 +30,65 @@ namespace PVR
   class CPVRSettings
   {
   public:
-    // settings value filler for start/end recording margin time for PVR timers.
+  /**
+    * Default values.
+    *
+    */
+    static const int PRIORITY_DEFAULT_VALUE = 50;
+    static const int LIFETIME_DEFAULT_VALUE = 99; // days
+    static const int PREVDUP_DEFAULT_VALUE  = 0;  // record all
+
+  /**
+    * Dynamically hide or Show settings.
+    *
+    */
+    static bool IsSettingVisible(const std::string &condition, const std::string &value, const CSetting *setting, void *data);
+
+  /**
+    * settings value filler for priority for PVR timers.
+    *
+    */
+    static void PriorityFiller(
+      const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
+
+  /**
+    * settings value filler for lifetime for PVR timers.
+    *
+    */
+    static void LifetimeFiller(
+      const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
+
+  /**
+    * settings value filler for duplicate prevention mode for PVR timers.
+    *
+    */
+    static void PreventDuplicatesFiller(
+      const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
+
+  /**
+    * settings value filler for start/end recording margin time for PVR timers.
+    *
+    */
     static void MarginTimeFiller(
       const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
+
+  /**
+    * settings value filler for default priority values for PVR timers.
+    *
+    */
+    static int GetPriorityDefaults(std::vector< std::pair<std::string, int> > &list);
+
+  /**
+    * settings value filler for default lifetime values for PVR timers.
+    *
+    */
+    static int GetLifetimeDefaults(std::vector< std::pair<std::string, int> > &list);
+
+  /**
+    * settings value filler for default duplicate prevention mode defaults for PVR timers.
+    *
+    */
+    static int GetPreventDuplicatesDefaults(std::vector< std::pair<std::string, int> > &list);
 
   private:
     CPVRSettings() = delete;

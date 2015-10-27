@@ -18,15 +18,16 @@
  *
  */
 
-#include "ServiceBroker.h"
+#include "PVRTimerType.h"
+
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "guilib/LocalizeStrings.h"
-#include "pvr/timers/PVRTimerType.h"
-#include "pvr/addons/PVRClients.h"
-#include "pvr/PVRManager.h"
-#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
+
+#include "pvr/PVRManager.h"
+#include "pvr/PVRSettings.h"
+#include "pvr/addons/PVRClients.h"
 
 using namespace PVR;
 
@@ -83,10 +84,10 @@ CPVRTimerType::CPVRTimerType() :
   m_iClientId(0),
   m_iTypeId(PVR_TIMER_TYPE_NONE),
   m_iAttributes(PVR_TIMER_TYPE_ATTRIBUTE_NONE),
-  m_iPriorityDefault(50),
-  m_iLifetimeDefault(365),
+  m_iPriorityDefault(CPVRSettings::PRIORITY_DEFAULT_VALUE),
+  m_iLifetimeDefault(CPVRSettings::LIFETIME_DEFAULT_VALUE),
   m_iMaxRecordingsDefault(0),
-  m_iPreventDupEpisodesDefault(0),
+  m_iPreventDupEpisodesDefault(CPVRSettings::PREVDUP_DEFAULT_VALUE),
   m_iRecordingGroupDefault(0)
 {
 }
@@ -155,16 +156,13 @@ void CPVRTimerType::InitPriorityValues(const PVR_TIMER_TYPE &type)
   }
   else if (SupportsPriority())
   {
-    // No values given by addon, but priority supported. Use default values 1..100
-    for (int i = 1; i < 101; ++i)
-      m_priorityValues.push_back(std::make_pair(StringUtils::Format("%d", i), i));
-
-    m_iPriorityDefault = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_PVRRECORD_DEFAULTPRIORITY);
+    // No values given by addon, but priority supported. Use default values.
+    m_iPriorityDefault = CPVRSettings::GetPriorityDefaults(m_priorityValues);
   }
   else
   {
     // No priority supported.
-    m_iPriorityDefault = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_PVRRECORD_DEFAULTPRIORITY);
+    m_iPriorityDefault = 0;
   }
 }
 
@@ -193,17 +191,13 @@ void CPVRTimerType::InitLifetimeValues(const PVR_TIMER_TYPE &type)
   }
   else if (SupportsLifetime())
   {
-    // No values given by addon, but lifetime supported. Use default values 1..365
-    for (int i = 1; i < 366; ++i)
-    {
-      m_lifetimeValues.push_back(std::make_pair(StringUtils::Format(g_localizeStrings.Get(17999).c_str(), i), i)); // "%s days"
-    }
-    m_iLifetimeDefault = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_PVRRECORD_DEFAULTLIFETIME);
+    // No values given by addon, but lifetime supported. Use default values.
+    m_iLifetimeDefault = CPVRSettings::GetLifetimeDefaults(m_lifetimeValues);
   }
   else
   {
     // No lifetime supported.
-    m_iLifetimeDefault = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_PVRRECORD_DEFAULTLIFETIME);
+    m_iLifetimeDefault = 0;
   }
 }
 
@@ -257,15 +251,13 @@ void CPVRTimerType::InitPreventDuplicateEpisodesValues(const PVR_TIMER_TYPE &typ
   }
   else if (SupportsRecordOnlyNewEpisodes())
   {
-    // No values given by addon, but prevent duplicate episodes supported. Use default values 0..1
-    m_preventDupEpisodesValues.push_back(std::make_pair(g_localizeStrings.Get(815), 0)); // "Record all episodes"
-    m_preventDupEpisodesValues.push_back(std::make_pair(g_localizeStrings.Get(816), 1)); // "Record only new episodes"
-    m_iPreventDupEpisodesDefault = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_PVRRECORD_PREVENTDUPLICATEEPISODES);
+    // No values given by addon, but prevent duplicate episodes supported. Use default values.
+    m_iPreventDupEpisodesDefault = CPVRSettings::GetPreventDuplicatesDefaults(m_preventDupEpisodesValues);
   }
   else
   {
     // No prevent duplicate episodes supported.
-    m_iPreventDupEpisodesDefault = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_PVRRECORD_PREVENTDUPLICATEEPISODES);
+    m_iPreventDupEpisodesDefault = 0;
   }
 }
 
