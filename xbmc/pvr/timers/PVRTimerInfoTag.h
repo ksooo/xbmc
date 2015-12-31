@@ -239,6 +239,10 @@ namespace PVR
     int                   m_iClientId;           /*!< @brief ID of the backend */
     unsigned int          m_iClientIndex;        /*!< @brief index number of the tag, given by the backend, PVR_TIMER_NO_CLIENT_INDEX for new */
     unsigned int          m_iParentClientIndex;  /*!< @brief for timers scheduled by repeated timers, the index number of the parent, given by the backend, PVR_TIMER_NO_PARENT for no parent */
+    unsigned int          m_iActiveChildTimers;  /*!< @brief Number of active timers which have this timer as their m_iParentClientIndex */
+    bool                  m_bHasChildConflictNOK; /*!< @brief Has at least one child timer with status PVR_TIMER_STATE_CONFLICT_NOK */
+    bool                  m_bHasChildRecording;  /*!< @brief Has at least one child timer with status PVR_TIMER_STATE_RECORDING */
+    bool                  m_bHasChildErrors;     /*!< @brief Has at least one child timer with status PVR_TIMER_STATE_ERROR */
     int                   m_iClientChannelUid;   /*!< @brief channel uid */
     bool                  m_bStartAnyTime;       /*!< @brief Ignore start date and time clock. Record at 'Any Time' */
     bool                  m_bEndAnyTime;         /*!< @brief Ignore end date and time clock. Record at 'Any Time' */
