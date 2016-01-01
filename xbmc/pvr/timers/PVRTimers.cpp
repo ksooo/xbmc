@@ -248,6 +248,47 @@ bool CPVRTimers::UpdateEntries(const CPVRTimers &timers)
     UpdateEpgEvent(*timerIt);
   }
 
+  /* go through the timer list and check for parent timers */
+  for (MapTags::const_iterator it = timers.m_tags.begin(); it != timers.m_tags.end(); ++it)
+  {
+    for (VecTimerInfoTag::const_iterator timerIt = it->second->begin(); timerIt != it->second->end(); ++timerIt)
+    {
+      /* check if the parent timer is present */
+      CPVRTimerInfoTagPtr parentTimer = GetByClient((*timerIt)->m_iClientId, (*timerIt)->m_iParentClientIndex);
+      if (parentTimer)
+      {
+        CPVRTimerInfoTagPtr childTimer = GetByClient((*timerIt)->m_iClientId, (*timerIt)->m_iClientIndex);
+        if (childTimer)
+        {
+          switch (childTimer->m_state)
+          {
+          case PVR_TIMER_STATE_NEW:
+          case PVR_TIMER_STATE_SCHEDULED:
+          case PVR_TIMER_STATE_CONFLICT_OK:
+            parentTimer->m_iActiveChildTimers ++;
+            break;
+          case PVR_TIMER_STATE_RECORDING:
+            parentTimer->m_iActiveChildTimers ++;
+            parentTimer->m_bHasChildRecording = true;
+            break;
+          case PVR_TIMER_STATE_CONFLICT_NOK:
+            parentTimer->m_bHasChildConflictNOK = true;
+            break;
+          case PVR_TIMER_STATE_ERROR:
+            parentTimer->m_bHasChildErrors = true;
+            break;
+          case PVR_TIMER_STATE_COMPLETED:
+          case PVR_TIMER_STATE_ABORTED:
+          case PVR_TIMER_STATE_CANCELLED:
+          case PVR_TIMER_STATE_DISABLED:
+            break;
+          }
+        }
+      }
+    }
+  }
+
+
   m_bIsUpdating = false;
   if (bChanged)
   {

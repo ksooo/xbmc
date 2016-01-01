@@ -50,6 +50,10 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(bool bRadio /* = false */) :
   m_iClientId           = g_PVRClients->GetFirstConnectedClientID();
   m_iClientIndex        = PVR_TIMER_NO_CLIENT_INDEX;
   m_iParentClientIndex  = PVR_TIMER_NO_PARENT;
+  m_iActiveChildTimers  = 0;
+  m_bHasChildConflictNOK= false;
+  m_bHasChildRecording  = false;
+  m_bHasChildErrors     = false;
   m_iClientChannelUid   = PVR_INVALID_CHANNEL_UID;
   m_iPriority           = CSettings::GetInstance().GetInt(CSettings::SETTING_PVRRECORD_DEFAULTPRIORITY);
   m_iLifetime           = CSettings::GetInstance().GetInt(CSettings::SETTING_PVRRECORD_DEFAULTLIFETIME);
@@ -104,6 +108,10 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(const PVR_TIMER &timer, const CPVRChannelPtr 
     CLog::Log(LOGERROR, "%s: invalid client index supplied by client %d (must be > 0)!", __FUNCTION__, m_iClientId);
 
   m_iParentClientIndex  = timer.iParentClientIndex;
+  m_iActiveChildTimers  = 0;
+  m_bHasChildConflictNOK= false;
+  m_bHasChildRecording  = false;
+  m_bHasChildErrors     = false;
   m_iClientChannelUid   = channel ? channel->UniqueID() : (timer.iClientChannelUid > 0) ? timer.iClientChannelUid : PVR_INVALID_CHANNEL_UID;
   m_iChannelNumber      = channel ? g_PVRChannelGroups->GetGroupAll(channel->IsRadio())->GetChannelNumber(channel) : 0;
   m_StartTime           = timer.startTime + g_advancedSettings.m_iPVRTimeCorrection;
@@ -183,6 +191,10 @@ bool CPVRTimerInfoTag::operator ==(const CPVRTimerInfoTag& right) const
   return (bChannelsMatch &&
           m_iClientIndex        == right.m_iClientIndex &&
           m_iParentClientIndex  == right.m_iParentClientIndex &&
+          m_iActiveChildTimers  == right.m_iActiveChildTimers &&
+          m_bHasChildConflictNOK== right.m_bHasChildConflictNOK &&
+          m_bHasChildRecording  == right.m_bHasChildRecording &&
+          m_bHasChildErrors     == right.m_bHasChildErrors &&
           m_strSummary          == right.m_strSummary &&
           m_iClientChannelUid   == right.m_iClientChannelUid &&
           m_bIsRadio            == right.m_bIsRadio &&
@@ -421,6 +433,22 @@ std::string CPVRTimerInfoTag::GetStatus() const
     strReturn = g_localizeStrings.Get(257);
   else if (m_state == PVR_TIMER_STATE_DISABLED)
     strReturn = g_localizeStrings.Get(13106);
+  else if (m_state == PVR_TIMER_STATE_COMPLETED)
+    if (m_bHasChildRecording)
+      strReturn = g_localizeStrings.Get(19162);
+    else
+      strReturn = g_localizeStrings.Get(19243);
+  else if (m_state == PVR_TIMER_STATE_SCHEDULED || m_state == PVR_TIMER_STATE_NEW)
+  {
+    if (m_bHasChildRecording)
+      strReturn = g_localizeStrings.Get(19162);
+    else if (m_bHasChildErrors)
+      strReturn = g_localizeStrings.Get(257);
+    else if (m_bHasChildConflictNOK)
+      strReturn = g_localizeStrings.Get(19276);
+    else if (m_iActiveChildTimers > 0)
+      strReturn = StringUtils::Format(g_localizeStrings.Get(19242).c_str(),m_iActiveChildTimers); // "%d will record"
+  }
 
   return strReturn;
 }
@@ -611,6 +639,12 @@ bool CPVRTimerInfoTag::UpdateEntry(const CPVRTimerInfoTagPtr &tag)
 
   if (m_strSummary.empty())
     UpdateSummary();
+
+  m_iActiveChildTimers = 0;
+  m_bHasChildConflictNOK = false;
+  m_bHasChildRecording = false;
+  m_bHasChildErrors = false;
+  // Updated in CPVRTimers::UpdateEntries which should run after this...
 
   return true;
 }

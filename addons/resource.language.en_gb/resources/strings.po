@@ -9491,7 +9491,15 @@ msgctxt "#19241"
 msgid "The PVR manager has been enabled without any enabled PVR add-on. Enable at least one add-on in order to use the PVR functionality."
 msgstr ""
 
-#empty strings from id 19242 to 19243
+#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
+msgctxt "#19242"
+msgid "%d will record"
+msgstr ""
+
+#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
+msgctxt "#19243"
+msgid "Completed"
+msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#19244"
