@@ -100,6 +100,8 @@ public:
 
   const CWeatherInfo &GetInfo() const;
 private:
+  bool UpdateData();
+
   void LocalizeOverview(std::string &str);
   void LocalizeOverviewToken(std::string &str);
   void LoadLocalizedToken();

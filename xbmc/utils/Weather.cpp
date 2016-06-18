@@ -41,6 +41,7 @@
 #include "network/Network.h"
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
+#include "threads/SystemClock.h"
 #include "StringUtils.h"
 #include "URIUtils.h"
 #include "utils/POUtils.h"
@@ -77,13 +78,47 @@ CWeatherJob::CWeatherJob(int location)
 
 bool CWeatherJob::DoWork()
 {
+  // In case of error, retry max 5 times, but unconditionally stop after 5 minutes
+  int nTries = 5;
+  XbmcThreads::EndTime timeout(5 * 60 * 1000);
+
+  while (!ShouldCancel(0, 0) && (nTries > 0))
+  {
+    if (timeout.IsTimePast())
+    {
+      CLog::Log(LOGERROR, "##### WEATHER: timeout while downloading data!");
+      return false;
+    }
+
+    CLog::Log(LOGERROR, "===== WEATHER: downloading, tries left: %d", nTries);
+    nTries--;
+
+    if (UpdateData())
+      return true;
+
+    if (!ShouldCancel(0, 0) && (nTries > 0))
+      Sleep(5000);
+  }
+
+  CLog::Log(LOGERROR, "##### WEATHER: no data after max retries!");
+  return false;
+}
+
+bool CWeatherJob::UpdateData()
+{
   // wait for the network
   if (!g_application.getNetwork().IsAvailable())
+  {
+    CLog::Log(LOGERROR, "##### WEATHER: No network!");
     return false;
+  }
 
   AddonPtr addon;
   if (!ADDON::CAddonMgr::GetInstance().GetAddon(CSettings::GetInstance().GetString(CSettings::SETTING_WEATHER_ADDON), addon, ADDON_SCRIPT_WEATHER))
+  {
+    CLog::Log(LOGERROR, "##### WEATHER: No addon!");
     return false;
+  }
 
   // initialize our sys.argv variables
   std::vector<std::string> argv;
@@ -110,10 +145,21 @@ bool CWeatherJob::DoWork()
     // and send a message that we're done
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL,0,0,GUI_MSG_WEATHER_FETCHED);
     g_windowManager.SendThreadMessage(msg);
+
+    /* Check for success. Not perfect, but no way to get the return code from script execution. */
+    if (m_info.currentConditions.empty() || m_info.currentConditions == "N/A")
+    {
+      CLog::Log(LOGERROR, "##### WEATHER: No data after weather download!");
+      return false;
+    }
   }
   else
-    CLog::Log(LOGERROR, "WEATHER: Weather download failed!");
+  {
+    CLog::Log(LOGERROR, "##### WEATHER: Weather download failed!");
+    return false;
+  }
 
+  CLog::Log(LOGERROR, "===== WEATHER: Weather download okay!");
   return true;
 }
 
@@ -317,10 +363,17 @@ CWeather::~CWeather(void)
 
 std::string CWeather::BusyInfo(int info) const
 {
-  if (info == WEATHER_IMAGE_CURRENT_ICON)
-    return URIUtils::AddFileToFolder(IconAddonPath, "na.png");
+  if (m_info.lastUpdateTime.empty())
+  {
+    /* No data present. Show placeholder ("n/a", "busy", ...) */
+    if (info == WEATHER_IMAGE_CURRENT_ICON)
+      return URIUtils::AddFileToFolder(IconAddonPath, "na.png");
 
-  return CInfoLoader::BusyInfo(info);
+    return CInfoLoader::BusyInfo(info);
+  }
+
+  /* Use outdated data - better than just a placeholder */
+  return TranslateInfo(info);
 }
 
 std::string CWeather::TranslateInfo(int info) const
