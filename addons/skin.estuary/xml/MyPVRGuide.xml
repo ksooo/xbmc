@@ -9,11 +9,20 @@
 		<control type="group" id="50">
 			<animation effect="fade" start="100" end="0" time="200" tween="sine" condition="$EXP[infodialog_active]">Conditional</animation>
 			<control type="group">
-				<description>Guide Timeline</description>
-				<visible>Control.IsVisible(10)</visible>
-				<include>OpenClose_Right</include>
-				<include>Visible_Right</include>
-				<control type="group">
+        <description>Guide Timeline</description>
+        <visible>Control.IsVisible(10)</visible>
+        <include>OpenClose_Right</include>
+        <include>Visible_Right</include>
+        <control type="group">
+          <visible>!PVR.ChannelsLoaded</visible>
+          <control type="image">
+            <width>100%</width>
+            <height>100%</height>
+            <texture colordiffuse="button_focus">special://skin/extras/home-images/tv.jpg</texture>
+          </control>
+        </control>
+        <control type="group">
+          <visible>PVR.ChannelsLoaded</visible>
 					<top>140</top>
 					<depth>DepthContentPanel</depth>
 					<control type="image">
@@ -200,15 +209,18 @@
 			<include content="TopBar">
 				<param name="breadcrumbs_label" value="$VAR[BreadcrumbsPVRGuideVar]" />
 				<param name="sublabel" value="" />
-			</include>
-			<include content="BottomBar">
-				<param name="info_visible" value="true" />
-			</include>
-			<control type="group">
-				<include>MediaMenuCommon</include>
-				<include content="PVRSideBar">
-					<param name="group_label2" value="$INFO[Control.GetLabel(30)]" />
-				</include>
+      </include>
+      <control type="group">
+        <visible>PVR.ChannelsLoaded</visible>
+        <include content="BottomBar">
+          <param name="info_visible" value="true" />
+        </include>
+        <control type="group">
+          <include>MediaMenuCommon</include>
+          <include content="PVRSideBar">
+            <param name="group_label2" value="$INFO[Control.GetLabel(30)]" />
+          </include>
+        </control>
 			</control>
 		</control>
 		<control type="label" id="29">
