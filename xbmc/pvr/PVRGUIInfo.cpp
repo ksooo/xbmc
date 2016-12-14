@@ -42,13 +42,18 @@ using namespace PVR;
 using namespace EPG;
 
 CPVRGUIInfo::CPVRGUIInfo(void) :
-    CThread("PVRGUIInfo")
+  CThread("PVRGUIInfo"),
+  m_bChannelsLoaded(false),
+  m_bTimersLoaded(false),
+  m_bRecordingsLoaded(false)
 {
   ResetProperties();
+  g_PVRManager.RegisterObserver(this);
 }
 
 CPVRGUIInfo::~CPVRGUIInfo(void)
 {
+  g_PVRManager.UnregisterObserver(this);
   Stop();
 }
 
@@ -86,9 +91,6 @@ void CPVRGUIInfo::ResetProperties(void)
   m_strTimeshiftStartTime.clear();
   m_strTimeshiftEndTime.clear();
   m_strTimeshiftPlayTime.clear();
-  m_bChannelsLoaded = false;
-  m_bTimersLoaded = false;
-  m_bRecordingsLoaded = false;
 
   ResetPlayingTag();
   ClearQualityInfo(m_qualityInfo);
@@ -113,7 +115,6 @@ void CPVRGUIInfo::Start(void)
 void CPVRGUIInfo::Stop(void)
 {
   StopThread();
-  g_PVRManager.UnregisterObserver(this);
 }
 
 void CPVRGUIInfo::Notify(const Observable &obs, const ObservableMessage msg)
@@ -198,7 +199,6 @@ void CPVRGUIInfo::Process(void)
   int toggleInterval = g_advancedSettings.m_iPVRInfoToggleInterval / 1000;
 
   /* updated on request */
-  g_PVRManager.RegisterObserver(this);
   UpdateTimersCache();
 
   /* update the backend cache once initially */
