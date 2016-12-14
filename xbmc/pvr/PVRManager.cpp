@@ -541,10 +541,16 @@ bool CPVRManager::Load(bool bShowProgress)
     ShowProgressDialog(g_localizeStrings.Get(19237), 50); // Loading timers from clients
   m_timers->Load();
 
+  SetChanged();
+  NotifyObservers(ObservableMessageTimersLoaded);
+
   /* get recordings from the backend */
   if (bShowProgress)
     ShowProgressDialog(g_localizeStrings.Get(19238), 75); // Loading recordings from clients
   m_recordings->Load();
+
+  SetChanged();
+  NotifyObservers(ObservableMessageRecordingsLoaded);
 
   if (!IsInitialising())
     return false;

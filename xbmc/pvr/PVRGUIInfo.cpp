@@ -86,6 +86,9 @@ void CPVRGUIInfo::ResetProperties(void)
   m_strTimeshiftStartTime.clear();
   m_strTimeshiftEndTime.clear();
   m_strTimeshiftPlayTime.clear();
+  m_bChannelsLoaded = false;
+  m_bTimersLoaded = false;
+  m_bRecordingsLoaded = false;
 
   ResetPlayingTag();
   ClearQualityInfo(m_qualityInfo);
@@ -115,8 +118,41 @@ void CPVRGUIInfo::Stop(void)
 
 void CPVRGUIInfo::Notify(const Observable &obs, const ObservableMessage msg)
 {
-  if (msg == ObservableMessageTimers || msg == ObservableMessageTimersReset)
-    UpdateTimersCache();
+  switch (msg)
+  {
+    case ObservableMessageTimers:
+    case ObservableMessageTimersReset:
+      UpdateTimersCache();
+      break;
+    case ObservableMessageChannelGroupsLoaded:
+    {
+      CSingleLock lock(m_critSection);
+      m_bChannelsLoaded = true;
+      break;
+    }
+    case ObservableMessageTimersLoaded:
+    {
+      CSingleLock lock(m_critSection);
+      m_bTimersLoaded = true;
+      break;
+    }
+    case ObservableMessageRecordingsLoaded:
+    {
+      CSingleLock lock(m_critSection);
+      m_bRecordingsLoaded = true;
+      break;
+    }
+    case ObservableMessageManagerStopped:
+    {
+      CSingleLock lock(m_critSection);
+      m_bChannelsLoaded = false;
+      m_bTimersLoaded = false;
+      m_bRecordingsLoaded = false;
+      break;
+    }
+    default:
+      break;
+  }
 }
 
 void CPVRGUIInfo::ShowPlayerInfo(int iTimeout)
@@ -507,6 +543,15 @@ bool CPVRGUIInfo::TranslateBoolInfo(DWORD dwInfo) const
     break;
   case PVR_IS_TIMESHIFTING:
     bReturn = m_bIsTimeshifting;
+    break;
+  case PVR_CHANNELS_LOADED:
+    bReturn = m_bChannelsLoaded;
+    break;
+  case PVR_TIMERS_LOADED:
+    bReturn = m_bTimersLoaded;
+    break;
+  case PVR_RECORDINGS_LOADED:
+    bReturn = m_bRecordingsLoaded;
     break;
   default:
     break;

@@ -43,6 +43,8 @@ typedef enum
   ObservableMessageRecordings,
   ObservableMessagePeripheralsChanged,
   ObservableMessageChannelGroupsLoaded,
+  ObservableMessageTimersLoaded,
+  ObservableMessageRecordingsLoaded,
   ObservableMessageManagerStopped,
   ObservableMessagePortsChanged,
   ObservableMessageSettingsChanged,

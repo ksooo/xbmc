@@ -262,6 +262,10 @@ namespace PVR
     std::string                     m_strTimeshiftEndTime;
     std::string                     m_strTimeshiftPlayTime;
 
+    bool m_bChannelsLoaded;
+    bool m_bTimersLoaded;
+    bool m_bRecordingsLoaded;
+
     CCriticalSection                m_critSection;
 
     /**

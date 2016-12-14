@@ -4523,6 +4523,21 @@ const infomap playlist[] =       {{ "length",           PLAYLIST_LENGTH },
 ///                  _boolean_,
 ///     Returns true if there are radio timers present who currently not do recording
 ///   }
+///   \table_row3{   <b>`Pvr.ChannelsLoaded`</b>,
+///                  \anchor Pvr_ChannelsLoaded
+///                  _boolean_,
+///     Returns true if the list of channels was loaded
+///   }
+///   \table_row3{   <b>`Pvr.TimersLoaded`</b>,
+///                  \anchor Pvr_TimersLoaded
+///                  _boolean_,
+///     Returns true if the list of timers and timer rules was loaded
+///   }
+///   \table_row3{   <b>`Pvr.RecordingsLoaded`</b>,
+///                  \anchor Pvr_RecordingsLoaded
+///                  _boolean_,
+///     Returns true if the list of recordings was loaded
+///   }
 /// \table_end
 ///
 /// -----------------------------------------------------------------------------
@@ -4608,7 +4623,10 @@ const infomap pvr[] =            {{ "isrecording",              PVR_IS_RECORDING
                                   { "hasnonrecordingtvtimer",     PVR_HAS_NONRECORDING_TV_TIMER },
                                   { "isrecordingradio",           PVR_IS_RECORDING_RADIO },
                                   { "hasradiotimer",              PVR_HAS_RADIO_TIMER },
-                                  { "hasnonrecordingradiotimer",  PVR_HAS_NONRECORDING_RADIO_TIMER }};
+                                  { "hasnonrecordingradiotimer",  PVR_HAS_NONRECORDING_RADIO_TIMER },
+                                  { "channelsloaded",             PVR_CHANNELS_LOADED },
+                                  { "timersloaded",               PVR_TIMERS_LOADED },
+                                  { "recordingsloaded",           PVR_RECORDINGS_LOADED }};
 
 /// \page modules__General__List_of_gui_access
 /// \section modules__General__List_of_gui_access_ADSP ADSP
