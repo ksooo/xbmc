@@ -59,7 +59,6 @@ namespace PVR
   class CPVRTimers;
   class CPVRGUIInfo;
   class CPVRDatabase;
-  class CGUIWindowPVRCommon;
 
   enum PlaybackType
   {
