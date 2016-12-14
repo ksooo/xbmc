@@ -116,6 +116,9 @@ void CGUIWindowPVRBase::Notify(const Observable &obs, const ObservableMessage ms
 
 bool CGUIWindowPVRBase::OnAction(const CAction &action)
 {
+  if (action.GetID() != ACTION_PREVIOUS_MENU && !InitChannelGroup())
+    return true;
+
   switch (action.GetID())
   {
     case ACTION_PREVIOUS_CHANNELGROUP:
