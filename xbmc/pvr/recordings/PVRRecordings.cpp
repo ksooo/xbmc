@@ -151,6 +151,36 @@ int CPVRRecordings::Load(void)
 {
   Update();
 
+  // Migrate local play counts/resume points. If local play count is larger than server-side-play count,
+  // assume we're hitting a 'virgin' server. Transfer local settings to server to sync.
+  if (m_database.IsOpen())
+  {
+    CPVRRecordingPtr recording;
+    for (auto rec : m_recordings)
+    {
+      recording = rec.second;
+      if (recording->GetLocalPlayCount() == 0 &&
+          CServiceBroker::GetPVRManager().Clients()->SupportsRecordingPlayCount(recording->ClientID()))
+      {
+        int dbPlayCount = m_database.GetPlayCount(recording->m_strFileNameAndPath);
+        if (dbPlayCount > 0)
+        {
+          recording->SetPlayCount(dbPlayCount);
+        }
+      }
+
+      if (recording->GetLocalResumePoint().timeInSeconds == 0 &&
+          CServiceBroker::GetPVRManager().Clients()->SupportsLastPlayedPosition(recording->ClientID()))
+      {
+        CBookmark dbResumePoint;
+        if (m_database.GetResumeBookMark(recording->m_strFileNameAndPath, dbResumePoint) &&
+            dbResumePoint.timeInSeconds > 0)
+        {
+          recording->SetResumePoint(dbResumePoint);
+        }
+      }
+    }
+  }
   return m_recordings.size();
 }
 
