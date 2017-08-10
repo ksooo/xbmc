@@ -52,6 +52,8 @@ namespace PERIPHERALS
 #include <queue>
 #include <vector>
 
+#include "dialogs/GUIDialogBusy.h"
+
 // undefine macro isset, it collides with function in cectypes.h
 #ifdef isset
 #undef isset
@@ -188,6 +190,8 @@ namespace PERIPHERALS
     bool m_bSendInactiveSource;
     bool m_bPowerOffScreensaver;
     bool m_bShutdownOnStandby;
+
+    CGUIDialogBusy *m_pDlgBusy = nullptr;
   };
 
   class CPeripheralCecAdapterUpdateThread : public CThread

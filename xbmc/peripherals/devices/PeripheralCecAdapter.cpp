@@ -329,9 +329,12 @@ bool CPeripheralCecAdapter::OpenConnection(void)
   // open the CEC adapter
   CLog::Log(LOGDEBUG, "%s - opening a connection to the CEC adapter: %s", __FUNCTION__, m_strComPort.c_str());
 
-  // scanning the CEC bus takes about 5 seconds, so display a notification to inform users that we're busy
-  std::string strMessage = StringUtils::Format(g_localizeStrings.Get(21336).c_str(), g_localizeStrings.Get(36000).c_str());
-  CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, g_localizeStrings.Get(36000), strMessage);
+  // scanning the CEC bus takes about 5 seconds, so inform users that we're busy
+  if (!m_pDlgBusy)
+    m_pDlgBusy = g_windowManager.GetWindow<CGUIDialogBusy>(WINDOW_DIALOG_BUSY);
+
+  if (m_pDlgBusy)
+    m_pDlgBusy->Open();
 
   bool bConnectionFailedDisplayed(false);
 
@@ -362,6 +365,9 @@ bool CPeripheralCecAdapter::OpenConnection(void)
       SetConfigurationFromLibCEC(config);
     }
   }
+
+  if (!bIsOpen && m_pDlgBusy)
+    m_pDlgBusy->Close();
 
   return bIsOpen;
 }
@@ -1607,7 +1613,8 @@ bool CPeripheralCecAdapterUpdateThread::SetInitialConfiguration(void)
   m_adapter->m_bIsReady = true;
 
   // and let the gui know that we're done
-  CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, g_localizeStrings.Get(36000), strNotification);
+  if (m_adapter->m_pDlgBusy)
+    m_adapter->m_pDlgBusy->Close();
 
   CSingleLock lock(m_critSection);
   m_bIsUpdating = false;
