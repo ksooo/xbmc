@@ -23,12 +23,14 @@
 #include "cores/VideoPlayer/Interface/Addon/DemuxPacket.h"
 #include "ServiceBroker.h"
 #include "URL.h"
-#include "pvr/PVRManager.h"
-#include "pvr/channels/PVRChannel.h"
+#include "addons/PVRClient.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
+#include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
+#include "pvr/channels/PVRChannel.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "pvr/recordings/PVRRecordingsPath.h"
 #include "pvr/recordings/PVRRecordings.h"
@@ -136,7 +138,7 @@ bool CDVDInputStreamPVRManager::Open()
   {
     std::shared_ptr<CPVRClient> client;
     if (CServiceBroker::GetPVRManager().Clients()->GetPlayingClient(client) &&
-        client->GetClientCapabilities().HandlesDemuxing())
+        client->GetClientCapabilities()->HandlesDemuxing())
       m_demuxActive = true;
   }
 

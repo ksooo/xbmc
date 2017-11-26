@@ -46,8 +46,7 @@ const CPVRTimerTypePtr CPVRTimerType::GetFirstAvailableType()
 CPVRTimerTypePtr CPVRTimerType::CreateFromIds(unsigned int iTypeId, int iClientId)
 {
   std::vector<CPVRTimerTypePtr> types;
-  PVR_ERROR error = CServiceBroker::GetPVRManager().Clients()->GetTimerTypes(types, iClientId);
-  if (error == PVR_ERROR_NO_ERROR)
+  if (CServiceBroker::GetPVRManager().Clients()->GetTimerTypes(types, iClientId))
   {
     for (const auto &type : types)
     {
@@ -64,8 +63,7 @@ CPVRTimerTypePtr CPVRTimerType::CreateFromAttributes(
   unsigned int iMustHaveAttr, unsigned int iMustNotHaveAttr, int iClientId)
 {
   std::vector<CPVRTimerTypePtr> types;
-  PVR_ERROR error = CServiceBroker::GetPVRManager().Clients()->GetTimerTypes(types, iClientId);
-  if (error == PVR_ERROR_NO_ERROR)
+  if (CServiceBroker::GetPVRManager().Clients()->GetTimerTypes(types, iClientId))
   {
     for (const auto &type : types)
     {

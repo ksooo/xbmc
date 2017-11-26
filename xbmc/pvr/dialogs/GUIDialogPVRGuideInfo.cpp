@@ -225,7 +225,7 @@ void CGUIDialogPVRGuideInfo::OnInitWindow()
       bHideRecord = false;
     }
   }
-  else if (m_progItem->Channel() && CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_progItem->Channel()->ClientID()).SupportsTimers() &&
+  else if (m_progItem->Channel() && CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_progItem->Channel()->ClientID())->SupportsTimers() &&
            m_progItem->IsRecordable())
   {
     SET_CONTROL_LABEL(CONTROL_BTN_RECORD, 264);     /* Record */

@@ -770,7 +770,7 @@ CPVRRecordingPtr CPVREpgInfoTag::Recording(void) const
 bool CPVREpgInfoTag::IsRecordable(void) const
 {
   bool bIsRecordable = false;
-  if (CServiceBroker::GetPVRManager().Clients()->IsRecordable(shared_from_this(), bIsRecordable) != PVR_ERROR_NO_ERROR)
+  if (!CServiceBroker::GetPVRManager().Clients()->IsRecordable(shared_from_this(), bIsRecordable))
   {
     // event end time based fallback
     bIsRecordable = EndAsLocalTime() > CDateTime::GetCurrentDateTime();
@@ -781,7 +781,7 @@ bool CPVREpgInfoTag::IsRecordable(void) const
 bool CPVREpgInfoTag::IsPlayable(void) const
 {
   bool bIsPlayable = false;
-  if (CServiceBroker::GetPVRManager().Clients()->IsPlayable(shared_from_this(), bIsPlayable) != PVR_ERROR_NO_ERROR)
+  if (!CServiceBroker::GetPVRManager().Clients()->IsPlayable(shared_from_this(), bIsPlayable))
   {
     // fallback
     bIsPlayable = false;

@@ -799,5 +799,5 @@ std::string CPVRChannel::EPGScraper(void) const
 
 bool CPVRChannel::CanRecord(void) const
 {
-  return CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_iClientId).SupportsRecordings();
+  return CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_iClientId)->SupportsRecordings();
 }

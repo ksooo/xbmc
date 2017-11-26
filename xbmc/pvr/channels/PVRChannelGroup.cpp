@@ -362,11 +362,9 @@ bool CPVRChannelGroup::UpdateClientPriorities()
 
     if (m_bUsingBackendChannelOrder)
     {
-      CPVRClientPtr client;
-      if (!clients->GetCreatedClient(member.channel->ClientID(), client))
+      iNewPriority = clients->GetPriority(member.channel->ClientID());
+      if (iNewPriority == -1)
         continue;
-
-      iNewPriority = client->GetPriority();
     }
     else
     {
@@ -584,7 +582,7 @@ int CPVRChannelGroup::LoadFromDb(bool bCompress /* = false */)
 bool CPVRChannelGroup::LoadFromClients(void)
 {
   /* get the channels from the backends */
-  return CServiceBroker::GetPVRManager().Clients()->GetChannelGroupMembers(this, m_failedClientsForChannelGroupMembers) == PVR_ERROR_NO_ERROR;
+  return CServiceBroker::GetPVRManager().Clients()->GetChannelGroupMembers(this, m_failedClientsForChannelGroupMembers);
 }
 
 bool CPVRChannelGroup::AddAndUpdateChannels(const CPVRChannelGroup &channels, bool bUseBackendChannelNumbers)

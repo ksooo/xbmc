@@ -729,14 +729,14 @@ bool CPVREpg::UpdateFromScraper(time_t start, time_t end)
 #endif
       bGrabSuccess = true;
     }
-    else if (!CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(channel->ClientID()).SupportsEPG())
+    else if (!CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(channel->ClientID())->SupportsEPG())
     {
       CLog::Log(LOGDEBUG, "EPG - %s - the backend for channel '%s' on client '%i' does not support EPGs", __FUNCTION__, channel->ChannelName().c_str(), channel->ClientID());
     }
     else
     {
       CLog::Log(LOGDEBUG, "EPG - %s - updating EPG for channel '%s' from client '%i'", __FUNCTION__, channel->ChannelName().c_str(), channel->ClientID());
-      bGrabSuccess = (CServiceBroker::GetPVRManager().Clients()->GetEPGForChannel(channel, this, start, end) == PVR_ERROR_NO_ERROR);
+      bGrabSuccess = CServiceBroker::GetPVRManager().Clients()->GetEPGForChannel(channel, this, start, end);
     }
   }
   else if (m_strScraperName.empty()) /* no grabber defined */

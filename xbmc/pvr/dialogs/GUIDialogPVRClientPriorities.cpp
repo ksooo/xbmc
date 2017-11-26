@@ -23,6 +23,7 @@
 #include <cstdlib>
 
 #include "ServiceBroker.h"
+#include "addons/PVRClient.h"
 #include "settings/lib/Setting.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"

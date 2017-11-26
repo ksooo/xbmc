@@ -9516,11 +9516,7 @@ msgctxt "#19037"
 msgid "Show signal quality"
 msgstr ""
 
-#. message box text stating that a PVR backend does not support a certain functionality.
-#: xbmc/pvr/dialogs/GUIDialogPVRChannelManager.cpp
-msgctxt "#19038"
-msgid "Not supported by the PVR backend."
-msgstr ""
+#empty string with id 19038
 
 #. message box text asking for confirmation to hide a channel.
 #: xbmc/pvr/PVRGUIActions.cpp

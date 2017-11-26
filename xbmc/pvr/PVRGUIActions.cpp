@@ -23,6 +23,7 @@
 #include "Application.h"
 #include "FileItem.h"
 #include "ServiceBroker.h"
+#include "addons/PVRClient.h"
 #include "dialogs/GUIDialogBusy.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "dialogs/GUIDialogNumeric.h"
@@ -132,9 +133,7 @@ namespace PVR
   private:
     bool DoRun(const CFileItemPtr &item) override
     {
-      PVR_ERROR error;
-      CServiceBroker::GetPVRManager().Clients()->SetRecordingPlayCount(*item->GetPVRRecordingInfoTag(), item->GetPVRRecordingInfoTag()->GetLocalPlayCount(), &error);
-      return error == PVR_ERROR_NO_ERROR;
+      return CServiceBroker::GetPVRManager().Clients()->SetRecordingPlayCount(*item->GetPVRRecordingInfoTag(), item->GetPVRRecordingInfoTag()->GetLocalPlayCount());
     }
   };
 
@@ -143,9 +142,7 @@ namespace PVR
   private:
     bool DoRun(const CFileItemPtr &item) override
     {
-      PVR_ERROR error;
-      CServiceBroker::GetPVRManager().Clients()->SetRecordingLifetime(*item->GetPVRRecordingInfoTag(), &error);
-      return error == PVR_ERROR_NO_ERROR;
+      return CServiceBroker::GetPVRManager().Clients()->SetRecordingLifetime(*item->GetPVRRecordingInfoTag());
     }
   };
 
@@ -342,7 +339,7 @@ namespace PVR
       return false;
     }
 
-    if (!CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(item->m_iClientId).SupportsTimers())
+    if (!CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(item->m_iClientId)->SupportsTimers())
     {
       HELPERS::ShowOKDialogText(CVariant{19033}, CVariant{19215}); // "Information", "The PVR backend does not support timers."
       return false;
@@ -486,7 +483,7 @@ namespace PVR
     if (!CheckParentalLock(channel))
       return bReturn;
 
-    if (CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(channel->ClientID()).SupportsTimers())
+    if (CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(channel->ClientID())->SupportsTimers())
     {
       /* timers are supported on this channel */
       if (bOnOff && !channel->IsRecording())

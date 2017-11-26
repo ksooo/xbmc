@@ -469,14 +469,11 @@ bool CGUIDialogPVRChannelManager::OnClickButtonNewChannel()
 
     CPVRChannelPtr channel(new CPVRChannel(m_bIsRadio));
     channel->SetChannelName(g_localizeStrings.Get(19204)); // New channel
-    channel->SetEPGEnabled(CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(iClientID).SupportsEPG());
+    channel->SetEPGEnabled(CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(iClientID)->SupportsEPG());
     channel->SetClientID(iClientID);
 
-    PVR_ERROR ret = CServiceBroker::GetPVRManager().Clients()->OpenDialogChannelAdd(channel);
-    if (ret == PVR_ERROR_NO_ERROR)
+    if (CServiceBroker::GetPVRManager().Clients()->OpenDialogChannelAdd(channel))
       Update();
-    else if (ret == PVR_ERROR_NOT_IMPLEMENTED)
-      HELPERS::ShowOKDialogText(CVariant{19033}, CVariant{19038}); // "Information", "Not supported by the PVR backend."
     else
       HELPERS::ShowOKDialogText(CVariant{2103}, CVariant{16029});  // "Add-on error", "Check the log for more information about this message."
   }
@@ -604,10 +601,7 @@ bool CGUIDialogPVRChannelManager::OnContextButton(int itemNumber, CONTEXT_BUTTON
   }
   else if (button == CONTEXT_BUTTON_SETTINGS)
   {
-    PVR_ERROR ret = CServiceBroker::GetPVRManager().Clients()->OpenDialogChannelSettings(pItem->GetPVRChannelInfoTag());
-    if (ret == PVR_ERROR_NOT_IMPLEMENTED)
-      HELPERS::ShowOKDialogText(CVariant{19033}, CVariant{19038}); // "Information", "Not supported by the PVR backend."
-    else if (ret != PVR_ERROR_NO_ERROR)
+    if (!CServiceBroker::GetPVRManager().Clients()->OpenDialogChannelSettings(pItem->GetPVRChannelInfoTag()))
       HELPERS::ShowOKDialogText(CVariant{2103}, CVariant{16029});  // "Add-on error", "Check the log for more information about this message."
   }
   else if (button == CONTEXT_BUTTON_DELETE)
@@ -623,16 +617,13 @@ bool CGUIDialogPVRChannelManager::OnContextButton(int itemNumber, CONTEXT_BUTTON
     if (pDialog->IsConfirmed())
     {
       CPVRChannelPtr channel = pItem->GetPVRChannelInfoTag();
-      PVR_ERROR ret = CServiceBroker::GetPVRManager().Clients()->DeleteChannel(channel);
-      if (ret == PVR_ERROR_NO_ERROR)
+      if (CServiceBroker::GetPVRManager().Clients()->DeleteChannel(channel))
       {
         CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(channel->IsRadio())->RemoveFromGroup(channel);
         m_channelItems->Remove(m_iSelected);
         m_viewControl.SetItems(*m_channelItems);
         Renumber();
       }
-      else if (ret == PVR_ERROR_NOT_IMPLEMENTED)
-        HELPERS::ShowOKDialogText(CVariant{19033}, CVariant{19038}); // "Information", "Not supported by the PVR backend."
       else
         HELPERS::ShowOKDialogText(CVariant{2103}, CVariant{16029});  // "Add-on error", "Check the log for more information about this message."
     }
@@ -691,7 +682,7 @@ void CGUIDialogPVRChannelManager::Update()
     std::string clientName;
     CServiceBroker::GetPVRManager().Clients()->GetClientFriendlyName(channel->ClientID(), clientName);
     channelFile->SetProperty("ClientName", clientName);
-    channelFile->SetProperty("SupportsSettings", CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(channel->ClientID()).SupportsChannelSettings());
+    channelFile->SetProperty("SupportsSettings", CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(channel->ClientID())->SupportsChannelSettings());
 
     m_channelItems->Add(channelFile);
   }

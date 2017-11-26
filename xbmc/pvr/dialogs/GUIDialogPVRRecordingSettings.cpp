@@ -95,14 +95,14 @@ void CGUIDialogPVRRecordingSettings::InitializeSettings()
 
   // Name
   setting = AddEdit(group, SETTING_RECORDING_NAME, 19075, SettingLevel::Basic, m_strTitle);
-  setting->SetEnabled(CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_recording->ClientID()).SupportsRecordingsRename());
+  setting->SetEnabled(CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_recording->ClientID())->SupportsRecordingsRename());
 
   // Play count
-  if (CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_recording->ClientID()).SupportsRecordingsPlayCount())
+  if (CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_recording->ClientID())->SupportsRecordingsPlayCount())
     setting = AddEdit(group, SETTING_RECORDING_PLAYCOUNT, 567, SettingLevel::Basic, m_recording->GetLocalPlayCount());
 
   // Lifetime
-  if (CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_recording->ClientID()).SupportsRecordingsLifetimeChange())
+  if (CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_recording->ClientID())->SupportsRecordingsLifetimeChange())
     setting = AddList(group, SETTING_RECORDING_LIFETIME, 19083, SettingLevel::Basic, m_iLifetime, LifetimesFiller, 19083);
 }
 
@@ -176,7 +176,7 @@ void CGUIDialogPVRRecordingSettings::LifetimesFiller(
   if (pThis)
   {
     list.clear();
-    CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(pThis->m_recording->ClientID()).GetRecordingsLifetimeValues(list);
+    CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(pThis->m_recording->ClientID())->GetRecordingsLifetimeValues(list);
     current = pThis->m_iLifetime;
 
     auto it = list.begin();

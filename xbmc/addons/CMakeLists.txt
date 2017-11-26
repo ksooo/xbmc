@@ -22,6 +22,7 @@ set(SOURCES Addon.cpp
             LanguageResource.cpp
             PluginSource.cpp
             PVRClient.cpp
+            PVRClientCapabilities.cpp
             Repository.cpp
             RepositoryUpdater.cpp
             Scraper.cpp
@@ -61,6 +62,7 @@ set(HEADERS Addon.h
             LanguageResource.h
             PluginSource.h
             PVRClient.h
+            PVRClientCapabilities.h
             Repository.h
             RepositoryUpdater.h
             Resource.h

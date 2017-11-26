@@ -374,7 +374,7 @@ int CPVRClients::GetCreatedClients(CPVRClientMap &clients) const
   return iReturn;
 }
 
-PVR_ERROR CPVRClients::GetCreatedClients(CPVRClientMap &clientsReady, std::vector<int> &clientsNotReady) const
+bool CPVRClients::GetCreatedClients(CPVRClientMap &clientsReady, std::vector<int> &clientsNotReady) const
 {
   clientsNotReady.clear();
 
@@ -398,7 +398,7 @@ PVR_ERROR CPVRClients::GetCreatedClients(CPVRClientMap &clientsReady, std::vecto
     }
   }
 
-  return clientsNotReady.empty() ? PVR_ERROR_NO_ERROR : PVR_ERROR_SERVER_ERROR;
+  return clientsNotReady.empty();
 }
 
 int CPVRClients::GetFirstCreatedClientID(void)
@@ -436,24 +436,24 @@ bool CPVRClients::GetClientFriendlyName(int iClientId, std::string &strName) con
 {
   return ForCreatedClient(__FUNCTION__, iClientId, [&strName](const CPVRClientPtr &client) {
     strName = client->GetFriendlyName();
-    return PVR_ERROR_NO_ERROR;
-  }) == PVR_ERROR_NO_ERROR;
+    return true;
+  });
 }
 
 bool CPVRClients::GetClientAddonName(int iClientId, std::string &strName) const
 {
   return ForCreatedClient(__FUNCTION__, iClientId, [&strName](const CPVRClientPtr &client) {
     strName = client->Name();
-    return PVR_ERROR_NO_ERROR;
-  }) == PVR_ERROR_NO_ERROR;
+    return true;
+  });
 }
 
 bool CPVRClients::GetClientAddonIcon(int iClientId, std::string &strIcon) const
 {
   return ForCreatedClient(__FUNCTION__, iClientId, [&strIcon](const CPVRClientPtr &client) {
     strIcon = client->Icon();
-    return PVR_ERROR_NO_ERROR;
-  }) == PVR_ERROR_NO_ERROR;
+    return true;
+  });
 }
 
 std::string CPVRClients::GetClientAddonId(int iClientId) const
@@ -474,22 +474,16 @@ bool CPVRClients::IsPlaying(void) const
 
 bool CPVRClients::IsPlayingRadio(void) const
 {
-  bool bReturn = false;
-  ForPlayingClient(__FUNCTION__, [&bReturn](const CPVRClientPtr &client) {
-    bReturn = client->IsPlayingLiveRadio();
-    return PVR_ERROR_NO_ERROR;
+  return ForPlayingClient(__FUNCTION__, [](const CPVRClientPtr &client) {
+    return client->IsPlayingLiveRadio();
   });
-  return bReturn;
 }
 
 bool CPVRClients::IsPlayingTV(void) const
 {
-  bool bReturn = false;
-  ForPlayingClient(__FUNCTION__, [&bReturn](const CPVRClientPtr &client) {
-    bReturn = client->IsPlayingLiveTV();
-    return PVR_ERROR_NO_ERROR;
+  return ForPlayingClient(__FUNCTION__, [](const CPVRClientPtr &client) {
+    return client->IsPlayingLiveTV();
   });
-  return bReturn;
 }
 
 bool CPVRClients::IsPlayingRecording(void) const
@@ -506,12 +500,9 @@ bool CPVRClients::IsPlayingEpgTag(void) const
 
 bool CPVRClients::IsPlayingEncryptedChannel(void) const
 {
-  bool bReturn = false;
-  ForPlayingClient(__FUNCTION__, [&bReturn](const CPVRClientPtr &client) {
-    bReturn = client->IsPlayingEncryptedChannel();
-    return PVR_ERROR_NO_ERROR;
+  return ForPlayingClient(__FUNCTION__, [](const CPVRClientPtr &client) {
+    return client->IsPlayingEncryptedChannel();
   });
-  return bReturn;
 }
 
 bool CPVRClients::GetPlayingClient(CPVRClientPtr &client) const
@@ -559,7 +550,7 @@ void CPVRClients::ClearPlayingChannel()
 {
   ForPlayingClient(__FUNCTION__, [](const CPVRClientPtr &client) {
     client->ClearPlayingChannel();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
 
   CSingleLock lock(m_critSection);
@@ -573,7 +564,7 @@ CPVRChannelPtr CPVRClients::GetPlayingChannel() const
   CPVRChannelPtr channel;
   ForPlayingClient(__FUNCTION__, [&channel](const CPVRClientPtr &client) {
     channel = client->GetPlayingChannel();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
   return channel;
 }
@@ -603,7 +594,7 @@ void CPVRClients::ClearPlayingRecording()
 {
   ForPlayingClient(__FUNCTION__, [](const CPVRClientPtr &client) {
     client->ClearPlayingRecording();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
 
   CSingleLock lock(m_critSection);
@@ -617,7 +608,7 @@ CPVRRecordingPtr CPVRClients::GetPlayingRecording() const
   CPVRRecordingPtr recording;
   ForPlayingClient(__FUNCTION__, [&recording](const CPVRClientPtr &client) {
     recording = client->GetPlayingRecording();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
   return recording;
 }
@@ -647,7 +638,7 @@ void CPVRClients::ClearPlayingEpgTag()
 {
   ForPlayingClient(__FUNCTION__, [](const CPVRClientPtr &client) {
     client->ClearPlayingEpgTag();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
 
   CSingleLock lock(m_critSection);
@@ -661,7 +652,7 @@ CPVREpgInfoTagPtr CPVRClients::GetPlayingEpgTag() const
   CPVREpgInfoTagPtr tag;
   ForPlayingClient(__FUNCTION__, [&tag](const CPVRClientPtr &client) {
     tag = client->GetPlayingEpgTag();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
   return tag;
 }
@@ -682,12 +673,12 @@ bool CPVRClients::CanRecordInstantly(void)
 // client API calls
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CPVRClientCapabilities CPVRClients::GetClientCapabilities(int iClientId) const
+CPVRClientCapabilitiesPtr CPVRClients::GetClientCapabilities(int iClientId) const
 {
-  CPVRClientCapabilities caps;
+  CPVRClientCapabilitiesPtr caps;
   ForCreatedClient(__FUNCTION__, iClientId, [&caps](const CPVRClientPtr &client) {
     caps = client->GetClientCapabilities();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
   return caps;
 }
@@ -699,27 +690,27 @@ std::vector<SBackend> CPVRClients::GetBackendProperties() const
   ForCreatedClients(__FUNCTION__, [&backendProperties](const CPVRClientPtr &client) {
     SBackend properties;
 
-    if (client->GetDriveSpace(properties.diskTotal, properties.diskUsed) == PVR_ERROR_NO_ERROR)
+    if (client->GetDriveSpace(properties.diskTotal, properties.diskUsed))
     {
       properties.diskTotal *= 1024;
       properties.diskUsed *= 1024;
     }
 
     int iAmount = 0;
-    if (client->GetChannelsAmount(iAmount) == PVR_ERROR_NO_ERROR)
+    if (client->GetChannelsAmount(iAmount))
       properties.numChannels = iAmount;
-    if (client->GetTimersAmount(iAmount) == PVR_ERROR_NO_ERROR)
+    if (client->GetTimersAmount(iAmount))
       properties.numTimers = iAmount;
-    if (client->GetRecordingsAmount(false, iAmount) == PVR_ERROR_NO_ERROR)
+    if (client->GetRecordingsAmount(false, iAmount))
       properties.numRecordings = iAmount;
-    if (client->GetRecordingsAmount(true, iAmount) == PVR_ERROR_NO_ERROR)
+    if (client->GetRecordingsAmount(true, iAmount))
       properties.numDeletedRecordings = iAmount;
     properties.name = client->GetBackendName();
     properties.version = client->GetBackendVersion();
     properties.host = client->GetConnectionString();
 
     backendProperties.emplace_back(properties);
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
 
   return backendProperties;
@@ -730,7 +721,7 @@ std::string CPVRClients::GetBackendHostnameByClientId(int iClientId) const
   std::string name;
   ForCreatedClient(__FUNCTION__, iClientId, [&name](const CPVRClientPtr &client) {
     name = client->GetBackendHostname();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
   return name;
 }
@@ -742,7 +733,7 @@ bool CPVRClients::OpenStream(const CPVRChannelPtr &channel)
   /* try to open the stream on the client */
   bool bReturn = ForCreatedClient(__FUNCTION__, channel->ClientID(), [&channel](const CPVRClientPtr &client) {
     return client->OpenStream(channel);
-  }) == PVR_ERROR_NO_ERROR;
+  });
 
   if (bReturn)
     SetPlayingChannel(channel);
@@ -757,7 +748,7 @@ bool CPVRClients::OpenStream(const CPVRRecordingPtr &recording)
   /* try to open the recording stream on the client */
   bool bReturn = ForCreatedClient(__FUNCTION__, recording->ClientID(), [&recording](const CPVRClientPtr &client) {
     return client->OpenStream(recording);
-  }) == PVR_ERROR_NO_ERROR;
+  });
 
   if (bReturn)
     SetPlayingRecording(recording);
@@ -843,29 +834,23 @@ std::string CPVRClients::GetCurrentInputFormat(void) const
 
 bool CPVRClients::FillChannelStreamFileItem(CFileItem &fileItem)
 {
-  bool bReturn = ForCreatedClient(__FUNCTION__, fileItem.GetPVRChannelInfoTag()->ClientID(), [&fileItem, &bReturn](const CPVRClientPtr &client) {
-    bReturn = client->FillChannelStreamFileItem(fileItem);
-    return PVR_ERROR_NO_ERROR;
-  }) == PVR_ERROR_NO_ERROR;
-  return bReturn;
+  return ForCreatedClient(__FUNCTION__, fileItem.GetPVRChannelInfoTag()->ClientID(), [&fileItem](const CPVRClientPtr &client) {
+    return client->FillChannelStreamFileItem(fileItem);
+  });
 }
 
 bool CPVRClients::FillRecordingStreamFileItem(CFileItem &fileItem)
 {
-  bool bReturn = ForCreatedClient(__FUNCTION__, fileItem.GetPVRRecordingInfoTag()->ClientID(), [&fileItem, &bReturn](const CPVRClientPtr &client) {
-    bReturn = client->FillRecordingStreamFileItem(fileItem);
-    return PVR_ERROR_NO_ERROR;
-  }) == PVR_ERROR_NO_ERROR;
-  return bReturn;
+  return ForCreatedClient(__FUNCTION__, fileItem.GetPVRRecordingInfoTag()->ClientID(), [&fileItem](const CPVRClientPtr &client) {
+    return client->FillRecordingStreamFileItem(fileItem);
+  });
 }
 
 bool CPVRClients::FillEpgTagStreamFileItem(CFileItem &fileItem)
 {
-  bool bReturn = ForCreatedClient(__FUNCTION__, fileItem.GetEPGInfoTag()->ClientID(), [&fileItem, &bReturn](const CPVRClientPtr &client) {
-    bReturn = client->FillEpgTagStreamFileItem(fileItem);
-    return PVR_ERROR_NO_ERROR;
-  }) == PVR_ERROR_NO_ERROR;
-  return bReturn;
+  return ForCreatedClient(__FUNCTION__, fileItem.GetEPGInfoTag()->ClientID(), [&fileItem](const CPVRClientPtr &client) {
+    return client->FillEpgTagStreamFileItem(fileItem);
+  });
 }
 
 bool CPVRClients::IsTimeshifting(void) const
@@ -908,7 +893,7 @@ bool CPVRClients::GetStreamTimes(PVR_STREAM_TIMES *times) const
 {
   return ForPlayingClient(__FUNCTION__, [&times](const CPVRClientPtr &client) {
     return client->GetStreamTimes(times);
-  }) == PVR_ERROR_NO_ERROR;
+  });
 }
 
 bool CPVRClients::IsRealTimeStream(void) const
@@ -925,8 +910,8 @@ bool CPVRClients::SupportsTimers() const
   bool bReturn = false;
   ForCreatedClients(__FUNCTION__, [&bReturn](const CPVRClientPtr &client) {
     if (!bReturn)
-      bReturn = client->GetClientCapabilities().SupportsTimers();
-    return PVR_ERROR_NO_ERROR;
+      bReturn = client->GetClientCapabilities()->SupportsTimers();
+    return true;
   });
   return bReturn;
 }
@@ -935,104 +920,101 @@ bool CPVRClients::GetTimers(CPVRTimersContainer *timers, std::vector<int> &faile
 {
   return ForCreatedClients(__FUNCTION__, [timers](const CPVRClientPtr &client) {
     return client->GetTimers(timers);
-  }, failedClients) == PVR_ERROR_NO_ERROR;
+  }, failedClients);
 }
 
-PVR_ERROR CPVRClients::AddTimer(const CPVRTimerInfoTag &timer)
+bool CPVRClients::AddTimer(const CPVRTimerInfoTag &timer)
 {
   return ForCreatedClient(__FUNCTION__, timer.m_iClientId, [&timer](const CPVRClientPtr &client) {
     return client->AddTimer(timer);
   });
 }
 
-PVR_ERROR CPVRClients::UpdateTimer(const CPVRTimerInfoTag &timer)
+bool CPVRClients::UpdateTimer(const CPVRTimerInfoTag &timer)
 {
   return ForCreatedClient(__FUNCTION__, timer.m_iClientId, [&timer](const CPVRClientPtr &client) {
     return client->UpdateTimer(timer);
   });
 }
 
-PVR_ERROR CPVRClients::DeleteTimer(const CPVRTimerInfoTag &timer, bool bForce)
+bool CPVRClients::DeleteTimer(const CPVRTimerInfoTag &timer, bool bForce, bool &bRunning)
 {
-  return ForCreatedClient(__FUNCTION__, timer.m_iClientId, [&timer, bForce](const CPVRClientPtr &client) {
-    return client->DeleteTimer(timer, bForce);
+  return ForCreatedClient(__FUNCTION__, timer.m_iClientId, [&timer, bForce, &bRunning](const CPVRClientPtr &client) {
+    return client->DeleteTimer(timer, bForce, bRunning);
   });
 }
 
-PVR_ERROR CPVRClients::GetTimerTypes(CPVRTimerTypes& results) const
+bool CPVRClients::GetTimerTypes(CPVRTimerTypes& results) const
 {
   return ForCreatedClients(__FUNCTION__, [&results](const CPVRClientPtr &client) {
     return client->GetTimerTypes(results);
   });
 }
 
-PVR_ERROR CPVRClients::GetTimerTypes(CPVRTimerTypes& results, int iClientId) const
+bool CPVRClients::GetTimerTypes(CPVRTimerTypes& results, int iClientId) const
 {
   return ForCreatedClient(__FUNCTION__, iClientId, [&results](const CPVRClientPtr &client) {
     return client->GetTimerTypes(results);
   });
 }
 
-PVR_ERROR CPVRClients::GetRecordings(CPVRRecordings *recordings, bool deleted)
+bool CPVRClients::GetRecordings(CPVRRecordings *recordings, bool deleted)
 {
   return ForCreatedClients(__FUNCTION__, [recordings, deleted](const CPVRClientPtr &client) {
     return client->GetRecordings(recordings, deleted);
   });
 }
 
-PVR_ERROR CPVRClients::RenameRecording(const CPVRRecording &recording)
+bool CPVRClients::RenameRecording(const CPVRRecording &recording)
 {
   return ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording](const CPVRClientPtr &client) {
     return client->RenameRecording(recording);
   });
 }
 
-PVR_ERROR CPVRClients::DeleteRecording(const CPVRRecording &recording)
+bool CPVRClients::DeleteRecording(const CPVRRecording &recording)
 {
   return ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording](const CPVRClientPtr &client) {
     return client->DeleteRecording(recording);
   });
 }
 
-PVR_ERROR CPVRClients::UndeleteRecording(const CPVRRecording &recording)
+bool CPVRClients::UndeleteRecording(const CPVRRecording &recording)
 {
   if (!recording.IsDeleted())
-    return PVR_ERROR_REJECTED;
+    return false;
 
   return ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording](const CPVRClientPtr &client) {
     return client->UndeleteRecording(recording);
   });
 }
 
-PVR_ERROR CPVRClients::DeleteAllRecordingsFromTrash()
+bool CPVRClients::DeleteAllRecordingsFromTrash()
 {
   return ForCreatedClients(__FUNCTION__, [](const CPVRClientPtr &client) {
     return client->DeleteAllRecordingsFromTrash();
   });
 }
 
-bool CPVRClients::SetRecordingLifetime(const CPVRRecording &recording, PVR_ERROR *error)
+bool CPVRClients::SetRecordingLifetime(const CPVRRecording &recording)
 {
-  *error = ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording](const CPVRClientPtr &client) {
+  return ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording](const CPVRClientPtr &client) {
     return client->SetRecordingLifetime(recording);
   });
-  return *error == PVR_ERROR_NO_ERROR;
 }
 
-bool CPVRClients::SetRecordingPlayCount(const CPVRRecording &recording, int count, PVR_ERROR *error)
+bool CPVRClients::SetRecordingPlayCount(const CPVRRecording &recording, int count)
 {
-  *error = ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording, count](const CPVRClientPtr &client) {
+  return ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording, count](const CPVRClientPtr &client) {
     return client->SetRecordingPlayCount(recording, count);
   });
-  return *error == PVR_ERROR_NO_ERROR;
 }
 
-bool CPVRClients::SetRecordingLastPlayedPosition(const CPVRRecording &recording, int lastplayedposition, PVR_ERROR *error)
+bool CPVRClients::SetRecordingLastPlayedPosition(const CPVRRecording &recording, int lastplayedposition)
 {
-  *error = ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording, lastplayedposition](const CPVRClientPtr &client) {
+  return ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording, lastplayedposition](const CPVRClientPtr &client) {
     return client->SetRecordingLastPlayedPosition(recording, lastplayedposition);
   });
-  return *error == PVR_ERROR_NO_ERROR;
 }
 
 int CPVRClients::GetRecordingLastPlayedPosition(const CPVRRecording &recording)
@@ -1053,56 +1035,56 @@ std::vector<PVR_EDL_ENTRY> CPVRClients::GetRecordingEdl(const CPVRRecording &rec
   return edls;
 }
 
-PVR_ERROR CPVRClients::GetEPGForChannel(const CPVRChannelPtr &channel, CPVREpg *epg, time_t start, time_t end)
+bool CPVRClients::GetEPGForChannel(const CPVRChannelPtr &channel, CPVREpg *epg, time_t start, time_t end)
 {
   return ForCreatedClient(__FUNCTION__, channel->ClientID(), [&channel, epg, start, end](const CPVRClientPtr &client) {
     return client->GetEPGForChannel(channel, epg, start, end);
   });
 }
 
-PVR_ERROR CPVRClients::SetEPGTimeFrame(int iDays)
+bool CPVRClients::SetEPGTimeFrame(int iDays)
 {
   return ForCreatedClients(__FUNCTION__, [iDays](const CPVRClientPtr &client) {
     return client->SetEPGTimeFrame(iDays);
   });
 }
 
-PVR_ERROR CPVRClients::IsRecordable(const CConstPVREpgInfoTagPtr& tag, bool &bIsRecordable) const
+bool CPVRClients::IsRecordable(const CConstPVREpgInfoTagPtr& tag, bool &bIsRecordable) const
 {
   return ForCreatedClient(__FUNCTION__, tag->ClientID(), [&tag, &bIsRecordable](const CPVRClientPtr &client) {
     return client->IsRecordable(tag, bIsRecordable);
   });
 }
 
-PVR_ERROR CPVRClients::IsPlayable(const CConstPVREpgInfoTagPtr& tag, bool &bIsPlayable) const
+bool CPVRClients::IsPlayable(const CConstPVREpgInfoTagPtr& tag, bool &bIsPlayable) const
 {
   return ForCreatedClient(__FUNCTION__, tag->ClientID(), [&tag, &bIsPlayable](const CPVRClientPtr &client) {
     return client->IsPlayable(tag, bIsPlayable);
   });
 }
 
-PVR_ERROR CPVRClients::GetChannels(CPVRChannelGroupInternal *group, std::vector<int> &failedClients)
+bool CPVRClients::GetChannels(CPVRChannelGroupInternal *group, std::vector<int> &failedClients)
 {
   return ForCreatedClients(__FUNCTION__, [group](const CPVRClientPtr &client) {
     return client->GetChannels(*group, group->IsRadio());
   }, failedClients);
 }
 
-PVR_ERROR CPVRClients::GetChannelGroups(CPVRChannelGroups *groups, std::vector<int> &failedClients)
+bool CPVRClients::GetChannelGroups(CPVRChannelGroups *groups, std::vector<int> &failedClients)
 {
   return ForCreatedClients(__FUNCTION__, [groups](const CPVRClientPtr &client) {
     return client->GetChannelGroups(groups);
   }, failedClients);
 }
 
-PVR_ERROR CPVRClients::GetChannelGroupMembers(CPVRChannelGroup *group, std::vector<int> &failedClients)
+bool CPVRClients::GetChannelGroupMembers(CPVRChannelGroup *group, std::vector<int> &failedClients)
 {
   return ForCreatedClients(__FUNCTION__, [group](const CPVRClientPtr &client) {
     return client->GetChannelGroupMembers(group);
   }, failedClients);
 }
 
-PVR_ERROR CPVRClients::DeleteChannel(const CPVRChannelPtr &channel)
+bool CPVRClients::DeleteChannel(const CPVRChannelPtr &channel)
 {
   return ForCreatedClient(__FUNCTION__, channel->ClientID(), [&channel](const CPVRClientPtr &client) {
     return client->DeleteChannel(channel);
@@ -1120,9 +1102,9 @@ std::vector<CPVRClientPtr> CPVRClients::GetClientsSupportingChannelScan(void) co
 {
   std::vector<CPVRClientPtr> possibleScanClients;
   ForCreatedClients(__FUNCTION__, [&possibleScanClients](const CPVRClientPtr &client) {
-    if (client->GetClientCapabilities().SupportsChannelScan())
+    if (client->GetClientCapabilities()->SupportsChannelScan())
       possibleScanClients.emplace_back(client);
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
   return possibleScanClients;
 }
@@ -1131,23 +1113,23 @@ std::vector<CPVRClientPtr> CPVRClients::GetClientsSupportingChannelSettings(bool
 {
   std::vector<CPVRClientPtr> possibleSettingsClients;
   ForCreatedClients(__FUNCTION__, [bRadio, &possibleSettingsClients](const CPVRClientPtr &client) {
-    const CPVRClientCapabilities& caps = client->GetClientCapabilities();
-    if (caps.SupportsChannelSettings() &&
-        ((bRadio && caps.SupportsRadio()) || (!bRadio && caps.SupportsTV())))
+    const CPVRClientCapabilitiesPtr caps = client->GetClientCapabilities();
+    if (caps && caps->SupportsChannelSettings() &&
+        ((bRadio && caps->SupportsRadio()) || (!bRadio && caps->SupportsTV())))
       possibleSettingsClients.emplace_back(client);
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
   return possibleSettingsClients;
 }
 
-PVR_ERROR CPVRClients::OpenDialogChannelAdd(const CPVRChannelPtr &channel)
+bool CPVRClients::OpenDialogChannelAdd(const CPVRChannelPtr &channel)
 {
   return ForCreatedClient(__FUNCTION__, channel->ClientID(), [&channel](const CPVRClientPtr &client) {
     return client->OpenDialogChannelAdd(channel);
   });
 }
 
-PVR_ERROR CPVRClients::OpenDialogChannelSettings(const CPVRChannelPtr &channel)
+bool CPVRClients::OpenDialogChannelSettings(const CPVRChannelPtr &channel)
 {
   return ForCreatedClient(__FUNCTION__, channel->ClientID(), [&channel](const CPVRClientPtr &client) {
     return client->OpenDialogChannelSettings(channel);
@@ -1162,7 +1144,7 @@ bool CPVRClients::HasMenuHooks(int iClientID, PVR_MENUHOOK_CAT cat)
   bool bHasMenuHooks = false;
   ForCreatedClient(__FUNCTION__, iClientID, [cat, &bHasMenuHooks](const CPVRClientPtr &client) {
     bHasMenuHooks = client->HasMenuHooks(cat);
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
   return bHasMenuHooks;
 }
@@ -1171,7 +1153,7 @@ void CPVRClients::OnSystemSleep()
 {
   ForCreatedClients(__FUNCTION__, [](const CPVRClientPtr &client) {
     client->OnSystemSleep();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
 }
 
@@ -1179,7 +1161,7 @@ void CPVRClients::OnSystemWake()
 {
   ForCreatedClients(__FUNCTION__, [](const CPVRClientPtr &client) {
     client->OnSystemWake();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
 }
 
@@ -1187,7 +1169,7 @@ void CPVRClients::OnPowerSavingActivated()
 {
   ForCreatedClients(__FUNCTION__, [](const CPVRClientPtr &client) {
     client->OnPowerSavingActivated();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
 }
 
@@ -1195,8 +1177,18 @@ void CPVRClients::OnPowerSavingDeactivated()
 {
   ForCreatedClients(__FUNCTION__, [](const CPVRClientPtr &client) {
     client->OnPowerSavingDeactivated();
-    return PVR_ERROR_NO_ERROR;
+    return true;
   });
+}
+
+int CPVRClients::GetPriority(int iClientId) const
+{
+  int iPriority = -1;
+  ForCreatedClient(__FUNCTION__, iClientId, [&iPriority](const CPVRClientPtr &client) {
+    iPriority = client->GetPriority();
+    return true;
+  });
+  return iPriority;
 }
 
 void CPVRClients::ConnectionStateChange(
@@ -1273,69 +1265,67 @@ void CPVRClients::ConnectionStateChange(
   }
 }
 
-PVR_ERROR CPVRClients::ForCreatedClients(const char* strFunctionName, PVRClientFunction function) const
+bool CPVRClients::ForCreatedClients(const char* strFunctionName, PVRClientFunction function) const
 {
   std::vector<int> failedClients;
   return ForCreatedClients(strFunctionName, function, failedClients);
 }
 
-PVR_ERROR CPVRClients::ForCreatedClients(const char* strFunctionName, PVRClientFunction function, std::vector<int> &failedClients) const
+bool CPVRClients::ForCreatedClients(const char* strFunctionName, PVRClientFunction function, std::vector<int> &failedClients) const
 {
-  PVR_ERROR lastError = PVR_ERROR_NO_ERROR;
+  bool bSuccess = false;
 
   CPVRClientMap clients;
   GetCreatedClients(clients, failedClients);
 
   for (const auto &clientEntry : clients)
   {
-    PVR_ERROR currentError = function(clientEntry.second);
+    bSuccess = function(clientEntry.second);
 
-    if (currentError != PVR_ERROR_NO_ERROR && currentError != PVR_ERROR_NOT_IMPLEMENTED)
+    if (!bSuccess)
     {
       CLog::Log(LOGERROR,
-                "CPVRClients - %s - client '%s' returned an error: %s",
-                strFunctionName, clientEntry.second->GetFriendlyName().c_str(), CPVRClient::ToString(currentError));
-      lastError = currentError;
+                "CPVRClients - %s - error calling client '%s'",
+                strFunctionName, clientEntry.second->GetFriendlyName().c_str());
       failedClients.emplace_back(clientEntry.first);
     }
   }
-  return lastError;
+  return bSuccess;
 }
 
-PVR_ERROR CPVRClients::ForCreatedClient(const char* strFunctionName, int iClientId, PVRClientFunction function) const
+bool CPVRClients::ForCreatedClient(const char* strFunctionName, int iClientId, PVRClientFunction function) const
 {
-  PVR_ERROR error = PVR_ERROR_UNKNOWN;
+  bool bSuccess = false;
   CPVRClientPtr client;
   if (GetCreatedClient(iClientId, client))
   {
-    error = function(client);
+    bSuccess = function(client);
 
-    if (error != PVR_ERROR_NO_ERROR && error != PVR_ERROR_NOT_IMPLEMENTED)
-      CLog::Log(LOGERROR, "CPVRClients - %s - client '%s' returned an error: %s",
-                strFunctionName, client->GetFriendlyName().c_str(), CPVRClient::ToString(error));
+    if (!bSuccess)
+      CLog::Log(LOGERROR, "CPVRClients - %s - error calling client '%s'.",
+                strFunctionName, client->GetFriendlyName().c_str());
   }
   else
   {
     CLog::Log(LOGERROR, "CPVRClients - %s - no created client with id '%d'", strFunctionName, iClientId);
   }
-  return error;
+  return bSuccess;
 }
 
-PVR_ERROR CPVRClients::ForPlayingClient(const char* strFunctionName, PVRClientFunction function) const
+bool CPVRClients::ForPlayingClient(const char* strFunctionName, PVRClientFunction function) const
 {
-  PVR_ERROR error = PVR_ERROR_UNKNOWN;
-
   if (!IsPlaying())
-    return PVR_ERROR_REJECTED;
+    return false;
 
+  bool bSuccess = false;
   CPVRClientPtr client;
   if (GetPlayingClient(client))
   {
-    error = function(client);
+    bSuccess = function(client);
 
-    if (error != PVR_ERROR_NO_ERROR && error != PVR_ERROR_NOT_IMPLEMENTED)
-      CLog::Log(LOGERROR, "CPVRClients - %s - playing client '%s' returned an error: %s",
-                strFunctionName, client->GetFriendlyName().c_str(), CPVRClient::ToString(error));
+    if (!bSuccess)
+      CLog::Log(LOGERROR, "CPVRClients - %s - error calling playing client '%s'.",
+                strFunctionName, client->GetFriendlyName().c_str());
   }
-  return error;
+  return bSuccess;
 }

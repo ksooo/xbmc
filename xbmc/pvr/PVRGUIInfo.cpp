@@ -22,6 +22,7 @@
 
 #include "Application.h"
 #include "ServiceBroker.h"
+#include "addons/PVRClient.h"
 #include "guiinfo/GUIInfoLabels.h"
 #include "guilib/LocalizeStrings.h"
 #include "settings/AdvancedSettings.h"

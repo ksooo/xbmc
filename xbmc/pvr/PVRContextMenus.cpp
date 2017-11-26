@@ -214,14 +214,18 @@ namespace PVR
     bool StartRecording::IsVisible(const CFileItem &item) const
     {
       const CPVRChannelPtr channel(item.GetPVRChannelInfoTag());
-      if (channel)
-        return CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(channel->ClientID()).SupportsTimers() && !channel->IsRecording();
+      if (channel && !channel->IsRecording())
+      {
+        const CPVRClientCapabilitiesPtr caps = CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(channel->ClientID());
+        return caps && caps->SupportsTimers();
+      }
 
       const CPVREpgInfoTagPtr epg(item.GetEPGInfoTag());
-      if (epg)
-        return !epg->Timer() &&
-               epg->Channel() && CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(epg->Channel()->ClientID()).SupportsTimers() &&
-               epg->IsRecordable();
+      if (epg && !epg->Timer() && epg->IsRecordable())
+      {
+        const CPVRClientCapabilitiesPtr caps = CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(epg->Channel()->ClientID());
+        return caps && caps->SupportsTimers();
+      }
 
       return false;
     }
@@ -279,11 +283,11 @@ namespace PVR
     bool RenameRecording::IsVisible(const CFileItem &item) const
     {
       const CPVRRecordingPtr recording(item.GetPVRRecordingInfoTag());
-      if (recording &&
-          !recording->IsDeleted() &&
-          !recording->IsInProgress() &&
-          CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(recording->ClientID()).SupportsRecordingsRename())
-        return true;
+      if (recording && !recording->IsDeleted() && !recording->IsInProgress())
+      {
+        const CPVRClientCapabilitiesPtr caps = CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(recording->ClientID());
+        return caps && caps->SupportsRecordingsRename();
+      }
 
       return false;
     }
@@ -376,9 +380,11 @@ namespace PVR
     bool AddTimerRule::IsVisible(const CFileItem &item) const
     {
       const CPVREpgInfoTagPtr epg(item.GetEPGInfoTag());
-      if (epg)
-        return epg->Channel() && CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(epg->Channel()->ClientID()).SupportsTimers() &&
-               !epg->Timer();
+      if (epg && epg->Channel() && !epg->Timer())
+      {
+        const CPVRClientCapabilitiesPtr caps = CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(epg->Channel()->ClientID());
+        return caps && caps->SupportsTimers();
+      }
 
       return false;
     }
