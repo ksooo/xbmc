@@ -28,12 +28,12 @@
 // struct PVR_STREAM_PROPERTIES
 // struct PVR_STREAM_TIMES
 // struct PVR_EDL_ENTRY
-// struct PVR_MENUHOOK_CAT
 // enum PVR_CONNECTION_STATE
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 
 #include "addons/AddonManager.h"
 #include "addons/PVRClientCapabilities.h"
+#include "addons/PVRClientMenuHooks.h"
 #include "threads/CriticalSection.h"
 
 #include "pvr/PVRTypes.h"
@@ -735,13 +735,21 @@ namespace PVR
     //@{
 
     /*!
-     * @brief Check whether a client provides PVR client specific menu entries.
-     * @param iClientId The ID of the client to get the menu entries for. Get the menu for the active channel if iClientId < 0.
-     * @param cat The menu hook category.
-     * @return True if the client provides menu hooks, false otherwise.
+     * @brief Get a client's menu hooks.
+     * @return The hooks. Guaranteed never to be null.
+     * @param iClientId The ID of the client to get the menu hooks for.
+     * @return The hooks or null, if the client could not be found.
      */
-    // TODO(): leaking c-api type
-   bool HasMenuHooks(int iClientId, PVR_MENUHOOK_CAT cat);
+    CPVRClientMenuHooksPtr GetMenuHooks(int iClientId) const;
+
+    /*!
+     * @brief Call one of the menu hooks of this client.
+     * @param iClientId The ID of the client to call the menu hooks for.
+     * @param hook The hook to call.
+     * @param item The item for which the hook shall be called.
+     * @return True on success, false otherwise.
+     */
+    bool CallMenuHook(int iClientId, const CPVRClientMenuHook &hook, const CFileItemPtr &item);
 
     //@}
 

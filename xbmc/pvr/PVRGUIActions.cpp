@@ -1371,44 +1371,28 @@ namespace PVR
       return false;
 
     int iClientID = -1;
-    PVR_MENUHOOK_CAT menuCategory = PVR_MENUHOOK_SETTING;
 
     if (item)
     {
       if (item->IsEPG())
       {
         if (item->GetEPGInfoTag()->HasChannel())
-        {
           iClientID = item->GetEPGInfoTag()->Channel()->ClientID();
-          menuCategory = PVR_MENUHOOK_EPG;
-        }
         else
           return false;
       }
       else if (item->IsPVRChannel())
-      {
         iClientID = item->GetPVRChannelInfoTag()->ClientID();
-        menuCategory = PVR_MENUHOOK_CHANNEL;
-      }
       else if (item->IsDeletedPVRRecording())
-      {
         iClientID = item->GetPVRRecordingInfoTag()->m_iClientId;
-        menuCategory = PVR_MENUHOOK_DELETED_RECORDING;
-      }
       else if (item->IsUsablePVRRecording())
-      {
         iClientID = item->GetPVRRecordingInfoTag()->m_iClientId;
-        menuCategory = PVR_MENUHOOK_RECORDING;
-      }
       else if (item->IsPVRTimer())
-      {
         iClientID = item->GetPVRTimerInfoTag()->m_iClientId;
-        menuCategory = PVR_MENUHOOK_TIMER;
-      }
     }
 
     // get client id
-    if (iClientID < 0 && menuCategory == PVR_MENUHOOK_SETTING)
+    if (iClientID < 0)
     {
       CPVRClientMap clients;
       CServiceBroker::GetPVRManager().Clients()->GetCreatedClients(clients);
@@ -1450,8 +1434,8 @@ namespace PVR
     if (iClientID < 0)
       iClientID = CServiceBroker::GetPVRManager().Clients()->GetPlayingClientID();
 
-    CPVRClientPtr client;
-    if (CServiceBroker::GetPVRManager().Clients()->GetCreatedClient(iClientID, client) && client->HasMenuHooks(menuCategory))
+    const CPVRClientMenuHooksPtr hooks = CServiceBroker::GetPVRManager().Clients()->GetMenuHooks(iClientID);
+    if (hooks)
     {
       CGUIDialogSelect* pDialog= g_windowManager.GetWindow<CGUIDialogSelect>(WINDOW_DIALOG_SELECT);
       if (!pDialog)
@@ -1463,31 +1447,36 @@ namespace PVR
       pDialog->Reset();
       pDialog->SetHeading(CVariant{19196}); // "PVR client specific actions"
 
-      PVR_MENUHOOKS& hooks = client->GetMenuHooks();
-      std::vector<int> hookIDs;
-      unsigned int i = 0;
+      std::vector<CPVRClientMenuHook> categorizedHooks;
+      if (!item)
+        categorizedHooks = hooks->GetSettingsHooks();
+      else if (item->IsEPG() && item->GetEPGInfoTag()->HasChannel())
+        categorizedHooks = hooks->GetEpgHooks();
+      else if (item->IsPVRChannel())
+        categorizedHooks = hooks->GetChannelHooks();
+      else if (item->IsDeletedPVRRecording())
+        categorizedHooks = hooks->GetDeletedRecordingHooks();
+      else if (item->IsUsablePVRRecording())
+        categorizedHooks = hooks->GetRecordingHooks();
+      else if (item->IsPVRTimer())
+        categorizedHooks = hooks->GetTimerHooks();
 
-      for (const auto& hook : hooks)
+      for (const auto& hook : categorizedHooks)
       {
-        if (hook.category == menuCategory || hook.category == PVR_MENUHOOK_ALL)
-        {
-          pDialog->Add(g_localizeStrings.GetAddonString(client->ID(), hook.iLocalizedStringId));
-          hookIDs.emplace_back(i);
-        }
-        ++i;
+        pDialog->Add(hook.GetLabel());
       }
 
-      int selection = 0;
-      if (hookIDs.size() > 1)
-      {
-        pDialog->Open();
-        selection = pDialog->GetSelectedItem();
-      }
+      pDialog->Open();
 
+      int selection = pDialog->GetSelectedItem();
       if (selection >= 0)
-        client->CallMenuHook(hooks.at(hookIDs.at(selection)), item);
-      else
-        return false;
+      {
+        auto selectedHook = categorizedHooks.begin();
+        std::advance(selectedHook, selection);
+        return CServiceBroker::GetPVRManager().Clients()->CallMenuHook(iClientID, *selectedHook, item);
+      }
+
+      return false;
     }
 
     return true;

@@ -28,10 +28,8 @@
 #include "addons/binary-addons/AddonDll.h"
 
 // TODO(): leaking c-api types
-// struct PVR_MENUHOOK
 // enum PVR_CONNECTION_STATE
 // struct PVR_STREAM_PROPERTIES
-// enum PVR_MENUHOOK_CAT
 // struct PVR_STREAM_TIMES
 // struct PVR_EDL_ENTRY
 // struct PVR_SIGNAL_STATUS
@@ -43,6 +41,7 @@
 #include "pvr/PVRTypes.h"
 
 #include "PVRClientCapabilities.h"
+#include "PVRClientMenuHooks.h"
 
 // PVR Addon C-API forwards
 struct PVR_CHANNEL_GROUP_MEMBER;
@@ -57,8 +56,6 @@ namespace PVR
 {
   class CPVRChannelGroups;
   class CPVRTimersContainer;
-
-  typedef std::vector<PVR_MENUHOOK> PVR_MENUHOOKS;
 
   class CPVRClient;
   typedef std::shared_ptr<CPVRClient> CPVRClientPtr;
@@ -269,24 +266,6 @@ namespace PVR
      * @return True on success, false otherwise.
      */
     bool FillEpgTagStreamFileItem(CFileItem &fileItem);
-
-    /*!
-     * @return True if this add-on has menu hooks, false otherwise.
-     */
-    bool HasMenuHooks(PVR_MENUHOOK_CAT cat) const;
-
-    /*!
-     * @return The menu hooks for this add-on.
-     */
-    PVR_MENUHOOKS& GetMenuHooks();
-
-    /*!
-     * @brief Call one of the menu hooks of this client.
-     * @param hook The hook to call.
-     * @param item The selected file item for which the hook was called.
-     * @return PVR_ERROR_NO_ERROR on success, respective error code otherwise.
-     */
-    bool CallMenuHook(const PVR_MENUHOOK &hook, const CFileItemPtr item);
 
     //@}
     /** @name PVR EPG methods */
@@ -753,6 +732,20 @@ namespace PVR
     bool GetAddonProperties(void);
 
     /*!
+     * @brief Get the client's menu hooks.
+     * @return The hooks. Guaranteed never to be null.
+     */
+    CPVRClientMenuHooksPtr GetMenuHooks();
+
+    /*!
+     * @brief Call one of the menu hooks of this client.
+     * @param hook The hook to call.
+     * @param item The item for which the hook shall be called.
+     * @return True on success, false otherwise.
+     */
+    bool CallMenuHook(const CPVRClientMenuHook &hook, const CFileItemPtr &item);
+
+    /*!
      * @brief Propagate power management events to this add-on
      * @return True on success, false otherwise.
      */
@@ -979,7 +972,6 @@ namespace PVR
     PVR_CONNECTION_STATE   m_connectionState;      /*!< the backend connection state */
     PVR_CONNECTION_STATE   m_prevConnectionState;  /*!< the previous backend connection state */
     bool                   m_ignoreClient;         /*!< signals to PVRManager to ignore this client until it has been connected */
-    PVR_MENUHOOKS          m_menuhooks;            /*!< the menu hooks for this add-on */
     CPVRTimerTypes         m_timertypes;           /*!< timer types supported by this backend */
     int                    m_iClientId;            /*!< unique ID of the client */
     mutable int            m_iPriority;            /*!< priority of the client */
@@ -993,6 +985,7 @@ namespace PVR
     std::string            m_strBackendHostname;   /*!< the cached backend hostname */
 
     CPVRClientCapabilitiesPtr m_clientCapabilities; /*!< the cached add-on's capabilities */
+    CPVRClientMenuHooksPtr m_menuhooks;             /*!< the menu hooks for this add-on */
 
     /* stored strings to make sure const char* members in PVR_PROPERTIES stay valid */
     std::string            m_strUserPath;         /*!< @brief translated path to the user profile */

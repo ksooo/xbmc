@@ -1136,17 +1136,21 @@ bool CPVRClients::OpenDialogChannelSettings(const CPVRChannelPtr &channel)
   });
 }
 
-bool CPVRClients::HasMenuHooks(int iClientID, PVR_MENUHOOK_CAT cat)
+CPVRClientMenuHooksPtr CPVRClients::GetMenuHooks(int iClientId) const
 {
-  if (iClientID < 0)
-    iClientID = GetPlayingClientID();
-
-  bool bHasMenuHooks = false;
-  ForCreatedClient(__FUNCTION__, iClientID, [cat, &bHasMenuHooks](const CPVRClientPtr &client) {
-    bHasMenuHooks = client->HasMenuHooks(cat);
+  CPVRClientMenuHooksPtr hooks;
+  ForCreatedClient(__FUNCTION__, iClientId, [&hooks](const CPVRClientPtr &client) {
+    hooks = client->GetMenuHooks();
     return true;
   });
-  return bHasMenuHooks;
+  return hooks;
+}
+
+bool CPVRClients::CallMenuHook(int iClientId, const CPVRClientMenuHook &hook, const CFileItemPtr &item)
+{
+  return ForCreatedClient(__FUNCTION__, iClientId, [&hook, &item](const CPVRClientPtr &client) {
+    return client->CallMenuHook(hook, item);
+  });
 }
 
 void CPVRClients::OnSystemSleep()

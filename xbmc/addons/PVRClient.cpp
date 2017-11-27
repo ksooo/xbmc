@@ -207,7 +207,7 @@ void CPVRClient::ResetProperties(int iClientId /* = PVR_INVALID_CLIENT_ID */)
   m_bIsPlayingRecording   = false;
   m_bIsPlayingEpgTag      = false;
   m_strBackendHostname.clear();
-  m_menuhooks.clear();
+  m_menuhooks.reset();
   m_timertypes.clear();
   m_clientCapabilities.reset();
 
@@ -692,45 +692,6 @@ bool CPVRClient::RenameChannel(const CPVRChannelPtr &channel)
     WriteClientChannelInfo(channel, addonChannel);
     return m_struct.toAddon.RenameChannel(addonChannel);
   }, m_clientCapabilities->SupportsChannelSettings()) == PVR_ERROR_NO_ERROR;
-}
-
-bool CPVRClient::CallMenuHook(const PVR_MENUHOOK &hook, const CFileItemPtr item)
-{
-  return m_addonCallWrapper->Call(__FUNCTION__, [this, &hook, item] {
-    PVR_MENUHOOK_DATA hookData;
-    hookData.cat = PVR_MENUHOOK_UNKNOWN;
-
-    if (item)
-    {
-      if (item->IsEPG())
-      {
-        hookData.cat = PVR_MENUHOOK_EPG;
-        hookData.data.iEpgUid = item->GetEPGInfoTag()->UniqueBroadcastID();
-      }
-      else if (item->IsPVRChannel())
-      {
-        hookData.cat = PVR_MENUHOOK_CHANNEL;
-        WriteClientChannelInfo(item->GetPVRChannelInfoTag(), hookData.data.channel);
-      }
-      else if (item->IsUsablePVRRecording())
-      {
-        hookData.cat = PVR_MENUHOOK_RECORDING;
-        WriteClientRecordingInfo(*item->GetPVRRecordingInfoTag(), hookData.data.recording);
-      }
-      else if (item->IsDeletedPVRRecording())
-      {
-        hookData.cat = PVR_MENUHOOK_DELETED_RECORDING;
-        WriteClientRecordingInfo(*item->GetPVRRecordingInfoTag(), hookData.data.recording);
-      }
-      else if (item->IsPVRTimer())
-      {
-        hookData.cat = PVR_MENUHOOK_TIMER;
-        WriteClientTimerInfo(*item->GetPVRTimerInfoTag(), hookData.data.timer);
-      }
-    }
-
-    return m_struct.toAddon.MenuHook(hook, hookData);
-  }) == PVR_ERROR_NO_ERROR;
 }
 
 bool CPVRClient::GetEPGForChannel(const CPVRChannelPtr &channel, CPVREpg *epg, time_t start /* = 0 */, time_t end /* = 0 */, bool bSaveInDb /* = false*/)
@@ -1273,28 +1234,6 @@ bool CPVRClient::DemuxRead(DemuxPacket* &packet)
   }, m_clientCapabilities->HandlesDemuxing()) == PVR_ERROR_NO_ERROR;
 }
 
-bool CPVRClient::HasMenuHooks(PVR_MENUHOOK_CAT cat) const
-{
-  bool bReturn(false);
-  if (m_bReadyToUse && !m_menuhooks.empty())
-  {
-    for (auto hook : m_menuhooks)
-    {
-      if (hook.category == cat || hook.category == PVR_MENUHOOK_ALL)
-      {
-        bReturn = true;
-        break;
-      }
-    }
-  }
-  return bReturn;
-}
-
-PVR_MENUHOOKS& CPVRClient::GetMenuHooks(void)
-{
-  return m_menuhooks;
-}
-
 bool CPVRClient::CanPlayChannel(const CPVRChannelPtr &channel) const
 {
   return (m_bReadyToUse &&
@@ -1616,6 +1555,67 @@ bool CPVRClient::OnPowerSavingDeactivated()
   }) == PVR_ERROR_NO_ERROR;
 }
 
+CPVRClientMenuHooksPtr CPVRClient::GetMenuHooks()
+{
+  if (!m_menuhooks)
+    m_menuhooks.reset(new CPVRClientMenuHooks(ID()));
+
+  return m_menuhooks;
+}
+
+bool CPVRClient::CallMenuHook(const CPVRClientMenuHook &hook, const CFileItemPtr &item)
+{
+  return m_addonCallWrapper->Call(__FUNCTION__, [this, &hook, &item] {
+    PVR_MENUHOOK_DATA hookData;
+    hookData.cat = PVR_MENUHOOK_UNKNOWN;
+
+    if (item)
+    {
+      if (item->IsEPG())
+      {
+        hookData.cat = PVR_MENUHOOK_EPG;
+        hookData.data.iEpgUid = item->GetEPGInfoTag()->UniqueBroadcastID();
+      }
+      else if (item->IsPVRChannel())
+      {
+        hookData.cat = PVR_MENUHOOK_CHANNEL;
+        WriteClientChannelInfo(item->GetPVRChannelInfoTag(), hookData.data.channel);
+      }
+      else if (item->IsUsablePVRRecording())
+      {
+        hookData.cat = PVR_MENUHOOK_RECORDING;
+        WriteClientRecordingInfo(*item->GetPVRRecordingInfoTag(), hookData.data.recording);
+      }
+      else if (item->IsDeletedPVRRecording())
+      {
+        hookData.cat = PVR_MENUHOOK_DELETED_RECORDING;
+        WriteClientRecordingInfo(*item->GetPVRRecordingInfoTag(), hookData.data.recording);
+      }
+      else if (item->IsPVRTimer())
+      {
+        hookData.cat = PVR_MENUHOOK_TIMER;
+        WriteClientTimerInfo(*item->GetPVRTimerInfoTag(), hookData.data.timer);
+      }
+      else
+      {
+        CLog::Log(LOGERROR, "CPVRClient - %s - unhandled item type.", __FUNCTION__);
+        return PVR_ERROR_INVALID_PARAMETERS;
+      }
+    }
+    else
+    {
+      hookData.cat = PVR_MENUHOOK_SETTING;
+    }
+
+    PVR_MENUHOOK menuHook = {0};
+    menuHook.category = hookData.cat;
+    menuHook.iHookId = hook.GetId();
+    menuHook.iLocalizedStringId = hook.GetLabelId();
+
+    return m_struct.toAddon.MenuHook(menuHook, hookData);
+  }) == PVR_ERROR_NO_ERROR;
+}
+
 void CPVRClient::SetPriority(int iPriority)
 {
   CSingleLock lock(m_critSection);
@@ -1790,15 +1790,7 @@ void CPVRClient::cb_add_menu_hook(void *kodiInstance, PVR_MENUHOOK *hook)
     return;
   }
 
-  PVR_MENUHOOKS& hooks = client->GetMenuHooks();
-
-  PVR_MENUHOOK hookInt;
-  hookInt.iHookId            = hook->iHookId;
-  hookInt.iLocalizedStringId = hook->iLocalizedStringId;
-  hookInt.category           = hook->category;
-
-  /* add this new hook */
-  hooks.emplace_back(hookInt);
+  client->GetMenuHooks()->AddHook(*hook);
 }
 
 void CPVRClient::cb_recording(void *kodiInstance, const char *strName, const char *strFileName, bool bOnOff)

@@ -531,26 +531,39 @@ namespace PVR
     {
       const CPVRChannelPtr channel(item.GetPVRChannelInfoTag());
       if (channel)
-        return CServiceBroker::GetPVRManager().Clients()->HasMenuHooks(channel->ClientID(), PVR_MENUHOOK_CHANNEL);
+      {
+        const CPVRClientMenuHooksPtr hooks = CServiceBroker::GetPVRManager().Clients()->GetMenuHooks(channel->ClientID());
+        return hooks && hooks->HasChannelHook();
+      }
 
       const CPVREpgInfoTagPtr epg(item.GetEPGInfoTag());
       if (epg)
       {
         const CPVRChannelPtr channel(epg->Channel());
-        return (channel && CServiceBroker::GetPVRManager().Clients()->HasMenuHooks(channel->ClientID(), PVR_MENUHOOK_EPG));
+        {
+          if (channel)
+          {
+            const CPVRClientMenuHooksPtr hooks = CServiceBroker::GetPVRManager().Clients()->GetMenuHooks(channel->ClientID());
+            return hooks && hooks->HasEpgHook();
+          }
+        }
       }
 
       const CPVRTimerInfoTagPtr timer(item.GetPVRTimerInfoTag());
       if (timer && !URIUtils::PathEquals(item.GetPath(), CPVRTimersPath::PATH_ADDTIMER))
-        return CServiceBroker::GetPVRManager().Clients()->HasMenuHooks(timer->m_iClientId, PVR_MENUHOOK_TIMER);
+      {
+        const CPVRClientMenuHooksPtr hooks = CServiceBroker::GetPVRManager().Clients()->GetMenuHooks(timer->m_iClientId);
+        return hooks && hooks->HasTimerHook();
+      }
 
       const CPVRRecordingPtr recording(item.GetPVRRecordingInfoTag());
       if (recording)
       {
+        const CPVRClientMenuHooksPtr hooks = CServiceBroker::GetPVRManager().Clients()->GetMenuHooks(recording->m_iClientId);
         if (recording->IsDeleted())
-          return CServiceBroker::GetPVRManager().Clients()->HasMenuHooks(recording->m_iClientId, PVR_MENUHOOK_DELETED_RECORDING);
+          return hooks && hooks->HasDeletedRecordingHook();
         else
-          return CServiceBroker::GetPVRManager().Clients()->HasMenuHooks(recording->m_iClientId, PVR_MENUHOOK_RECORDING);
+          return hooks && hooks->HasRecordingHook();
       }
 
       return false;
