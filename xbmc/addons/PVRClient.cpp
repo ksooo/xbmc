@@ -130,6 +130,172 @@ PVR_ERROR CAddonCallWrapper::Call(const char* strFunctionName, std::function<PVR
   return error;
 }
 
+namespace PVRAddonCallbacks
+{
+  /*!
+   * @brief Callback functions from addon to kodi
+   */
+  //@{
+
+  /*!
+   * @brief Transfer a channel group from the add-on to Kodi. The group will be created if it doesn't exist.
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param handle The handle parameter that Kodi used when requesting the channel groups list
+   * @param entry The entry to transfer to Kodi
+   */
+  static void cb_transfer_channel_group(void* kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL_GROUP* entry);
+
+  /*!
+   * @brief Transfer a channel group member entry from the add-on to Kodi. The channel will be added to the group if the group can be found.
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param handle The handle parameter that Kodi used when requesting the channel group members list
+   * @param entry The entry to transfer to Kodi
+   */
+  static void cb_transfer_channel_group_member(void* kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL_GROUP_MEMBER* entry);
+
+  /*!
+   * @brief Transfer an EPG tag from the add-on to Kodi
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param handle The handle parameter that Kodi used when requesting the EPG data
+   * @param entry The entry to transfer to Kodi
+   */
+  static void cb_transfer_epg_entry(void* kodiInstance, const ADDON_HANDLE handle, const EPG_TAG* entry);
+
+  /*!
+   * @brief Transfer a channel entry from the add-on to Kodi
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param handle The handle parameter that Kodi used when requesting the channel list
+   * @param entry The entry to transfer to Kodi
+   */
+  static void cb_transfer_channel_entry(void* kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL* entry);
+
+  /*!
+   * @brief Transfer a timer entry from the add-on to Kodi
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param handle The handle parameter that Kodi used when requesting the timers list
+   * @param entry The entry to transfer to Kodi
+   */
+  static void cb_transfer_timer_entry(void* kodiInstance, const ADDON_HANDLE handle, const PVR_TIMER* entry);
+
+  /*!
+   * @brief Transfer a recording entry from the add-on to Kodi
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param handle The handle parameter that Kodi used when requesting the recordings list
+   * @param entry The entry to transfer to Kodi
+   */
+  static void cb_transfer_recording_entry(void* kodiInstance, const ADDON_HANDLE handle, const PVR_RECORDING* entry);
+
+  /*!
+   * @brief Add or replace a menu hook for the context menu for this add-on
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param hook The hook to add.
+   */
+  static void cb_add_menu_hook(void* kodiInstance, PVR_MENUHOOK* hook);
+
+  /*!
+   * @brief Display a notification in Kodi that a recording started or stopped on the server
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param strName The name of the recording to display
+   * @param strFileName The filename of the recording
+   * @param bOnOff True when recording started, false when it stopped
+   */
+  static void cb_recording(void* kodiInstance, const char* strName, const char* strFileName, bool bOnOff);
+
+  /*!
+   * @brief Request Kodi to update it's list of channels
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   */
+  static void cb_trigger_channel_update(void* kodiInstance);
+
+  /*!
+   * @brief Request Kodi to update it's list of timers
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   */
+  static void cb_trigger_timer_update(void* kodiInstance);
+
+  /*!
+   * @brief Request Kodi to update it's list of recordings
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   */
+  static void cb_trigger_recording_update(void* kodiInstance);
+
+  /*!
+   * @brief Request Kodi to update it's list of channel groups
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   */
+  static void cb_trigger_channel_groups_update(void* kodiInstance);
+
+  /*!
+   * @brief Schedule an EPG update for the given channel channel
+   * @param kodiInstance A pointer to the add-on
+   * @param iChannelUid The unique id of the channel for this add-on
+   */
+  static void cb_trigger_epg_update(void* kodiInstance, unsigned int iChannelUid);
+
+  /*!
+   * @brief Free a packet that was allocated with AllocateDemuxPacket
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param pPacket The packet to free.
+   */
+  static void cb_free_demux_packet(void* kodiInstance, DemuxPacket* pPacket);
+
+  /*!
+   * @brief Allocate a demux packet. Free with FreeDemuxPacket
+   * @param kodiInstance Pointer to Kodi's CPVRClient class.
+   * @param iDataSize The size of the data that will go into the packet
+   * @return The allocated packet.
+   */
+  static DemuxPacket* cb_allocate_demux_packet(void* kodiInstance, int iDataSize = 0);
+
+  /*!
+   * @brief Notify a state change for a PVR backend connection
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param strConnectionString The connection string reported by the backend that can be displayed in the UI.
+   * @param newState The new state.
+   * @param strMessage A localized addon-defined string representing the new state, that can be displayed
+   *        in the UI or NULL if the Kodi-defined default string for the new state shall be displayed.
+   */
+  static void cb_connection_state_change(void* kodiInstance, const char* strConnectionString, PVR_CONNECTION_STATE newState, const char *strMessage);
+
+  /*!
+   * @brief Notify a state change for an EPG event
+   * @param kodiInstance Pointer to Kodi's CPVRClient class
+   * @param tag The EPG event.
+   * @param newState The new state.
+   * @param newState The new state. For EPG_EVENT_CREATED and EPG_EVENT_UPDATED, tag must be filled with all available
+   *        event data, not just a delta. For EPG_EVENT_DELETED, it is sufficient to fill EPG_TAG.iUniqueBroadcastId
+   */
+  static void cb_epg_event_state_change(void* kodiInstance, EPG_TAG* tag, EPG_EVENT_STATE newState);
+
+  /*! @todo remove the use complete from them, or add as generl function?!
+   * Returns the ffmpeg codec id from given ffmpeg codec string name
+   */
+  static xbmc_codec_t cb_get_codec_by_name(const void* kodiInstance, const char* strCodecName);
+  //@}
+
+  void RegisterImplementation(AddonToKodiFuncTable_PVR& functionTable)
+  {
+    functionTable.TransferEpgEntry = cb_transfer_epg_entry;
+    functionTable.TransferChannelEntry = cb_transfer_channel_entry;
+    functionTable.TransferTimerEntry = cb_transfer_timer_entry;
+    functionTable.TransferRecordingEntry = cb_transfer_recording_entry;
+    functionTable.AddMenuHook = cb_add_menu_hook;
+    functionTable.Recording = cb_recording;
+    functionTable.TriggerChannelUpdate = cb_trigger_channel_update;
+    functionTable.TriggerChannelGroupsUpdate = cb_trigger_channel_groups_update;
+    functionTable.TriggerTimerUpdate = cb_trigger_timer_update;
+    functionTable.TriggerRecordingUpdate = cb_trigger_recording_update;
+    functionTable.TriggerEpgUpdate = PVRAddonCallbacks::cb_trigger_epg_update;
+    functionTable.FreeDemuxPacket = PVRAddonCallbacks::cb_free_demux_packet;
+    functionTable.AllocateDemuxPacket = PVRAddonCallbacks::cb_allocate_demux_packet;
+    functionTable.TransferChannelGroup = PVRAddonCallbacks::cb_transfer_channel_group;
+    functionTable.TransferChannelGroupMember = PVRAddonCallbacks::cb_transfer_channel_group_member;
+    functionTable.ConnectionStateChange = PVRAddonCallbacks::cb_connection_state_change;
+    functionTable.EpgEventStateChange = PVRAddonCallbacks::cb_epg_event_state_change;
+    functionTable.GetCodecByName = PVRAddonCallbacks::cb_get_codec_by_name;
+  }
+} // namespace PVRAddonCallbacks
+
 CPVRClient::CPVRClient(ADDON::CAddonInfo addonInfo)
 : CAddonDll(std::move(addonInfo)),
   m_addonCallWrapper(new CAddonCallWrapper(this))
@@ -219,24 +385,7 @@ void CPVRClient::ResetProperties(int iClientId /* = PVR_INVALID_CLIENT_ID */)
   m_struct->props.iEpgMaxDays = CServiceBroker::GetPVRManager().EpgContainer().GetFutureDaysToDisplay();
 
   m_struct->toKodi.kodiInstance = this;
-  m_struct->toKodi.TransferEpgEntry = cb_transfer_epg_entry;
-  m_struct->toKodi.TransferChannelEntry = cb_transfer_channel_entry;
-  m_struct->toKodi.TransferTimerEntry = cb_transfer_timer_entry;
-  m_struct->toKodi.TransferRecordingEntry = cb_transfer_recording_entry;
-  m_struct->toKodi.AddMenuHook = cb_add_menu_hook;
-  m_struct->toKodi.Recording = cb_recording;
-  m_struct->toKodi.TriggerChannelUpdate = cb_trigger_channel_update;
-  m_struct->toKodi.TriggerChannelGroupsUpdate = cb_trigger_channel_groups_update;
-  m_struct->toKodi.TriggerTimerUpdate = cb_trigger_timer_update;
-  m_struct->toKodi.TriggerRecordingUpdate = cb_trigger_recording_update;
-  m_struct->toKodi.TriggerEpgUpdate = cb_trigger_epg_update;
-  m_struct->toKodi.FreeDemuxPacket = cb_free_demux_packet;
-  m_struct->toKodi.AllocateDemuxPacket = cb_allocate_demux_packet;
-  m_struct->toKodi.TransferChannelGroup = cb_transfer_channel_group;
-  m_struct->toKodi.TransferChannelGroupMember = cb_transfer_channel_group_member;
-  m_struct->toKodi.ConnectionStateChange = cb_connection_state_change;
-  m_struct->toKodi.EpgEventStateChange = cb_epg_event_state_change;
-  m_struct->toKodi.GetCodecByName = cb_get_codec_by_name;
+  PVRAddonCallbacks::RegisterImplementation(m_struct->toKodi);
 }
 
 ADDON_STATUS CPVRClient::Create(int iClientId)
@@ -705,7 +854,7 @@ bool CPVRClient::GetEPGForChannel(const CPVRChannelPtr &channel, CPVREpg *epg, t
     ADDON_HANDLE_STRUCT handle;
     handle.callerAddress  = this;
     handle.dataAddress    = epg;
-    handle.dataIdentifier = bSaveInDb ? 1 : 0; // used by the callback method CPVRClient::cb_transfer_epg_entry()
+    handle.dataIdentifier = bSaveInDb ? 1 : 0; // used by the callback method PVRAddonCallbacks::cb_transfer_epg_entry()
 
     return m_struct->toAddon.GetEPGForChannel(&handle,
                                              addonChannel,
@@ -1643,7 +1792,7 @@ int CPVRClient::GetPriority() const
   return m_iPriority;
 }
 
-void CPVRClient::cb_transfer_channel_group(void *kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL_GROUP *group)
+void PVRAddonCallbacks::cb_transfer_channel_group(void *kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL_GROUP *group)
 {
   if (!handle)
   {
@@ -1669,7 +1818,7 @@ void CPVRClient::cb_transfer_channel_group(void *kodiInstance, const ADDON_HANDL
   kodiGroups->UpdateFromClient(transferGroup);
 }
 
-void CPVRClient::cb_transfer_channel_group_member(void *kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL_GROUP_MEMBER *member)
+void PVRAddonCallbacks::cb_transfer_channel_group_member(void *kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL_GROUP_MEMBER *member)
 {
   if (!handle)
   {
@@ -1697,7 +1846,7 @@ void CPVRClient::cb_transfer_channel_group_member(void *kodiInstance, const ADDO
   }
 }
 
-void CPVRClient::cb_transfer_epg_entry(void *kodiInstance, const ADDON_HANDLE handle, const EPG_TAG *epgentry)
+void PVRAddonCallbacks::cb_transfer_epg_entry(void *kodiInstance, const ADDON_HANDLE handle, const EPG_TAG *epgentry)
 {
   if (!handle)
   {
@@ -1717,7 +1866,7 @@ void CPVRClient::cb_transfer_epg_entry(void *kodiInstance, const ADDON_HANDLE ha
   kodiEpg->UpdateEntry(epgentry, client->GetID(), handle->dataIdentifier == 1 /* update db */);
 }
 
-void CPVRClient::cb_transfer_channel_entry(void *kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL *channel)
+void PVRAddonCallbacks::cb_transfer_channel_entry(void *kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL *channel)
 {
   if (!handle)
   {
@@ -1738,7 +1887,7 @@ void CPVRClient::cb_transfer_channel_entry(void *kodiInstance, const ADDON_HANDL
   kodiChannels->UpdateFromClient(transferChannel, CPVRChannelNumber());
 }
 
-void CPVRClient::cb_transfer_recording_entry(void *kodiInstance, const ADDON_HANDLE handle, const PVR_RECORDING *recording)
+void PVRAddonCallbacks::cb_transfer_recording_entry(void *kodiInstance, const ADDON_HANDLE handle, const PVR_RECORDING *recording)
 {
   if (!handle)
   {
@@ -1759,7 +1908,7 @@ void CPVRClient::cb_transfer_recording_entry(void *kodiInstance, const ADDON_HAN
   kodiRecordings->UpdateFromClient(transferRecording);
 }
 
-void CPVRClient::cb_transfer_timer_entry(void *kodiInstance, const ADDON_HANDLE handle, const PVR_TIMER *timer)
+void PVRAddonCallbacks::cb_transfer_timer_entry(void *kodiInstance, const ADDON_HANDLE handle, const PVR_TIMER *timer)
 {
   if (!handle)
   {
@@ -1783,7 +1932,7 @@ void CPVRClient::cb_transfer_timer_entry(void *kodiInstance, const ADDON_HANDLE 
   kodiTimers->UpdateFromClient(transferTimer);
 }
 
-void CPVRClient::cb_add_menu_hook(void *kodiInstance, PVR_MENUHOOK *hook)
+void PVRAddonCallbacks::cb_add_menu_hook(void *kodiInstance, PVR_MENUHOOK *hook)
 {
   CPVRClient *client = static_cast<CPVRClient*>(kodiInstance);
   if (!hook || !client)
@@ -1795,7 +1944,7 @@ void CPVRClient::cb_add_menu_hook(void *kodiInstance, PVR_MENUHOOK *hook)
   client->GetMenuHooks()->AddHook(*hook);
 }
 
-void CPVRClient::cb_recording(void *kodiInstance, const char *strName, const char *strFileName, bool bOnOff)
+void PVRAddonCallbacks::cb_recording(void *kodiInstance, const char *strName, const char *strFileName, bool bOnOff)
 {
   CPVRClient *client = static_cast<CPVRClient*>(kodiInstance);
   if (!client || !strFileName)
@@ -1819,31 +1968,31 @@ void CPVRClient::cb_recording(void *kodiInstance, const char *strName, const cha
       __FUNCTION__, bOnOff ? "started" : "finished", client->Name().c_str(), strName, strFileName);
 }
 
-void CPVRClient::cb_trigger_channel_update(void *kodiInstance)
+void PVRAddonCallbacks::cb_trigger_channel_update(void *kodiInstance)
 {
   /* update the channels table in the next iteration of the pvrmanager's main loop */
   CServiceBroker::GetPVRManager().TriggerChannelsUpdate();
 }
 
-void CPVRClient::cb_trigger_timer_update(void *kodiInstance)
+void PVRAddonCallbacks::cb_trigger_timer_update(void *kodiInstance)
 {
   /* update the timers table in the next iteration of the pvrmanager's main loop */
   CServiceBroker::GetPVRManager().TriggerTimersUpdate();
 }
 
-void CPVRClient::cb_trigger_recording_update(void *kodiInstance)
+void PVRAddonCallbacks::cb_trigger_recording_update(void *kodiInstance)
 {
   /* update the recordings table in the next iteration of the pvrmanager's main loop */
   CServiceBroker::GetPVRManager().TriggerRecordingsUpdate();
 }
 
-void CPVRClient::cb_trigger_channel_groups_update(void *kodiInstance)
+void PVRAddonCallbacks::cb_trigger_channel_groups_update(void *kodiInstance)
 {
   /* update all channel groups in the next iteration of the pvrmanager's main loop */
   CServiceBroker::GetPVRManager().TriggerChannelGroupsUpdate();
 }
 
-void CPVRClient::cb_trigger_epg_update(void *kodiInstance, unsigned int iChannelUid)
+void PVRAddonCallbacks::cb_trigger_epg_update(void *kodiInstance, unsigned int iChannelUid)
 {
   // get the client
   CPVRClient *client = static_cast<CPVRClient*>(kodiInstance);
@@ -1856,17 +2005,17 @@ void CPVRClient::cb_trigger_epg_update(void *kodiInstance, unsigned int iChannel
   CServiceBroker::GetPVRManager().EpgContainer().UpdateRequest(client->GetID(), iChannelUid);
 }
 
-void CPVRClient::cb_free_demux_packet(void *kodiInstance, DemuxPacket* pPacket)
+void PVRAddonCallbacks::cb_free_demux_packet(void *kodiInstance, DemuxPacket* pPacket)
 {
   CDVDDemuxUtils::FreeDemuxPacket(pPacket);
 }
 
-DemuxPacket* CPVRClient::cb_allocate_demux_packet(void *kodiInstance, int iDataSize)
+DemuxPacket* PVRAddonCallbacks::cb_allocate_demux_packet(void *kodiInstance, int iDataSize)
 {
   return CDVDDemuxUtils::AllocateDemuxPacket(iDataSize);
 }
 
-void CPVRClient::cb_connection_state_change(void* kodiInstance, const char* strConnectionString, PVR_CONNECTION_STATE newState, const char *strMessage)
+void PVRAddonCallbacks::cb_connection_state_change(void* kodiInstance, const char* strConnectionString, PVR_CONNECTION_STATE newState, const char *strMessage)
 {
   CPVRClient *client = static_cast<CPVRClient*>(kodiInstance);
   if (!client || !strConnectionString)
@@ -1890,7 +2039,7 @@ void CPVRClient::cb_connection_state_change(void* kodiInstance, const char* strC
   CServiceBroker::GetPVRManager().ConnectionStateChange(client, std::string(strConnectionString), newState, msg);
 }
 
-void CPVRClient::cb_epg_event_state_change(void* kodiInstance, EPG_TAG* tag, EPG_EVENT_STATE newState)
+void PVRAddonCallbacks::cb_epg_event_state_change(void* kodiInstance, EPG_TAG* tag, EPG_EVENT_STATE newState)
 {
   CPVRClient *client = static_cast<CPVRClient*>(kodiInstance);
   if (!client || !tag)
@@ -1963,7 +2112,7 @@ private:
   std::map<std::string, xbmc_codec_t> m_lookup;
 };
 
-xbmc_codec_t CPVRClient::cb_get_codec_by_name(const void* kodiInstance, const char* strCodecName)
+xbmc_codec_t PVRAddonCallbacks::cb_get_codec_by_name(const void* kodiInstance, const char* strCodecName)
 {
   return CCodecIds::GetInstance().GetCodecByName(strCodecName);
 }
