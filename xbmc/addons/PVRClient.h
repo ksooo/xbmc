@@ -34,7 +34,6 @@
 // struct PVR_EDL_ENTRY
 // struct PVR_SIGNAL_STATUS
 // struct PVR_DESCRAMBLE_INFO
-// struct AddonInstance_PVR
 // DemuxPacket
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 
@@ -51,6 +50,7 @@ struct PVR_RECORDING;
 struct PVR_TIMER;
 struct PVR_CHANNEL;
 struct PVR_NAMED_VALUE;
+struct AddonInstance_PVR;
 
 namespace PVR
 {
@@ -770,7 +770,7 @@ namespace PVR
      * @brief Get the interface table used between addon and Kodi.
      * @todo This function will be removed after old callback library system is removed.
      */
-    AddonInstance_PVR* GetInstanceInterface() { return &m_struct; }
+    AddonInstance_PVR* GetInstanceInterface() { return m_struct.get(); }
 
   private:
     /*!
@@ -1001,7 +1001,6 @@ namespace PVR
     CPVREpgInfoTagPtr   m_playingEpgTag;
 
     std::unique_ptr<CAddonCallWrapper> m_addonCallWrapper;
-
-    AddonInstance_PVR m_struct;
+    std::unique_ptr<AddonInstance_PVR> m_struct;
   };
 }
