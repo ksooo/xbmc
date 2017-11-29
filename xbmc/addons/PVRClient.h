@@ -31,7 +31,6 @@
 // enum PVR_CONNECTION_STATE
 // struct PVR_STREAM_PROPERTIES
 // struct PVR_STREAM_TIMES
-// struct PVR_EDL_ENTRY
 // struct PVR_SIGNAL_STATUS
 // struct PVR_DESCRAMBLE_INFO
 // DemuxPacket
@@ -41,6 +40,7 @@
 
 #include "PVRClientCapabilities.h"
 #include "PVRClientMenuHooks.h"
+#include "PVREdlEntry.h"
 
 // PVR Addon C-API forwards
 struct PVR_CHANNEL_GROUP_MEMBER;
@@ -419,7 +419,7 @@ namespace PVR
      * @param edls The edit decision list (empty on error).
      * @return True on success, false otherwise.
      */
-    bool GetRecordingEdl(const CPVRRecording &recording, std::vector<PVR_EDL_ENTRY> &edls);
+    bool GetRecordingEdl(const CPVRRecording &recording, std::vector<CPVREdlEntry> &edls);
 
     //@}
     /** @name PVR timer methods */

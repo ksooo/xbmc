@@ -19,6 +19,7 @@
  */
 
 #include "Edl.h"
+#include "addons/PVREdlEntry.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "filesystem/File.h"
@@ -580,34 +581,36 @@ bool CEdl::ReadPvr(const std::string &strMovie)
     return false;
   }
 
-  std::vector<PVR_EDL_ENTRY> edl = tag->GetPVRRecordingInfoTag()->GetEdl();
-  std::vector<PVR_EDL_ENTRY>::const_iterator it;
+  std::vector<PVR::CPVREdlEntry> edl = tag->GetPVRRecordingInfoTag()->GetEdl();
+  std::vector<PVR::CPVREdlEntry>::const_iterator it;
   for (it = edl.begin(); it != edl.end(); ++it)
   {
     Cut cut;
-    cut.start = it->start;
-    cut.end = it->end;
+    cut.start = it->GetStart();
+    cut.end = it->GetEnd();
 
-    switch (it->type)
+    if (it->IsCut())
     {
-    case PVR_EDL_TYPE_CUT:
       cut.action = CUT;
       break;
-    case PVR_EDL_TYPE_MUTE:
+    }
+    else if (it->IsMute())
+    {
       cut.action = MUTE;
       break;
-    case PVR_EDL_TYPE_SCENE:
+    }
+    else if (it->IsScene())
+    {
       if (!AddSceneMarker(cut.end))
       {
         CLog::Log(LOGWARNING, "%s - Error adding scene marker for pvr recording", __FUNCTION__);
       }
       continue;
-    case PVR_EDL_TYPE_COMBREAK:
+    }
+    else if (it->IsCommBreak())
+    {
       cut.action = COMM_BREAK;
       break;
-    default:
-      CLog::Log(LOGINFO, "%s - Ignoring entry of unknown type: %d", __FUNCTION__, it->type);
-      continue;
     }
 
     if (AddCut(cut))

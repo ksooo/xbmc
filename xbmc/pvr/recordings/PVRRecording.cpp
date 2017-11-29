@@ -326,13 +326,13 @@ void CPVRRecording::UpdateMetadata(CVideoDatabase &db)
   m_bGotMetaData = true;
 }
 
-std::vector<PVR_EDL_ENTRY> CPVRRecording::GetEdl() const
+std::vector<CPVREdlEntry> CPVRRecording::GetEdl() const
 {
   if (CServiceBroker::GetPVRManager().Clients()->GetClientCapabilities(m_iClientId)->SupportsRecordingsEdl())
   {
     return CServiceBroker::GetPVRManager().Clients()->GetRecordingEdl(*this);
   }
-  return std::vector<PVR_EDL_ENTRY>();
+  return std::vector<CPVREdlEntry>();
 }
 
 void CPVRRecording::Update(const CPVRRecording &tag)

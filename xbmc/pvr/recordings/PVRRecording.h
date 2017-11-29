@@ -39,13 +39,15 @@
 #include <vector>
 
 #include "XBDateTime.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
+#include "addons/PVREdlEntry.h"
 #include "video/VideoInfoTag.h"
 
 #include "pvr/PVRTypes.h"
 
 class CVideoDatabase;
 class CVariant;
+
+struct PVR_RECORDING;
 
 namespace PVR
 {
@@ -182,7 +184,7 @@ namespace PVR
      * @brief Retrieve the edit decision list (EDL) of a recording on the backend.
      * @return The edit decision list (empty on error)
      */
-    std::vector<PVR_EDL_ENTRY> GetEdl() const;
+    std::vector<CPVREdlEntry> GetEdl() const;
 
     /*!
      * @brief Get the resume point and play count from the database if the

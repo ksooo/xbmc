@@ -27,13 +27,13 @@
 // TODO(): leaking c-api types
 // struct PVR_STREAM_PROPERTIES
 // struct PVR_STREAM_TIMES
-// struct PVR_EDL_ENTRY
 // enum PVR_CONNECTION_STATE
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 
 #include "addons/AddonManager.h"
 #include "addons/PVRClientCapabilities.h"
 #include "addons/PVRClientMenuHooks.h"
+#include "addons/PVREdlEntry.h"
 #include "threads/CriticalSection.h"
 
 #include "pvr/PVRTypes.h"
@@ -610,8 +610,7 @@ namespace PVR
     * @param recording The recording.
     * @return The edit decision list (empty on error).
     */
-    // TODO(): leaking c-api type
-    std::vector<PVR_EDL_ENTRY> GetRecordingEdl(const CPVRRecording &recording);
+    std::vector<CPVREdlEntry> GetRecordingEdl(const CPVRRecording &recording);
 
     //@}
 

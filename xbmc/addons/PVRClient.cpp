@@ -984,7 +984,7 @@ bool CPVRClient::GetRecordingLastPlayedPosition(const CPVRRecording &recording, 
   }, m_clientCapabilities->SupportsRecordingsLastPlayedPosition()) == PVR_ERROR_NO_ERROR;
 }
 
-bool CPVRClient::GetRecordingEdl(const CPVRRecording &recording, std::vector<PVR_EDL_ENTRY> &edls)
+bool CPVRClient::GetRecordingEdl(const CPVRRecording &recording, std::vector<CPVREdlEntry> &edls)
 {
   edls.clear();
   return m_addonCallWrapper->Call(__FUNCTION__, [this, &recording, &edls] {
@@ -998,7 +998,7 @@ bool CPVRClient::GetRecordingEdl(const CPVRRecording &recording, std::vector<PVR
     {
       edls.reserve(size);
       for (int i = 0; i < size; ++i)
-        edls.emplace_back(edl_array[i]);
+        edls.emplace_back(CPVREdlEntry(edl_array[i]));
     }
     return error;
   }, m_clientCapabilities->SupportsRecordingsEdl()) == PVR_ERROR_NO_ERROR;

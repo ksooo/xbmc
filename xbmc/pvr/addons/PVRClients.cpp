@@ -1026,9 +1026,9 @@ int CPVRClients::GetRecordingLastPlayedPosition(const CPVRRecording &recording)
   return iPos;
 }
 
-std::vector<PVR_EDL_ENTRY> CPVRClients::GetRecordingEdl(const CPVRRecording &recording)
+std::vector<CPVREdlEntry> CPVRClients::GetRecordingEdl(const CPVRRecording &recording)
 {
-  std::vector<PVR_EDL_ENTRY> edls;
+  std::vector<CPVREdlEntry> edls;
   ForCreatedClient(__FUNCTION__, recording.ClientID(), [&recording, &edls](const CPVRClientPtr &client) {
     return client->GetRecordingEdl(recording, edls);
   });
