@@ -158,6 +158,18 @@ namespace PVR
     CPVREpgInfoTagPtr GetTagPrevious() const;
 
     /*!
+     * @brief Get the event that will occur after the given event
+     * @return The next event or NULL if it wasn't found.
+     */
+    CPVREpgInfoTagPtr GetNextEvent(const CPVREpgInfoTag& tag) const;
+
+    /*!
+     * @brief Get the event that occured before the given event
+     * @return The previous event or NULL if it wasn't found.
+     */
+    CPVREpgInfoTagPtr GetPreviousEvent(const CPVREpgInfoTag& tag) const;
+
+    /*!
      * Get the event that occurs between the given begin and end time.
      * @param beginTime Minimum start time in UTC of the event.
      * @param endTime Maximum end time in UTC of the event.
@@ -266,8 +278,6 @@ namespace PVR
      * @return A human readable name.
      */
     static const std::string &ConvertGenreIdToString(int iID, int iSubID);
-
-    CPVREpgInfoTagPtr GetNextEvent(const CPVREpgInfoTag& tag) const;
 
     size_t Size(void) const;
 

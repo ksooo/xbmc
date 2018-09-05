@@ -178,13 +178,11 @@ CPVREpgInfoTagPtr CPVREpg::GetTagNow(bool bUpdateIfNeeded /* = true */) const
 
 CPVREpgInfoTagPtr CPVREpg::GetTagNext() const
 {
-  CPVREpgInfoTagPtr nowTag(GetTagNow());
+  CSingleLock lock(m_critSection);
+  const CPVREpgInfoTagPtr nowTag = GetTagNow();
   if (nowTag)
   {
-    CSingleLock lock(m_critSection);
-    std::map<CDateTime, CPVREpgInfoTagPtr>::const_iterator it = m_tags.find(nowTag->StartAsUTC());
-    if (it != m_tags.end() && ++it != m_tags.end())
-      return it->second;
+    return GetNextEvent(*nowTag);
   }
   else if (Size() > 0)
   {
@@ -201,16 +199,11 @@ CPVREpgInfoTagPtr CPVREpg::GetTagNext() const
 
 CPVREpgInfoTagPtr CPVREpg::GetTagPrevious() const
 {
-  CPVREpgInfoTagPtr nowTag(GetTagNow());
+  CSingleLock lock(m_critSection);
+  const CPVREpgInfoTagPtr nowTag = GetTagNow();
   if (nowTag)
   {
-    CSingleLock lock(m_critSection);
-    std::map<CDateTime, CPVREpgInfoTagPtr>::const_iterator it = m_tags.find(nowTag->StartAsUTC());
-    if (it != m_tags.end() && it != m_tags.begin())
-    {
-      --it;
-      return it->second;
-    }
+    return GetPreviousEvent(*nowTag);
   }
   else if (Size() > 0)
   {
@@ -220,6 +213,29 @@ CPVREpgInfoTagPtr CPVREpg::GetTagPrevious() const
       if (it->second->WasActive())
         return it->second;
     }
+  }
+
+  return CPVREpgInfoTagPtr();
+}
+
+CPVREpgInfoTagPtr CPVREpg::GetNextEvent(const CPVREpgInfoTag& tag) const
+{
+  CSingleLock lock(m_critSection);
+  std::map<CDateTime, CPVREpgInfoTagPtr>::const_iterator it = m_tags.find(tag.StartAsUTC());
+  if (it != m_tags.end() && ++it != m_tags.end())
+    return it->second;
+
+  return CPVREpgInfoTagPtr();
+}
+
+CPVREpgInfoTagPtr CPVREpg::GetPreviousEvent(const CPVREpgInfoTag& tag) const
+{
+  CSingleLock lock(m_critSection);
+  std::map<CDateTime, CPVREpgInfoTagPtr>::const_iterator it = m_tags.find(tag.StartAsUTC());
+  if (it != m_tags.end() && it != m_tags.begin())
+  {
+    --it;
+    return it->second;
   }
 
   return CPVREpgInfoTagPtr();
@@ -802,17 +818,6 @@ bool CPVREpg::LoadFromClients(time_t start, time_t end)
   }
 
   return bReturn;
-}
-
-CPVREpgInfoTagPtr CPVREpg::GetNextEvent(const CPVREpgInfoTag& tag) const
-{
-  CSingleLock lock(m_critSection);
-  std::map<CDateTime, CPVREpgInfoTagPtr>::const_iterator it = m_tags.find(tag.StartAsUTC());
-  if (it != m_tags.end() && ++it != m_tags.end())
-    return it->second;
-
-  CPVREpgInfoTagPtr retVal;
-  return retVal;
 }
 
 CPVRChannelPtr CPVREpg::Channel(void) const
