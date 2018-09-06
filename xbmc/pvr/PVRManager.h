@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "FileItem.h"
+#include "XBDateTime.h"
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "interfaces/IAnnouncer.h"
 #include "threads/Event.h"
@@ -421,6 +422,13 @@ namespace PVR
      * @param state the event
      */
     void PublishEvent(PVREvent state);
+
+    /*!
+     * @brief If a TV or radio channel is playing, return the current playing time in UTC.
+     *        Implementation takes time shifting and possibly ongoing seek operations into account.
+     * @return The playing time.
+     */
+    CDateTime GetPlayingTime() const;
 
   protected:
     /*!

@@ -15,6 +15,7 @@
 #include "cores/DataCacheCore.h"
 #include "FileItem.h"
 #include "guilib/GUIComponent.h"
+#include "interfaces/AnnouncementManager.h"
 #include "windowing/GraphicContext.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"
@@ -71,11 +72,16 @@ void CSeekHandler::Configure()
 
 void CSeekHandler::Reset()
 {
+  bool wasSeeking = m_seekSize != 0;
+
   m_requireSeek = false;
   m_analogSeek = false;
   m_seekStep = 0;
   m_seekSize = 0;
   m_timeCodePosition = 0;
+
+  if (wasSeeking)
+    CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::GUI, "xbmc", "OnSeekFinished");
 }
 
 int CSeekHandler::GetSeekStepSize(SeekType type, int step)
@@ -190,6 +196,9 @@ void CSeekHandler::SetSeekSize(double seekSize)
   m_seekSize = seekSize > 0
     ? std::min(seekSize, maxSeekSize)
     : std::max(seekSize, minSeekSize);
+
+  if (m_seekSize != 0)
+    CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::GUI, "xbmc", "OnSeekRequested", CVariant(m_seekSize));
 }
 
 bool CSeekHandler::InProgress() const

@@ -13,7 +13,6 @@
 #include "dialogs/GUIDialogKaiToast.h"
 #include "events/EventLog.h"
 #include "events/NotificationEvent.h"
-#include "interfaces/AnnouncementManager.h"
 #ifdef TARGET_POSIX
 #include "platform/linux/XTimeUtils.h"
 #endif

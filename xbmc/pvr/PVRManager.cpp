@@ -147,7 +147,7 @@ void CPVRManager::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *send
   if (!IsStarted())
     return;
 
-  if ((flag & (ANNOUNCEMENT::GUI)))
+  if (flag & ANNOUNCEMENT::GUI)
   {
     if (strcmp(message, "OnScreensaverActivated") == 0)
       m_addons->OnPowerSavingActivated();
@@ -929,4 +929,10 @@ void CPVRManager::UpdateLastWatched(const CPVRChannelPtr &channel)
 
   /* update last played group */
   m_channelGroups->SetLastPlayedGroup(group);
+}
+
+CDateTime CPVRManager::GetPlayingTime() const
+{
+  CSingleLock lock(m_critSection);
+  return m_guiInfo->GetPlayingTime();
 }

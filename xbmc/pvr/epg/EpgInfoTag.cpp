@@ -11,7 +11,6 @@
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
-#include "cores/DataCacheCore.h"
 #include "guilib/LocalizeStrings.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
@@ -208,17 +207,7 @@ void CPVREpgInfoTag::ToSortable(SortItem& sortable, Field field) const
 
 CDateTime CPVREpgInfoTag::GetCurrentPlayingTime() const
 {
-  if (CServiceBroker::GetPVRManager().GetPlayingChannel() == Channel())
-  {
-    // start time valid?
-    time_t startTime = CServiceBroker::GetDataCacheCore().GetStartTime();
-    if (startTime > 0)
-    {
-      return CDateTime(startTime + CServiceBroker::GetDataCacheCore().GetPlayTime() / 1000);
-    }
-  }
-
-  return CDateTime::GetUTCDateTime();
+  return CServiceBroker::GetPVRManager().GetPlayingTime();
 }
 
 bool CPVREpgInfoTag::IsActive(void) const

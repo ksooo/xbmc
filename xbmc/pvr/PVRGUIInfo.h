@@ -45,6 +45,9 @@ namespace PVR
     void Start(void);
     void Stop(void);
 
+    CDateTime GetPlayingTime() const;
+
+    // Observer implementation
     void Notify(const Observable &obs, const ObservableMessage msg) override;
 
     // KODI::GUILIB::GUIINFO::IGUIInfoProvider implementation
@@ -58,6 +61,7 @@ namespace PVR
     void ClearQualityInfo(PVR_SIGNAL_STATUS &qualityInfo);
     void ClearDescrambleInfo(PVR_DESCRAMBLE_INFO &descrambleInfo);
 
+    // CThread implementation
     void Process(void) override;
 
     void UpdateTimersCache(void);

@@ -12,6 +12,7 @@
 
 #include "ServiceBroker.h"
 #include "cores/DataCacheCore.h"
+#include "interfaces/AnnouncementManager.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "threads/SingleLock.h"
@@ -24,6 +25,32 @@ using namespace PVR;
 CPVRGUITimesInfo::CPVRGUITimesInfo()
 {
   Reset();
+  CServiceBroker::GetAnnouncementManager()->AddAnnouncer(this);
+}
+
+CPVRGUITimesInfo::~CPVRGUITimesInfo()
+{
+  CServiceBroker::GetAnnouncementManager()->RemoveAnnouncer(this);
+}
+
+void CPVRGUITimesInfo::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
+{
+  if (flag & ANNOUNCEMENT::GUI)
+  {
+    if (strcmp(message, "OnSeekRequested") == 0)
+    {
+      if (CServiceBroker::GetPVRManager().IsPlayingTV() || CServiceBroker::GetPVRManager().IsPlayingRadio())
+      {
+        CSingleLock lock(m_critSection);
+        m_iSeekSize = static_cast<int64_t>(data.asDouble());
+      }
+    }
+    else if (strcmp(message, "OnSeekFinished") == 0)
+    {
+      CSingleLock lock(m_critSection);
+      m_iSeekSize = 0;
+    }
+  }
 }
 
 void CPVRGUITimesInfo::Reset()
@@ -42,6 +69,13 @@ void CPVRGUITimesInfo::Reset()
   m_iTimeshiftProgressDuration = 0;
 
   m_playingEpgTag.reset();
+  m_iSeekSize = 0;
+}
+
+CDateTime CPVRGUITimesInfo::GetPlayingTime() const
+{
+  CSingleLock lock(m_critSection);
+  return CDateTime(m_iTimeshiftPlayTime + m_iSeekSize);
 }
 
 void CPVRGUITimesInfo::UpdatePlayingTag()
@@ -294,9 +328,9 @@ std::string CPVRGUITimesInfo::GetEpgEventFinishTime(const CPVREpgInfoTagPtr& epg
   return finish.GetAsLocalizedTime(format);
 }
 
-std::string CPVRGUITimesInfo::GetEpgEventSeekTime(int iSeekSize, TIME_FORMAT format) const
+std::string CPVRGUITimesInfo::GetEpgEventSeekTime(TIME_FORMAT format) const
 {
-  return StringUtils::SecondsToTimeString(GetElapsedTime() + iSeekSize, format);
+  return StringUtils::SecondsToTimeString(GetElapsedTime() + m_iSeekSize, format);
 }
 
 int CPVRGUITimesInfo::GetElapsedTime() const
@@ -327,7 +361,7 @@ int CPVRGUITimesInfo::GetRemainingTime(const CPVREpgInfoTagPtr& epgTag) const
 int CPVRGUITimesInfo::GetTimeshiftProgress() const
 {
   CSingleLock lock(m_critSection);
-  return std::lrintf(static_cast<float>(m_iTimeshiftPlayTime - m_iTimeshiftStartTime) / (m_iTimeshiftEndTime - m_iTimeshiftStartTime) * 100);
+  return std::lrintf(static_cast<float>(m_iTimeshiftPlayTime + m_iSeekSize - m_iTimeshiftStartTime) / (m_iTimeshiftEndTime - m_iTimeshiftStartTime) * 100);
 }
 
 int CPVRGUITimesInfo::GetTimeshiftProgressDuration() const

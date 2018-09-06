@@ -9,20 +9,26 @@
 #pragma once
 
 #include "XBDateTime.h"
+#include "interfaces/IAnnouncer.h"
 #include "threads/CriticalSection.h"
 
 #include "pvr/PVRTypes.h"
 
 namespace PVR
 {
-  class CPVRGUITimesInfo
+  class CPVRGUITimesInfo : public ANNOUNCEMENT::IAnnouncer
   {
   public:
     CPVRGUITimesInfo();
-    virtual ~CPVRGUITimesInfo() = default;
+    virtual ~CPVRGUITimesInfo();
+
+    // IAnnouncer implementation
+    void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
 
     void Reset();
     void Update();
+
+    CDateTime GetPlayingTime() const;
 
     // GUI info labels
     std::string GetTimeshiftStartTime(TIME_FORMAT format) const;
@@ -37,7 +43,7 @@ namespace PVR
     std::string GetEpgEventElapsedTime(const CPVREpgInfoTagPtr& epgTag, TIME_FORMAT format) const;
     std::string GetEpgEventRemainingTime(const CPVREpgInfoTagPtr& epgTag, TIME_FORMAT format) const;
     std::string GetEpgEventFinishTime(const CPVREpgInfoTagPtr& epgTag, TIME_FORMAT format) const;
-    std::string GetEpgEventSeekTime(int iSeekSize, TIME_FORMAT format) const;
+    std::string GetEpgEventSeekTime(TIME_FORMAT format) const;
 
     // GUI info ints
     int GetTimeshiftProgress() const;
@@ -78,6 +84,8 @@ namespace PVR
     time_t m_iTimeshiftProgressStartTime;
     time_t m_iTimeshiftProgressEndTime;
     unsigned int m_iTimeshiftProgressDuration;
+
+    int64_t m_iSeekSize = 0;
   };
 
 } // namespace PVR

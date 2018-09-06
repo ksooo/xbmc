@@ -262,6 +262,11 @@ void CPVRGUIInfo::UpdateTimeshiftData(void)
   m_timesInfo.Update();
 }
 
+CDateTime CPVRGUIInfo::GetPlayingTime() const
+{
+  return m_timesInfo.GetPlayingTime();
+}
+
 bool CPVRGUIInfo::InitCurrentItem(CFileItem *item)
 {
   return false;
@@ -688,8 +693,7 @@ bool CPVRGUIInfo::GetPVRLabel(const CFileItem *item, const CGUIInfo &info, std::
       strValue = m_timesInfo.GetTimeshiftProgressEndTime(static_cast<TIME_FORMAT>(info.GetData1()));
       return true;
     case PVR_EPG_EVENT_SEEK_TIME:
-      strValue = m_timesInfo.GetEpgEventSeekTime(g_application.GetAppPlayer().GetSeekHandler().GetSeekSize(),
-                                                     static_cast<TIME_FORMAT>(info.GetData1()));
+      strValue = m_timesInfo.GetEpgEventSeekTime(static_cast<TIME_FORMAT>(info.GetData1()));
       return true;
     case PVR_NOW_RECORDING_TITLE:
       strValue = m_anyTimersInfo.GetActiveTimerTitle();
