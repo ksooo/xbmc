@@ -53,6 +53,7 @@ namespace PVR
     int GetTimeshiftProgressEpgEnd() const;
     int GetTimeshiftProgressBufferStart() const;
     int GetTimeshiftProgressBufferEnd() const;
+    int64_t GetTimeshiftSeekSize() const;
 
     int GetEpgEventDuration(const CPVREpgInfoTagPtr& epgTag) const;
     int GetEpgEventProgress(const CPVREpgInfoTagPtr& epgTag) const;

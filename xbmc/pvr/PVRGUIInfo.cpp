@@ -1087,6 +1087,9 @@ bool CPVRGUIInfo::GetPVRInt(const CFileItem *item, const CGUIInfo &info, int& iV
     case PVR_TIMESHIFT_PROGRESS_BUFFER_END:
       iValue = m_timesInfo.GetTimeshiftProgressBufferEnd();
       return true;
+    case PVR_TIMESHIFT_SEEK_SIZE:
+      iValue = m_timesInfo.GetTimeshiftSeekSize();
+      return true;
     case PVR_ACTUAL_STREAM_SIG_PROGR:
       iValue = std::lrintf(static_cast<float>(m_qualityInfo.iSignal) / 0xFFFF * 100);
       return true;

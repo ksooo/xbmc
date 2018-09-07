@@ -117,7 +117,9 @@ int CGUIDialogSeekBar::GetTimeshiftProgress() const
   int progress = 0;
   infoMgr.GetInt(progress, PVR_TIMESHIFT_PROGRESS_PLAY_POS);
 
-  int seekSize = g_application.GetAppPlayer().GetSeekHandler().GetSeekSize();
+//  int seekSize = g_application.GetAppPlayer().GetSeekHandler().GetSeekSize();
+  int seekSize = 0;
+  infoMgr.GetInt(seekSize, PVR_TIMESHIFT_SEEK_SIZE);
   if (seekSize != 0)
   {
     int total = 0;

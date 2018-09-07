@@ -433,6 +433,12 @@ int CPVRGUITimesInfo::GetTimeshiftProgressBufferEnd() const
   return std::lrintf(static_cast<float>(m_iTimeshiftEndTime - m_iTimeshiftProgressStartTime) / m_iTimeshiftProgressDuration * 100);
 }
 
+int64_t CPVRGUITimesInfo::GetTimeshiftSeekSize() const
+{
+  CSingleLock lock(m_critSection);
+  return m_iSeekSize;
+}
+
 int CPVRGUITimesInfo::GetEpgEventDuration(const CPVREpgInfoTagPtr& epgTag) const
 {
   CSingleLock lock(m_critSection);

@@ -4596,6 +4596,11 @@ const infomap playlist[] =       {{ "length",           PLAYLIST_LENGTH },
 ///                  _integer_,
 ///     Returns the percentage of the end of the timeshift buffer within the PVR timeshift progress.
 ///   }
+///   \table_row3{   <b>`PVR.TimeshiftSeekSize`</b>,
+///                  \anchor PVR_TimeshiftSeekSize
+///                  _integer_,
+///     Returns the seek size in seconds, if a seek operation on the playing stream is ongoing.
+///   }
 /// \table_end
 ///
 /// -----------------------------------------------------------------------------
@@ -4675,7 +4680,8 @@ const infomap pvr[] =            {{ "isrecording",              PVR_IS_RECORDING
                                   { "timeshiftprogressepgstart",  PVR_TIMESHIFT_PROGRESS_EPG_START },
                                   { "timeshiftprogressepgend",    PVR_TIMESHIFT_PROGRESS_EPG_END },
                                   { "timeshiftprogressbufferstart", PVR_TIMESHIFT_PROGRESS_BUFFER_START },
-                                  { "timeshiftprogressbufferend", PVR_TIMESHIFT_PROGRESS_BUFFER_END }};
+                                  { "timeshiftprogressbufferend", PVR_TIMESHIFT_PROGRESS_BUFFER_END },
+                                  { "timeshiftseeksize",          PVR_TIMESHIFT_SEEK_SIZE }};
 
 /// \page modules__General__List_of_gui_access
 /// \section modules__General__List_of_gui_access_PvrTimes PvrTimes
