@@ -85,6 +85,7 @@ namespace PVR
     time_t m_iTimeshiftProgressEndTime;
     unsigned int m_iTimeshiftProgressDuration;
 
+    bool m_bSeeking = false;
     int64_t m_iSeekSize = 0;
   };
 

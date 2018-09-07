@@ -45,11 +45,12 @@ void CPVRGUITimesInfo::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char 
         m_iSeekSize = static_cast<int64_t>(data.asDouble());
       }
     }
-    else if (strcmp(message, "OnSeekFinished") == 0)
-    {
-      CSingleLock lock(m_critSection);
-      m_iSeekSize = 0;
-    }
+// fires to early, directly after putting the async seek request for the app
+//    else if (strcmp(message, "OnSeekFinished") == 0)
+//    {
+//      CSingleLock lock(m_critSection);
+//      m_iSeekSize = 0;
+//    }
   }
 }
 
@@ -70,6 +71,7 @@ void CPVRGUITimesInfo::Reset()
 
   m_playingEpgTag.reset();
   m_iSeekSize = 0;
+  m_bSeeking = false;
 }
 
 CDateTime CPVRGUITimesInfo::GetPlayingTime() const
@@ -90,9 +92,22 @@ void CPVRGUITimesInfo::UpdatePlayingTag()
 
     CSingleLock lock(m_critSection);
 
-    const CPVRChannelPtr playingChannel = m_playingEpgTag ? m_playingEpgTag->Channel() : nullptr;
-    if (!m_playingEpgTag || !m_playingEpgTag->IsActive() ||
-        !playingChannel || !currentChannel || *playingChannel != *currentChannel)
+    bool bEventInvalid = !m_playingEpgTag;
+    if (!bEventInvalid)
+    {
+      // Do not use m_playingEpgTag->IsActive() here as it is implemented via call to CPVRGUITimesInfo::GetPlayingTime()!
+      const CDateTime playingTime = GetPlayingTime();
+      bEventInvalid = m_playingEpgTag->StartAsUTC() > playingTime || m_playingEpgTag->EndAsUTC() <= playingTime;
+    }
+
+    bool bChannelInvalid = false;
+    if (!bEventInvalid)
+    {
+      const CPVRChannelPtr playingChannel = m_playingEpgTag->Channel();
+      bChannelInvalid = !playingChannel || !currentChannel || *playingChannel != *currentChannel;
+    }
+
+    if (bEventInvalid || bChannelInvalid)
     {
       if (currentTag)
       {
@@ -137,6 +152,7 @@ void CPVRGUITimesInfo::UpdateTimeshiftData()
   int64_t iPlayTime, iMinTime, iMaxTime;
   CServiceBroker::GetDataCacheCore().GetPlayTimes(iStartTime, iPlayTime, iMinTime, iMaxTime);
   bool bPlaying = CServiceBroker::GetDataCacheCore().GetSpeed() == 1.0;
+  bool bSeeking = CServiceBroker::GetDataCacheCore().IsSeeking();
 
   CSingleLock lock(m_critSection);
 
@@ -172,6 +188,11 @@ void CPVRGUITimesInfo::UpdateTimeshiftData()
 
     m_iTimeshiftOffset = now - m_iTimeshiftPlayTime;
   }
+
+  if (m_iSeekSize && m_bSeeking && !bSeeking)
+    m_iSeekSize = 0;
+
+  m_bSeeking = bSeeking;
 
   UpdateTimeshiftProgressData();
 }
@@ -361,7 +382,7 @@ int CPVRGUITimesInfo::GetRemainingTime(const CPVREpgInfoTagPtr& epgTag) const
 int CPVRGUITimesInfo::GetTimeshiftProgress() const
 {
   CSingleLock lock(m_critSection);
-  return std::lrintf(static_cast<float>(m_iTimeshiftPlayTime + m_iSeekSize - m_iTimeshiftStartTime) / (m_iTimeshiftEndTime - m_iTimeshiftStartTime) * 100);
+  return std::lrintf(static_cast<float>(m_iTimeshiftPlayTime - m_iTimeshiftStartTime) / (m_iTimeshiftEndTime - m_iTimeshiftStartTime) * 100);
 }
 
 int CPVRGUITimesInfo::GetTimeshiftProgressDuration() const
