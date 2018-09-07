@@ -77,7 +77,10 @@ void CPVRGUITimesInfo::Reset()
 CDateTime CPVRGUITimesInfo::GetPlayingTime() const
 {
   CSingleLock lock(m_critSection);
-  return CDateTime(m_iTimeshiftPlayTime + m_iSeekSize);
+  if (m_iTimeshiftPlayTime)
+    return CDateTime(m_iTimeshiftPlayTime + m_iSeekSize);
+  else
+    return CDateTime::GetUTCDateTime();
 }
 
 void CPVRGUITimesInfo::UpdatePlayingTag()
