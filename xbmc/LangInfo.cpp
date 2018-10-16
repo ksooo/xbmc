@@ -33,7 +33,6 @@
 #include "utils/XMLUtils.h"
 #include "weather/WeatherManager.h"
 
-using namespace PVR;
 using namespace KODI::MESSAGING;
 
 static std::string shortDateFormats[] = {

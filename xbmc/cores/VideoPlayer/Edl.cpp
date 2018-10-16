@@ -15,7 +15,8 @@
 #include "utils/log.h"
 #include "utils/XBMCTinyXML.h"
 #include "PlatformDefs.h"
-#include "pvr/recordings/PVRRecordings.h"
+#include "pvr/epg/EpgInfoTag.h"
+#include "pvr/recordings/PVRRecording.h"
 #include "pvr/PVRManager.h"
 #include "ServiceBroker.h"
 

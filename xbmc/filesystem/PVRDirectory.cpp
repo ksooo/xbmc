@@ -21,7 +21,6 @@
 #include "pvr/timers/PVRTimers.h"
 
 using namespace XFILE;
-using namespace PVR;
 
 CPVRDirectory::CPVRDirectory() = default;
 

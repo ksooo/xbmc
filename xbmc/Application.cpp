@@ -208,7 +208,6 @@ using namespace VIDEO;
 using namespace MUSIC_INFO;
 using namespace EVENTSERVER;
 using namespace JSONRPC;
-using namespace PVR;
 using namespace PERIPHERALS;
 using namespace KODI;
 using namespace KODI::MESSAGING;

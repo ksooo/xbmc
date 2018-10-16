@@ -42,7 +42,6 @@
 #include "video/VideoInfoScanner.h"
 #include "video/VideoLibraryQueue.h"
 #include "video/dialogs/GUIDialogVideoInfo.h"
-#include "pvr/recordings/PVRRecording.h"
 
 #include <utility>
 
