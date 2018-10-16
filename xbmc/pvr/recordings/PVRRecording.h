@@ -24,6 +24,7 @@
  *
  */
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -31,13 +32,13 @@
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "video/VideoInfoTag.h"
 
-#include "pvr/PVRTypes.h"
-
 class CVideoDatabase;
 class CVariant;
 
 namespace PVR
 {
+  class CPVRChannel;
+
   /*!
    * @brief Representation of a CPVRRecording unique ID.
    */
@@ -253,7 +254,7 @@ namespace PVR
      * @return Get the channel on which this recording is/was running
      * @note Only works if the recording has a channel uid provided by the add-on
      */
-    CPVRChannelPtr Channel(void) const;
+    std::shared_ptr<CPVRChannel> Channel(void) const;
 
     /*!
      * @brief Get the uid of the channel on which this recording is/was running

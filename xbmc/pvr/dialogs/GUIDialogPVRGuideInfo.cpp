@@ -75,7 +75,7 @@ bool CGUIDialogPVRGuideInfo::OnClickButtonRecord(CGUIMessage &message)
       return bReturn;
     }
 
-    const CPVRTimerInfoTagPtr timerTag(m_progItem->Timer());
+    const std::shared_ptr<CPVRTimerInfoTag> timerTag(m_progItem->Timer());
     if (timerTag)
     {
       const CFileItemPtr item(new CFileItem(timerTag));
@@ -171,7 +171,7 @@ bool CGUIDialogPVRGuideInfo::OnInfo(int actionID)
   return true;
 }
 
-void CGUIDialogPVRGuideInfo::SetProgInfo(const CPVREpgInfoTagPtr &tag)
+void CGUIDialogPVRGuideInfo::SetProgInfo(const std::shared_ptr<CPVREpgInfoTag> &tag)
 {
   m_progItem = tag;
 }
@@ -215,7 +215,7 @@ void CGUIDialogPVRGuideInfo::OnInitWindow()
   }
   else if (m_progItem->Channel() && m_progItem->IsRecordable())
   {
-    const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_progItem->ClientID());
+    const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_progItem->ClientID());
     if (client && client->GetClientCapabilities().SupportsTimers())
     {
       SET_CONTROL_LABEL(CONTROL_BTN_RECORD, 264);     /* Record */

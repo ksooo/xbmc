@@ -654,7 +654,7 @@ void CGUIEPGGridContainer::UpdateItems()
     return;
 
   /* Safe currently selected epg tag and grid coordinates. Selection shall be restored after update. */
-  CPVREpgInfoTagPtr prevSelectedEpgTag;
+  std::shared_ptr<CPVREpgInfoTag> prevSelectedEpgTag;
   if (m_item)
     prevSelectedEpgTag = m_item->item->GetEPGInfoTag();
 
@@ -692,7 +692,7 @@ void CGUIEPGGridContainer::UpdateItems()
         newBlockIndex = m_gridModel->GetFirstEventBlock(prevSelectedEpgTag) + eventOffset;
       }
 
-      const CPVRChannelPtr channel(prevSelectedEpgTag->Channel());
+      const std::shared_ptr<CPVRChannel> channel(prevSelectedEpgTag->Channel());
       if (channel)
         channelUid = channel->UniqueID();
 
@@ -707,7 +707,7 @@ void CGUIEPGGridContainer::UpdateItems()
       const GridItem *prevItem(GetPrevItem(m_channelCursor));
       if (prevItem)
       {
-        const CPVREpgInfoTagPtr tag(prevItem->item->GetEPGInfoTag());
+        const std::shared_ptr<CPVREpgInfoTag> tag(prevItem->item->GetEPGInfoTag());
         if (tag && tag->EndAsUTC().IsValid())
         {
           if (oldGridStart >= tag->StartAsUTC())
@@ -1061,7 +1061,7 @@ bool CGUIEPGGridContainer::SetChannel(const std::string &channel)
   return false;
 }
 
-bool CGUIEPGGridContainer::SetChannel(const CPVRChannelPtr &channel)
+bool CGUIEPGGridContainer::SetChannel(const std::shared_ptr<CPVRChannel> &channel)
 {
   for (int iIndex = 0; iIndex < m_gridModel->ChannelItemsSize(); iIndex++)
   {
@@ -1283,7 +1283,7 @@ bool CGUIEPGGridContainer::OnMouseWheel(char wheel, const CPoint &point)
   return true;
 }
 
-CPVRChannelPtr CGUIEPGGridContainer::GetSelectedChannel() const
+std::shared_ptr<CPVRChannel> CGUIEPGGridContainer::GetSelectedChannel() const
 {
   CFileItemPtr fileItem;
   {
@@ -1295,7 +1295,7 @@ CPVRChannelPtr CGUIEPGGridContainer::GetSelectedChannel() const
   if (fileItem && fileItem->HasPVRChannelInfoTag())
     return fileItem->GetPVRChannelInfoTag();
 
-  return CPVRChannelPtr();
+  return std::shared_ptr<CPVRChannel>();
 }
 
 CDateTime CGUIEPGGridContainer::GetSelectedDate() const

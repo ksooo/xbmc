@@ -8,13 +8,12 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
-
-#include "pvr/PVRTypes.h"
 
 struct PVR_TIMER_TYPE;
 
@@ -32,13 +31,13 @@ namespace PVR
      * @brief Return a list with all known timer types.
      * @return A list of timer types or an empty list if no types available.
      */
-    static const std::vector<CPVRTimerTypePtr> GetAllTypes();
+    static const std::vector<std::shared_ptr<CPVRTimerType>> GetAllTypes();
 
     /*!
      * @brief Return the first available timer type.
      * @return A timer type or NULL if none available.
      */
-    static const CPVRTimerTypePtr GetFirstAvailableType();
+    static const std::shared_ptr<CPVRTimerType> GetFirstAvailableType();
 
     /*!
      * @brief Create a timer type from given timer type id and client id.
@@ -46,7 +45,7 @@ namespace PVR
      * @param iClientId the PVR client id.
      * @return A timer type instance.
      */
-    static CPVRTimerTypePtr CreateFromIds(unsigned int iTypeId, int iClientId);
+    static std::shared_ptr<CPVRTimerType> CreateFromIds(unsigned int iTypeId, int iClientId);
 
     /*!
      * @brief Create a timer type from given timer type attributes and client id.
@@ -55,7 +54,7 @@ namespace PVR
      * @param iClientId the PVR client id.
      * @return A timer type instance.
      */
-    static CPVRTimerTypePtr CreateFromAttributes(unsigned int iMustHaveAttr, unsigned int iMustNotHaveAttr, int iClientId);
+    static std::shared_ptr<CPVRTimerType> CreateFromAttributes(unsigned int iMustHaveAttr, unsigned int iMustNotHaveAttr, int iClientId);
 
     CPVRTimerType();
     CPVRTimerType(const PVR_TIMER_TYPE &type, int iClientId);

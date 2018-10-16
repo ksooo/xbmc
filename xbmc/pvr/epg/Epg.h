@@ -9,6 +9,7 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -16,7 +17,6 @@
 #include "threads/CriticalSection.h"
 #include "utils/Observer.h"
 
-#include "pvr/PVRTypes.h"
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/epg/EpgInfoTag.h"
 #include "pvr/epg/EpgSearchFilter.h"
@@ -42,7 +42,7 @@ namespace PVR
      * @brief Create a new EPG instance for a channel.
      * @param channel The channel to create the EPG for.
      */
-    CPVREpg(const CPVRChannelPtr &channel);
+    CPVREpg(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Destroy this EPG instance.
@@ -59,7 +59,7 @@ namespace PVR
      * @brief The channel this EPG belongs to.
      * @return The channel this EPG belongs to
      */
-    CPVRChannelPtr Channel(void) const;
+    std::shared_ptr<CPVRChannel> Channel(void) const;
 
     /*!
      * @brief The id of the channel this EPG belongs to.
@@ -71,7 +71,7 @@ namespace PVR
      * @brief Channel the channel tag linked to this EPG table.
      * @param channel The new channel tag.
      */
-    void SetChannel(const CPVRChannelPtr &channel);
+    void SetChannel(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Get the name of the scraper to use for this table.
@@ -130,19 +130,19 @@ namespace PVR
      * @brief Get the event that is occurring now
      * @return The current event or NULL if it wasn't found.
      */
-    CPVREpgInfoTagPtr GetTagNow(bool bUpdateIfNeeded = true) const;
+    std::shared_ptr<CPVREpgInfoTag> GetTagNow(bool bUpdateIfNeeded = true) const;
 
     /*!
      * @brief Get the event that will occur next
      * @return The next event or NULL if it wasn't found.
      */
-    CPVREpgInfoTagPtr GetTagNext() const;
+    std::shared_ptr<CPVREpgInfoTag> GetTagNext() const;
 
     /*!
      * @brief Get the event that occured previously
      * @return The previous event or NULL if it wasn't found.
      */
-    CPVREpgInfoTagPtr GetTagPrevious() const;
+    std::shared_ptr<CPVREpgInfoTag> GetTagPrevious() const;
 
     /*!
      * @brief Get the event that occurs between the given begin and end time.
@@ -151,7 +151,7 @@ namespace PVR
      * @param bUpdateFromClient if true, try to fetch the event from the client if not found locally.
      * @return The found tag or NULL if it wasn't found.
      */
-    CPVREpgInfoTagPtr GetTagBetween(const CDateTime &beginTime, const CDateTime &endTime, bool bUpdateFromClient = false);
+    std::shared_ptr<CPVREpgInfoTag> GetTagBetween(const CDateTime &beginTime, const CDateTime &endTime, bool bUpdateFromClient = false);
 
     /*!
      * @brief Get all events occurring between the given begin and end time.
@@ -159,14 +159,14 @@ namespace PVR
      * @param endTime Maximum end time in UTC of the event.
      * @return The tags found or an empty vector if none was found.
      */
-    std::vector<CPVREpgInfoTagPtr> GetTagsBetween(const CDateTime &beginTime, const CDateTime &endTime) const;
+    std::vector<std::shared_ptr<CPVREpgInfoTag>> GetTagsBetween(const CDateTime &beginTime, const CDateTime &endTime) const;
 
     /*!
      * @brief Get the event matching the given unique broadcast id
      * @param iUniqueBroadcastId The uid to look up
      * @return The matching event or NULL if it wasn't found.
      */
-    CPVREpgInfoTagPtr GetTagByBroadcastId(unsigned int iUniqueBroadcastId) const;
+    std::shared_ptr<CPVREpgInfoTag> GetTagByBroadcastId(unsigned int iUniqueBroadcastId) const;
 
     /*!
      * @brief Update an entry in this EPG.
@@ -183,7 +183,7 @@ namespace PVR
      * @param bUpdateDatabase If set to true, this event will be persisted in the database.
      * @return True if it was updated successfully, false otherwise.
      */
-    bool UpdateEntry(const CPVREpgInfoTagPtr &tag, bool bUpdateDatabase);
+    bool UpdateEntry(const std::shared_ptr<CPVREpgInfoTag> &tag, bool bUpdateDatabase);
 
     /*!
      * @brief Update an entry in this EPG.
@@ -192,7 +192,7 @@ namespace PVR
      * @param bUpdateDatabase If set to true, this event will be persisted in the database.
      * @return True if it was updated successfully, false otherwise.
      */
-    bool UpdateEntry(const CPVREpgInfoTagPtr &tag, EPG_EVENT_STATE newState, bool bUpdateDatabase);
+    bool UpdateEntry(const std::shared_ptr<CPVREpgInfoTag> &tag, EPG_EVENT_STATE newState, bool bUpdateDatabase);
 
     /*!
      * @brief Update the EPG from 'start' till 'end'.
@@ -314,9 +314,9 @@ namespace PVR
      */
     bool UpdateEntries(const CPVREpg &epg, bool bStoreInDb = true);
 
-    std::map<CDateTime, CPVREpgInfoTagPtr> m_tags;
-    std::map<int, CPVREpgInfoTagPtr>       m_changedTags;
-    std::map<int, CPVREpgInfoTagPtr>       m_deletedTags;
+    std::map<CDateTime, std::shared_ptr<CPVREpgInfoTag>> m_tags;
+    std::map<int, std::shared_ptr<CPVREpgInfoTag>>       m_changedTags;
+    std::map<int, std::shared_ptr<CPVREpgInfoTag>>       m_deletedTags;
     bool                                m_bChanged = false;        /*!< true if anything changed that needs to be persisted, false otherwise */
     bool                                m_bTagsChanged = false;    /*!< true when any tags are changed and not persisted, false otherwise */
     bool                                m_bLoaded = false;         /*!< true when the initial entries have been loaded */
@@ -328,7 +328,7 @@ namespace PVR
 
     CDateTime                           m_lastScanTime;    /*!< the last time the EPG has been updated */
 
-    CPVRChannelPtr                      m_pvrChannel;      /*!< the channel this EPG belongs to */
+    std::shared_ptr<CPVRChannel>                      m_pvrChannel;      /*!< the channel this EPG belongs to */
 
     mutable CCriticalSection            m_critSection;     /*!< critical section for changes in this table */
     bool                                m_bUpdateLastScanTime = false;

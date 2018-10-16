@@ -8,9 +8,10 @@
 
 #pragma once
 
+#include <memory>
+
 #include "XBDateTime.h"
 
-#include "pvr/PVRTypes.h"
 #include "pvr/channels/PVRChannelNumber.h"
 
 class CFileItemList;
@@ -19,7 +20,7 @@ namespace PVR
 {
   #define EPG_SEARCH_UNSET (-1)
 
-  /** Filter to apply with on a CPVREpgInfoTag */
+  class CPVREpgInfoTag;
 
   class CPVREpgSearchFilter
   {
@@ -42,7 +43,7 @@ namespace PVR
      * @param tag The tag to check.
      * @return True if this tag matches the filter, false if not.
      */
-    bool FilterEntry(const CPVREpgInfoTagPtr &tag) const;
+    bool FilterEntry(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
 
     /*!
      * @brief remove duplicates from a list of epg tags.
@@ -110,17 +111,17 @@ namespace PVR
     void SetUniqueBroadcastId(unsigned int iUniqueBroadcastId) { m_iUniqueBroadcastId = iUniqueBroadcastId; }
 
   private:
-    bool MatchGenre(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchDuration(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchStartAndEndTimes(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchSearchTerm(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchChannelNumber(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchChannelGroup(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchBroadcastId(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchChannelType(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchFreeToAir(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchTimers(const CPVREpgInfoTagPtr &tag) const;
-    bool MatchRecordings(const CPVREpgInfoTagPtr &tag) const;
+    bool MatchGenre(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchDuration(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchStartAndEndTimes(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchSearchTerm(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchChannelNumber(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchChannelGroup(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchBroadcastId(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchChannelType(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchFreeToAir(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchTimers(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
+    bool MatchRecordings(const std::shared_ptr<CPVREpgInfoTag> &tag) const;
 
     std::string   m_strSearchTerm;            /*!< The term to search for */
     bool          m_bIsCaseSensitive;         /*!< Do a case sensitive search */

@@ -28,7 +28,7 @@
 
 using namespace PVR;
 
-CPVREpgInfoTag::CPVREpgInfoTag(const CPVRChannelPtr &channel, CPVREpg *epg /* = nullptr */, const std::string &strTableName /* = "" */)
+CPVREpgInfoTag::CPVREpgInfoTag(const std::shared_ptr<CPVRChannel> &channel, CPVREpg *epg /* = nullptr */, const std::string &strTableName /* = "" */)
 : m_iClientId(channel ? channel->ClientID() : -1),
   m_iUniqueChannelID(channel ? channel->UniqueID() : PVR_CHANNEL_INVALID_UID),
   m_strIconPath(channel ? channel->IconPath() : ""),
@@ -136,7 +136,7 @@ bool CPVREpgInfoTag::operator !=(const CPVREpgInfoTag& right) const
 
 void CPVREpgInfoTag::Serialize(CVariant &value) const
 {
-  const CPVRRecordingPtr recording = Recording();
+  const std::shared_ptr<CPVRRecording> recording = Recording();
 
   value["broadcastid"] = m_iUniqueBroadcastID;
   value["channeluid"] = m_iUniqueChannelID;
@@ -321,7 +321,7 @@ int CPVREpgInfoTag::GetDuration(void) const
 
 bool CPVREpgInfoTag::IsParentalLocked() const
 {
-  CPVRChannelPtr channel;
+  std::shared_ptr<CPVRChannel> channel;
   {
     CSingleLock lock(m_critSection);
     channel = m_channel;
@@ -538,13 +538,13 @@ bool CPVREpgInfoTag::HasTimerRule(void) const
   return m_timer && (m_timer->GetTimerRuleId() != PVR_TIMER_NO_PARENT);
 }
 
-CPVRTimerInfoTagPtr CPVREpgInfoTag::Timer(void) const
+std::shared_ptr<CPVRTimerInfoTag> CPVREpgInfoTag::Timer(void) const
 {
   CSingleLock lock(m_critSection);
   return m_timer;
 }
 
-void CPVREpgInfoTag::SetChannel(const CPVRChannelPtr &channel)
+void CPVREpgInfoTag::SetChannel(const std::shared_ptr<CPVRChannel> &channel)
 {
   CSingleLock lock(m_critSection);
   m_channel = channel;
@@ -558,7 +558,7 @@ bool CPVREpgInfoTag::HasChannel(void) const
   return m_channel != nullptr;
 }
 
-const CPVRChannelPtr CPVREpgInfoTag::Channel() const
+const std::shared_ptr<CPVRChannel> CPVREpgInfoTag::Channel() const
 {
   CSingleLock lock(m_critSection);
   return m_channel;
@@ -668,7 +668,7 @@ bool CPVREpgInfoTag::Persist(bool bSingleUpdate /* = true */)
 {
   bool bReturn = false;
 
-  const CPVREpgDatabasePtr database = CServiceBroker::GetPVRManager().EpgContainer().GetEpgDatabase();
+  const std::shared_ptr<CPVREpgDatabase> database = CServiceBroker::GetPVRManager().EpgContainer().GetEpgDatabase();
   if (!database)
   {
     CLog::LogF(LOGERROR, "Could not open the EPG database");
@@ -690,7 +690,7 @@ bool CPVREpgInfoTag::Persist(bool bSingleUpdate /* = true */)
 std::vector<PVR_EDL_ENTRY> CPVREpgInfoTag::GetEdl() const
 {
   std::vector<PVR_EDL_ENTRY> edls;
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
 
   if (client && client->GetClientCapabilities().SupportsEpgTagEdl())
     client->GetEpgTagEdl(shared_from_this(), edls);
@@ -708,7 +708,7 @@ int CPVREpgInfoTag::EpgID(void) const
   return m_epg ? m_epg->EpgID() : -1;
 }
 
-void CPVREpgInfoTag::SetTimer(const CPVRTimerInfoTagPtr &timer)
+void CPVREpgInfoTag::SetTimer(const std::shared_ptr<CPVRTimerInfoTag> &timer)
 {
   CSingleLock lock(m_critSection);
   m_timer = timer;
@@ -716,7 +716,7 @@ void CPVREpgInfoTag::SetTimer(const CPVRTimerInfoTagPtr &timer)
 
 void CPVREpgInfoTag::ClearTimer(void)
 {
-  CPVRTimerInfoTagPtr previousTag;
+  std::shared_ptr<CPVRTimerInfoTag> previousTag;
   {
     CSingleLock lock(m_critSection);
     previousTag = std::move(m_timer);
@@ -726,7 +726,7 @@ void CPVREpgInfoTag::ClearTimer(void)
     previousTag->ClearEpgTag();
 }
 
-void CPVREpgInfoTag::SetRecording(const CPVRRecordingPtr &recording)
+void CPVREpgInfoTag::SetRecording(const std::shared_ptr<CPVRRecording> &recording)
 {
   CSingleLock lock(m_critSection);
   m_recording = recording;
@@ -744,7 +744,7 @@ bool CPVREpgInfoTag::HasRecording(void) const
   return m_recording != nullptr;
 }
 
-CPVRRecordingPtr CPVREpgInfoTag::Recording(void) const
+std::shared_ptr<CPVRRecording> CPVREpgInfoTag::Recording(void) const
 {
   CSingleLock lock(m_critSection);
   return m_recording;
@@ -753,7 +753,7 @@ CPVRRecordingPtr CPVREpgInfoTag::Recording(void) const
 bool CPVREpgInfoTag::IsRecordable(void) const
 {
   bool bIsRecordable = false;
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (!client || (client->IsRecordable(shared_from_this(), bIsRecordable) != PVR_ERROR_NO_ERROR))
   {
     // event end time based fallback
@@ -765,7 +765,7 @@ bool CPVREpgInfoTag::IsRecordable(void) const
 bool CPVREpgInfoTag::IsPlayable(void) const
 {
   bool bIsPlayable = false;
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (!client || (client->IsPlayable(shared_from_this(), bIsPlayable) != PVR_ERROR_NO_ERROR))
   {
     // fallback

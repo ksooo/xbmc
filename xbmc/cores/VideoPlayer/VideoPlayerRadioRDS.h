@@ -9,6 +9,7 @@
 #pragma once
 
 #include <deque>
+#include <memory>
 
 #include "IVideoPlayer.h"
 #include "DVDMessageQueue.h"
@@ -17,6 +18,12 @@
 #include "utils/Stopwatch.h"
 
 class CDVDStreamInfo;
+
+namespace PVR
+{
+  class CPVRChannel;
+  class CPVRRadioRDSInfoTag;
+}
 
 /// --- CDVDRadioRDSData ------------------------------------------------------------
 
@@ -80,8 +87,9 @@ private:
   void SendTMCSignal(unsigned int flags, uint8_t *data);
   void SetRadioStyle(std::string genre);
 
-  PVR::CPVRRadioRDSInfoTagPtr m_currentInfoTag;
-  PVR::CPVRChannelPtr         m_currentChannel;
+  std::shared_ptr<PVR::CPVRRadioRDSInfoTag> m_currentInfoTag;
+  std::shared_ptr<PVR::CPVRChannel> m_currentChannel;
+
   bool                        m_currentFileUpdate;
   int                         m_speed;
   CCriticalSection            m_critSection;

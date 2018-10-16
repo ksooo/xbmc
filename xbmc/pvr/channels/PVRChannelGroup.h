@@ -16,7 +16,6 @@
 #include "XBDateTime.h"
 #include "settings/lib/ISettingCallback.h"
 
-#include "pvr/PVRTypes.h"
 #include "pvr/channels/PVRChannel.h"
 
 class CFileItem;
@@ -32,10 +31,10 @@ namespace PVR
   {
     PVRChannelGroupMember() = default;
 
-    PVRChannelGroupMember(const CPVRChannelPtr _channel, const CPVRChannelNumber &_channelNumber, int _iClientPriority)
+    PVRChannelGroupMember(const std::shared_ptr<CPVRChannel> _channel, const CPVRChannelNumber &_channelNumber, int _iClientPriority)
     : channel(_channel), channelNumber(_channelNumber), iClientPriority(_iClientPriority) {}
 
-    CPVRChannelPtr channel;
+    std::shared_ptr<CPVRChannel> channel;
     CPVRChannelNumber channelNumber; // the number this channel has in the group
     int iClientPriority = 0;
   };
@@ -116,7 +115,7 @@ namespace PVR
      * @param channel The channel to change the channel number for.
      * @param channelNumber The new channel number.
      */
-    bool SetChannelNumber(const CPVRChannelPtr &channel, const CPVRChannelNumber &channelNumber);
+    bool SetChannelNumber(const std::shared_ptr<CPVRChannel> &channel, const CPVRChannelNumber &channelNumber);
 
     /*!
      * @brief Search missing channel icons for all known channels.
@@ -129,7 +128,7 @@ namespace PVR
      * @param channel The channel to remove.
      * @return True if the channel was found and removed, false otherwise.
      */
-    virtual bool RemoveFromGroup(const CPVRChannelPtr &channel);
+    virtual bool RemoveFromGroup(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Add a channel to this container.
@@ -138,7 +137,7 @@ namespace PVR
      * @param bUseBackendChannelNumbers True, if channelNumber contains a backend channel number.
      * @return True if the channel was added, false otherwise.
      */
-    virtual bool AddToGroup(const CPVRChannelPtr &channel, const CPVRChannelNumber &channelNumber, bool bUseBackendChannelNumbers);
+    virtual bool AddToGroup(const std::shared_ptr<CPVRChannel> &channel, const CPVRChannelNumber &channelNumber, bool bUseBackendChannelNumbers);
 
     /*!
      * @brief Change the name of this group.
@@ -159,7 +158,7 @@ namespace PVR
      * @param channel The channel to find.
      * @return True if the channel was found, false otherwise.
      */
-    virtual bool IsGroupMember(const CPVRChannelPtr &channel) const;
+    virtual bool IsGroupMember(const std::shared_ptr<CPVRChannel> &channel) const;
 
     /*!
      * @brief Check whether a channel is in this container.
@@ -264,7 +263,7 @@ namespace PVR
      * @param iEpgID The channel EPG ID.
      * @return The channel or NULL if it wasn't found.
      */
-    CPVRChannelPtr GetByChannelEpgID(int iEpgID) const;
+    std::shared_ptr<CPVRChannel> GetByChannelEpgID(int iEpgID) const;
 
     /*!
      * @brief The channel that was played last that has a valid client or NULL if there was none.
@@ -285,28 +284,28 @@ namespace PVR
      * @param channel The channel to get the channel number for.
      * @return The channel number in this group.
      */
-    CPVRChannelNumber GetChannelNumber(const CPVRChannelPtr &channel) const;
+    CPVRChannelNumber GetChannelNumber(const std::shared_ptr<CPVRChannel> &channel) const;
 
     /*!
      * @brief Get the next channel in this group.
      * @param channel The current channel.
      * @return The channel or NULL if it wasn't found.
      */
-    CFileItemPtr GetNextChannel(const CPVRChannelPtr &channel) const;
+    CFileItemPtr GetNextChannel(const std::shared_ptr<CPVRChannel> &channel) const;
 
     /*!
      * @brief Get the previous channel in this group.
      * @param channel The current channel.
      * @return The channel or NULL if it wasn't found.
      */
-    CFileItemPtr GetPreviousChannel(const CPVRChannelPtr &channel) const;
+    CFileItemPtr GetPreviousChannel(const std::shared_ptr<CPVRChannel> &channel) const;
 
     /*!
      * @brief Get a channel given it's channel ID.
      * @param iChannelID The channel ID.
      * @return The channel or NULL if it wasn't found.
      */
-    CPVRChannelPtr GetByChannelID(int iChannelID) const;
+    std::shared_ptr<CPVRChannel> GetByChannelID(int iChannelID) const;
 
     /*!
      * Get the current members of this group
@@ -338,12 +337,12 @@ namespace PVR
     /*!
      * @return The next channel group.
      */
-    CPVRChannelGroupPtr GetNextGroup(void) const;
+    std::shared_ptr<CPVRChannelGroup> GetNextGroup(void) const;
 
     /*!
      * @return The previous channel group.
      */
-    CPVRChannelGroupPtr GetPreviousGroup(void) const;
+    std::shared_ptr<CPVRChannelGroup> GetPreviousGroup(void) const;
 
     /*!
      * @brief The amount of hidden channels in this container.
@@ -407,7 +406,7 @@ namespace PVR
      * @param iClientID The ID of the client.
      * @return The channel or NULL if it wasn't found.
      */
-    CPVRChannelPtr GetByUniqueID(int iUniqueChannelId, int iClientID) const;
+    std::shared_ptr<CPVRChannel> GetByUniqueID(int iUniqueChannelId, int iClientID) const;
 
     /*!
      * @brief Get a channel group member given its storage id.
@@ -474,7 +473,7 @@ namespace PVR
      * @param channels The new channels to use for this group.
      * @return The removed channels.
      */
-    virtual std::vector<CPVRChannelPtr> RemoveDeletedChannels(const CPVRChannelGroup &channels);
+    virtual std::vector<std::shared_ptr<CPVRChannel>> RemoveDeletedChannels(const CPVRChannelGroup &channels);
 
     /*!
      * @brief Clear this channel list.

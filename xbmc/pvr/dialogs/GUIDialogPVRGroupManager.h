@@ -48,7 +48,7 @@ namespace PVR
     bool ActionButtonToggleRadioTV(CGUIMessage &message);
     bool OnMessageClick(CGUIMessage &message);
 
-    CPVRChannelGroupPtr m_selectedGroup;
+    std::shared_ptr<CPVRChannelGroup> m_selectedGroup;
     bool              m_bIsRadio;
 
     unsigned int      m_iSelectedUngroupedChannel;

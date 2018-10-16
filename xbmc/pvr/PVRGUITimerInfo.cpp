@@ -85,7 +85,7 @@ void CPVRGUITimerInfo::UpdateTimersToggle()
     std::vector<CFileItemPtr> activeTags = GetActiveRecordings();
     if (m_iTimerInfoToggleCurrent < activeTags.size() && activeTags.at(m_iTimerInfoToggleCurrent)->HasPVRTimerInfoTag())
     {
-      CPVRTimerInfoTagPtr tag = activeTags.at(m_iTimerInfoToggleCurrent)->GetPVRTimerInfoTag();
+      std::shared_ptr<CPVRTimerInfoTag> tag = activeTags.at(m_iTimerInfoToggleCurrent)->GetPVRTimerInfoTag();
       strActiveTimerTitle = StringUtils::Format("%s", tag->Title().c_str());
       strActiveTimerChannelName = StringUtils::Format("%s", tag->ChannelName().c_str());
       strActiveTimerChannelIcon = StringUtils::Format("%s", tag->ChannelIcon().c_str());
@@ -126,7 +126,7 @@ void CPVRGUITimerInfo::UpdateNextTimer()
   CFileItemPtr tag = GetNextActiveTimer();
   if (tag && tag->HasPVRTimerInfoTag())
   {
-    CPVRTimerInfoTagPtr timer = tag->GetPVRTimerInfoTag();
+    std::shared_ptr<CPVRTimerInfoTag> timer = tag->GetPVRTimerInfoTag();
     strNextRecordingTitle = StringUtils::Format("%s", timer->Title().c_str());
     strNextRecordingChannelName = StringUtils::Format("%s", timer->ChannelName().c_str());
     strNextRecordingChannelIcon = StringUtils::Format("%s", timer->ChannelIcon().c_str());

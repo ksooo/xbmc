@@ -172,7 +172,7 @@ void CGUIWindowPVRGuideBase::UpdateSelectedItemPath()
   CGUIEPGGridContainer *epgGridContainer = GetGridControl();
   if (epgGridContainer)
   {
-    CPVRChannelPtr channel(epgGridContainer->GetSelectedChannel());
+    std::shared_ptr<CPVRChannel> channel(epgGridContainer->GetSelectedChannel());
     if (channel)
       CServiceBroker::GetPVRManager().GUIActions()->SetSelectedItemPath(m_bRadio, channel->Path());
   }
@@ -406,7 +406,7 @@ bool CGUIWindowPVRGuideBase::OnMessage(CGUIMessage& message)
                   break;
                 case EPG_SELECT_ACTION_SMART_SELECT:
                 {
-                  const CPVREpgInfoTagPtr tag(pItem->GetEPGInfoTag());
+                  const std::shared_ptr<CPVREpgInfoTag> tag(pItem->GetEPGInfoTag());
                   if (tag)
                   {
                     const CDateTime start(tag->StartAsUTC());
@@ -597,7 +597,7 @@ bool CGUIWindowPVRGuideBase::RefreshTimelineItems()
     CGUIEPGGridContainer* epgGridContainer = GetGridControl();
     if (epgGridContainer)
     {
-      const CPVRChannelGroupPtr group(GetChannelGroup());
+      const std::shared_ptr<CPVRChannelGroup> group(GetChannelGroup());
       if (!group)
         return false;
 
@@ -690,7 +690,7 @@ void CGUIWindowPVRGuideBase::OnInputDone()
   {
     for (const CFileItemPtr event : *m_vecItems)
     {
-      const CPVREpgInfoTagPtr tag(event->GetEPGInfoTag());
+      const std::shared_ptr<CPVREpgInfoTag> tag(event->GetEPGInfoTag());
       if (tag->HasChannel() && tag->Channel()->ChannelNumber() == channelNumber)
       {
         CGUIEPGGridContainer* epgGridContainer = GetGridControl();
@@ -706,7 +706,7 @@ void CGUIWindowPVRGuideBase::OnInputDone()
 
 void CGUIWindowPVRGuideBase::GetChannelNumbers(std::vector<std::string>& channelNumbers)
 {
-  const CPVRChannelGroupPtr group = GetChannelGroup();
+  const std::shared_ptr<CPVRChannelGroup> group = GetChannelGroup();
   if (group)
     group->GetChannelNumbers(channelNumbers);
 }

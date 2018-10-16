@@ -9,12 +9,11 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <vector>
 
 #include "dbwrappers/Database.h"
 #include "threads/CriticalSection.h"
-
-#include "pvr/PVRTypes.h"
 
 namespace PVR
 {

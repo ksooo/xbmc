@@ -21,7 +21,6 @@ set(HEADERS PVRActionListener.h
             PVRContextMenus.h
             PVRGUIActions.h
             PVRItem.h
-            PVRTypes.h
             PVRChannelNumberInputHandler.h
             PVRJobs.h
             PVRGUIChannelNavigator.h

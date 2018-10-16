@@ -14,7 +14,6 @@
 #include "FileItem.h"
 #include "video/VideoDatabase.h"
 
-#include "pvr/PVRTypes.h"
 #include "pvr/recordings/PVRRecording.h"
 
 namespace PVR
@@ -37,7 +36,7 @@ namespace PVR
      */
     void Unload();
 
-    void UpdateFromClient(const CPVRRecordingPtr &tag);
+    void UpdateFromClient(const std::shared_ptr<CPVRRecording> &tag);
 
     /**
      * @brief refresh the recordings list from the clients.
@@ -72,7 +71,7 @@ namespace PVR
 
     bool GetDirectory(const std::string& strPath, CFileItemList &items);
     CFileItemPtr GetByPath(const std::string &path);
-    CPVRRecordingPtr GetById(int iClientId, const std::string &strRecordingId) const;
+    std::shared_ptr<CPVRRecording> GetById(int iClientId, const std::string &strRecordingId) const;
     void GetAll(CFileItemList &items, bool bDeleted = false);
     CFileItemPtr GetById(unsigned int iId) const;
 
@@ -81,10 +80,10 @@ namespace PVR
      * @param epgTag The epg tag.
      * @return The requested recording, or an empty recordingptr if none was found.
      */
-    CPVRRecordingPtr GetRecordingForEpgTag(const CPVREpgInfoTagPtr &epgTag) const;
+    std::shared_ptr<CPVRRecording> GetRecordingForEpgTag(const std::shared_ptr<CPVREpgInfoTag> &epgTag) const;
 
   private:
-    typedef std::map<CPVRRecordingUid, CPVRRecordingPtr> PVR_RECORDINGMAP;
+    typedef std::map<CPVRRecordingUid, std::shared_ptr<CPVRRecording>> PVR_RECORDINGMAP;
     typedef PVR_RECORDINGMAP::iterator PVR_RECORDINGMAP_ITR;
     typedef PVR_RECORDINGMAP::const_iterator PVR_RECORDINGMAP_CITR;
 

@@ -147,7 +147,7 @@ JSONRPC_STATUS CPlayerOperations::GetItem(const std::string &method, ITransportL
       fileItem = CFileItemPtr(new CFileItem(g_application.CurrentFileItem()));
       if (IsPVRChannel())
       {
-        CPVRChannelPtr currentChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
+        std::shared_ptr<CPVRChannel> currentChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
         if (currentChannel)
           fileItem = CFileItemPtr(new CFileItem(currentChannel));
       }
@@ -577,11 +577,11 @@ JSONRPC_STATUS CPlayerOperations::Open(const std::string &method, ITransportLaye
   }
   else if (parameterObject["item"].isMember("channelid"))
   {
-    const CPVRChannelGroupsContainerPtr channelGroupContainer = CServiceBroker::GetPVRManager().ChannelGroups();
+    const std::shared_ptr<CPVRChannelGroupsContainer> channelGroupContainer = CServiceBroker::GetPVRManager().ChannelGroups();
     if (!channelGroupContainer)
       return FailedToExecute;
 
-    const CPVRChannelPtr channel = channelGroupContainer->GetChannelById(static_cast<int>(parameterObject["item"]["channelid"].asInteger()));
+    const std::shared_ptr<CPVRChannel> channel = channelGroupContainer->GetChannelById(static_cast<int>(parameterObject["item"]["channelid"].asInteger()));
     if (!channel)
       return InvalidParams;
 
@@ -592,7 +592,7 @@ JSONRPC_STATUS CPlayerOperations::Open(const std::string &method, ITransportLaye
   }
   else if (parameterObject["item"].isMember("recordingid"))
   {
-    const CPVRRecordingsPtr recordingsContainer = CServiceBroker::GetPVRManager().Recordings();
+    const std::shared_ptr<CPVRRecordings> recordingsContainer = CServiceBroker::GetPVRManager().Recordings();
     if (!recordingsContainer)
       return FailedToExecute;
 
@@ -1258,7 +1258,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const std:
           ms = (int)(g_application.GetTime() * 1000.0);
         else
         {
-          CPVREpgInfoTagPtr epg(GetCurrentEpg());
+          std::shared_ptr<CPVREpgInfoTag> epg(GetCurrentEpg());
           if (epg)
             ms = epg->Progress() * 1000;
         }
@@ -1287,7 +1287,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const std:
           result = g_application.GetPercentage();
         else
         {
-          CPVREpgInfoTagPtr epg(GetCurrentEpg());
+          std::shared_ptr<CPVREpgInfoTag> epg(GetCurrentEpg());
           if (epg)
             result = epg->ProgressPercentage();
           else
@@ -1320,7 +1320,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const std:
           ms = (int)(g_application.GetTotalTime() * 1000.0);
         else
         {
-          CPVREpgInfoTagPtr epg(GetCurrentEpg());
+          std::shared_ptr<CPVREpgInfoTag> epg(GetCurrentEpg());
           if (epg)
             ms = epg->GetDuration() * 1000;
         }
@@ -1778,14 +1778,14 @@ bool CPlayerOperations::IsPVRChannel()
   return CServiceBroker::GetPVRManager().IsPlayingTV() || CServiceBroker::GetPVRManager().IsPlayingRadio();
 }
 
-CPVREpgInfoTagPtr CPlayerOperations::GetCurrentEpg()
+std::shared_ptr<CPVREpgInfoTag> CPlayerOperations::GetCurrentEpg()
 {
   if (!CServiceBroker::GetPVRManager().IsPlayingTV() && !CServiceBroker::GetPVRManager().IsPlayingRadio())
-    return CPVREpgInfoTagPtr();
+    return std::shared_ptr<CPVREpgInfoTag>();
 
-  CPVRChannelPtr currentChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
+  std::shared_ptr<CPVRChannel> currentChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
   if (!currentChannel)
-    return CPVREpgInfoTagPtr();
+    return std::shared_ptr<CPVREpgInfoTag>();
 
   return currentChannel->GetEPGNow();
 }

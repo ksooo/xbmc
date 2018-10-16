@@ -15,11 +15,11 @@ namespace XBMCAddon
   {
     InfoTagRadioRDS::InfoTagRadioRDS()
     {
-      PVR::CPVRRadioRDSInfoTagPtr empty;
+      std::shared_ptr<PVR::CPVRRadioRDSInfoTag> empty;
       infoTag = empty;
     }
 
-    InfoTagRadioRDS::InfoTagRadioRDS(const PVR::CPVRRadioRDSInfoTagPtr tag)
+    InfoTagRadioRDS::InfoTagRadioRDS(const std::shared_ptr<PVR::CPVRRadioRDSInfoTag> tag)
     {
       infoTag = tag;
     }

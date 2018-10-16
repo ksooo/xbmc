@@ -8,13 +8,14 @@
 
 #pragma once
 
+#include <memory>
+
 #include "XBDateTime.h"
 #include "threads/CriticalSection.h"
 #include "threads/Thread.h"
 #include "utils/Observer.h"
 
 #include "pvr/PVRSettings.h"
-#include "pvr/PVRTypes.h"
 #include "pvr/epg/Epg.h"
 #include "pvr/epg/EpgDatabase.h"
 
@@ -44,7 +45,7 @@ namespace PVR
      * @brief Get a pointer to the database instance.
      * @return A pointer to the database instance.
      */
-    CPVREpgDatabasePtr GetEpgDatabase() const;
+    std::shared_ptr<CPVREpgDatabase> GetEpgDatabase() const;
 
     /*!
      * @brief Start the EPG update thread.
@@ -74,7 +75,7 @@ namespace PVR
      * @param bDeleteFromDatabase Delete this table from the database too if true.
      * @return True on success, false otherwise.
      */
-    bool DeleteEpg(const CPVREpgPtr &epg, bool bDeleteFromDatabase = false);
+    bool DeleteEpg(const std::shared_ptr<CPVREpg> &epg, bool bDeleteFromDatabase = false);
 
     /*!
      * @brief Process a notification from an observable.
@@ -88,7 +89,7 @@ namespace PVR
      * @param channel The channel.
      * @return the created EPG
      */
-    CPVREpgPtr CreateChannelEpg(const CPVRChannelPtr &channel);
+    std::shared_ptr<CPVREpg> CreateChannelEpg(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Get all EPG tables and apply a filter.
@@ -115,7 +116,7 @@ namespace PVR
      * @param iEpgId The database ID of the table.
      * @return The table or NULL if it wasn't found.
      */
-    CPVREpgPtr GetById(int iEpgId) const;
+    std::shared_ptr<CPVREpg> GetById(int iEpgId) const;
 
     /*!
      * @brief Get the EPG event with the given event id
@@ -123,14 +124,14 @@ namespace PVR
      * @param iBroadcastId The event id to get
      * @return The requested event, or an empty tag when not found
      */
-    CPVREpgInfoTagPtr GetTagById(const CPVRChannelPtr &channel, unsigned int iBroadcastId) const;
+    std::shared_ptr<CPVREpgInfoTag> GetTagById(const std::shared_ptr<CPVRChannel> &channel, unsigned int iBroadcastId) const;
 
     /*!
      * @brief Get the EPG events matching the given timer
      * @param timer The timer to get the matching events for.
      * @return The matching events, or an empty vector when no matching tag was found
      */
-    std::vector<CPVREpgInfoTagPtr> GetEpgTagsForTimer(const CPVRTimerInfoTagPtr &timer) const;
+    std::vector<std::shared_ptr<CPVREpgInfoTag>> GetEpgTagsForTimer(const std::shared_ptr<CPVRTimerInfoTag> &timer) const;
 
     /*!
      * @brief Check whether data should be persisted to the EPG database.
@@ -156,7 +157,7 @@ namespace PVR
      * @param tag The epg tag containing the updated data
      * @param eNewState The kind of change (CREATED, UPDATED, DELETED)
      */
-    void UpdateFromClient(const CPVREpgInfoTagPtr &tag, EPG_EVENT_STATE eNewState);
+    void UpdateFromClient(const std::shared_ptr<CPVREpgInfoTag> &tag, EPG_EVENT_STATE eNewState);
 
     /*!
      * @brief Get the number of past days to show in the guide and to import from backends.
@@ -240,9 +241,9 @@ namespace PVR
      * @brief Insert data from database
      * @param newEpg the EPG containing the updated data.
      */
-    void InsertFromDB(const CPVREpgPtr &newEpg);
+    void InsertFromDB(const std::shared_ptr<CPVREpg> &newEpg);
 
-    CPVREpgDatabasePtr m_database; /*!< the EPG database */
+    std::shared_ptr<CPVREpgDatabase> m_database; /*!< the EPG database */
 
     bool m_bIsUpdating = false;                /*!< true while an update is running */
     bool m_bIsInitialising = true;             /*!< true while the epg manager hasn't loaded all tables */
@@ -255,7 +256,7 @@ namespace PVR
     time_t m_iNextEpgUpdate = 0;               /*!< the time the EPG will be updated */
     time_t m_iNextEpgActiveTagCheck = 0;       /*!< the time the EPG will be checked for active tag updates */
     unsigned int m_iNextEpgId = 0;             /*!< the next epg ID that will be given to a new table when the db isn't being used */
-    std::map<unsigned int, CPVREpgPtr> m_epgs; /*!< the EPGs in this container */
+    std::map<unsigned int, std::shared_ptr<CPVREpg>> m_epgs; /*!< the EPGs in this container */
 
     mutable CCriticalSection m_critSection;    /*!< a critical section for changes to this container */
     CEvent m_updateEvent;                      /*!< trigger when an update finishes */

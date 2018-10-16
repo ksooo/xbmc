@@ -19,7 +19,6 @@
 #include "utils/Observer.h"
 
 #include "pvr/channels/PVRChannelNumber.h"
-#include "pvr/PVRTypes.h"
 
 class CVariant;
 class CFileItemList;
@@ -27,6 +26,9 @@ class CFileItemList;
 namespace PVR
 {
   class CPVRChannelGroupInternal;
+  class CPVREpg;
+  class CPVREpgInfoTag;
+  class CPVRRecording;
 
   /** PVR Channel class */
   class CPVRChannel : public Observable,
@@ -66,7 +68,7 @@ namespace PVR
      * @param channel The new channel data.
      * @return True if something changed, false otherwise.
      */
-    bool UpdateFromClient(const CPVRChannelPtr &channel);
+    bool UpdateFromClient(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Persists the changes in the database.
@@ -146,7 +148,7 @@ namespace PVR
     /*!
      * @return If recording, gets the recording if the add-on provides the epg id in recordings
      */
-    CPVRRecordingPtr GetRecording(void) const;
+    std::shared_ptr<CPVRRecording> GetRecording(void) const;
 
     /*!
      * @return True if this channel has a corresponding recording, false otherwise
@@ -341,7 +343,7 @@ namespace PVR
      * @brief Get the EPG table for this channel.
      * @return The EPG for this channel.
      */
-    CPVREpgPtr GetEPG(void) const;
+    std::shared_ptr<CPVREpg> GetEPG(void) const;
 
     /*!
      * @brief Get the EPG table for this channel.
@@ -364,7 +366,7 @@ namespace PVR
      *
      * @return The EPG tag that is now active.
      */
-    CPVREpgInfoTagPtr GetEPGNow() const;
+    std::shared_ptr<CPVREpgInfoTag> GetEPGNow() const;
 
     /*!
      * @brief Get the EPG tag that was previously active on this channel.
@@ -374,7 +376,7 @@ namespace PVR
      *
      * @return The EPG tag that was previously activ.
      */
-    CPVREpgInfoTagPtr GetEPGPrevious() const;
+    std::shared_ptr<CPVREpgInfoTag> GetEPGPrevious() const;
 
     /*!
      * @brief Get the EPG tag that will be next active on this channel.
@@ -384,7 +386,7 @@ namespace PVR
      *
      * @return The EPG tag that will be next active.
      */
-    CPVREpgInfoTagPtr GetEPGNext() const;
+    std::shared_ptr<CPVREpgInfoTag> GetEPGNext() const;
 
     /*!
      * @return Don't use an EPG for this channel if set to false.

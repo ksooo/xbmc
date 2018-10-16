@@ -105,14 +105,14 @@ CPVRRecording::CPVRRecording(const PVR_RECORDING &recording, unsigned int iClien
   }
   else
   {
-    const CPVRChannelPtr channel(Channel());
+    const std::shared_ptr<CPVRChannel> channel(Channel());
     if (channel)
     {
       m_bRadio = channel->IsRadio();
     }
     else
     {
-      const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+      const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
       bool bSupportsRadio = client && client->GetClientCapabilities().SupportsRadio();
       if (bSupportsRadio && client && client->GetClientCapabilities().SupportsTV())
       {
@@ -216,7 +216,7 @@ void CPVRRecording::Reset(void)
 
 bool CPVRRecording::Delete(void)
 {
-  CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (!client || client->DeleteRecording(*this) != PVR_ERROR_NO_ERROR)
     return false;
 
@@ -228,10 +228,10 @@ void CPVRRecording::OnDelete(void)
 {
   if (m_iEpgEventId != EPG_TAG_INVALID_UID)
   {
-    const CPVRChannelPtr channel(Channel());
+    const std::shared_ptr<CPVRChannel> channel(Channel());
     if (channel)
     {
-      const CPVREpgInfoTagPtr epgTag(CServiceBroker::GetPVRManager().EpgContainer().GetTagById(channel, m_iEpgEventId));
+      const std::shared_ptr<CPVREpgInfoTag> epgTag(CServiceBroker::GetPVRManager().EpgContainer().GetTagById(channel, m_iEpgEventId));
       if (epgTag)
         epgTag->ClearRecording();
     }
@@ -240,20 +240,20 @@ void CPVRRecording::OnDelete(void)
 
 bool CPVRRecording::Undelete(void)
 {
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   return client && (client->UndeleteRecording(*this) == PVR_ERROR_NO_ERROR);
 }
 
 bool CPVRRecording::Rename(const std::string &strNewName)
 {
   m_strTitle = strNewName;
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   return client && (client->RenameRecording(*this) == PVR_ERROR_NO_ERROR);
 }
 
 bool CPVRRecording::SetPlayCount(int count)
 {
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (client && client->GetClientCapabilities().SupportsRecordingsPlayCount())
   {
     if (client->SetRecordingPlayCount(*this, count) != PVR_ERROR_NO_ERROR)
@@ -265,7 +265,7 @@ bool CPVRRecording::SetPlayCount(int count)
 
 bool CPVRRecording::IncrementPlayCount()
 {
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (client && client->GetClientCapabilities().SupportsRecordingsPlayCount())
   {
     if (client->SetRecordingPlayCount(*this, CVideoInfoTag::GetPlayCount() + 1) != PVR_ERROR_NO_ERROR)
@@ -277,7 +277,7 @@ bool CPVRRecording::IncrementPlayCount()
 
 bool CPVRRecording::SetResumePoint(const CBookmark &resumePoint)
 {
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (client && client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
   {
     if (client->SetRecordingLastPlayedPosition(*this, lrint(resumePoint.timeInSeconds)) != PVR_ERROR_NO_ERROR)
@@ -289,7 +289,7 @@ bool CPVRRecording::SetResumePoint(const CBookmark &resumePoint)
 
 bool CPVRRecording::SetResumePoint(double timeInSeconds, double totalTimeInSeconds, const std::string &playerState /* = "" */)
 {
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (client && client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
   {
     if (client->SetRecordingLastPlayedPosition(*this, lrint(timeInSeconds)) != PVR_ERROR_NO_ERROR)
@@ -301,7 +301,7 @@ bool CPVRRecording::SetResumePoint(double timeInSeconds, double totalTimeInSecon
 
 CBookmark CPVRRecording::GetResumePoint() const
 {
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (client && client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
   {
     int pos = -1;
@@ -323,7 +323,7 @@ void CPVRRecording::UpdateMetadata(CVideoDatabase &db)
   if (m_bGotMetaData || !db.IsOpen())
     return;
 
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
 
   if (!client || !client->GetClientCapabilities().SupportsRecordingsPlayCount())
     CVideoInfoTag::SetPlayCount(db.GetPlayCount(m_strFileNameAndPath));
@@ -342,7 +342,7 @@ std::vector<PVR_EDL_ENTRY> CPVRRecording::GetEdl() const
 {
   std::vector<PVR_EDL_ENTRY> edls;
 
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (client && client->GetClientCapabilities().SupportsRecordingsEdl())
     client->GetRecordingEdl(*this, edls);
 
@@ -461,12 +461,12 @@ std::string CPVRRecording::GetTitleFromURL(const std::string &url)
   return CPVRRecordingsPath(url).GetTitle();
 }
 
-CPVRChannelPtr CPVRRecording::Channel(void) const
+std::shared_ptr<CPVRChannel> CPVRRecording::Channel(void) const
 {
   if (m_iChannelUid != PVR_CHANNEL_INVALID_UID)
     return CServiceBroker::GetPVRManager().ChannelGroups()->GetByUniqueID(m_iChannelUid, m_iClientId);
 
-  return CPVRChannelPtr();
+  return std::shared_ptr<CPVRChannel>();
 }
 
 int CPVRRecording::ChannelUid(void) const

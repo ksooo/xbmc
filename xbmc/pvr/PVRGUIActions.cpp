@@ -126,10 +126,10 @@ namespace PVR
   private:
     bool DoRun(const CFileItemPtr &item) override
     {
-      const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(*item);
+      const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(*item);
       if (client)
       {
-        const CPVRRecordingPtr recording = item->GetPVRRecordingInfoTag();
+        const std::shared_ptr<CPVRRecording> recording = item->GetPVRRecordingInfoTag();
         return client->SetRecordingPlayCount(*recording, recording->GetLocalPlayCount()) == PVR_ERROR_NO_ERROR;
       }
       return false;
@@ -141,7 +141,7 @@ namespace PVR
   private:
     bool DoRun(const CFileItemPtr &item) override
     {
-      const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(*item);
+      const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(*item);
       if (client)
         return client->SetRecordingLifetime(*item->GetPVRRecordingInfoTag()) == PVR_ERROR_NO_ERROR;
       return false;
@@ -166,11 +166,11 @@ namespace PVR
 
   bool CPVRGUIActions::ShowEPGInfo(const CFileItemPtr &item) const
   {
-    const CPVRChannelPtr channel(CPVRItem(item).GetChannel());
+    const std::shared_ptr<CPVRChannel> channel(CPVRItem(item).GetChannel());
     if (channel && CheckParentalLock(channel) != ParentalCheckResult::SUCCESS)
       return false;
 
-    const CPVREpgInfoTagPtr epgTag(CPVRItem(item).GetEpgInfoTag());
+    const std::shared_ptr<CPVREpgInfoTag> epgTag(CPVRItem(item).GetEpgInfoTag());
     if (!epgTag)
     {
       CLog::LogF(LOGERROR, "No epg tag!");
@@ -192,7 +192,7 @@ namespace PVR
 
   bool CPVRGUIActions::ShowChannelEPG(const CFileItemPtr &item) const
   {
-    const CPVRChannelPtr channel(CPVRItem(item).GetChannel());
+    const std::shared_ptr<CPVRChannel> channel(CPVRItem(item).GetChannel());
     if (channel && CheckParentalLock(channel) != ParentalCheckResult::SUCCESS)
       return false;
 
@@ -253,7 +253,7 @@ namespace PVR
     return true;
   };
 
-  bool CPVRGUIActions::ShowTimerSettings(const CPVRTimerInfoTagPtr &timer) const
+  bool CPVRGUIActions::ShowTimerSettings(const std::shared_ptr<CPVRTimerInfoTag> &timer) const
   {
     CGUIDialogPVRTimerSettings* pDlgInfo = CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogPVRTimerSettings>(WINDOW_DIALOG_PVR_TIMER_SETTING);
     if (!pDlgInfo)
@@ -270,7 +270,7 @@ namespace PVR
 
   bool CPVRGUIActions::AddTimer(bool bRadio) const
   {
-    const CPVRTimerInfoTagPtr newTimer(new CPVRTimerInfoTag(bRadio));
+    const std::shared_ptr<CPVRTimerInfoTag> newTimer(new CPVRTimerInfoTag(bRadio));
     if (ShowTimerSettings(newTimer))
     {
       /* Add timer to backend */
@@ -291,7 +291,7 @@ namespace PVR
 
   bool CPVRGUIActions::AddTimer(const CFileItemPtr &item, bool bCreateRule, bool bShowTimerSettings) const
   {
-    const CPVRChannelPtr channel(CPVRItem(item).GetChannel());
+    const std::shared_ptr<CPVRChannel> channel(CPVRItem(item).GetChannel());
     if (!channel)
     {
       CLog::LogF(LOGERROR, "No channel!");
@@ -301,22 +301,22 @@ namespace PVR
     if (CheckParentalLock(channel) != ParentalCheckResult::SUCCESS)
       return false;
 
-    const CPVREpgInfoTagPtr epgTag(CPVRItem(item).GetEpgInfoTag());
+    const std::shared_ptr<CPVREpgInfoTag> epgTag(CPVRItem(item).GetEpgInfoTag());
     if (!epgTag && bCreateRule)
     {
       CLog::LogF(LOGERROR, "No epg tag!");
       return false;
     }
 
-    CPVRTimerInfoTagPtr timer(bCreateRule || !epgTag ? nullptr : epgTag->Timer());
-    CPVRTimerInfoTagPtr rule (bCreateRule ? CServiceBroker::GetPVRManager().Timers()->GetTimerRule(timer) : nullptr);
+    std::shared_ptr<CPVRTimerInfoTag> timer(bCreateRule || !epgTag ? nullptr : epgTag->Timer());
+    std::shared_ptr<CPVRTimerInfoTag> rule (bCreateRule ? CServiceBroker::GetPVRManager().Timers()->GetTimerRule(timer) : nullptr);
     if (timer || rule)
     {
       HELPERS::ShowOKDialogText(CVariant{ 19033 }, CVariant{ 19034 }); // "Information", "There is already a timer set for this event"
       return false;
     }
 
-    CPVRTimerInfoTagPtr newTimer(epgTag ? CPVRTimerInfoTag::CreateFromEpg(epgTag, bCreateRule) : CPVRTimerInfoTag::CreateInstantTimerTag(channel));
+    std::shared_ptr<CPVRTimerInfoTag> newTimer(epgTag ? CPVRTimerInfoTag::CreateFromEpg(epgTag, bCreateRule) : CPVRTimerInfoTag::CreateInstantTimerTag(channel));
     if (!newTimer)
     {
       HELPERS::ShowOKDialogText(CVariant{19033},
@@ -335,7 +335,7 @@ namespace PVR
     return AddTimer(newTimer);
   }
 
-  bool CPVRGUIActions::AddTimer(const CPVRTimerInfoTagPtr &item) const
+  bool CPVRGUIActions::AddTimer(const std::shared_ptr<CPVRTimerInfoTag> &item) const
   {
     if (!item->Channel() && item->GetTimerType() && !item->GetTimerType()->IsEpgBasedTimerRule())
     {
@@ -344,7 +344,7 @@ namespace PVR
       return false;
     }
 
-    const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(item->m_iClientId);
+    const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(item->m_iClientId);
     if (client && !client->GetClientCapabilities().SupportsTimers())
     {
       HELPERS::ShowOKDialogText(CVariant{19033}, CVariant{19215}); // "Information", "The PVR backend does not support timers."
@@ -481,14 +481,14 @@ namespace PVR
 
   bool CPVRGUIActions::ToggleRecordingOnPlayingChannel()
   {
-    const CPVRChannelPtr channel = CServiceBroker::GetPVRManager().GetPlayingChannel();
+    const std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().GetPlayingChannel();
     if (channel && channel->CanRecord())
       return SetRecordingOnChannel(channel, !channel->IsRecording());
 
     return false;
   }
 
-  bool CPVRGUIActions::SetRecordingOnChannel(const CPVRChannelPtr &channel, bool bOnOff)
+  bool CPVRGUIActions::SetRecordingOnChannel(const std::shared_ptr<CPVRChannel> &channel, bool bOnOff)
   {
     bool bReturn = false;
 
@@ -498,13 +498,13 @@ namespace PVR
     if (CheckParentalLock(channel) != ParentalCheckResult::SUCCESS)
       return bReturn;
 
-    const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(channel->ClientID());
+    const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(channel->ClientID());
     if (client && client->GetClientCapabilities().SupportsTimers())
     {
       /* timers are supported on this channel */
       if (bOnOff && !channel->IsRecording())
       {
-        CPVREpgInfoTagPtr epgTag;
+        std::shared_ptr<CPVREpgInfoTag> epgTag;
         int iDuration = m_settings.GetIntValue(CSettings::SETTING_PVRRECORD_INSTANTRECORDTIME);
 
         int iAction = m_settings.GetIntValue(CSettings::SETTING_PVRRECORD_INSTANTRECORDACTION);
@@ -523,7 +523,7 @@ namespace PVR
             PVRRECORD_INSTANTRECORDACTION ePreselect = RECORD_INSTANTRECORDTIME;
             const int iDurationDefault = m_settings.GetIntValue(CSettings::SETTING_PVRRECORD_INSTANTRECORDTIME);
             InstantRecordingActionSelector selector(iDurationDefault);
-            CPVREpgInfoTagPtr epgTagNext;
+            std::shared_ptr<CPVREpgInfoTag> epgTagNext;
 
             // fixed length recordings
             selector.AddAction(RECORD_30_MINUTES, "");
@@ -601,7 +601,7 @@ namespace PVR
             break;
         }
 
-        const CPVRTimerInfoTagPtr newTimer(epgTag ? CPVRTimerInfoTag::CreateFromEpg(epgTag, false) : CPVRTimerInfoTag::CreateInstantTimerTag(channel, iDuration));
+        const std::shared_ptr<CPVRTimerInfoTag> newTimer(epgTag ? CPVRTimerInfoTag::CreateFromEpg(epgTag, false) : CPVRTimerInfoTag::CreateInstantTimerTag(channel, iDuration));
 
         if (newTimer)
           bReturn = CServiceBroker::GetPVRManager().Timers()->AddTimer(newTimer);
@@ -627,7 +627,7 @@ namespace PVR
     if (!item->HasEPGInfoTag())
       return false;
 
-    const CPVRTimerInfoTagPtr timer(CPVRItem(item).GetTimerInfoTag());
+    const std::shared_ptr<CPVRTimerInfoTag> timer(CPVRItem(item).GetTimerInfoTag());
     if (timer)
     {
       if (timer->IsRecording())
@@ -644,7 +644,7 @@ namespace PVR
     if (!item->HasPVRTimerInfoTag())
       return false;
 
-    const CPVRTimerInfoTagPtr timer(item->GetPVRTimerInfoTag());
+    const std::shared_ptr<CPVRTimerInfoTag> timer(item->GetPVRTimerInfoTag());
     if (timer->m_state == PVR_TIMER_STATE_DISABLED)
       timer->m_state = PVR_TIMER_STATE_SCHEDULED;
     else
@@ -659,7 +659,7 @@ namespace PVR
 
   bool CPVRGUIActions::EditTimer(const CFileItemPtr &item) const
   {
-    const CPVRTimerInfoTagPtr timer(CPVRItem(item).GetTimerInfoTag());
+    const std::shared_ptr<CPVRTimerInfoTag> timer(CPVRItem(item).GetTimerInfoTag());
     if (!timer)
     {
       CLog::LogF(LOGERROR, "No timer!");
@@ -667,7 +667,7 @@ namespace PVR
     }
 
     // clone the timer.
-    const CPVRTimerInfoTagPtr newTimer(new CPVRTimerInfoTag);
+    const std::shared_ptr<CPVRTimerInfoTag> newTimer(new CPVRTimerInfoTag);
     newTimer->UpdateEntry(timer);
 
     if (ShowTimerSettings(newTimer) && (!timer->GetTimerType()->IsReadOnly() || timer->GetTimerType()->SupportsEnableDisable()))
@@ -713,7 +713,7 @@ namespace PVR
     if (!item->HasPVRTimerInfoTag())
       return false;
 
-    const CPVRTimerInfoTagPtr timer(item->GetPVRTimerInfoTag());
+    const std::shared_ptr<CPVRTimerInfoTag> timer(item->GetPVRTimerInfoTag());
 
     std::string strNewName(timer->m_strTitle);
     if (CGUIKeyboardFactory::ShowAndGetInput(strNewName,
@@ -748,8 +748,8 @@ namespace PVR
 
   bool CPVRGUIActions::DeleteTimer(const CFileItemPtr &item, bool bIsRecording, bool bDeleteRule) const
   {
-    CPVRTimerInfoTagPtr timer;
-    const CPVRRecordingPtr recording(CPVRItem(item).GetRecording());
+    std::shared_ptr<CPVRTimerInfoTag> timer;
+    const std::shared_ptr<CPVRRecording> recording(CPVRItem(item).GetRecording());
     if (recording)
       timer = CServiceBroker::GetPVRManager().Timers()->GetRecordingTimerForRecording(*recording);
 
@@ -795,7 +795,7 @@ namespace PVR
     return false;
   }
 
-  bool CPVRGUIActions::DeleteTimer(const CPVRTimerInfoTagPtr &timer, bool bIsRecording, bool bDeleteRule) const
+  bool CPVRGUIActions::DeleteTimer(const std::shared_ptr<CPVRTimerInfoTag> &timer, bool bIsRecording, bool bDeleteRule) const
   {
     TimerOperationResult result = CServiceBroker::GetPVRManager().Timers()->DeleteTimer(timer, bIsRecording, bDeleteRule);
     switch (result)
@@ -828,10 +828,10 @@ namespace PVR
     return false;
   }
 
-  bool CPVRGUIActions::ConfirmDeleteTimer(const CPVRTimerInfoTagPtr &timer, bool &bDeleteRule) const
+  bool CPVRGUIActions::ConfirmDeleteTimer(const std::shared_ptr<CPVRTimerInfoTag> &timer, bool &bDeleteRule) const
   {
     bool bConfirmed(false);
-    const CPVRTimerInfoTagPtr parentTimer(CServiceBroker::GetPVRManager().Timers()->GetTimerRule(timer));
+    const std::shared_ptr<CPVRTimerInfoTag> parentTimer(CServiceBroker::GetPVRManager().Timers()->GetTimerRule(timer));
 
     if (parentTimer && parentTimer->HasTimerType() && parentTimer->GetTimerType()->AllowsDelete())
     {
@@ -872,7 +872,7 @@ namespace PVR
     return true;
   }
 
-  bool CPVRGUIActions::ConfirmStopRecording(const CPVRTimerInfoTagPtr &timer) const
+  bool CPVRGUIActions::ConfirmStopRecording(const std::shared_ptr<CPVRTimerInfoTag> &timer) const
   {
     return CGUIDialogYesNo::ShowAndGetInput(CVariant{847}, // "Confirm stop recording"
                                             CVariant{848}, // "Are you sure you want to stop this recording?"
@@ -882,14 +882,14 @@ namespace PVR
 
   bool CPVRGUIActions::EditRecording(const CFileItemPtr &item) const
   {
-    const CPVRRecordingPtr recording = CPVRItem(item).GetRecording();
+    const std::shared_ptr<CPVRRecording> recording = CPVRItem(item).GetRecording();
     if (!recording)
     {
       CLog::LogF(LOGERROR, "No recording!");
       return false;
     }
 
-    CPVRRecordingPtr origRecording(new CPVRRecording);
+    std::shared_ptr<CPVRRecording> origRecording(new CPVRRecording);
     origRecording->Update(*recording);
 
     if (!ShowRecordingSettings(recording))
@@ -918,7 +918,7 @@ namespace PVR
 
   bool CPVRGUIActions::RenameRecording(const CFileItemPtr &item) const
   {
-    const CPVRRecordingPtr recording(item->GetPVRRecordingInfoTag());
+    const std::shared_ptr<CPVRRecording> recording(item->GetPVRRecordingInfoTag());
     if (!recording)
       return false;
 
@@ -995,7 +995,7 @@ namespace PVR
     return true;
   }
 
-  bool CPVRGUIActions::ShowRecordingSettings(const CPVRRecordingPtr &recording) const
+  bool CPVRGUIActions::ShowRecordingSettings(const std::shared_ptr<CPVRRecording> &recording) const
   {
     CGUIDialogPVRRecordingSettings* pDlgInfo = CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogPVRRecordingSettings>(WINDOW_DIALOG_PVR_RECORDING_SETTING);
     if (!pDlgInfo)
@@ -1014,7 +1014,7 @@ namespace PVR
   {
     std::string resumeString;
 
-    const CPVRRecordingPtr recording(CPVRItem(CFileItemPtr(new CFileItem(item))).GetRecording());
+    const std::shared_ptr<CPVRRecording> recording(CPVRItem(CFileItemPtr(new CFileItem(item))).GetRecording());
     if (recording && !recording->IsDeleted())
     {
       int positionInSeconds = lrint(recording->GetResumePoint().timeInSeconds);
@@ -1083,7 +1083,7 @@ namespace PVR
 
   bool CPVRGUIActions::PlayRecording(const CFileItemPtr &item, bool bCheckResume) const
   {
-    const CPVRRecordingPtr recording(CPVRItem(item).GetRecording());
+    const std::shared_ptr<CPVRRecording> recording(CPVRItem(item).GetRecording());
     if (!recording)
       return false;
 
@@ -1105,7 +1105,7 @@ namespace PVR
 
   bool CPVRGUIActions::PlayEpgTag(const CFileItemPtr &item) const
   {
-    const CPVREpgInfoTagPtr epgTag(CPVRItem(item).GetEpgInfoTag());
+    const std::shared_ptr<CPVREpgInfoTag> epgTag(CPVRItem(item).GetEpgInfoTag());
     if (!epgTag)
       return false;
 
@@ -1125,7 +1125,7 @@ namespace PVR
     if (item->m_bIsFolder)
       return false;
 
-    const CPVRChannelPtr channel(CPVRItem(item).GetChannel());
+    const std::shared_ptr<CPVRChannel> channel(CPVRItem(item).GetChannel());
     if ((channel && CServiceBroker::GetPVRManager().IsPlayingChannel(channel)) ||
         (channel && channel->HasRecording() && CServiceBroker::GetPVRManager().IsPlayingRecording(channel->GetRecording())))
     {
@@ -1138,7 +1138,7 @@ namespace PVR
     if (result == ParentalCheckResult::SUCCESS)
     {
       // switch to channel or if recording present, ask whether to switch or play recording...
-      const CPVRRecordingPtr recording(channel->GetRecording());
+      const std::shared_ptr<CPVRRecording> recording(channel->GetRecording());
       if (recording)
       {
         bool bCancel(false);
@@ -1214,7 +1214,7 @@ namespace PVR
     else
     {
       // if we don't, find the active channel group of the demanded type and play it's first channel
-      const CPVRChannelGroupPtr channelGroup(CServiceBroker::GetPVRManager().GetPlayingGroup(bIsRadio));
+      const std::shared_ptr<CPVRChannelGroup> channelGroup(CServiceBroker::GetPVRManager().GetPlayingGroup(bIsRadio));
       if (channelGroup)
       {
         // try to start playback of first channel in this group
@@ -1243,8 +1243,8 @@ namespace PVR
       return false;
 
     bool playTV = iAction == STARTUP_ACTION_PLAY_TV;
-    const CPVRChannelGroupsContainerPtr groups(CServiceBroker::GetPVRManager().ChannelGroups());
-    CPVRChannelGroupPtr group = playTV ? groups->GetGroupAllTV() : groups->GetGroupAllRadio();
+    const std::shared_ptr<CPVRChannelGroupsContainer> groups(CServiceBroker::GetPVRManager().ChannelGroups());
+    std::shared_ptr<CPVRChannelGroup> group = playTV ? groups->GetGroupAllTV() : groups->GetGroupAllRadio();
 
     // get the last played channel or fallback to first channel
     CFileItemPtr item(group->GetLastPlayedChannel());
@@ -1293,7 +1293,7 @@ namespace PVR
 
   bool CPVRGUIActions::HideChannel(const CFileItemPtr &item) const
   {
-    const CPVRChannelPtr channel(item->GetPVRChannelInfoTag());
+    const std::shared_ptr<CPVRChannel> channel(item->GetPVRChannelInfoTag());
 
     /* check if the channel tag is valid */
     if (!channel || !channel->ChannelNumber().IsValid())
@@ -1322,8 +1322,8 @@ namespace PVR
     if (!CServiceBroker::GetPVRManager().IsStarted() || IsRunningChannelScan())
       return false;
 
-    CPVRClientPtr scanClient;
-    std::vector<CPVRClientPtr> possibleScanClients = CServiceBroker::GetPVRManager().Clients()->GetClientsSupportingChannelScan();
+    std::shared_ptr<CPVRClient> scanClient;
+    std::vector<std::shared_ptr<CPVRClient>> possibleScanClients = CServiceBroker::GetPVRManager().Clients()->GetClientsSupportingChannelScan();
     m_bChannelScanRunning = true;
 
     /* multiple clients found */
@@ -1383,7 +1383,7 @@ namespace PVR
     CPVRClientMap clients;
     CServiceBroker::GetPVRManager().Clients()->GetCreatedClients(clients);
 
-    std::vector<std::pair<CPVRClientPtr, CPVRClientMenuHook>> settingsHooks;
+    std::vector<std::pair<std::shared_ptr<CPVRClient>, CPVRClientMenuHook>> settingsHooks;
     for (const auto& client : clients)
     {
       for (const auto& hook : client.second->GetMenuHooks()->GetSettingsHooks())
@@ -1473,8 +1473,8 @@ namespace PVR
     pDlgProgress->SetPercentage(10);
     pDlgProgress->Progress();
 
-    const CPVRDatabasePtr pvrDatabase(CServiceBroker::GetPVRManager().GetTVDatabase());
-    const CPVREpgDatabasePtr epgDatabase(CServiceBroker::GetPVRManager().EpgContainer().GetEpgDatabase());
+    const std::shared_ptr<CPVRDatabase> pvrDatabase(CServiceBroker::GetPVRManager().GetTVDatabase());
+    const std::shared_ptr<CPVREpgDatabase> epgDatabase(CServiceBroker::GetPVRManager().EpgContainer().GetEpgDatabase());
 
     // increase db open refcounts, so they don't get closed during following pvr manager shutdown
     pvrDatabase->Open();
@@ -1533,7 +1533,7 @@ namespace PVR
     return true;
   }
 
-  ParentalCheckResult CPVRGUIActions::CheckParentalLock(const CPVRChannelPtr &channel) const
+  ParentalCheckResult CPVRGUIActions::CheckParentalLock(const std::shared_ptr<CPVRChannel> &channel) const
   {
     if (!CServiceBroker::GetPVRManager().IsParentalLocked(channel))
       return ParentalCheckResult::SUCCESS;
@@ -1578,7 +1578,7 @@ namespace PVR
     bool bReturn(true);
     if (CServiceBroker::GetPVRManager().IsStarted())
     {
-      CPVRTimerInfoTagPtr cause;
+      std::shared_ptr<CPVRTimerInfoTag> cause;
       if (!AllLocalBackendsIdle(cause))
       {
         if (bAskUser)
@@ -1666,7 +1666,7 @@ namespace PVR
     return bReturn;
   }
 
-  bool CPVRGUIActions::AllLocalBackendsIdle(CPVRTimerInfoTagPtr& causingEvent) const
+  bool CPVRGUIActions::AllLocalBackendsIdle(std::shared_ptr<CPVRTimerInfoTag>& causingEvent) const
   {
     // active recording on local backend?
     const std::vector<CFileItemPtr> activeRecordings = CServiceBroker::GetPVRManager().Timers()->GetActiveRecordings();
@@ -1703,7 +1703,7 @@ namespace PVR
   {
     if (item && item->HasPVRTimerInfoTag())
     {
-      const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(*item);
+      const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(*item);
       if (client)
       {
         const std::string hostname = client->GetBackendHostname();
@@ -1739,7 +1739,7 @@ namespace PVR
     if (m_settings.GetBoolValue(CSettings::SETTING_PVRMANAGER_PRESELECTPLAYINGCHANNEL))
     {
       // if preselect playing channel is activated, return the path of the playing channel, if any.
-      const CPVRChannelPtr playingChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
+      const std::shared_ptr<CPVRChannel> playingChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
       if (playingChannel && playingChannel->IsRadio() == bRadio)
         return playingChannel->Path();
     }
@@ -1753,11 +1753,11 @@ namespace PVR
     time_t playbackStartTime = CServiceBroker::GetDataCacheCore().GetStartTime();
     if (playbackStartTime > 0)
     {
-      const CPVRChannelPtr playingChannel = CServiceBroker::GetPVRManager().GetPlayingChannel();
+      const std::shared_ptr<CPVRChannel> playingChannel = CServiceBroker::GetPVRManager().GetPlayingChannel();
       if (playingChannel)
       {
         time_t nextTime = 0;
-        CPVREpgInfoTagPtr next = playingChannel->GetEPGNext();
+        std::shared_ptr<CPVREpgInfoTag> next = playingChannel->GetEPGNext();
         if (next)
         {
           next->StartAsUTC().GetAsTime(nextTime);
@@ -1790,11 +1790,11 @@ namespace PVR
     time_t playbackStartTime = CServiceBroker::GetDataCacheCore().GetStartTime();
     if (playbackStartTime > 0)
     {
-      const CPVRChannelPtr playingChannel = CServiceBroker::GetPVRManager().GetPlayingChannel();
+      const std::shared_ptr<CPVRChannel> playingChannel = CServiceBroker::GetPVRManager().GetPlayingChannel();
       if (playingChannel)
       {
         time_t prevTime = 0;
-        CPVREpgInfoTagPtr prev = playingChannel->GetEPGNow();
+        std::shared_ptr<CPVREpgInfoTag> prev = playingChannel->GetEPGNow();
         if (prev)
         {
           prev->StartAsUTC().GetAsTime(prevTime);
@@ -1846,7 +1846,7 @@ namespace PVR
   {
     if (item->HasPVRChannelInfoTag())
     {
-      const CPVRChannelPtr channel = item->GetPVRChannelInfoTag();
+      const std::shared_ptr<CPVRChannel> channel = item->GetPVRChannelInfoTag();
       m_channelNavigator.SetPlayingChannel(channel);
       SetSelectedItemPath(channel->IsRadio(), channel->Path());
     }
@@ -1875,10 +1875,10 @@ namespace PVR
   void CPVRChannelSwitchingInputHandler::GetChannelNumbers(std::vector<std::string>& channelNumbers)
   {
     CPVRManager& pvrMgr = CServiceBroker::GetPVRManager();
-    const CPVRChannelPtr playingChannel = pvrMgr.GetPlayingChannel();
+    const std::shared_ptr<CPVRChannel> playingChannel = pvrMgr.GetPlayingChannel();
     if (playingChannel)
     {
-      const CPVRChannelGroupPtr group = pvrMgr.ChannelGroups()->GetGroupAll(playingChannel->IsRadio());
+      const std::shared_ptr<CPVRChannelGroup> group = pvrMgr.ChannelGroups()->GetGroupAll(playingChannel->IsRadio());
       if (group)
         group->GetChannelNumbers(channelNumbers);
     }
@@ -1895,21 +1895,21 @@ namespace PVR
   {
     if (channelNumber.IsValid() && CServiceBroker::GetPVRManager().IsPlaying())
     {
-      const CPVRChannelPtr playingChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
+      const std::shared_ptr<CPVRChannel> playingChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
       if (playingChannel)
       {
         if (channelNumber != playingChannel->ChannelNumber())
         {
           // channel number present in playing group?
           bool bRadio = playingChannel->IsRadio();
-          const CPVRChannelGroupPtr group = CServiceBroker::GetPVRManager().GetPlayingGroup(bRadio);
+          const std::shared_ptr<CPVRChannelGroup> group = CServiceBroker::GetPVRManager().GetPlayingGroup(bRadio);
           CFileItemPtr channel = group->GetByChannelNumber(channelNumber);
 
           if (!channel)
           {
             // channel number present in any group?
             const CPVRChannelGroups* groupAccess = CServiceBroker::GetPVRManager().ChannelGroups()->Get(bRadio);
-            const std::vector<CPVRChannelGroupPtr> groups = groupAccess->GetMembers(true);
+            const std::vector<std::shared_ptr<CPVRChannelGroup>> groups = groupAccess->GetMembers(true);
             for (const auto &currentGroup : groups)
             {
               channel = currentGroup->GetByChannelNumber(channelNumber);
@@ -1939,10 +1939,10 @@ namespace PVR
   {
     if (CServiceBroker::GetPVRManager().IsPlaying())
     {
-      const CPVRChannelPtr playingChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
+      const std::shared_ptr<CPVRChannel> playingChannel(CServiceBroker::GetPVRManager().GetPlayingChannel());
       if (playingChannel)
       {
-        const CPVRChannelGroupPtr group(CServiceBroker::GetPVRManager().ChannelGroups()->GetPreviousPlayedGroup());
+        const std::shared_ptr<CPVRChannelGroup> group(CServiceBroker::GetPVRManager().ChannelGroups()->GetPreviousPlayedGroup());
         if (group)
         {
           CServiceBroker::GetPVRManager().SetPlayingGroup(group);

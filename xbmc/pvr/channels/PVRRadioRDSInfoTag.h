@@ -9,13 +9,12 @@
 #pragma once
 
 #include <deque>
+#include <memory>
 #include <string>
 
 #include "XBDateTime.h"
 #include "utils/IArchivable.h"
 #include "utils/ISerializable.h"
-
-#include "pvr/PVRTypes.h"
 
 namespace PVR
 {
@@ -26,7 +25,7 @@ public:
   /*!
    * @brief Create a new empty event .
    */
-  static CPVRRadioRDSInfoTagPtr CreateDefaultTag();
+  static std::shared_ptr<CPVRRadioRDSInfoTag> CreateDefaultTag();
 
 private:
   /*!

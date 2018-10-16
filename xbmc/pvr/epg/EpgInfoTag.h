@@ -17,7 +17,6 @@
 #include "utils/ISerializable.h"
 #include "utils/ISortable.h"
 
-#include "pvr/PVRTypes.h"
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/recordings/PVRRecording.h"
 #include "pvr/timers/PVRTimerInfoTag.h"
@@ -47,7 +46,7 @@ namespace PVR
      * @param epg The epg data.
      * @param strTabelName The name of the epg database table.
      */
-    CPVREpgInfoTag(const CPVRChannelPtr &channel, CPVREpg *epg = nullptr, const std::string &strTableName = "");
+    CPVREpgInfoTag(const std::shared_ptr<CPVRChannel> &channel, CPVREpg *epg = nullptr, const std::string &strTableName = "");
 
     bool operator ==(const CPVREpgInfoTag& right) const;
     bool operator !=(const CPVREpgInfoTag& right) const;
@@ -343,7 +342,7 @@ namespace PVR
      * @brief Set a timer for this event.
      * @param timer The timer.
      */
-    void SetTimer(const CPVRTimerInfoTagPtr &timer);
+    void SetTimer(const std::shared_ptr<CPVRTimerInfoTag> &timer);
 
     /*!
      * @brief Clear the timer for this event.
@@ -366,13 +365,13 @@ namespace PVR
      * @brief Get the timer for this event, if any.
      * @return The timer or nullptr if there is none.
      */
-    CPVRTimerInfoTagPtr Timer(void) const;
+    std::shared_ptr<CPVRTimerInfoTag> Timer(void) const;
 
     /*!
      * @brief Set a recording for this event.
      * @param recording The recording.
      */
-    void SetRecording(const CPVRRecordingPtr &recording);
+    void SetRecording(const std::shared_ptr<CPVRRecording> &recording);
 
     /*!
      * @brief Clear a recording for this event.
@@ -389,7 +388,7 @@ namespace PVR
      * @brief Get the recording for this event, if any.
      * @return The pointer or nullptr if there is none.
      */
-    CPVRRecordingPtr Recording(void) const;
+    std::shared_ptr<CPVRRecording> Recording(void) const;
 
     /*!
      * @brief Check if this event can be recorded.
@@ -407,7 +406,7 @@ namespace PVR
      * @brief Set the channel of this epg tag
      * @param channel The channel
      */
-    void SetChannel(const CPVRChannelPtr &channel);
+    void SetChannel(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Check whether this event has a channel.
@@ -419,7 +418,7 @@ namespace PVR
      * @brief Get the channel for this event.
      * @return The channel.
      */
-    const CPVRChannelPtr Channel(void) const;
+    const std::shared_ptr<CPVRChannel> Channel(void) const;
 
     /*!
      * @brief Persist this tag in the database.
@@ -531,8 +530,8 @@ namespace PVR
 
     mutable CCriticalSection m_critSection;
     CPVREpg *m_epg = nullptr;
-    CPVRChannelPtr m_channel;
-    CPVRTimerInfoTagPtr m_timer;
-    CPVRRecordingPtr m_recording;
+    std::shared_ptr<CPVRChannel> m_channel;
+    std::shared_ptr<CPVRTimerInfoTag> m_timer;
+    std::shared_ptr<CPVRRecording> m_recording;
   };
 }

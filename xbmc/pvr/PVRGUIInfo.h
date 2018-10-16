@@ -9,6 +9,7 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -20,7 +21,6 @@
 
 #include "pvr/PVRGUITimerInfo.h"
 #include "pvr/PVRGUITimesInfo.h"
-#include "pvr/PVRTypes.h"
 #include "pvr/addons/PVRClients.h"
 
 namespace KODI

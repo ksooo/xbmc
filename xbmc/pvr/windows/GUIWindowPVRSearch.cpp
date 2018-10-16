@@ -95,7 +95,7 @@ void CGUIWindowPVRSearchBase::SetItemToSearch(const CFileItemPtr &item)
   }
   else
   {
-    const CPVREpgInfoTagPtr epgTag(CPVRItem(item).GetEpgInfoTag());
+    const std::shared_ptr<CPVREpgInfoTag> epgTag(CPVRItem(item).GetEpgInfoTag());
     if (epgTag)
       m_searchfilter->SetSearchPhrase(epgTag->Title());
   }

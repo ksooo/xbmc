@@ -19,25 +19,25 @@
 
 using namespace PVR;
 
-const std::vector<CPVRTimerTypePtr> CPVRTimerType::GetAllTypes()
+const std::vector<std::shared_ptr<CPVRTimerType>> CPVRTimerType::GetAllTypes()
 {
-  std::vector<CPVRTimerTypePtr> allTypes;
+  std::vector<std::shared_ptr<CPVRTimerType>> allTypes;
   CServiceBroker::GetPVRManager().Clients()->GetTimerTypes(allTypes);
   return allTypes;
 }
 
-const CPVRTimerTypePtr CPVRTimerType::GetFirstAvailableType()
+const std::shared_ptr<CPVRTimerType> CPVRTimerType::GetFirstAvailableType()
 {
-  std::vector<CPVRTimerTypePtr> allTypes(GetAllTypes());
-  return allTypes.empty() ? CPVRTimerTypePtr() : *(allTypes.begin());
+  std::vector<std::shared_ptr<CPVRTimerType>> allTypes(GetAllTypes());
+  return allTypes.empty() ? std::shared_ptr<CPVRTimerType>() : *(allTypes.begin());
 }
 
-CPVRTimerTypePtr CPVRTimerType::CreateFromIds(unsigned int iTypeId, int iClientId)
+std::shared_ptr<CPVRTimerType> CPVRTimerType::CreateFromIds(unsigned int iTypeId, int iClientId)
 {
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(iClientId);
   if (client)
   {
-    std::vector<CPVRTimerTypePtr> types;
+    std::vector<std::shared_ptr<CPVRTimerType>> types;
     if (client->GetTimerTypes(types) == PVR_ERROR_NO_ERROR)
     {
       for (const auto &type : types)
@@ -49,16 +49,16 @@ CPVRTimerTypePtr CPVRTimerType::CreateFromIds(unsigned int iTypeId, int iClientI
   }
 
   CLog::LogF(LOGERROR, "Unable to resolve numeric timer type (%d, %d)", iTypeId, iClientId);
-  return CPVRTimerTypePtr();
+  return std::shared_ptr<CPVRTimerType>();
 }
 
-CPVRTimerTypePtr CPVRTimerType::CreateFromAttributes(
+std::shared_ptr<CPVRTimerType> CPVRTimerType::CreateFromAttributes(
   unsigned int iMustHaveAttr, unsigned int iMustNotHaveAttr, int iClientId)
 {
-  const CPVRClientPtr client = CServiceBroker::GetPVRManager().GetClient(iClientId);
+  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(iClientId);
   if (client)
   {
-    std::vector<CPVRTimerTypePtr> types;
+    std::vector<std::shared_ptr<CPVRTimerType>> types;
     if (client->GetTimerTypes(types) == PVR_ERROR_NO_ERROR)
     {
       for (const auto &type : types)
@@ -71,7 +71,7 @@ CPVRTimerTypePtr CPVRTimerType::CreateFromAttributes(
   }
 
   CLog::LogF(LOGERROR, "Unable to resolve timer type (0x%x, 0x%x, %d)", iMustHaveAttr, iMustNotHaveAttr, iClientId);
-  return CPVRTimerTypePtr();
+  return std::shared_ptr<CPVRTimerType>();
 }
 
 CPVRTimerType::CPVRTimerType() :

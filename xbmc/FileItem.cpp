@@ -113,7 +113,7 @@ CFileItem::CFileItem(const CVideoInfoTag& movie)
   SetFromVideoInfoTag(movie);
 }
 
-void CFileItem::FillMusicInfoTag(const CPVRChannelPtr& channel, const CPVREpgInfoTagPtr& tag)
+void CFileItem::FillMusicInfoTag(const std::shared_ptr<CPVRChannel>& channel, const std::shared_ptr<CPVREpgInfoTag>& tag)
 {
   if (channel && channel->IsRadio() && !HasMusicInfoTag())
   {
@@ -138,7 +138,7 @@ void CFileItem::FillMusicInfoTag(const CPVRChannelPtr& channel, const CPVREpgInf
   }
 }
 
-CFileItem::CFileItem(const CPVREpgInfoTagPtr& tag)
+CFileItem::CFileItem(const std::shared_ptr<CPVREpgInfoTag>& tag)
 {
   Initialize();
 
@@ -157,11 +157,11 @@ CFileItem::CFileItem(const CPVREpgInfoTagPtr& tag)
   FillInMimeType(false);
 }
 
-CFileItem::CFileItem(const CPVRChannelPtr& channel)
+CFileItem::CFileItem(const std::shared_ptr<CPVRChannel>& channel)
 {
   Initialize();
 
-  CPVREpgInfoTagPtr epgNow(channel->GetEPGNow());
+  std::shared_ptr<CPVREpgInfoTag> epgNow(channel->GetEPGNow());
 
   m_strPath = channel->Path();
   m_bIsFolder = false;
@@ -183,7 +183,7 @@ CFileItem::CFileItem(const CPVRChannelPtr& channel)
   FillInMimeType(false);
 }
 
-CFileItem::CFileItem(const CPVRRecordingPtr& record)
+CFileItem::CFileItem(const std::shared_ptr<CPVRRecording>& record)
 {
   Initialize();
 
@@ -209,7 +209,7 @@ CFileItem::CFileItem(const CPVRRecordingPtr& record)
   FillInMimeType(false);
 }
 
-CFileItem::CFileItem(const CPVRTimerInfoTagPtr& timer)
+CFileItem::CFileItem(const std::shared_ptr<CPVRTimerInfoTag>& timer)
 {
   Initialize();
 
@@ -3622,7 +3622,7 @@ CFileItem CFileItem::GetItemToPlay() const
 {
   if (HasEPGInfoTag())
   {
-    const CPVRChannelPtr channel(GetEPGInfoTag()->Channel());
+    const std::shared_ptr<CPVRChannel> channel(GetEPGInfoTag()->Channel());
     if (channel)
       return CFileItem(channel);
   }

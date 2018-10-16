@@ -254,7 +254,7 @@ int CPVRDatabase::Get(CPVRChannelGroup &results, bool bCompressDB)
     {
       while (!m_pDS->eof())
       {
-        CPVRChannelPtr channel = CPVRChannelPtr(new CPVRChannel());
+        std::shared_ptr<CPVRChannel> channel = std::shared_ptr<CPVRChannel>(new CPVRChannel());
 
         channel->m_iChannelId              = m_pDS->fv("idChannel").get_asInt();
         channel->m_iUniqueId               = m_pDS->fv("iUniqueId").get_asInt();
@@ -563,7 +563,7 @@ int CPVRDatabase::Get(CPVRChannelGroup &group, const CPVRChannelGroup &allGroup)
     iReturn = 0;
 
     // create a map to speedup data lookup
-    std::map<int, CPVRChannelPtr> allChannels;
+    std::map<int, std::shared_ptr<CPVRChannel>> allChannels;
     for (const auto& groupMember : allGroup.GetMembers())
     {
       allChannels.insert(std::make_pair(groupMember.channel->ChannelID(), groupMember.channel));
@@ -619,7 +619,7 @@ bool CPVRDatabase::PersistChannels(CPVRChannelGroup &group)
 {
   bool bReturn(true);
 
-  CPVRChannelPtr channel;
+  std::shared_ptr<CPVRChannel> channel;
   for (const auto& groupMember : group.m_members)
   {
     channel = groupMember.second.channel;

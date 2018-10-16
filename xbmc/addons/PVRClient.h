@@ -17,20 +17,16 @@
 #include "addons/binary-addons/AddonDll.h"
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 
-#include "pvr/PVRTypes.h"
-
 namespace PVR
 {
+  class CPVRChannelGroup;
   class CPVRChannelGroups;
-  class CPVRTimersContainer;
   class CPVRClientMenuHook;
   class CPVRClientMenuHooks;
-
-  class CPVRClient;
-  typedef std::shared_ptr<CPVRClient> CPVRClientPtr;
-
+  class CPVREpg;
+  class CPVRRecordings;
+  class CPVRTimersContainer;
   class CPVRTimerType;
-  typedef std::vector<CPVRTimerTypePtr> CPVRTimerTypes;
 
   #define PVR_INVALID_CLIENT_ID (-2)
 
@@ -348,28 +344,28 @@ namespace PVR
      * @param channel The channel to add
      * @return PVR_ERROR_NO_ERROR if the add has been fetched successfully.
      */
-    PVR_ERROR OpenDialogChannelAdd(const CPVRChannelPtr &channel);
+    PVR_ERROR OpenDialogChannelAdd(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Request the client to open dialog about given channel settings
      * @param channel The channel to edit
      * @return PVR_ERROR_NO_ERROR if the edit has been fetched successfully.
      */
-    PVR_ERROR OpenDialogChannelSettings(const CPVRChannelPtr &channel);
+    PVR_ERROR OpenDialogChannelSettings(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Request the client to delete given channel
      * @param channel The channel to delete
      * @return PVR_ERROR_NO_ERROR if the delete has been fetched successfully.
      */
-    PVR_ERROR DeleteChannel(const CPVRChannelPtr &channel);
+    PVR_ERROR DeleteChannel(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Request the client to rename given channel
      * @param channel The channel to rename
      * @return PVR_ERROR_NO_ERROR if the rename has been fetched successfully.
      */
-    PVR_ERROR RenameChannel(const CPVRChannelPtr &channel);
+    PVR_ERROR RenameChannel(const std::shared_ptr<CPVRChannel> &channel);
 
     /*
      * @brief Check if an epg tag can be recorded
@@ -377,7 +373,7 @@ namespace PVR
      * @param bIsRecordable Set to true if the tag can be recorded
      * @return PVR_ERROR_NO_ERROR if bIsRecordable has been set successfully.
      */
-    PVR_ERROR IsRecordable(const CConstPVREpgInfoTagPtr &tag, bool &bIsRecordable) const;
+    PVR_ERROR IsRecordable(const std::shared_ptr<const CPVREpgInfoTag> &tag, bool &bIsRecordable) const;
 
     /*
      * @brief Check if an epg tag can be played
@@ -385,7 +381,7 @@ namespace PVR
      * @param bIsPlayable Set to true if the tag can be played
      * @return PVR_ERROR_NO_ERROR if bIsPlayable has been set successfully.
      */
-    PVR_ERROR IsPlayable(const CConstPVREpgInfoTagPtr &tag, bool &bIsPlayable) const;
+    PVR_ERROR IsPlayable(const std::shared_ptr<const CPVREpgInfoTag> &tag, bool &bIsPlayable) const;
 
     /*!
      * @brief Fill the file item for an epg tag with the properties required for playback. Values are obtained from the PVR backend.
@@ -407,7 +403,7 @@ namespace PVR
      * @param bSaveInDb If true, tell the callback method to save any new entry in the database or not. see CAddonCallbacksPVR::PVRTransferEpgEntry()
      * @return PVR_ERROR_NO_ERROR if the table has been fetched successfully.
      */
-    PVR_ERROR GetEPGForChannel(const CPVRChannelPtr &channel, CPVREpg *epg, time_t start = 0, time_t end = 0, bool bSaveInDb = false);
+    PVR_ERROR GetEPGForChannel(const std::shared_ptr<CPVRChannel> &channel, CPVREpg *epg, time_t start = 0, time_t end = 0, bool bSaveInDb = false);
 
     /*!
      * Tell the client the time frame to use when notifying epg events back to Kodi. The client might push epg events asynchronously
@@ -554,7 +550,7 @@ namespace PVR
     * @param edls The edit decision list (empty on error).
     * @return PVR_ERROR_NO_ERROR on success, respective error code otherwise.
     */
-    PVR_ERROR GetEpgTagEdl(const CConstPVREpgInfoTagPtr &epgTag, std::vector<PVR_EDL_ENTRY> &edls);
+    PVR_ERROR GetEpgTagEdl(const std::shared_ptr<const CPVREpgInfoTag> &epgTag, std::vector<PVR_EDL_ENTRY> &edls);
 
     //@}
     /** @name PVR timer methods */
@@ -601,7 +597,7 @@ namespace PVR
      * @param results The container to store the result in.
      * @return PVR_ERROR_NO_ERROR if the list has been fetched successfully.
      */
-    PVR_ERROR GetTimerTypes(CPVRTimerTypes& results) const;
+    PVR_ERROR GetTimerTypes(std::vector<std::shared_ptr<CPVRTimerType>>& results) const;
 
     //@}
     /** @name PVR live stream methods */
@@ -612,7 +608,7 @@ namespace PVR
      * @param channel The channel to stream.
      * @return PVR_ERROR_NO_ERROR on success, respective error code otherwise.
      */
-    PVR_ERROR OpenLiveStream(const CPVRChannelPtr &channel);
+    PVR_ERROR OpenLiveStream(const std::shared_ptr<CPVRChannel> &channel);
 
     /*!
      * @brief Close an open live stream.
@@ -714,7 +710,7 @@ namespace PVR
      * @param recording The recording to open.
      * @return PVR_ERROR_NO_ERROR on success, respective error code otherwise.
      */
-    PVR_ERROR OpenRecordedStream(const CPVRRecordingPtr &recording);
+    PVR_ERROR OpenRecordedStream(const std::shared_ptr<CPVRRecording> &recording);
 
     /*!
      * @brief Close an open recording stream.
@@ -885,7 +881,7 @@ namespace PVR
      * @param xbmcChannel The channel on XBMC's side.
      * @param addonChannel The channel on the addon's side.
      */
-    static void WriteClientChannelInfo(const CPVRChannelPtr &xbmcChannel, PVR_CHANNEL &addonChannel);
+    static void WriteClientChannelInfo(const std::shared_ptr<CPVRChannel> &xbmcChannel, PVR_CHANNEL &addonChannel);
 
     /*!
      * @brief Write the given addon properties to the properties of the given file item.
@@ -900,7 +896,7 @@ namespace PVR
      * @param channel The channel to check.
      * @return True when it can be played, false otherwise.
      */
-    bool CanPlayChannel(const CPVRChannelPtr &channel) const;
+    bool CanPlayChannel(const std::shared_ptr<CPVRChannel> &channel) const;
 
     /*!
      * @brief Stop this instance, if it is currently running.
@@ -1067,7 +1063,7 @@ namespace PVR
     PVR_CONNECTION_STATE   m_connectionState;      /*!< the backend connection state */
     PVR_CONNECTION_STATE   m_prevConnectionState;  /*!< the previous backend connection state */
     bool                   m_ignoreClient;         /*!< signals to PVRManager to ignore this client until it has been connected */
-    CPVRTimerTypes         m_timertypes;           /*!< timer types supported by this backend */
+    std::vector<std::shared_ptr<CPVRTimerType>>         m_timertypes;           /*!< timer types supported by this backend */
     int                    m_iClientId;            /*!< unique ID of the client */
     mutable int            m_iPriority;            /*!< priority of the client */
     mutable bool           m_bPriorityFetched;

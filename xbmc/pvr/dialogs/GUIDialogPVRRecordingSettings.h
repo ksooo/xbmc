@@ -8,24 +8,25 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "settings/SettingConditions.h"
 #include "settings/dialogs/GUIDialogSettingsManualBase.h"
 #include "settings/lib/SettingDependency.h"
 
-#include "pvr/PVRTypes.h"
-
 class CSetting;
 
 namespace PVR
 {
+  class CPVRRecording;
+
   class CGUIDialogPVRRecordingSettings : public CGUIDialogSettingsManualBase
   {
   public:
     CGUIDialogPVRRecordingSettings();
 
-    void SetRecording(const CPVRRecordingPtr &recording);
+    void SetRecording(const std::shared_ptr<CPVRRecording> &recording);
 
   protected:
     // implementation of ISettingCallback
@@ -45,7 +46,7 @@ namespace PVR
                                 std::vector<std::pair<std::string, int>> &list,
                                 int &current, void *data);
 
-    CPVRRecordingPtr m_recording;
+    std::shared_ptr<CPVRRecording> m_recording;
     std::string m_strTitle;
     int m_iPlayCount = 0;
     int m_iLifetime = 0;

@@ -22,18 +22,22 @@
  * number of the tag reported by the PVR backend and can not be played!
  */
 
+#include <memory>
+
 #include "XBDateTime.h"
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "threads/CriticalSection.h"
 #include "utils/ISerializable.h"
 
-#include "pvr/PVRTypes.h"
 #include "pvr/timers/PVRTimerType.h"
 
 class CVariant;
 
 namespace PVR
 {
+  class CPVRChannel;
+  class CPVREpgInfoTag;
+
   enum class TimerOperationResult
   {
     OK = 0,
@@ -45,7 +49,7 @@ namespace PVR
   {
   public:
     explicit CPVRTimerInfoTag(bool bRadio = false);
-    CPVRTimerInfoTag(const PVR_TIMER &timer, const CPVRChannelPtr &channel, unsigned int iClientId);
+    CPVRTimerInfoTag(const PVR_TIMER &timer, const std::shared_ptr<CPVRChannel> &channel, unsigned int iClientId);
 
     bool operator ==(const CPVRTimerInfoTag& right) const;
     bool operator !=(const CPVRTimerInfoTag& right) const;
@@ -65,7 +69,7 @@ namespace PVR
      * @param iDuration is the duration for the instant timer, DEFAULT_PVRRECORD_INSTANTRECORDTIME denotes system default (setting value)
      * @return the timer or null if timer could not be created
      */
-    static CPVRTimerInfoTagPtr CreateInstantTimerTag(const CPVRChannelPtr &channel, int iDuration = DEFAULT_PVRRECORD_INSTANTRECORDTIME);
+    static std::shared_ptr<CPVRTimerInfoTag> CreateInstantTimerTag(const std::shared_ptr<CPVRChannel> &channel, int iDuration = DEFAULT_PVRRECORD_INSTANTRECORDTIME);
 
     /*!
      * @brief create a timer or timer rule for the given epg info tag.
@@ -73,14 +77,14 @@ namespace PVR
      * @param bCreateRule if true, create a timer rule, create a one shot timer otherwise
      * @return the timer or null if timer could not be created
      */
-    static CPVRTimerInfoTagPtr CreateFromEpg(const CPVREpgInfoTagPtr &tag, bool bCreateRule = false);
+    static std::shared_ptr<CPVRTimerInfoTag> CreateFromEpg(const std::shared_ptr<CPVREpgInfoTag> &tag, bool bCreateRule = false);
 
     /*!
      * @brief get the epg info tag associated with this timer, if any
      * @param bCreate if true, try to find the epg tag if not yet set (lazy evaluation)
      * @return the epg info tag associated with this timer or null if there is no tag
      */
-    CPVREpgInfoTagPtr GetEpgInfoTag(bool bCreate = true) const;
+    std::shared_ptr<CPVREpgInfoTag> GetEpgInfoTag(bool bCreate = true) const;
 
     std::string ChannelName(void) const;
     std::string ChannelIcon(void) const;
@@ -95,19 +99,19 @@ namespace PVR
      * @brief Get the channel associated with this timer, if any.
      * @return the channel or null if non is associated with this timer.
      */
-    CPVRChannelPtr Channel() const;
+    std::shared_ptr<CPVRChannel> Channel() const;
 
     /*!
      * @brief updates this timer excluding the state of any children. See UpdateChildState/ResetChildState.
      * @return true if the timer was updated successfully
      */
-    bool UpdateEntry(const CPVRTimerInfoTagPtr &tag);
+    bool UpdateEntry(const std::shared_ptr<CPVRTimerInfoTag> &tag);
 
     /*!
      * @brief merge in the state of this child timer. Run for each child after using ResetChildState.
      * @return true if the child timer's state was merged successfully
      */
-    bool UpdateChildState(const CPVRTimerInfoTagPtr &childTimer);
+    bool UpdateChildState(const std::shared_ptr<CPVRTimerInfoTag> &childTimer);
 
     /*!
      * @brief reset the state of children related to this timer. Run UpdateChildState for all children afterwards.
@@ -149,13 +153,13 @@ namespace PVR
       * @brief Gets the type of this timer.
       * @return the timer type or NULL if this tag has no timer type.
       */
-    const CPVRTimerTypePtr GetTimerType() const { return m_timerType; }
+    const std::shared_ptr<CPVRTimerType> GetTimerType() const { return m_timerType; }
 
     /*!
       * @brief Sets the type of this timer.
       * @param the new timer type.
       */
-    void SetTimerType(const CPVRTimerTypePtr &type);
+    void SetTimerType(const std::shared_ptr<CPVRTimerType> &type);
 
     /*!
       * @brief Checks whether this is a timer rule (vs. one time timer).
@@ -243,7 +247,7 @@ namespace PVR
      * @brief Associate the given epg tag with this timer; before, clear old timer at associated epg tag, if any.
      * @param tag The epg tag to assign.
      */
-    void SetEpgTag(const CPVREpgInfoTagPtr &tag);
+    void SetEpgTag(const std::shared_ptr<CPVREpgInfoTag> &tag);
 
     /*!
      * @brief Clear the epg tag associated with this timer; before, clear this timer at associated epg tag, if any.
@@ -254,7 +258,7 @@ namespace PVR
      * @brief Update the channel associated with this timer.
      * @return the channel for the timer. Can be empty for epg based repeating timers (e.g. "match any channel" rules)
      */
-    CPVRChannelPtr UpdateChannel(void);
+    std::shared_ptr<CPVRChannel> UpdateChannel(void);
 
     /*!
      * @brief Return string representation for any possible combination of weekdays.
@@ -307,7 +311,7 @@ namespace PVR
     CDateTime             m_StartTime; /*!< start time */
     CDateTime             m_StopTime;  /*!< stop time */
     CDateTime             m_FirstDay;  /*!< if it is a manual timer rule the first date it starts */
-    CPVRTimerTypePtr      m_timerType; /*!< the type of this timer */
+    std::shared_ptr<CPVRTimerType>      m_timerType; /*!< the type of this timer */
 
     unsigned int          m_iActiveChildTimers;   /*!< @brief Number of active timers which have this timer as their m_iParentClientIndex */
     bool                  m_bHasChildConflictNOK; /*!< @brief Has at least one child timer with status PVR_TIMER_STATE_CONFLICT_NOK */
@@ -317,7 +321,7 @@ namespace PVR
     std::string m_strSeriesLink; /*!< series link */
 
     mutable unsigned int  m_iEpgUid;   /*!< id of epg event associated with this timer, EPG_TAG_INVALID_UID if none. */
-    mutable CPVREpgInfoTagPtr m_epgTag; /*!< epg info tag matching m_iEpgUid. */
-    mutable CPVRChannelPtr m_channel;
+    mutable std::shared_ptr<CPVREpgInfoTag> m_epgTag; /*!< epg info tag matching m_iEpgUid. */
+    mutable std::shared_ptr<CPVRChannel> m_channel;
   };
 }

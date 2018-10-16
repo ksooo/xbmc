@@ -111,7 +111,7 @@ bool CGUIDialogPVRChannelsOSD::OnAction(const CAction &action)
       SaveControlStates();
 
       // switch to next or previous group
-      const CPVRChannelGroupPtr nextGroup = action.GetID() == ACTION_NEXT_CHANNELGROUP ? m_group->GetNextGroup() : m_group->GetPreviousGroup();
+      const std::shared_ptr<CPVRChannelGroup> nextGroup = action.GetID() == ACTION_NEXT_CHANNELGROUP ? m_group->GetNextGroup() : m_group->GetPreviousGroup();
       CServiceBroker::GetPVRManager().SetPlayingGroup(nextGroup);
       m_group = nextGroup;
       Init();
@@ -154,10 +154,10 @@ void CGUIDialogPVRChannelsOSD::Update()
   CPVRManager& pvrMgr = CServiceBroker::GetPVRManager();
   pvrMgr.EpgContainer().RegisterObserver(this);
 
-  const CPVRChannelPtr channel = pvrMgr.GetPlayingChannel();
+  const std::shared_ptr<CPVRChannel> channel = pvrMgr.GetPlayingChannel();
   if (channel)
   {
-    const CPVRChannelGroupPtr group = pvrMgr.GetPlayingGroup(channel->IsRadio());
+    const std::shared_ptr<CPVRChannelGroup> group = pvrMgr.GetPlayingGroup(channel->IsRadio());
     if (group)
     {
       group->GetMembers(*m_vecItems);

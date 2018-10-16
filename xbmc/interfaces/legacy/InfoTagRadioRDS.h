@@ -45,11 +45,11 @@ namespace XBMCAddon
     class InfoTagRadioRDS : public AddonClass
     {
     private:
-      PVR::CPVRRadioRDSInfoTagPtr infoTag;
+      std::shared_ptr<PVR::CPVRRadioRDSInfoTag> infoTag;
 
     public:
 #ifndef SWIG
-      explicit InfoTagRadioRDS(const PVR::CPVRRadioRDSInfoTagPtr tag);
+      explicit InfoTagRadioRDS(const std::shared_ptr<PVR::CPVRRadioRDSInfoTag> tag);
 #endif
       InfoTagRadioRDS();
       ~InfoTagRadioRDS() override;

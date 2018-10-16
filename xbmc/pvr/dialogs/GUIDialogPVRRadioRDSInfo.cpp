@@ -63,7 +63,7 @@ bool CGUIDialogPVRRadioRDSInfo::OnMessage(CGUIMessage& message)
       CGUITextBox *textbox = static_cast<CGUITextBox*>(GetControl(TEXT_INFO));
       if (!textbox) return true;
 
-      PVR::CPVRRadioRDSInfoTagPtr currentRDS = g_application.CurrentFileItem().GetPVRRadioRDSInfoTag();
+      std::shared_ptr<PVR::CPVRRadioRDSInfoTag> currentRDS = g_application.CurrentFileItem().GetPVRRadioRDSInfoTag();
       switch (spin->GetValue())
       {
         case INFO_NEWS:
@@ -104,7 +104,7 @@ bool CGUIDialogPVRRadioRDSInfo::OnMessage(CGUIMessage& message)
         g_application.GetAppPlayer().IsPlaying() &&
         g_application.CurrentFileItem().HasPVRRadioRDSInfoTag())
     {
-      PVR::CPVRRadioRDSInfoTagPtr currentRDS = g_application.CurrentFileItem().GetPVRRadioRDSInfoTag();
+      std::shared_ptr<PVR::CPVRRadioRDSInfoTag> currentRDS = g_application.CurrentFileItem().GetPVRRadioRDSInfoTag();
       CGUISpinControl *spin = static_cast<CGUISpinControl*>(GetControl(SPIN_CONTROL_INFO));
       CGUITextBox *textbox = static_cast<CGUITextBox*>(GetControl(TEXT_INFO));
 
@@ -278,7 +278,7 @@ void CGUIDialogPVRRadioRDSInfo::OnInitWindow()
   m_LabelInfoCinemaPresent    = false;
   m_InfoPresent               = false;
 
-  PVR::CPVRRadioRDSInfoTagPtr currentRDS = g_application.CurrentFileItem().GetPVRRadioRDSInfoTag();
+  std::shared_ptr<PVR::CPVRRadioRDSInfoTag> currentRDS = g_application.CurrentFileItem().GetPVRRadioRDSInfoTag();
 
   CGUISpinControl *spin = static_cast<CGUISpinControl*>(GetControl(SPIN_CONTROL_INFO));
   if (!spin) return;

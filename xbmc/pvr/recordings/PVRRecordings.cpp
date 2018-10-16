@@ -76,7 +76,7 @@ void CPVRRecordings::GetSubDirectories(const CPVRRecordingsPath &recParentPath, 
 
   for (const auto recording : m_recordings)
   {
-    CPVRRecordingPtr current = recording.second;
+    std::shared_ptr<CPVRRecording> current = recording.second;
     if (current->IsDeleted())
       continue;
 
@@ -208,7 +208,7 @@ bool CPVRRecordings::DeleteRecording(const CFileItem &item)
     return false;
   }
 
-  CPVRRecordingPtr tag = item.GetPVRRecordingInfoTag();
+  std::shared_ptr<CPVRRecording> tag = item.GetPVRRecordingInfoTag();
   return tag->Delete();
 }
 
@@ -220,7 +220,7 @@ bool CPVRRecordings::Undelete(const CFileItem &item)
     return false;
   }
 
-  CPVRRecordingPtr tag = item.GetPVRRecordingInfoTag();
+  std::shared_ptr<CPVRRecording> tag = item.GetPVRRecordingInfoTag();
   return tag->Undelete();
 }
 
@@ -232,7 +232,7 @@ bool CPVRRecordings::RenameRecording(CFileItem &item, std::string &strNewName)
     return false;
   }
 
-  CPVRRecordingPtr tag = item.GetPVRRecordingInfoTag();
+  std::shared_ptr<CPVRRecording> tag = item.GetPVRRecordingInfoTag();
   return tag->Rename(strNewName);
 }
 
@@ -287,7 +287,7 @@ bool CPVRRecordings::GetDirectory(const std::string& strPath, CFileItemList &ite
     // get all files of the current directory or recursively all files starting at the current directory if in flatten mode
     for (const auto recording : m_recordings)
     {
-      const CPVRRecordingPtr current = recording.second;
+      const std::shared_ptr<CPVRRecording> current = recording.second;
 
       // Omit recordings not matching criteria
       if (!IsDirectoryMember(strDirectory, current->m_strDirectory, bGrouped) ||
@@ -311,7 +311,7 @@ void CPVRRecordings::GetAll(CFileItemList &items, bool bDeleted)
   CSingleLock lock(m_critSection);
   for (const auto recording : m_recordings)
   {
-    const CPVRRecordingPtr current = recording.second;
+    const std::shared_ptr<CPVRRecording> current = recording.second;
     if (current->IsDeleted() != bDeleted)
       continue;
 
@@ -348,7 +348,7 @@ CFileItemPtr CPVRRecordings::GetByPath(const std::string &path)
 
     for (const auto recording : m_recordings)
     {
-      CPVRRecordingPtr current = recording.second;
+      std::shared_ptr<CPVRRecording> current = recording.second;
       // Omit recordings not matching criteria
       if (!URIUtils::PathEquals(path, current->m_strFileNameAndPath) ||
           bDeleted != current->IsDeleted() || bRadio != current->IsRadio())
@@ -363,9 +363,9 @@ CFileItemPtr CPVRRecordings::GetByPath(const std::string &path)
   return fileItem;
 }
 
-CPVRRecordingPtr CPVRRecordings::GetById(int iClientId, const std::string &strRecordingId) const
+std::shared_ptr<CPVRRecording> CPVRRecordings::GetById(int iClientId, const std::string &strRecordingId) const
 {
-  CPVRRecordingPtr retVal;
+  std::shared_ptr<CPVRRecording> retVal;
   CSingleLock lock(m_critSection);
   PVR_RECORDINGMAP_CITR it = m_recordings.find(CPVRRecordingUid(iClientId, strRecordingId));
   if (it != m_recordings.end())
@@ -374,7 +374,7 @@ CPVRRecordingPtr CPVRRecordings::GetById(int iClientId, const std::string &strRe
   return retVal;
 }
 
-void CPVRRecordings::UpdateFromClient(const CPVRRecordingPtr &tag)
+void CPVRRecordings::UpdateFromClient(const std::shared_ptr<CPVRRecording> &tag)
 {
   CSingleLock lock(m_critSection);
 
@@ -386,21 +386,21 @@ void CPVRRecordings::UpdateFromClient(const CPVRRecordingPtr &tag)
       m_bDeletedTVRecordings = true;
   }
 
-  CPVRRecordingPtr newTag = GetById(tag->m_iClientId, tag->m_strRecordingId);
+  std::shared_ptr<CPVRRecording> newTag = GetById(tag->m_iClientId, tag->m_strRecordingId);
   if (newTag)
   {
     newTag->Update(*tag);
   }
   else
   {
-    newTag = CPVRRecordingPtr(new CPVRRecording);
+    newTag = std::shared_ptr<CPVRRecording>(new CPVRRecording);
     newTag->Update(*tag);
     if (newTag->BroadcastUid() != EPG_TAG_INVALID_UID)
     {
-      const CPVRChannelPtr channel(newTag->Channel());
+      const std::shared_ptr<CPVRChannel> channel(newTag->Channel());
       if (channel)
       {
-        const CPVREpgInfoTagPtr epgTag = CServiceBroker::GetPVRManager().EpgContainer().GetTagById(channel, newTag->BroadcastUid());
+        const std::shared_ptr<CPVREpgInfoTag> epgTag = CServiceBroker::GetPVRManager().EpgContainer().GetTagById(channel, newTag->BroadcastUid());
         if (epgTag)
           epgTag->SetRecording(newTag);
       }
@@ -414,7 +414,7 @@ void CPVRRecordings::UpdateFromClient(const CPVRRecordingPtr &tag)
   }
 }
 
-CPVRRecordingPtr CPVRRecordings::GetRecordingForEpgTag(const CPVREpgInfoTagPtr &epgTag) const
+std::shared_ptr<CPVRRecording> CPVRRecordings::GetRecordingForEpgTag(const std::shared_ptr<CPVREpgInfoTag> &epgTag) const
 {
   CSingleLock lock(m_critSection);
 
@@ -447,7 +447,7 @@ CPVRRecordingPtr CPVRRecordings::GetRecordingForEpgTag(const CPVREpgInfoTagPtr &
     }
   }
 
-  return CPVRRecordingPtr();
+  return std::shared_ptr<CPVRRecording>();
 }
 
 bool CPVRRecordings::ChangeRecordingsPlayCount(const CFileItemPtr &item, int count)
@@ -487,7 +487,7 @@ bool CPVRRecordings::ChangeRecordingsPlayCount(const CFileItemPtr &item, int cou
       if (!pItem->HasPVRRecordingInfoTag())
         continue;
 
-      const CPVRRecordingPtr recording = pItem->GetPVRRecordingInfoTag();
+      const std::shared_ptr<CPVRRecording> recording = pItem->GetPVRRecordingInfoTag();
       if (recording)
       {
         if (count == INCREMENT_PLAY_COUNT)
@@ -527,7 +527,7 @@ bool CPVRRecordings::ResetResumePoint(const CFileItemPtr item)
 {
   bool bResult = false;
 
-  const CPVRRecordingPtr recording = item->GetPVRRecordingInfoTag();
+  const std::shared_ptr<CPVRRecording> recording = item->GetPVRRecordingInfoTag();
   if (recording)
   {
     CVideoDatabase& db = GetVideoDatabase();

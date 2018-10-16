@@ -197,9 +197,9 @@ bool CPVREpgDatabase::Delete(const CPVREpgInfoTag &tag)
   return DeleteValues("epgtags", filter);
 }
 
-std::vector<CPVREpgPtr> CPVREpgDatabase::Get(const CPVREpgContainer &container)
+std::vector<std::shared_ptr<CPVREpg>> CPVREpgDatabase::Get(const CPVREpgContainer &container)
 {
-  std::vector<CPVREpgPtr> result;
+  std::vector<std::shared_ptr<CPVREpg>> result;
 
   CSingleLock lock(m_critSection);
   std::string strQuery = PrepareSQL("SELECT idEpg, sName, sScraperName FROM epg;");
@@ -227,9 +227,9 @@ std::vector<CPVREpgPtr> CPVREpgDatabase::Get(const CPVREpgContainer &container)
   return result;
 }
 
-std::vector<CPVREpgInfoTagPtr> CPVREpgDatabase::Get(const CPVREpg &epg)
+std::vector<std::shared_ptr<CPVREpgInfoTag>> CPVREpgDatabase::Get(const CPVREpg &epg)
 {
-  std::vector<CPVREpgInfoTagPtr> result;
+  std::vector<std::shared_ptr<CPVREpgInfoTag>> result;
 
   CSingleLock lock(m_critSection);
   std::string strQuery = PrepareSQL("SELECT * FROM epgtags WHERE idEpg = %u;", epg.EpgID());
@@ -239,7 +239,7 @@ std::vector<CPVREpgInfoTagPtr> CPVREpgDatabase::Get(const CPVREpg &epg)
     {
       while (!m_pDS->eof())
       {
-        CPVREpgInfoTagPtr newTag(new CPVREpgInfoTag());
+        std::shared_ptr<CPVREpgInfoTag> newTag(new CPVREpgInfoTag());
 
         time_t iStartTime, iEndTime, iFirstAired;
         iStartTime = (time_t) m_pDS->fv("iStartTime").get_asInt();

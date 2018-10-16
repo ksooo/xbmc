@@ -9,10 +9,10 @@
 #pragma once
 
 #include <map>
+#include <memory>
 
 #include "utils/Observer.h"
 
-#include "pvr/PVRTypes.h"
 #include "pvr/PVRChannelNumberInputHandler.h"
 #include "pvr/dialogs/GUIDialogPVRItemsViewBase.h"
 
@@ -20,6 +20,8 @@ class CFileItemList;
 
 namespace PVR
 {
+  class CPVRChannelGroup;
+
   class CGUIDialogPVRChannelsOSD : public CGUIDialogPVRItemsViewBase, public Observer, public CPVRChannelNumberInputHandler
   {
   public:
@@ -48,7 +50,7 @@ namespace PVR
     void SaveSelectedItemPath(int iGroupID);
     std::string GetLastSelectedItemPath(int iGroupID) const;
 
-    CPVRChannelGroupPtr m_group;
+    std::shared_ptr<CPVRChannelGroup> m_group;
     std::map<int, std::string> m_groupSelectedItemPaths;
     XbmcThreads::EndTime m_refreshTimeout;
   };

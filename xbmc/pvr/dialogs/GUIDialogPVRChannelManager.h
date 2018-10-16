@@ -61,7 +61,7 @@ namespace PVR
     bool OnClickButtonGroupManager(CGUIMessage &message);
     bool OnClickButtonNewChannel();
 
-    bool PersistChannel(const CFileItemPtr &pItem, const CPVRChannelGroupPtr &group, unsigned int *iChannelNumber);
+    bool PersistChannel(const CFileItemPtr &pItem, const std::shared_ptr<CPVRChannelGroup> &group, unsigned int *iChannelNumber);
     void SetItemsUnchanged(void);
 
     bool m_bIsRadio = false;
@@ -73,6 +73,6 @@ namespace PVR
     CFileItemList* m_channelItems;
     CGUIViewControl m_viewControl;
 
-    std::vector<CPVRClientPtr> m_clientsWithSettingsList;
+    std::vector<std::shared_ptr<CPVRClient>> m_clientsWithSettingsList;
   };
 }

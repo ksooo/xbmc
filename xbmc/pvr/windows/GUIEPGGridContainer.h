@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -21,6 +22,7 @@ namespace PVR
 {
   struct GridItem;
   class CGUIEPGGridContainerModel;
+  class CPVRChannel;
 
   class CGUIEPGGridContainer : public IGUIContainer
   {
@@ -59,7 +61,7 @@ namespace PVR
     std::string GetLabel(int info) const override;
 
     CFileItemPtr GetSelectedChannelItem() const;
-    PVR::CPVRChannelPtr GetSelectedChannel() const;
+    std::shared_ptr<PVR::CPVRChannel> GetSelectedChannel() const;
     CDateTime GetSelectedDate() const;
 
     void LoadLayout(TiXmlElement *layout);
@@ -87,7 +89,7 @@ namespace PVR
      * @param channel the channel.
      * @return true if the selection was set to the given channel, false otherwise.
      */
-    bool SetChannel(const PVR::CPVRChannelPtr &channel);
+    bool SetChannel(const std::shared_ptr<CPVRChannel> &channel);
     /*!
      * @brief Set the control's selection to the given channel and set the control's view port to show the channel.
      * @param channel the channel's path.

@@ -8,12 +8,14 @@
 
 #pragma once
 
-#include "guilib/GUIDialog.h"
+#include <memory>
 
-#include "pvr/PVRTypes.h"
+#include "guilib/GUIDialog.h"
 
 namespace PVR
 {
+  class CPVREpgInfoTag;
+
   class CGUIDialogPVRGuideInfo : public CGUIDialog
   {
   public:
@@ -24,7 +26,7 @@ namespace PVR
     bool HasListItems() const override { return true; }
     CFileItemPtr GetCurrentListItem(int offset = 0) override;
 
-    void SetProgInfo(const CPVREpgInfoTagPtr &tag);
+    void SetProgInfo(const std::shared_ptr<CPVREpgInfoTag> &tag);
 
     static void ShowFor(const CFileItemPtr& item);
 
@@ -38,6 +40,6 @@ namespace PVR
     bool OnClickButtonFind(CGUIMessage &message);
     bool OnClickButtonAddTimer(CGUIMessage &message);
 
-    CPVREpgInfoTagPtr m_progItem;
+    std::shared_ptr<CPVREpgInfoTag> m_progItem;
   };
 }
