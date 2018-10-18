@@ -10,6 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "guilib/GUIMessage.h"
 #include "guilib/LocalizeStrings.h"
 #include "messaging/helpers/DialogHelper.h"
@@ -83,14 +84,14 @@ void CGUIDialogPVRRecordingSettings::InitializeSettings()
 
   // Name
   setting = AddEdit(group, SETTING_RECORDING_NAME, 19075, SettingLevel::Basic, m_strTitle);
-  setting->SetEnabled(client && client->GetClientCapabilities().SupportsRecordingsRename());
+  setting->SetEnabled(client && client->GetClientCapabilities()->SupportsRecordingsRename());
 
   // Play count
-  if (client && client->GetClientCapabilities().SupportsRecordingsPlayCount())
+  if (client && client->GetClientCapabilities()->SupportsRecordingsPlayCount())
     setting = AddEdit(group, SETTING_RECORDING_PLAYCOUNT, 567, SettingLevel::Basic, m_recording->GetLocalPlayCount());
 
   // Lifetime
-  if (client && client->GetClientCapabilities().SupportsRecordingsLifetimeChange())
+  if (client && client->GetClientCapabilities()->SupportsRecordingsLifetimeChange())
     setting = AddList(group, SETTING_RECORDING_LIFETIME, 19083, SettingLevel::Basic, m_iLifetime, LifetimesFiller, 19083);
 }
 
@@ -167,7 +168,7 @@ void CGUIDialogPVRRecordingSettings::LifetimesFiller(
 
     const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(pThis->m_recording->ClientID());
     if (client)
-      client->GetClientCapabilities().GetRecordingsLifetimeValues(list);
+      client->GetClientCapabilities()->GetRecordingsLifetimeValues(list);
 
     current = pThis->m_iLifetime;
 

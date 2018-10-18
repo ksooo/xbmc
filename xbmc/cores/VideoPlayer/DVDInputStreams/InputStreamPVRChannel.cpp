@@ -9,6 +9,7 @@
 #include "InputStreamPVRChannel.h"
 
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "utils/log.h"
 
 using namespace PVR;
@@ -36,7 +37,7 @@ bool CInputStreamPVRChannel::OpenPVRStream()
 {
   if (m_client && (m_client->OpenLiveStream(m_item.GetPVRChannelInfoTag()) == PVRClientError::NO_ERROR))
   {
-    m_bDemuxActive = m_client->GetClientCapabilities().HandlesDemuxing();
+    m_bDemuxActive = m_client->GetClientCapabilities()->HandlesDemuxing();
     CLog::Log(LOGDEBUG, "CInputStreamPVRChannel - %s - opened channel stream %s", __FUNCTION__, m_item.GetPath().c_str());
     return true;
   }

@@ -13,6 +13,7 @@
 #include "ServiceBroker.h"
 #include "addons/BinaryAddonCache.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "guilib/LocalizeStrings.h"
 #include "messaging/ApplicationMessenger.h"
 #include "utils/log.h"
@@ -461,7 +462,7 @@ bool CPVRClients::SupportsTimers() const
   bool bReturn = false;
   ForCreatedClients(__FUNCTION__, [&bReturn](const std::shared_ptr<CPVRClient> &client) {
     if (!bReturn)
-      bReturn = client->GetClientCapabilities().SupportsTimers();
+      bReturn = client->GetClientCapabilities()->SupportsTimers();
     return PVRClientError::NO_ERROR;
   });
   return bReturn;
@@ -527,7 +528,7 @@ std::vector<std::shared_ptr<CPVRClient>> CPVRClients::GetClientsSupportingChanne
 {
   std::vector<std::shared_ptr<CPVRClient>> possibleScanClients;
   ForCreatedClients(__FUNCTION__, [&possibleScanClients](const std::shared_ptr<CPVRClient> &client) {
-    if (client->GetClientCapabilities().SupportsChannelScan())
+    if (client->GetClientCapabilities()->SupportsChannelScan())
       possibleScanClients.emplace_back(client);
     return PVRClientError::NO_ERROR;
   });
@@ -538,9 +539,9 @@ std::vector<std::shared_ptr<CPVRClient>> CPVRClients::GetClientsSupportingChanne
 {
   std::vector<std::shared_ptr<CPVRClient>> possibleSettingsClients;
   ForCreatedClients(__FUNCTION__, [bRadio, &possibleSettingsClients](const std::shared_ptr<CPVRClient> &client) {
-    const CPVRClientCapabilities& caps = client->GetClientCapabilities();
-    if (caps.SupportsChannelSettings() &&
-        ((bRadio && caps.SupportsRadio()) || (!bRadio && caps.SupportsTV())))
+    const std::shared_ptr<CPVRClientCapabilities> caps = client->GetClientCapabilities();
+    if (caps->SupportsChannelSettings() &&
+        ((bRadio && caps->SupportsRadio()) || (!bRadio && caps->SupportsTV())))
       possibleSettingsClients.emplace_back(client);
     return PVRClientError::NO_ERROR;
   });

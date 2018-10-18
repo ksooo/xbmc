@@ -14,6 +14,7 @@
 #include "GUIPassword.h"
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "dialogs/GUIDialogFileBrowser.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "dialogs/GUIDialogSelect.h"
@@ -468,7 +469,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonNewChannel()
     const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(iClientID);
     if (client)
     {
-      channel->SetEPGEnabled(client->GetClientCapabilities().SupportsEPG());
+      channel->SetEPGEnabled(client->GetClientCapabilities()->SupportsEPG());
       ret = client->OpenDialogChannelAdd(channel);
     }
 
@@ -699,7 +700,7 @@ void CGUIDialogPVRChannelManager::Update()
     if (client)
     {
       channelFile->SetProperty("ClientName", client->GetFriendlyName());
-      channelFile->SetProperty("SupportsSettings", client->GetClientCapabilities().SupportsChannelSettings());
+      channelFile->SetProperty("SupportsSettings", client->GetClientCapabilities()->SupportsChannelSettings());
     }
 
     m_channelItems->Add(channelFile);

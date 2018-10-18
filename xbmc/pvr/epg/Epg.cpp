@@ -11,7 +11,7 @@
 #include <utility>
 
 #include "addons/PVRClient.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_epg_types.h"
+#include "addons/PVRClientCapabilities.h"
 #include "EpgContainer.h"
 #include "EpgDatabase.h"
 #include "ServiceBroker.h"
@@ -686,12 +686,12 @@ bool CPVREpg::UpdateFromScraper(time_t start, time_t end, bool bForceUpdate)
       const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(channel->ClientID());
       if (client)
       {
-        if (!client->GetClientCapabilities().SupportsEPG())
+        if (!client->GetClientCapabilities()->SupportsEPG())
         {
           CLog::LogF(LOGERROR, "The backend for channel '%s' on client '%i' does not support EPGs",
                      channel->ChannelName().c_str(), channel->ClientID());
         }
-        else if (!bForceUpdate && client->GetClientCapabilities().SupportsAsyncEPGTransfer())
+        else if (!bForceUpdate && client->GetClientCapabilities()->SupportsAsyncEPGTransfer())
         {
           // nothing to do. client will provide epg updates asynchronously
           return true;

@@ -13,6 +13,7 @@
 #include "Application.h"
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"
@@ -217,7 +218,7 @@ void CGUIDialogPVRGuideInfo::OnInitWindow()
   else if (m_progItem->Channel() && m_progItem->IsRecordable())
   {
     const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_progItem->ClientID());
-    if (client && client->GetClientCapabilities().SupportsTimers())
+    if (client && client->GetClientCapabilities()->SupportsTimers())
     {
       SET_CONTROL_LABEL(CONTROL_BTN_RECORD, 264);     /* Record */
       bHideRecord = false;

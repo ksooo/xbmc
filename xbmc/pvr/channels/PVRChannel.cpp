@@ -10,6 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "filesystem/File.h"
 #include "guilib/LocalizeStrings.h"
 #include "threads/SingleLock.h"
@@ -801,5 +802,5 @@ std::string CPVRChannel::EPGScraper(void) const
 bool CPVRChannel::CanRecord(void) const
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  return client && client->GetClientCapabilities().SupportsRecordings();
+  return client && client->GetClientCapabilities()->SupportsRecordings();
 }

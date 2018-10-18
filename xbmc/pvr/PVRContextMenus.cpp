@@ -11,6 +11,7 @@
 #include "ContextMenuItem.h"
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "addons/PVRClientMenuHooks.h"
 #include "guilib/GUIWindowManager.h"
 #include "utils/URIUtils.h"
@@ -222,11 +223,11 @@ namespace PVR
 
       const std::shared_ptr<CPVRChannel> channel = item.GetPVRChannelInfoTag();
       if (channel)
-        return !channel->IsRecording() && client && client->GetClientCapabilities().SupportsTimers();
+        return !channel->IsRecording() && client && client->GetClientCapabilities()->SupportsTimers();
 
       const std::shared_ptr<CPVREpgInfoTag> epg = item.GetEPGInfoTag();
       if (epg && !epg->Timer() && epg->Channel() && epg->IsRecordable())
-        return client && client->GetClientCapabilities().SupportsTimers();
+        return client && client->GetClientCapabilities()->SupportsTimers();
 
       return false;
     }
@@ -289,7 +290,7 @@ namespace PVR
           !recording->IsInProgress())
       {
         const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(recording->ClientID());
-        return client && client->GetClientCapabilities().SupportsRecordingsRename();
+        return client && client->GetClientCapabilities()->SupportsRecordingsRename();
       }
       return false;
     }
@@ -385,7 +386,7 @@ namespace PVR
       if (epg && epg->Channel() && !epg->Timer())
       {
         const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(item);
-        return client && client->GetClientCapabilities().SupportsTimers();
+        return client && client->GetClientCapabilities()->SupportsTimers();
       }
       return false;
     }

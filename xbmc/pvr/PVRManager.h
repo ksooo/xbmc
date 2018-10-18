@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "interfaces/IAnnouncer.h"
 #include "threads/CriticalSection.h"
 #include "threads/Event.h"

@@ -10,7 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
+#include "addons/PVRClientCapabilities.h"
 #include "cores/DataCacheCore.h"
 #include "guilib/LocalizeStrings.h"
 #include "settings/AdvancedSettings.h"
@@ -697,7 +697,7 @@ std::vector<PVR_EDL_ENTRY> CPVREpgInfoTag::GetEdl() const
   std::vector<PVR_EDL_ENTRY> edls;
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
 
-  if (client && client->GetClientCapabilities().SupportsEpgTagEdl())
+  if (client && client->GetClientCapabilities()->SupportsEpgTagEdl())
     client->GetEpgTagEdl(shared_from_this(), edls);
 
   return edls;

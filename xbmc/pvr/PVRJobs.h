@@ -11,7 +11,7 @@
 #include <memory>
 #include <vector>
 
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of in this file PVR_CONNECTION_STATE
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of PVR_CONNECTION_STATE in this file 
 #include "threads/SystemClock.h"
 #include "utils/Job.h"
 

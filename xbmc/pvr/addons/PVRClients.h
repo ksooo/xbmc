@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "addons/AddonManager.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of PVR_CONNECTION_STATE in this file
 #include "threads/CriticalSection.h"
 
 namespace ADDON

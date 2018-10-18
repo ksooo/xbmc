@@ -10,6 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "guilib/LocalizeStrings.h"
 #include "messaging/helpers/DialogOKHelper.h"
 #include "settings/AdvancedSettings.h"
@@ -115,8 +116,8 @@ CPVRRecording::CPVRRecording(const PVR_RECORDING &recording, unsigned int iClien
     else
     {
       const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-      bool bSupportsRadio = client && client->GetClientCapabilities().SupportsRadio();
-      if (bSupportsRadio && client && client->GetClientCapabilities().SupportsTV())
+      bool bSupportsRadio = client && client->GetClientCapabilities()->SupportsRadio();
+      if (bSupportsRadio && client && client->GetClientCapabilities()->SupportsTV())
       {
         CLog::Log(LOGWARNING, "Unable to determine channel type. Defaulting to TV.");
         m_bRadio = false; // Assume TV.
@@ -256,7 +257,7 @@ bool CPVRRecording::Rename(const std::string &strNewName)
 bool CPVRRecording::SetPlayCount(int count)
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  if (client && client->GetClientCapabilities().SupportsRecordingsPlayCount())
+  if (client && client->GetClientCapabilities()->SupportsRecordingsPlayCount())
   {
     if (client->SetRecordingPlayCount(*this, count) != PVRClientError::NO_ERROR)
       return false;
@@ -268,7 +269,7 @@ bool CPVRRecording::SetPlayCount(int count)
 bool CPVRRecording::IncrementPlayCount()
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  if (client && client->GetClientCapabilities().SupportsRecordingsPlayCount())
+  if (client && client->GetClientCapabilities()->SupportsRecordingsPlayCount())
   {
     if (client->SetRecordingPlayCount(*this, CVideoInfoTag::GetPlayCount() + 1) != PVRClientError::NO_ERROR)
       return false;
@@ -280,7 +281,7 @@ bool CPVRRecording::IncrementPlayCount()
 bool CPVRRecording::SetResumePoint(const CBookmark &resumePoint)
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  if (client && client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
+  if (client && client->GetClientCapabilities()->SupportsRecordingsLastPlayedPosition())
   {
     if (client->SetRecordingLastPlayedPosition(*this, lrint(resumePoint.timeInSeconds)) != PVRClientError::NO_ERROR)
       return false;
@@ -292,7 +293,7 @@ bool CPVRRecording::SetResumePoint(const CBookmark &resumePoint)
 bool CPVRRecording::SetResumePoint(double timeInSeconds, double totalTimeInSeconds, const std::string &playerState /* = "" */)
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  if (client && client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
+  if (client && client->GetClientCapabilities()->SupportsRecordingsLastPlayedPosition())
   {
     if (client->SetRecordingLastPlayedPosition(*this, lrint(timeInSeconds)) != PVRClientError::NO_ERROR)
       return false;
@@ -304,7 +305,7 @@ bool CPVRRecording::SetResumePoint(double timeInSeconds, double totalTimeInSecon
 CBookmark CPVRRecording::GetResumePoint() const
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  if (client && client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
+  if (client && client->GetClientCapabilities()->SupportsRecordingsLastPlayedPosition())
   {
     int pos = -1;
     client->GetRecordingLastPlayedPosition(*this, pos);
@@ -327,10 +328,10 @@ void CPVRRecording::UpdateMetadata(CVideoDatabase &db)
 
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
 
-  if (!client || !client->GetClientCapabilities().SupportsRecordingsPlayCount())
+  if (!client || !client->GetClientCapabilities()->SupportsRecordingsPlayCount())
     CVideoInfoTag::SetPlayCount(db.GetPlayCount(m_strFileNameAndPath));
 
-  if (!client || !client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
+  if (!client || !client->GetClientCapabilities()->SupportsRecordingsLastPlayedPosition())
   {
     CBookmark resumePoint;
     if (db.GetResumeBookMark(m_strFileNameAndPath, resumePoint))
@@ -345,7 +346,7 @@ std::vector<PVR_EDL_ENTRY> CPVRRecording::GetEdl() const
   std::vector<PVR_EDL_ENTRY> edls;
 
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  if (client && client->GetClientCapabilities().SupportsRecordingsEdl())
+  if (client && client->GetClientCapabilities()->SupportsRecordingsEdl())
     client->GetRecordingEdl(*this, edls);
 
   return edls;

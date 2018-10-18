@@ -12,6 +12,7 @@
 #include "FileItem.h"
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "addons/PVRClientMenuHooks.h"
 #include "cores/DataCacheCore.h"
 #include "dialogs/GUIDialogBusy.h"
@@ -352,7 +353,7 @@ namespace PVR
     }
 
     const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(item->m_iClientId);
-    if (client && !client->GetClientCapabilities().SupportsTimers())
+    if (client && !client->GetClientCapabilities()->SupportsTimers())
     {
       HELPERS::ShowOKDialogText(CVariant{19033}, CVariant{19215}); // "Information", "The PVR backend does not support timers."
       return false;
@@ -506,7 +507,7 @@ namespace PVR
       return bReturn;
 
     const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(channel->ClientID());
-    if (client && client->GetClientCapabilities().SupportsTimers())
+    if (client && client->GetClientCapabilities()->SupportsTimers())
     {
       /* timers are supported on this channel */
       if (bOnOff && !channel->IsRecording())

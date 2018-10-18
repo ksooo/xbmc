@@ -10,6 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientCapabilities.h"
 #include "guilib/LocalizeStrings.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
@@ -51,7 +52,7 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(bool bRadio /* = false */) :
   m_FirstDay.SetValid(false);
 
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  if (client && client->GetClientCapabilities().SupportsTimers())
+  if (client && client->GetClientCapabilities()->SupportsTimers())
   {
     // default to manual one-shot timer for given client
     std::shared_ptr<CPVRTimerType> type(CPVRTimerType::CreateFromAttributes(
@@ -108,7 +109,7 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(const PVR_TIMER &timer, const std::shared_ptr
     CLog::LogF(LOGERROR, "Invalid client index supplied by client %d (must be > 0)!", m_iClientId);
 
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  if (client && client->GetClientCapabilities().SupportsTimers())
+  if (client && client->GetClientCapabilities()->SupportsTimers())
   {
     // begin compat section
 
