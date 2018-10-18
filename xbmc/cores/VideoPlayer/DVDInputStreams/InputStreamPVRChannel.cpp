@@ -11,6 +11,8 @@
 #include "addons/PVRClient.h"
 #include "utils/log.h"
 
+using namespace PVR;
+
 CInputStreamPVRChannel::CInputStreamPVRChannel(IVideoPlayer* pPlayer, const CFileItem& fileitem)
   : CInputStreamPVRBase(pPlayer, fileitem),
     m_bDemuxActive(false)
@@ -32,7 +34,7 @@ CDVDInputStream::IDemux* CInputStreamPVRChannel::GetIDemux()
 
 bool CInputStreamPVRChannel::OpenPVRStream()
 {
-  if (m_client && (m_client->OpenLiveStream(m_item.GetPVRChannelInfoTag()) == PVR_ERROR_NO_ERROR))
+  if (m_client && (m_client->OpenLiveStream(m_item.GetPVRChannelInfoTag()) == PVRClientError::NO_ERROR))
   {
     m_bDemuxActive = m_client->GetClientCapabilities().HandlesDemuxing();
     CLog::Log(LOGDEBUG, "CInputStreamPVRChannel - %s - opened channel stream %s", __FUNCTION__, m_item.GetPath().c_str());
@@ -43,7 +45,7 @@ bool CInputStreamPVRChannel::OpenPVRStream()
 
 void CInputStreamPVRChannel::ClosePVRStream()
 {
-  if (m_client && (m_client->CloseLiveStream() == PVR_ERROR_NO_ERROR))
+  if (m_client && (m_client->CloseLiveStream() == PVRClientError::NO_ERROR))
   {
     m_bDemuxActive = false;
     CLog::Log(LOGDEBUG, "CInputStreamPVRChannel - %s - closed channel stream %s", __FUNCTION__, m_item.GetPath().c_str());

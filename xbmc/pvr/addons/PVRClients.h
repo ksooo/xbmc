@@ -25,6 +25,8 @@ namespace ADDON
 
 namespace PVR
 {
+  enum class PVRClientError;
+
   class CPVRChannelGroupInternal;
   class CPVRChannelGroup;
   class CPVRChannelGroups;
@@ -195,9 +197,9 @@ namespace PVR
     /*!
      * @brief Get all supported timer types.
      * @param results The container to store the result in.
-     * @return PVR_ERROR_NO_ERROR if the operation succeeded, the respective PVR_ERROR value otherwise.
+     * @return PVR_ERROR_NO_ERROR if the operation succeeded, the respective PVRClientError value otherwise.
      */
-    PVR_ERROR GetTimerTypes(std::vector<std::shared_ptr<CPVRTimerType>>& results) const;
+    PVRClientError GetTimerTypes(std::vector<std::shared_ptr<CPVRTimerType>>& results) const;
 
     //@}
 
@@ -208,15 +210,15 @@ namespace PVR
      * @brief Get all recordings from clients
      * @param recordings Store the recordings in this container.
      * @param deleted If true, return deleted recordings, return not deleted recordings otherwise.
-     * @return PVR_ERROR_NO_ERROR if the operation succeeded, the respective PVR_ERROR value otherwise.
+     * @return PVR_ERROR_NO_ERROR if the operation succeeded, the respective PVRClientError value otherwise.
      */
-    PVR_ERROR GetRecordings(CPVRRecordings *recordings, bool deleted);
+    PVRClientError GetRecordings(CPVRRecordings *recordings, bool deleted);
 
     /*!
      * @brief Delete all "soft" deleted recordings permanently on the backend.
-     * @return PVR_ERROR_NO_ERROR if the operation succeeded, the respective PVR_ERROR value otherwise.
+     * @return PVR_ERROR_NO_ERROR if the operation succeeded, the respective PVRClientError value otherwise.
      */
-    PVR_ERROR DeleteAllRecordingsFromTrash();
+    PVRClientError DeleteAllRecordingsFromTrash();
 
     //@}
 
@@ -228,9 +230,9 @@ namespace PVR
      * to Kodi using the callback function EpgEventStateChange. To be able to only push events that are actually of interest for Kodi,
      * clients need to know about the epg time frame Kodi uses.
      * @param iDays number of days from "now". EPG_TIMEFRAME_UNLIMITED means that Kodi is interested in all epg events, regardless of event times.
-     * @return PVR_ERROR_NO_ERROR if the operation succeeded, the respective PVR_ERROR value otherwise.
+     * @return PVR_ERROR_NO_ERROR if the operation succeeded, the respective PVRClientError value otherwise.
      */
-    PVR_ERROR SetEPGTimeFrame(int iDays);
+    PVRClientError SetEPGTimeFrame(int iDays);
 
     //@}
 
@@ -243,7 +245,7 @@ namespace PVR
      * @param failedClients in case of errors will contain the ids of the clients for which the channels could not be obtained.
      * @return PVR_ERROR_NO_ERROR if the channels were fetched successfully, last error otherwise.
      */
-    PVR_ERROR GetChannels(CPVRChannelGroupInternal *group, std::vector<int> &failedClients);
+    PVRClientError GetChannels(CPVRChannelGroupInternal *group, std::vector<int> &failedClients);
 
     /*!
      * @brief Get all channel groups from backends.
@@ -251,7 +253,7 @@ namespace PVR
      * @param failedClients in case of errors will contain the ids of the clients for which the channel groups could not be obtained.
      * @return PVR_ERROR_NO_ERROR if the channel groups were fetched successfully, last error otherwise.
      */
-    PVR_ERROR GetChannelGroups(CPVRChannelGroups *groups, std::vector<int> &failedClients);
+    PVRClientError GetChannelGroups(CPVRChannelGroups *groups, std::vector<int> &failedClients);
 
     /*!
      * @brief Get all group members of a channel group.
@@ -259,7 +261,7 @@ namespace PVR
      * @param failedClients in case of errors will contain the ids of the clients for which the channel group members could not be obtained.
      * @return PVR_ERROR_NO_ERROR if the channel group members were fetched successfully, last error otherwise.
      */
-    PVR_ERROR GetChannelGroupMembers(CPVRChannelGroup *group, std::vector<int> &failedClients);
+    PVRClientError GetChannelGroupMembers(CPVRChannelGroup *group, std::vector<int> &failedClients);
 
     /*!
      * @brief Get a list of clients providing a channel scan dialog.
@@ -338,26 +340,26 @@ namespace PVR
      * @param clientsNotReady Store the the ids of the not (yet) ready clients in this list.
      * @return PVR_ERROR_NO_ERROR in case all clients are ready, PVR_ERROR_SERVER_ERROR otherwise.
      */
-    PVR_ERROR GetCreatedClients(CPVRClientMap &clientsReady, std::vector<int> &clientsNotReady) const;
+    PVRClientError GetCreatedClients(CPVRClientMap &clientsReady, std::vector<int> &clientsNotReady) const;
 
-    typedef std::function<PVR_ERROR(const std::shared_ptr<CPVRClient>&)> PVRClientFunction;
+    typedef std::function<PVRClientError(const std::shared_ptr<CPVRClient>&)> PVRClientFunction;
 
     /*!
      * @brief Wraps calls to all created clients in order to do common pre and post function invocation actions.
      * @param strFunctionName The function name, for logging purposes.
-     * @param function The function to wrap. It has to have return type PVR_ERROR and must take a const reference to a std::shared_ptr<CPVRClient> as parameter.
+     * @param function The function to wrap. It has to have return type PVRClientError and must take a const reference to a std::shared_ptr<CPVRClient> as parameter.
      * @return PVR_ERROR_NO_ERROR on success, any other PVR_ERROR_* value otherwise.
      */
-    PVR_ERROR ForCreatedClients(const char* strFunctionName, PVRClientFunction function) const;
+    PVRClientError ForCreatedClients(const char* strFunctionName, PVRClientFunction function) const;
 
     /*!
      * @brief Wraps calls to all created clients in order to do common pre and post function invocation actions.
      * @param strFunctionName The function name, for logging purposes.
-     * @param function The function to wrap. It has to have return type PVR_ERROR and must take a const reference to a std::shared_ptr<CPVRClient> as parameter.
+     * @param function The function to wrap. It has to have return type PVRClientError and must take a const reference to a std::shared_ptr<CPVRClient> as parameter.
      * @param failedClients Contains a list of the ids of clients for that the call failed, if any.
      * @return PVR_ERROR_NO_ERROR on success, any other PVR_ERROR_* value otherwise.
      */
-    PVR_ERROR ForCreatedClients(const char* strFunctionName, PVRClientFunction function, std::vector<int> &failedClients) const;
+    PVRClientError ForCreatedClients(const char* strFunctionName, PVRClientFunction function, std::vector<int> &failedClients) const;
 
     mutable CCriticalSection m_critSection;
     CPVRClientMap m_clientMap;

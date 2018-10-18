@@ -137,7 +137,7 @@ namespace PVR
       if (client)
       {
         const std::shared_ptr<CPVRRecording> recording = item->GetPVRRecordingInfoTag();
-        return client->SetRecordingPlayCount(*recording, recording->GetLocalPlayCount()) == PVR_ERROR_NO_ERROR;
+        return client->SetRecordingPlayCount(*recording, recording->GetLocalPlayCount()) == PVRClientError::NO_ERROR;
       }
       return false;
     }
@@ -150,7 +150,7 @@ namespace PVR
     {
       const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(*item);
       if (client)
-        return client->SetRecordingLifetime(*item->GetPVRRecordingInfoTag()) == PVR_ERROR_NO_ERROR;
+        return client->SetRecordingLifetime(*item->GetPVRRecordingInfoTag()) == PVRClientError::NO_ERROR;
       return false;
     }
   };
@@ -1375,7 +1375,7 @@ namespace PVR
     long perfCnt = XbmcThreads::SystemClockMillis();
 
     /* do the scan */
-    if (scanClient->StartChannelScan() != PVR_ERROR_NO_ERROR)
+    if (scanClient->StartChannelScan() != PVRClientError::NO_ERROR)
       HELPERS::ShowOKDialogText(CVariant{257},    // "Error"
                                     CVariant{19193}); // "The channel scan can't be started. Check the log for more information about this message."
 
@@ -1433,7 +1433,7 @@ namespace PVR
 
       std::advance(selectedHook, selection);
     }
-    return selectedHook->first->CallMenuHook(selectedHook->second, CFileItemPtr()) == PVR_ERROR_NO_ERROR;
+    return selectedHook->first->CallMenuHook(selectedHook->second, CFileItemPtr()) == PVRClientError::NO_ERROR;
   }
 
   bool CPVRGUIActions::ResetPVRDatabase(bool bResetEPGOnly)

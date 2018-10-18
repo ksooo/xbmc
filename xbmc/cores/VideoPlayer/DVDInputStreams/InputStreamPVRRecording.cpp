@@ -11,6 +11,8 @@
 #include "addons/PVRClient.h"
 #include "utils/log.h"
 
+using namespace PVR;
+
 CInputStreamPVRRecording::CInputStreamPVRRecording(IVideoPlayer* pPlayer, const CFileItem& fileitem)
   : CInputStreamPVRBase(pPlayer, fileitem)
 {
@@ -23,7 +25,7 @@ CInputStreamPVRRecording::~CInputStreamPVRRecording()
 
 bool CInputStreamPVRRecording::OpenPVRStream()
 {
-  if (m_client && (m_client->OpenRecordedStream(m_item.GetPVRRecordingInfoTag()) == PVR_ERROR_NO_ERROR))
+  if (m_client && (m_client->OpenRecordedStream(m_item.GetPVRRecordingInfoTag()) == PVRClientError::NO_ERROR))
   {
     CLog::Log(LOGDEBUG, "CInputStreamPVRRecording - %s - opened recording stream %s", __FUNCTION__, m_item.GetPath().c_str());
     return true;
@@ -33,7 +35,7 @@ bool CInputStreamPVRRecording::OpenPVRStream()
 
 void CInputStreamPVRRecording::ClosePVRStream()
 {
-  if (m_client && (m_client->CloseRecordedStream() == PVR_ERROR_NO_ERROR))
+  if (m_client && (m_client->CloseRecordedStream() == PVRClientError::NO_ERROR))
   {
     CLog::Log(LOGDEBUG, "CInputStreamPVRRecording - %s - closed recording stream %s", __FUNCTION__, m_item.GetPath().c_str());
   }

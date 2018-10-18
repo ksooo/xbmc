@@ -583,7 +583,7 @@ namespace PVR
       if (!client)
         return false;
 
-      return client->CallMenuHook(m_hook, item) == PVR_ERROR_NO_ERROR;
+      return client->CallMenuHook(m_hook, item) == PVRClientError::NO_ERROR;
     }
 
   } // namespace CONEXTMENUITEM

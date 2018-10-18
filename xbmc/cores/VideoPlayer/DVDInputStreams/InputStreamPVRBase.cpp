@@ -17,6 +17,8 @@
 #include "settings/SettingsComponent.h"
 #include "utils/log.h"
 
+using namespace PVR;
+
 CInputStreamPVRBase::CInputStreamPVRBase(IVideoPlayer* pPlayer, const CFileItem& fileitem)
   : CDVDInputStream(DVDSTREAM_TYPE_PVRMANAGER, fileitem),
     m_eof(true),
@@ -103,7 +105,7 @@ int CInputStreamPVRBase::GetBlockSize()
 bool CInputStreamPVRBase::GetTimes(Times &times)
 {
   PVR_STREAM_TIMES streamTimes;
-  if (m_client && m_client->GetStreamTimes(&streamTimes) == PVR_ERROR_NO_ERROR)
+  if (m_client && m_client->GetStreamTimes(&streamTimes) == PVRClientError::NO_ERROR)
   {
     times.startTime = streamTimes.startTime;
     times.ptsStart = streamTimes.ptsStart;
@@ -220,7 +222,7 @@ void CInputStreamPVRBase::SetSpeed(int Speed)
 bool CInputStreamPVRBase::SeekTime(double timems, bool backwards, double *startpts)
 {
   if (m_client)
-    return m_client->SeekTime(timems, backwards, startpts) == PVR_ERROR_NO_ERROR;
+    return m_client->SeekTime(timems, backwards, startpts) == PVRClientError::NO_ERROR;
   else
     return false;
 }

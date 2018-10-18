@@ -510,22 +510,22 @@ bool CPVRTimerInfoTag::AddToClient(void) const
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (client)
-    return client->AddTimer(*this) == PVR_ERROR_NO_ERROR;
+    return client->AddTimer(*this) == PVRClientError::NO_ERROR;
   return false;
 }
 
 TimerOperationResult CPVRTimerInfoTag::DeleteFromClient(bool bForce /* = false */) const
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  PVR_ERROR error = PVR_ERROR_UNKNOWN;
+  PVRClientError error = PVRClientError::UNKNOWN;
 
   if (client)
     error = client->DeleteTimer(*this, bForce);
 
-  if (error == PVR_ERROR_RECORDING_RUNNING)
+  if (error == PVRClientError::RECORDING_RUNNING)
     return TimerOperationResult::RECORDING;
 
-  return (error == PVR_ERROR_NO_ERROR) ? TimerOperationResult::OK : TimerOperationResult::FAILED;
+  return (error == PVRClientError::NO_ERROR) ? TimerOperationResult::OK : TimerOperationResult::FAILED;
 }
 
 bool CPVRTimerInfoTag::RenameOnClient(const std::string &strNewName)
@@ -651,7 +651,7 @@ bool CPVRTimerInfoTag::IsRecording(void) const
 bool CPVRTimerInfoTag::UpdateOnClient()
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  return client && (client->UpdateTimer(*this) == PVR_ERROR_NO_ERROR);
+  return client && (client->UpdateTimer(*this) == PVRClientError::NO_ERROR);
 }
 
 std::string CPVRTimerInfoTag::ChannelName() const

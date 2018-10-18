@@ -38,7 +38,7 @@ std::shared_ptr<CPVRTimerType> CPVRTimerType::CreateFromIds(unsigned int iTypeId
   if (client)
   {
     std::vector<std::shared_ptr<CPVRTimerType>> types;
-    if (client->GetTimerTypes(types) == PVR_ERROR_NO_ERROR)
+    if (client->GetTimerTypes(types) == PVRClientError::NO_ERROR)
     {
       for (const auto &type : types)
       {
@@ -59,7 +59,7 @@ std::shared_ptr<CPVRTimerType> CPVRTimerType::CreateFromAttributes(
   if (client)
   {
     std::vector<std::shared_ptr<CPVRTimerType>> types;
-    if (client->GetTimerTypes(types) == PVR_ERROR_NO_ERROR)
+    if (client->GetTimerTypes(types) == PVRClientError::NO_ERROR)
     {
       for (const auto &type : types)
       {

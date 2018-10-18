@@ -361,7 +361,7 @@ int CPVRClients::GetCreatedClients(CPVRClientMap &clients) const
   return iReturn;
 }
 
-PVR_ERROR CPVRClients::GetCreatedClients(CPVRClientMap &clientsReady, std::vector<int> &clientsNotReady) const
+PVRClientError CPVRClients::GetCreatedClients(CPVRClientMap &clientsReady, std::vector<int> &clientsNotReady) const
 {
   clientsNotReady.clear();
 
@@ -385,7 +385,7 @@ PVR_ERROR CPVRClients::GetCreatedClients(CPVRClientMap &clientsReady, std::vecto
     }
   }
 
-  return clientsNotReady.empty() ? PVR_ERROR_NO_ERROR : PVR_ERROR_SERVER_ERROR;
+  return clientsNotReady.empty() ? PVRClientError::NO_ERROR : PVRClientError::SERVER_ERROR;
 }
 
 int CPVRClients::GetFirstCreatedClientID(void)
@@ -430,27 +430,27 @@ std::vector<SBackend> CPVRClients::GetBackendProperties() const
   ForCreatedClients(__FUNCTION__, [&backendProperties](const std::shared_ptr<CPVRClient> &client) {
     SBackend properties;
 
-    if (client->GetDriveSpace(properties.diskTotal, properties.diskUsed) == PVR_ERROR_NO_ERROR)
+    if (client->GetDriveSpace(properties.diskTotal, properties.diskUsed) == PVRClientError::NO_ERROR)
     {
       properties.diskTotal *= 1024;
       properties.diskUsed *= 1024;
     }
 
     int iAmount = 0;
-    if (client->GetChannelsAmount(iAmount) == PVR_ERROR_NO_ERROR)
+    if (client->GetChannelsAmount(iAmount) == PVRClientError::NO_ERROR)
       properties.numChannels = iAmount;
-    if (client->GetTimersAmount(iAmount) == PVR_ERROR_NO_ERROR)
+    if (client->GetTimersAmount(iAmount) == PVRClientError::NO_ERROR)
       properties.numTimers = iAmount;
-    if (client->GetRecordingsAmount(false, iAmount) == PVR_ERROR_NO_ERROR)
+    if (client->GetRecordingsAmount(false, iAmount) == PVRClientError::NO_ERROR)
       properties.numRecordings = iAmount;
-    if (client->GetRecordingsAmount(true, iAmount) == PVR_ERROR_NO_ERROR)
+    if (client->GetRecordingsAmount(true, iAmount) == PVRClientError::NO_ERROR)
       properties.numDeletedRecordings = iAmount;
     properties.name = client->GetBackendName();
     properties.version = client->GetBackendVersion();
     properties.host = client->GetConnectionString();
 
     backendProperties.emplace_back(properties);
-    return PVR_ERROR_NO_ERROR;
+    return PVRClientError::NO_ERROR;
   });
 
   return backendProperties;
@@ -462,7 +462,7 @@ bool CPVRClients::SupportsTimers() const
   ForCreatedClients(__FUNCTION__, [&bReturn](const std::shared_ptr<CPVRClient> &client) {
     if (!bReturn)
       bReturn = client->GetClientCapabilities().SupportsTimers();
-    return PVR_ERROR_NO_ERROR;
+    return PVRClientError::NO_ERROR;
   });
   return bReturn;
 }
@@ -471,52 +471,52 @@ bool CPVRClients::GetTimers(CPVRTimersContainer *timers, std::vector<int> &faile
 {
   return ForCreatedClients(__FUNCTION__, [timers](const std::shared_ptr<CPVRClient> &client) {
     return client->GetTimers(timers);
-  }, failedClients) == PVR_ERROR_NO_ERROR;
+  }, failedClients) == PVRClientError::NO_ERROR;
 }
 
-PVR_ERROR CPVRClients::GetTimerTypes(std::vector<std::shared_ptr<CPVRTimerType>>& results) const
+PVRClientError CPVRClients::GetTimerTypes(std::vector<std::shared_ptr<CPVRTimerType>>& results) const
 {
   return ForCreatedClients(__FUNCTION__, [&results](const std::shared_ptr<CPVRClient> &client) {
     return client->GetTimerTypes(results);
   });
 }
 
-PVR_ERROR CPVRClients::GetRecordings(CPVRRecordings *recordings, bool deleted)
+PVRClientError CPVRClients::GetRecordings(CPVRRecordings *recordings, bool deleted)
 {
   return ForCreatedClients(__FUNCTION__, [recordings, deleted](const std::shared_ptr<CPVRClient> &client) {
     return client->GetRecordings(recordings, deleted);
   });
 }
 
-PVR_ERROR CPVRClients::DeleteAllRecordingsFromTrash()
+PVRClientError CPVRClients::DeleteAllRecordingsFromTrash()
 {
   return ForCreatedClients(__FUNCTION__, [](const std::shared_ptr<CPVRClient> &client) {
     return client->DeleteAllRecordingsFromTrash();
   });
 }
 
-PVR_ERROR CPVRClients::SetEPGTimeFrame(int iDays)
+PVRClientError CPVRClients::SetEPGTimeFrame(int iDays)
 {
   return ForCreatedClients(__FUNCTION__, [iDays](const std::shared_ptr<CPVRClient> &client) {
     return client->SetEPGTimeFrame(iDays);
   });
 }
 
-PVR_ERROR CPVRClients::GetChannels(CPVRChannelGroupInternal *group, std::vector<int> &failedClients)
+PVRClientError CPVRClients::GetChannels(CPVRChannelGroupInternal *group, std::vector<int> &failedClients)
 {
   return ForCreatedClients(__FUNCTION__, [group](const std::shared_ptr<CPVRClient> &client) {
     return client->GetChannels(*group, group->IsRadio());
   }, failedClients);
 }
 
-PVR_ERROR CPVRClients::GetChannelGroups(CPVRChannelGroups *groups, std::vector<int> &failedClients)
+PVRClientError CPVRClients::GetChannelGroups(CPVRChannelGroups *groups, std::vector<int> &failedClients)
 {
   return ForCreatedClients(__FUNCTION__, [groups](const std::shared_ptr<CPVRClient> &client) {
     return client->GetChannelGroups(groups);
   }, failedClients);
 }
 
-PVR_ERROR CPVRClients::GetChannelGroupMembers(CPVRChannelGroup *group, std::vector<int> &failedClients)
+PVRClientError CPVRClients::GetChannelGroupMembers(CPVRChannelGroup *group, std::vector<int> &failedClients)
 {
   return ForCreatedClients(__FUNCTION__, [group](const std::shared_ptr<CPVRClient> &client) {
     return client->GetChannelGroupMembers(group);
@@ -529,7 +529,7 @@ std::vector<std::shared_ptr<CPVRClient>> CPVRClients::GetClientsSupportingChanne
   ForCreatedClients(__FUNCTION__, [&possibleScanClients](const std::shared_ptr<CPVRClient> &client) {
     if (client->GetClientCapabilities().SupportsChannelScan())
       possibleScanClients.emplace_back(client);
-    return PVR_ERROR_NO_ERROR;
+    return PVRClientError::NO_ERROR;
   });
   return possibleScanClients;
 }
@@ -542,7 +542,7 @@ std::vector<std::shared_ptr<CPVRClient>> CPVRClients::GetClientsSupportingChanne
     if (caps.SupportsChannelSettings() &&
         ((bRadio && caps.SupportsRadio()) || (!bRadio && caps.SupportsTV())))
       possibleSettingsClients.emplace_back(client);
-    return PVR_ERROR_NO_ERROR;
+    return PVRClientError::NO_ERROR;
   });
   return possibleSettingsClients;
 }
@@ -551,7 +551,7 @@ void CPVRClients::OnSystemSleep()
 {
   ForCreatedClients(__FUNCTION__, [](const std::shared_ptr<CPVRClient> &client) {
     client->OnSystemSleep();
-    return PVR_ERROR_NO_ERROR;
+    return PVRClientError::NO_ERROR;
   });
 }
 
@@ -559,7 +559,7 @@ void CPVRClients::OnSystemWake()
 {
   ForCreatedClients(__FUNCTION__, [](const std::shared_ptr<CPVRClient> &client) {
     client->OnSystemWake();
-    return PVR_ERROR_NO_ERROR;
+    return PVRClientError::NO_ERROR;
   });
 }
 
@@ -567,7 +567,7 @@ void CPVRClients::OnPowerSavingActivated()
 {
   ForCreatedClients(__FUNCTION__, [](const std::shared_ptr<CPVRClient> &client) {
     client->OnPowerSavingActivated();
-    return PVR_ERROR_NO_ERROR;
+    return PVRClientError::NO_ERROR;
   });
 }
 
@@ -575,7 +575,7 @@ void CPVRClients::OnPowerSavingDeactivated()
 {
   ForCreatedClients(__FUNCTION__, [](const std::shared_ptr<CPVRClient> &client) {
     client->OnPowerSavingDeactivated();
-    return PVR_ERROR_NO_ERROR;
+    return PVRClientError::NO_ERROR;
   });
 }
 
@@ -643,24 +643,24 @@ void CPVRClients::ConnectionStateChange(
   }
 }
 
-PVR_ERROR CPVRClients::ForCreatedClients(const char* strFunctionName, PVRClientFunction function) const
+PVRClientError CPVRClients::ForCreatedClients(const char* strFunctionName, PVRClientFunction function) const
 {
   std::vector<int> failedClients;
   return ForCreatedClients(strFunctionName, function, failedClients);
 }
 
-PVR_ERROR CPVRClients::ForCreatedClients(const char* strFunctionName, PVRClientFunction function, std::vector<int> &failedClients) const
+PVRClientError CPVRClients::ForCreatedClients(const char* strFunctionName, PVRClientFunction function, std::vector<int> &failedClients) const
 {
-  PVR_ERROR lastError = PVR_ERROR_NO_ERROR;
+  PVRClientError lastError = PVRClientError::NO_ERROR;
 
   CPVRClientMap clients;
   GetCreatedClients(clients, failedClients);
 
   for (const auto &clientEntry : clients)
   {
-    PVR_ERROR currentError = function(clientEntry.second);
+    PVRClientError currentError = function(clientEntry.second);
 
-    if (currentError != PVR_ERROR_NO_ERROR && currentError != PVR_ERROR_NOT_IMPLEMENTED)
+    if (currentError != PVRClientError::NO_ERROR && currentError != PVRClientError::NOT_IMPLEMENTED)
     {
       CLog::LogFunction(LOGERROR, strFunctionName,
                         "PVR client '%s' returned an error: %s",

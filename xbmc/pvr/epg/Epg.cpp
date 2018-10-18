@@ -700,7 +700,7 @@ bool CPVREpg::UpdateFromScraper(time_t start, time_t end, bool bForceUpdate)
         {
           CLog::LogFC(LOGDEBUG, LOGEPG, "Updating EPG for channel '%s' from client '%i'",
                       channel->ChannelName().c_str(), channel->ClientID());
-          return (client->GetEPGForChannel(channel, this, start, end) == PVR_ERROR_NO_ERROR);
+          return (client->GetEPGForChannel(channel, this, start, end) == PVRClientError::NO_ERROR);
         }
       }
       else

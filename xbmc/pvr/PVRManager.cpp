@@ -864,11 +864,11 @@ bool CPVRManager::FillStreamFileItem(CFileItem &fileItem)
   if (client)
   {
     if (fileItem.IsPVRChannel())
-      return client->FillChannelStreamFileItem(fileItem) == PVR_ERROR_NO_ERROR;
+      return client->FillChannelStreamFileItem(fileItem) == PVRClientError::NO_ERROR;
     else if (fileItem.IsPVRRecording())
-      return client->FillRecordingStreamFileItem(fileItem) == PVR_ERROR_NO_ERROR;
+      return client->FillRecordingStreamFileItem(fileItem) == PVRClientError::NO_ERROR;
     else if (fileItem.IsEPG())
-      return client->FillEpgTagStreamFileItem(fileItem) == PVR_ERROR_NO_ERROR;
+      return client->FillEpgTagStreamFileItem(fileItem) == PVRClientError::NO_ERROR;
   }
   return false;
 }

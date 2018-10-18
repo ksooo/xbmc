@@ -201,7 +201,7 @@ void CPVRGUIInfo::UpdateQualityData(void)
     {
       std::shared_ptr<CPVRClient> client;
       CServiceBroker::GetPVRManager().Clients()->GetCreatedClient(CServiceBroker::GetPVRManager().GetPlayingClientID(), client);
-      if (client && client->SignalQuality(qualityInfo) == PVR_ERROR_NO_ERROR)
+      if (client && client->SignalQuality(qualityInfo) == PVRClientError::NO_ERROR)
       {
         m_qualityInfo = qualityInfo;
       }
@@ -219,7 +219,7 @@ void CPVRGUIInfo::UpdateDescrambleData(void)
   {
     std::shared_ptr<CPVRClient> client;
     CServiceBroker::GetPVRManager().Clients()->GetCreatedClient(CServiceBroker::GetPVRManager().GetPlayingClientID(), client);
-    if (client && client->GetDescrambleInfo(descrambleInfo) == PVR_ERROR_NO_ERROR)
+    if (client && client->GetDescrambleInfo(descrambleInfo) == PVRClientError::NO_ERROR)
     {
       m_descrambleInfo = descrambleInfo;
     }
