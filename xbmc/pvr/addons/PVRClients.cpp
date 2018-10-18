@@ -12,6 +12,7 @@
 
 #include "ServiceBroker.h"
 #include "addons/BinaryAddonCache.h"
+#include "addons/PVRClient.h"
 #include "guilib/LocalizeStrings.h"
 #include "messaging/ApplicationMessenger.h"
 #include "utils/log.h"

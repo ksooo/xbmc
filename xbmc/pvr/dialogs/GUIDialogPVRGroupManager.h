@@ -11,12 +11,13 @@
 #include "guilib/GUIDialog.h"
 #include "view/GUIViewControl.h"
 
-#include "pvr/channels/PVRChannelGroup.h"
-
 class CFileItemList;
+class CGUIMessage;
 
 namespace PVR
 {
+  class CPVRChannelGroup;
+
   class CGUIDialogPVRGroupManager : public CGUIDialog
   {
   public:

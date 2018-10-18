@@ -10,19 +10,25 @@
 
 #include <map>
 #include <memory>
+#include <string>
 
-#include "FileItem.h"
-#include "video/VideoDatabase.h"
+#include "threads/CriticalSection.h"
 
-#include "pvr/recordings/PVRRecording.h"
+class CFileItem;
+class CFileItemList;
+class CVideoDatabase;
 
 namespace PVR
 {
+  class CPVREpgInfoTag;
+  class CPVRRecording;
+  class CPVRRecordingUid;
   class CPVRRecordingsPath;
 
   class CPVRRecordings
   {
   public:
+    CPVRRecordings();
     virtual ~CPVRRecordings(void);
 
     /**
@@ -58,22 +64,22 @@ namespace PVR
     bool Undelete(const CFileItem &item);
     bool DeleteAllRecordingsFromTrash();
     bool RenameRecording(CFileItem &item, std::string &strNewName);
-    bool SetRecordingsPlayCount(const CFileItemPtr &item, int count);
-    bool IncrementRecordingsPlayCount(const CFileItemPtr &item);
-    bool MarkWatched(const CFileItemPtr &item, bool bWatched);
+    bool SetRecordingsPlayCount(const std::shared_ptr<CFileItem> &item, int count);
+    bool IncrementRecordingsPlayCount(const std::shared_ptr<CFileItem> &item);
+    bool MarkWatched(const std::shared_ptr<CFileItem> &item, bool bWatched);
 
     /**
      * @brief Resets a recording's resume point, if any
      * @param item The item to process
      * @return True, if the item's resume point was reset successfully, false otherwise
      */
-    bool ResetResumePoint(const CFileItemPtr item);
+    bool ResetResumePoint(const std::shared_ptr<CFileItem> item);
 
     bool GetDirectory(const std::string& strPath, CFileItemList &items);
-    CFileItemPtr GetByPath(const std::string &path);
+    std::shared_ptr<CFileItem> GetByPath(const std::string &path);
     std::shared_ptr<CPVRRecording> GetById(int iClientId, const std::string &strRecordingId) const;
     void GetAll(CFileItemList &items, bool bDeleted = false);
-    CFileItemPtr GetById(unsigned int iId) const;
+    std::shared_ptr<CFileItem> GetById(unsigned int iId) const;
 
     /*!
      * @brief Get the recording for the given epg tag, if any.
@@ -83,13 +89,9 @@ namespace PVR
     std::shared_ptr<CPVRRecording> GetRecordingForEpgTag(const std::shared_ptr<CPVREpgInfoTag> &epgTag) const;
 
   private:
-    typedef std::map<CPVRRecordingUid, std::shared_ptr<CPVRRecording>> PVR_RECORDINGMAP;
-    typedef PVR_RECORDINGMAP::iterator PVR_RECORDINGMAP_ITR;
-    typedef PVR_RECORDINGMAP::const_iterator PVR_RECORDINGMAP_CITR;
-
     mutable CCriticalSection m_critSection;
     bool m_bIsUpdating = false;
-    PVR_RECORDINGMAP m_recordings;
+    std::map<CPVRRecordingUid, std::shared_ptr<CPVRRecording>> m_recordings;
     unsigned int m_iLastId = 0;
     std::unique_ptr<CVideoDatabase> m_database;
     bool m_bDeletedTVRecordings = false;
@@ -127,6 +129,6 @@ namespace PVR
      * @param count the new playcount or INCREMENT_PLAY_COUNT to denote that the current playcount(s) are to be incremented by one
      * @return true if all playcounts were changed
      */
-    bool ChangeRecordingsPlayCount(const CFileItemPtr &item, int count);
+    bool ChangeRecordingsPlayCount(const std::shared_ptr<CFileItem> &item, int count);
   };
 }

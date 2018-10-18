@@ -15,6 +15,7 @@
 #include "view/GUIViewControl.h"
 
 class CFileItemList;
+class CGUIControl;
 
 namespace PVR
 {

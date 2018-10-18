@@ -319,6 +319,12 @@ bool CPVRChannelGroups::Load(void)
   return m_groups.size() > 0;
 }
 
+size_t CPVRChannelGroups::Size(void) const
+{
+  CSingleLock lock(m_critSection);
+  return m_groups.size();
+}
+
 bool CPVRChannelGroups::PersistAll(void)
 {
   bool bReturn(true);

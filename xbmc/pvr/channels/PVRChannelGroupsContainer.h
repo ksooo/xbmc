@@ -8,14 +8,20 @@
 
 #pragma once
 
+#include <memory>
+
 #include "threads/CriticalSection.h"
 
-#include "pvr/channels/PVRChannelGroups.h"
-
+class CFileItem;
+class CFileItemList;
 class CURL;
 
 namespace PVR
 {
+  class CPVRChannel;
+  class CPVRChannelGroup;
+  class CPVRChannelGroups;
+
   class CPVRChannelGroupsContainer
   {
   public:
@@ -126,7 +132,7 @@ namespace PVR
      * @param strPath The path.
      * @return The channel or NULL if it wasn't found.
      */
-    CFileItemPtr GetByPath(const std::string &strPath) const;
+    std::shared_ptr<CFileItem> GetByPath(const std::string &strPath) const;
 
     /*!
      * @brief Get the directory for a path.
@@ -160,7 +166,7 @@ namespace PVR
      * @brief The channel that was played last that has a valid client or NULL if there was none.
      * @return The requested channel.
      */
-    CFileItemPtr GetLastPlayedChannel(void) const;
+    std::shared_ptr<CFileItem> GetLastPlayedChannel(void) const;
 
     /*!
      * @brief The group that was played last and optionally contains the given channel.

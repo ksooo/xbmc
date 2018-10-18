@@ -21,8 +21,13 @@
 
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
+#include "pvr/channels/PVRChannel.h"
+#include "pvr/channels/PVRChannelGroup.h"
+#include "pvr/channels/PVRChannelGroups.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "pvr/epg/Epg.h"
+#include "pvr/epg/EpgInfoTag.h"
+#include "pvr/timers/PVRTimerType.h"
 #include "pvr/timers/PVRTimers.h"
 
 using namespace PVR;
@@ -359,9 +364,16 @@ void CPVRTimerInfoTag::SetTimerType(const std::shared_ptr<CPVRTimerType> &type)
     m_iWeekdays = PVR_WEEKDAY_NONE;
 }
 
-/**
- * Get the status string of this Timer, is used by the GUIInfoManager
- */
+bool CPVRTimerInfoTag::IsTimerRule(void) const
+{
+  return m_timerType && m_timerType->IsTimerRule();
+}
+
+bool CPVRTimerInfoTag::IsManual(void) const
+{
+  return m_timerType && m_timerType->IsManual();
+}
+
 std::string CPVRTimerInfoTag::GetStatus() const
 {
   std::string strReturn = g_localizeStrings.Get(305);
@@ -609,6 +621,31 @@ void CPVRTimerInfoTag::ResetChildState()
   m_bHasChildConflictNOK = false;
   m_bHasChildRecording = false;
   m_bHasChildErrors = false;
+}
+
+bool CPVRTimerInfoTag::IsActive(void) const
+{
+  return m_state == PVR_TIMER_STATE_SCHEDULED
+      || m_state == PVR_TIMER_STATE_RECORDING
+      || m_state == PVR_TIMER_STATE_CONFLICT_OK
+      || m_state == PVR_TIMER_STATE_CONFLICT_NOK
+      || m_state == PVR_TIMER_STATE_ERROR;
+}
+
+bool CPVRTimerInfoTag::IsBroken(void) const
+{
+  return m_state == PVR_TIMER_STATE_CONFLICT_NOK
+      || m_state == PVR_TIMER_STATE_ERROR;
+}
+
+bool CPVRTimerInfoTag::HasConflict(void) const
+{
+  return m_state == PVR_TIMER_STATE_CONFLICT_NOK;
+}
+
+bool CPVRTimerInfoTag::IsRecording(void) const
+{
+  return m_state == PVR_TIMER_STATE_RECORDING;
 }
 
 bool CPVRTimerInfoTag::UpdateOnClient()

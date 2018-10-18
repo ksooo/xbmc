@@ -14,6 +14,7 @@
 
 #include "ServiceBroker.h"
 #include "Util.h"
+#include "addons/PVRClient.h"
 #include "filesystem/Directory.h"
 #include "guilib/LocalizeStrings.h"
 #include "settings/AdvancedSettings.h"
@@ -29,8 +30,12 @@
 #include "pvr/PVRGUIProgressHandler.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
+#include "pvr/channels/PVRChannel.h"
+#include "pvr/channels/PVRChannelGroups.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
+#include "pvr/epg/Epg.h"
 #include "pvr/epg/EpgContainer.h"
+#include "pvr/epg/EpgInfoTag.h"
 
 using namespace PVR;
 

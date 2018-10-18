@@ -24,11 +24,17 @@
 
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
+#include "pvr/channels/PVRChannel.h"
 #include "pvr/epg/EpgContainer.h"
 #include "pvr/epg/EpgInfoTag.h"
+#include "pvr/recordings/PVRRecording.h"
 #include "pvr/recordings/PVRRecordingsPath.h"
 
 using namespace PVR;
+
+CPVRRecordings::CPVRRecordings()
+{
+}
 
 CPVRRecordings::~CPVRRecordings()
 {
@@ -367,7 +373,7 @@ std::shared_ptr<CPVRRecording> CPVRRecordings::GetById(int iClientId, const std:
 {
   std::shared_ptr<CPVRRecording> retVal;
   CSingleLock lock(m_critSection);
-  PVR_RECORDINGMAP_CITR it = m_recordings.find(CPVRRecordingUid(iClientId, strRecordingId));
+  const auto it = m_recordings.find(CPVRRecordingUid(iClientId, strRecordingId));
   if (it != m_recordings.end())
     retVal = it->second;
 

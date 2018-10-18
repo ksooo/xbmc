@@ -13,33 +13,35 @@
 #include <string>
 #include <vector>
 
-#include "FileItem.h"
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "interfaces/IAnnouncer.h"
+#include "threads/CriticalSection.h"
 #include "threads/Event.h"
 #include "threads/Thread.h"
 #include "utils/EventStream.h"
-#include "utils/JobManager.h"
 #include "utils/Observer.h"
 
 #include "pvr/PVRActionListener.h"
 #include "pvr/PVRSettings.h"
 #include "pvr/epg/EpgContainer.h"
-#include "pvr/recordings/PVRRecording.h"
 
+class CFileItem;
+class CJob;
 class CStopWatch;
-class CVariant;
 
 namespace PVR
 {
+  class CPVRChannel;
   class CPVRChannelGroup;
   class CPVRChannelGroupsContainer;
   class CPVRClient;
   class CPVRClients;
   class CPVRDatabase;
+  class CPVREpgInfoTag;
   class CPVRGUIActions;
   class CPVRGUIInfo;
   class CPVRGUIProgressHandler;
+  class CPVRRecording;
   class CPVRRecordings;
   class CPVRTimers;
 
@@ -297,19 +299,19 @@ namespace PVR
      * @brief Inform PVR manager that playback of an item just started.
      * @param item The item that started to play.
      */
-    void OnPlaybackStarted(const CFileItemPtr item);
+    void OnPlaybackStarted(const std::shared_ptr<CFileItem>& item);
 
     /*!
      * @brief Inform PVR manager that playback of an item was stopped due to user interaction.
      * @param item The item that stopped to play.
      */
-    void OnPlaybackStopped(const CFileItemPtr item);
+    void OnPlaybackStopped(const std::shared_ptr<CFileItem>& item);
 
     /*!
      * @brief Inform PVR manager that playback of an item has stopped without user interaction.
      * @param item The item that ended to play.
      */
-    void OnPlaybackEnded(const CFileItemPtr item);
+    void OnPlaybackEnded(const std::shared_ptr<CFileItem>& item);
 
     /*!
      * @brief Check whether there are active recordings.
@@ -514,23 +516,20 @@ namespace PVR
      */
     void SetState(ManagerState state);
 
-    /** @name containers */
-    //@{
     std::shared_ptr<CPVRChannelGroupsContainer>  m_channelGroups;               /*!< pointer to the channel groups container */
     std::shared_ptr<CPVRRecordings>              m_recordings;                  /*!< pointer to the recordings container */
     std::shared_ptr<CPVRTimers>                  m_timers;                      /*!< pointer to the timers container */
     std::shared_ptr<CPVRClients>                 m_addons;                      /*!< pointer to the pvr addon container */
-    std::unique_ptr<CPVRGUIInfo>   m_guiInfo;                     /*!< pointer to the guiinfo data */
+    std::unique_ptr<CPVRGUIInfo>                 m_guiInfo;                     /*!< pointer to the guiinfo data */
     std::shared_ptr<CPVRGUIActions>              m_guiActions;                  /*!< pointer to the pvr gui actions */
-    CPVREpgContainer               m_epgContainer;                /*!< the epg container */
-    //@}
+    CPVREpgContainer                             m_epgContainer;                /*!< the epg container */
 
     CPVRManagerJobQueue             m_pendingUpdates;              /*!< vector of pending pvr updates */
 
-    std::shared_ptr<CPVRDatabase>                 m_database;                    /*!< the database for all PVR related data */
+    std::shared_ptr<CPVRDatabase>   m_database;                    /*!< the database for all PVR related data */
     mutable CCriticalSection        m_critSection;                 /*!< critical section for all changes to this class, except for changes to triggers */
-    bool                            m_bFirstStart = true;                 /*!< true when the PVR manager was started first, false otherwise */
-    bool                            m_bEpgsCreated = false;                /*!< true if epg data for channels has been created */
+    bool                            m_bFirstStart = true;          /*!< true when the PVR manager was started first, false otherwise */
+    bool                            m_bEpgsCreated = false;        /*!< true if epg data for channels has been created */
 
     mutable CCriticalSection        m_managerStateMutex;
     ManagerState                    m_managerState = ManagerStateStopped;

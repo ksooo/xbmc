@@ -8,35 +8,24 @@
 
 #pragma once
 
-/*
- * DESCRIPTION:
- *
- * CPVRTimerInfoTag is part of the PVRManager to support scheduled recordings.
- *
- * The timer information tag holds data about current programmed timers for
- * the PVRManager. It is possible to create timers directly based upon
- * a EPG entry by giving the EPG information tag or as instant timer
- * on currently tuned channel, or give a blank tag to modify later.
- *
- * The filename inside the tag is for reference only and gives the index
- * number of the tag reported by the PVR backend and can not be played!
- */
-
 #include <memory>
+#include <string>
 
 #include "XBDateTime.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of enum PVR_TIMER_STATE usage in this file
 #include "threads/CriticalSection.h"
 #include "utils/ISerializable.h"
 
-#include "pvr/timers/PVRTimerType.h"
-
 class CVariant;
+
+// PVR Addon API types
+struct PVR_TIMER;
 
 namespace PVR
 {
   class CPVRChannel;
   class CPVREpgInfoTag;
+  class CPVRTimerType;
 
   enum class TimerOperationResult
   {
@@ -118,30 +107,25 @@ namespace PVR
      */
     void ResetChildState();
 
-    bool IsActive(void) const
-    {
-      return m_state == PVR_TIMER_STATE_SCHEDULED
-        || m_state == PVR_TIMER_STATE_RECORDING
-        || m_state == PVR_TIMER_STATE_CONFLICT_OK
-        || m_state == PVR_TIMER_STATE_CONFLICT_NOK
-        || m_state == PVR_TIMER_STATE_ERROR;
-    }
+    /*!
+     * @return True if this timer is active (scheduled, recording, has conflict or other error), false otherwise
+     */
+    bool IsActive(void) const;
 
     /*!
      * @return True if this timer won't result in a recording because it is broken for some reason, false otherwise
      */
-    bool IsBroken(void) const
-    {
-      return m_state == PVR_TIMER_STATE_CONFLICT_NOK
-        || m_state == PVR_TIMER_STATE_ERROR;
-    }
+    bool IsBroken(void) const;
 
     /*!
      * @return True if this timer won't result in a recording because it is in conflict with another timer or live stream, false otherwise
      */
-    bool HasConflict(void) const { return m_state == PVR_TIMER_STATE_CONFLICT_NOK; }
+    bool HasConflict(void) const;
 
-    bool IsRecording(void) const { return m_state == PVR_TIMER_STATE_RECORDING; }
+    /*!
+     * @return True if this timer is currently recording, false otherwise
+     */
+    bool IsRecording(void) const;
 
     /*!
       * @brief Checks whether this timer has a timer type.
@@ -165,13 +149,13 @@ namespace PVR
       * @brief Checks whether this is a timer rule (vs. one time timer).
       * @return True if this is a timer rule, false otherwise.
       */
-    bool IsTimerRule(void) const { return m_timerType && m_timerType->IsTimerRule(); }
+    bool IsTimerRule(void) const;
 
     /*!
       * @brief Checks whether this is a manual (vs. epg-based) timer.
       * @return True if this is a manual timer, false otherwise.
       */
-    bool IsManual(void) const { return m_timerType && m_timerType->IsManual(); }
+    bool IsManual(void) const;
 
     CDateTime StartAsUTC(void) const;
     CDateTime StartAsLocalTime(void) const;
@@ -280,7 +264,7 @@ namespace PVR
     bool                  m_bFullTextEpgSearch = false;  /*!< @brief indicates whether only epg episode title can be matched by the pvr backend or "more" (backend-dependent") data. */
     std::string           m_strDirectory;        /*!< @brief directory where the recording must be stored */
     std::string           m_strSummary;          /*!< @brief summary string with the time to show inside a GUI list */
-    PVR_TIMER_STATE       m_state = PVR_TIMER_STATE_SCHEDULED;               /*!< @brief the state of this timer */
+    PVR_TIMER_STATE       m_state = PVR_TIMER_STATE_SCHEDULED;  /*!< @brief the state of this timer */
     int                   m_iClientId;           /*!< @brief ID of the backend */
     unsigned int          m_iClientIndex;        /*!< @brief index number of the tag, given by the backend, PVR_TIMER_NO_CLIENT_INDEX for new */
     unsigned int          m_iParentClientIndex;  /*!< @brief for timers scheduled by a timer rule, the index number of the parent, given by the backend, PVR_TIMER_NO_PARENT for no parent */

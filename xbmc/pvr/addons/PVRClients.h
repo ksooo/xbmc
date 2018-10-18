@@ -10,11 +10,11 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "addons/AddonManager.h"
-#include "addons/PVRClient.h"
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "threads/CriticalSection.h"
 
@@ -28,9 +28,11 @@ namespace PVR
   class CPVRChannelGroupInternal;
   class CPVRChannelGroup;
   class CPVRChannelGroups;
+  class CPVRClient;
   class CPVREpg;
   class CPVRRecordings;
   class CPVRTimersContainer;
+  class CPVRTimerType;
 
   typedef std::map<int, std::shared_ptr<CPVRClient>> CPVRClientMap;
 

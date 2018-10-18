@@ -8,20 +8,18 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "threads/CriticalSection.h"
-#include "threads/SingleLock.h"
-
-#include "pvr/channels/PVRChannelGroup.h"
 
 class CFileItem;
-typedef std::shared_ptr<CFileItem> CFileItemPtr;
 class CFileItemList;
 
 namespace PVR
 {
-  /** A container class for channel groups */
+  class CPVRChannel;
+  class CPVRChannelGroup;
 
   class CPVRChannelGroups
   {
@@ -47,7 +45,7 @@ namespace PVR
     /*!
      * @return Amount of groups in this container
      */
-    size_t Size(void) const { CSingleLock lock(m_critSection); return m_groups.size(); }
+    size_t Size(void) const;
 
     /*!
      * @brief Update a group or add it if it's not in here yet.
@@ -69,7 +67,7 @@ namespace PVR
      * @param strPath The path to the channel
      * @return The channel, or an empty fileitem when not found
      */
-    CFileItemPtr GetByPath(const std::string &strPath) const;
+    std::shared_ptr<CFileItem> GetByPath(const std::string &strPath) const;
 
     /*!
      * @brief Get a pointer to a channel group given it's ID.
@@ -207,7 +205,7 @@ namespace PVR
     bool GetGroupsFromClients(void);
     void SortGroups(void);
 
-    bool                             m_bRadio;         /*!< true if this is a container for radio channels, false if it is for tv channels */
+    bool                                           m_bRadio;         /*!< true if this is a container for radio channels, false if it is for tv channels */
     std::shared_ptr<CPVRChannelGroup>              m_selectedGroup;  /*!< the group that's currently selected in the UI */
     std::vector<std::shared_ptr<CPVRChannelGroup>> m_groups;         /*!< the groups in this container */
     mutable CCriticalSection m_critSection;

@@ -29,11 +29,14 @@
 #include <vector>
 
 #include "XBDateTime.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "video/VideoInfoTag.h"
 
 class CVideoDatabase;
 class CVariant;
+
+// PVR Addon API types
+struct PVR_EDL_ENTRY;
+struct PVR_RECORDING;
 
 namespace PVR
 {

@@ -21,17 +21,22 @@
 #include "utils/log.h"
 
 #include "pvr/PVRManager.h"
+#include "pvr/channels/PVRChannel.h"
 #include "pvr/epg/Epg.h"
 #include "pvr/epg/EpgContainer.h"
 #include "pvr/epg/EpgDatabase.h"
+#include "pvr/recordings/PVRRecording.h"
+#include "pvr/timers/PVRTimerInfoTag.h"
 #include "pvr/timers/PVRTimers.h"
 
 using namespace PVR;
 
 CPVREpgInfoTag::CPVREpgInfoTag(const std::shared_ptr<CPVRChannel> &channel, CPVREpg *epg /* = nullptr */, const std::string &strTableName /* = "" */)
 : m_iClientId(channel ? channel->ClientID() : -1),
+  m_iUniqueBroadcastID(EPG_TAG_INVALID_UID),
   m_iUniqueChannelID(channel ? channel->UniqueID() : PVR_CHANNEL_INVALID_UID),
   m_strIconPath(channel ? channel->IconPath() : ""),
+  m_iFlags(EPG_TAG_FLAG_UNDEFINED),
   m_epg(epg),
   m_channel(channel)
 {

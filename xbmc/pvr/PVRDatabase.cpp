@@ -19,6 +19,8 @@
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
+#include "pvr/channels/PVRChannel.h"
+#include "pvr/channels/PVRChannelGroup.h"
 #include "pvr/channels/PVRChannelGroups.h"
 
 using namespace dbiplus;

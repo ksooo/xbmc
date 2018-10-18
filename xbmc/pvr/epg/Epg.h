@@ -13,17 +13,22 @@
 #include <string>
 #include <vector>
 
-#include "FileItem.h"
+#include "XBDateTime.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of enum EPG_EVENT_STATE usage in this file
 #include "threads/CriticalSection.h"
 #include "utils/Observer.h"
 
-#include "pvr/channels/PVRChannel.h"
-#include "pvr/epg/EpgInfoTag.h"
-#include "pvr/epg/EpgSearchFilter.h"
+class CFileItemList;
 
-/** EPG container for CPVREpgInfoTag instances */
+// PVR Addon API types
+struct EPG_TAG;
+
 namespace PVR
 {
+  class CPVRChannel;
+  class CPVREpgInfoTag;
+  class CPVREpgSearchFilter;
+
   class CPVREpg : public Observable
   {
     friend class CPVREpgDatabase;
@@ -328,7 +333,7 @@ namespace PVR
 
     CDateTime                           m_lastScanTime;    /*!< the last time the EPG has been updated */
 
-    std::shared_ptr<CPVRChannel>                      m_pvrChannel;      /*!< the channel this EPG belongs to */
+    std::shared_ptr<CPVRChannel>        m_pvrChannel;      /*!< the channel this EPG belongs to */
 
     mutable CCriticalSection            m_critSection;     /*!< critical section for changes in this table */
     bool                                m_bUpdateLastScanTime = false;

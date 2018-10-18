@@ -20,7 +20,9 @@
 #include "pvr/PVRDatabase.h"
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannelGroupInternal.h"
+#include "pvr/epg/Epg.h"
 #include "pvr/epg/EpgContainer.h"
+#include "pvr/epg/EpgInfoTag.h"
 #include "pvr/timers/PVRTimers.h"
 
 using namespace PVR;

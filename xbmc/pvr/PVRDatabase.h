@@ -17,8 +17,8 @@
 
 namespace PVR
 {
-  class CPVRChannelGroup;
   class CPVRChannel;
+  class CPVRChannelGroup;
   class CPVRChannelGroups;
   class CPVRClient;
 

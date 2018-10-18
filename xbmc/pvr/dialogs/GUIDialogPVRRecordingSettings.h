@@ -10,10 +10,9 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
-#include "settings/SettingConditions.h"
 #include "settings/dialogs/GUIDialogSettingsManualBase.h"
-#include "settings/lib/SettingDependency.h"
 
 class CSetting;
 

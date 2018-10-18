@@ -8,17 +8,23 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
-#include "addons/PVRClient.h"
 #include "dialogs/GUIDialogContextMenu.h"
 #include "guilib/GUIDialog.h"
 #include "view/GUIViewControl.h"
 
-#include "pvr/channels/PVRChannelGroup.h"
+class CAction;
+class CFileItem;
+class CFileItemList;
+class CGUIMessage;
 
 namespace PVR
 {
+  class CPVRChannelGroup;
+  class CPVRClient;
+
   class CGUIDialogPVRChannelManager : public CGUIDialog
   {
   public:
@@ -29,7 +35,7 @@ namespace PVR
     void OnWindowLoaded(void) override;
     void OnWindowUnload(void) override;
     bool HasListItems() const override{ return true; }
-    CFileItemPtr GetCurrentListItem(int offset = 0) override;
+    std::shared_ptr<CFileItem> GetCurrentListItem(int offset = 0) override;
 
   protected:
     void OnInitWindow() override;
@@ -41,7 +47,7 @@ namespace PVR
     void SaveList(void);
     void Renumber(void);
     void SetData(int iItem);
-    void RenameChannel(const CFileItemPtr &pItem);
+    void RenameChannel(const std::shared_ptr<CFileItem> &pItem);
 
     bool OnPopupMenu(int iItem);
     bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
@@ -61,7 +67,7 @@ namespace PVR
     bool OnClickButtonGroupManager(CGUIMessage &message);
     bool OnClickButtonNewChannel();
 
-    bool PersistChannel(const CFileItemPtr &pItem, const std::shared_ptr<CPVRChannelGroup> &group, unsigned int *iChannelNumber);
+    bool PersistChannel(const std::shared_ptr<CFileItem> &pItem, const std::shared_ptr<CPVRChannelGroup> &group, unsigned int *iChannelNumber);
     void SetItemsUnchanged(void);
 
     bool m_bIsRadio = false;

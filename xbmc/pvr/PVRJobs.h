@@ -11,13 +11,14 @@
 #include <memory>
 #include <vector>
 
-#include "FileItem.h"
-#include "addons/PVRClient.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
-#include "utils/JobManager.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of in this file PVR_CONNECTION_STATE
+#include "threads/SystemClock.h"
+#include "utils/Job.h"
 
 namespace PVR
 {
+  class CPVRClient;
+
   class CPVRPlayChannelOnStartupJob : public CJob
   {
   public:

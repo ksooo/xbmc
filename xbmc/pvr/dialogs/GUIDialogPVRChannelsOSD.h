@@ -10,13 +10,13 @@
 
 #include <map>
 #include <memory>
+#include <string>
 
+#include "threads/SystemClock.h"
 #include "utils/Observer.h"
 
 #include "pvr/PVRChannelNumberInputHandler.h"
 #include "pvr/dialogs/GUIDialogPVRItemsViewBase.h"
-
-class CFileItemList;
 
 namespace PVR
 {

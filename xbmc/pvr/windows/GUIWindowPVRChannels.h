@@ -8,8 +8,13 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "pvr/PVRChannelNumberInputHandler.h"
 #include "pvr/windows/GUIWindowPVRBase.h"
+
+class CFileItem;
 
 namespace PVR
 {
@@ -31,11 +36,11 @@ namespace PVR
     void OnInputDone() override;
 
   private:
-    bool OnContextButtonManage(const CFileItemPtr &item, CONTEXT_BUTTON button);
+    bool OnContextButtonManage(const std::shared_ptr<CFileItem> &item, CONTEXT_BUTTON button);
 
     void ShowChannelManager();
     void ShowGroupManager();
-    void UpdateEpg(const CFileItemPtr &item);
+    void UpdateEpg(const std::shared_ptr<CFileItem> &item);
 
   protected:
     bool m_bShowHiddenChannels;

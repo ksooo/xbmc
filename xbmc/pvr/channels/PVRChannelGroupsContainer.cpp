@@ -8,6 +8,7 @@
 
 #include "PVRChannelGroupsContainer.h"
 
+#include "FileItem.h"
 #include "URL.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/StringUtils.h"
@@ -15,6 +16,9 @@
 #include "utils/log.h"
 
 #include "pvr/PVRManager.h"
+#include "pvr/channels/PVRChannel.h"
+#include "pvr/channels/PVRChannelGroup.h"
+#include "pvr/channels/PVRChannelGroups.h"
 
 using namespace PVR;
 

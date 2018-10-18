@@ -10,11 +10,13 @@
 
 #include <tinyxml.h>
 
+#include "FileItem.h"
 #include "GUIInfoManager.h"
 #include "guilib/guiinfo/GUIInfoLabels.h"
 #include "guilib/DirtyRegion.h"
 #include "guilib/GUIControlFactory.h"
 #include "guilib/GUIListItem.h"
+#include "guilib/GUIListItemLayout.h"
 #include "guilib/GUIMessage.h"
 #include "guilib/GUIAction.h"
 #include "input/Key.h"
@@ -24,6 +26,7 @@
 
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/epg/Epg.h"
+#include "pvr/epg/EpgInfoTag.h"
 #include "pvr/windows/GUIEPGGridContainerModel.h"
 
 using namespace PVR;

@@ -15,7 +15,6 @@
 #include "threads/CriticalSection.h"
 
 class CFileItem;
-typedef std::shared_ptr<CFileItem> CFileItemPtr;
 
 namespace PVR
 {
@@ -50,8 +49,8 @@ namespace PVR
 
     virtual int AmountActiveTimers() = 0;
     virtual int AmountActiveRecordings() = 0;
-    virtual std::vector<CFileItemPtr> GetActiveRecordings() = 0;
-    virtual CFileItemPtr GetNextActiveTimer() = 0;
+    virtual std::vector<std::shared_ptr<CFileItem>> GetActiveRecordings() = 0;
+    virtual std::shared_ptr<CFileItem> GetNextActiveTimer() = 0;
 
     unsigned int m_iTimerAmount;
     unsigned int m_iRecordingTimerAmount;
@@ -80,8 +79,8 @@ namespace PVR
   private:
     int AmountActiveTimers() override;
     int AmountActiveRecordings() override;
-    std::vector<CFileItemPtr> GetActiveRecordings() override;
-    CFileItemPtr GetNextActiveTimer() override;
+    std::vector<std::shared_ptr<CFileItem>> GetActiveRecordings() override;
+    std::shared_ptr<CFileItem> GetNextActiveTimer() override;
   };
 
   class CPVRGUITVTimerInfo : public CPVRGUITimerInfo
@@ -92,8 +91,8 @@ namespace PVR
   private:
     int AmountActiveTimers() override;
     int AmountActiveRecordings() override;
-    std::vector<CFileItemPtr> GetActiveRecordings() override;
-    CFileItemPtr GetNextActiveTimer() override;
+    std::vector<std::shared_ptr<CFileItem>> GetActiveRecordings() override;
+    std::shared_ptr<CFileItem> GetNextActiveTimer() override;
   };
 
   class CPVRGUIRadioTimerInfo : public CPVRGUITimerInfo
@@ -104,8 +103,8 @@ namespace PVR
   private:
     int AmountActiveTimers() override;
     int AmountActiveRecordings() override;
-    std::vector<CFileItemPtr> GetActiveRecordings() override;
-    CFileItemPtr GetNextActiveTimer() override;
+    std::vector<std::shared_ptr<CFileItem>> GetActiveRecordings() override;
+    std::shared_ptr<CFileItem> GetNextActiveTimer() override;
   };
 
 } // namespace PVR

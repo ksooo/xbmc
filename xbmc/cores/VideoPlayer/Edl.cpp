@@ -7,6 +7,7 @@
  */
 
 #include "Edl.h"
+#include "FileItem.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "filesystem/File.h"

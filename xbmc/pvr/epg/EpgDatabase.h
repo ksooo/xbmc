@@ -8,14 +8,17 @@
 
 #pragma once
 
-#include "XBDateTime.h"
+#include <memory>
+#include <vector>
+
 #include "dbwrappers/Database.h"
 #include "threads/CriticalSection.h"
 
-#include "pvr/epg/Epg.h"
+class CDateTime;
 
 namespace PVR
 {
+  class CPVREpg;
   class CPVREpgInfoTag;
   class CPVREpgContainer;
 

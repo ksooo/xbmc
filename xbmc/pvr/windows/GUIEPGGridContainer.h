@@ -12,15 +12,20 @@
 #include <string>
 #include <vector>
 
-#include "FileItem.h"
 #include "XBDateTime.h"
-#include "guilib/GUIControl.h"
-#include "guilib/GUIListItemLayout.h"
+#include "guilib/GUITexture.h"
 #include "guilib/IGUIContainer.h"
+
+class CFileItem;
+class CFileItemList;
+class CGUIListItem;
+class CGUIListItemLayout;
+class CTextureInfo;
 
 namespace PVR
 {
   struct GridItem;
+
   class CGUIEPGGridContainerModel;
   class CPVRChannel;
 
@@ -57,11 +62,11 @@ namespace PVR
     void Process(unsigned int currentTime, CDirtyRegionList &dirtyregions) override;
     void Render() override;
 
-    CGUIListItemPtr GetListItem(int offset, unsigned int flag = 0) const override;
+    std::shared_ptr<CGUIListItem> GetListItem(int offset, unsigned int flag = 0) const override;
     std::string GetLabel(int info) const override;
 
-    CFileItemPtr GetSelectedChannelItem() const;
-    std::shared_ptr<PVR::CPVRChannel> GetSelectedChannel() const;
+    std::shared_ptr<CFileItem> GetSelectedChannelItem() const;
+    std::shared_ptr<CPVRChannel> GetSelectedChannel() const;
     CDateTime GetSelectedDate() const;
 
     void LoadLayout(TiXmlElement *layout);
@@ -112,8 +117,8 @@ namespace PVR
     GridItem *GetNextItem(int channel);
     GridItem *GetPrevItem(int channel);
 
-    int GetBlock(const CGUIListItemPtr &item, int channel);
-    int GetRealBlock(const CGUIListItemPtr &item, int channel);
+    int GetBlock(const std::shared_ptr<CGUIListItem> &item, int channel);
+    int GetRealBlock(const std::shared_ptr<CGUIListItem> &item, int channel);
     void MoveToRow(int row);
 
     CGUIListItemLayout *GetFocusedLayout() const;
@@ -123,7 +128,7 @@ namespace PVR
     void GoToBlock(int blockIndex);
     void GoToChannel(int channelIndex);
     void UpdateScrollOffset(unsigned int currentTime);
-    void ProcessItem(float posX, float posY, const CFileItemPtr &item, CFileItemPtr &lastitem, bool focused, CGUIListItemLayout* normallayout, CGUIListItemLayout* focusedlayout, unsigned int currentTime, CDirtyRegionList &dirtyregions, float resize = -1.0f);
+    void ProcessItem(float posX, float posY, const std::shared_ptr<CFileItem> &item, std::shared_ptr<CFileItem> &lastitem, bool focused, CGUIListItemLayout* normallayout, CGUIListItemLayout* focusedlayout, unsigned int currentTime, CDirtyRegionList &dirtyregions, float resize = -1.0f);
     void RenderItem(float posX, float posY, CGUIListItem *item, bool focused);
     void GetCurrentLayouts();
 
@@ -211,8 +216,8 @@ namespace PVR
 
     CGUITexture m_guiProgressIndicatorTexture;
 
-    CFileItemPtr m_lastItem;
-    CFileItemPtr m_lastChannel;
+    std::shared_ptr<CFileItem> m_lastItem;
+    std::shared_ptr<CFileItem> m_lastChannel;
 
     int m_scrollTime;
 

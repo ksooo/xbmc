@@ -12,6 +12,8 @@
 
 #include "pvr/windows/GUIWindowPVRBase.h"
 
+class CFileItem;
+
 namespace PVR
 {
   class CPVREpgSearchFilter;
@@ -20,7 +22,7 @@ namespace PVR
   {
   public:
     CGUIWindowPVRSearchBase(bool bRadio, int id, const std::string &xmlFile);
-    ~CGUIWindowPVRSearchBase() override = default;
+    ~CGUIWindowPVRSearchBase() override;
 
     bool OnMessage(CGUIMessage& message)  override;
     void GetContextButtons(int itemNumber, CContextButtons &buttons) override;
@@ -30,7 +32,7 @@ namespace PVR
      * @brief set the item to search similar events for.
      * @param item the epg event to search similar events for.
      */
-    void SetItemToSearch(const CFileItemPtr &item);
+    void SetItemToSearch(const std::shared_ptr<CFileItem> &item);
 
   protected:
     void OnPrepareFileItems(CFileItemList &items) override;

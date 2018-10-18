@@ -12,8 +12,6 @@
 
 #include "pvr/dialogs/GUIDialogPVRItemsViewBase.h"
 
-class CFileItemList;
-
 namespace PVR
 {
   class CPVRChannel;

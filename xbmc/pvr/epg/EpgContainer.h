@@ -8,23 +8,31 @@
 
 #pragma once
 
+#include <list>
 #include <memory>
 
 #include "XBDateTime.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of enum EPG_EVENT_STATE usage in this file
 #include "threads/CriticalSection.h"
 #include "threads/Thread.h"
 #include "utils/Observer.h"
 
 #include "pvr/PVRSettings.h"
-#include "pvr/epg/Epg.h"
-#include "pvr/epg/EpgDatabase.h"
 
+class CFileItem;
 class CFileItemList;
 
 namespace PVR
 {
   class CEpgUpdateRequest;
   class CEpgTagStateChange;
+
+  class CPVRChannel;
+  class CPVREpg;
+  class CPVREpgDatabase;
+  class CPVREpgInfoTag;
+  class CPVREpgSearchFilter;
+  class CPVRTimerInfoTag;
 
   class CPVREpgContainer : public Observer, public Observable, private CThread
   {
@@ -175,13 +183,13 @@ namespace PVR
      * @brief Inform the epg container that playback of an item just started.
      * @param item The item that started to play.
      */
-    void OnPlaybackStarted(const CFileItemPtr &item);
+    void OnPlaybackStarted(const std::shared_ptr<CFileItem> &item);
 
     /*!
      * @brief Inform the epg container that playback of an item was stopped due to user interaction.
      * @param item The item that stopped to play.
      */
-    void OnPlaybackStopped(const CFileItemPtr &item);
+    void OnPlaybackStopped(const std::shared_ptr<CFileItem> &item);
 
 
   private:

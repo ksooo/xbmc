@@ -12,6 +12,8 @@
 
 #include "guilib/GUIDialog.h"
 
+class CFileItem;
+
 namespace PVR
 {
   class CPVREpgInfoTag;
@@ -24,11 +26,11 @@ namespace PVR
     bool OnMessage(CGUIMessage& message) override;
     bool OnInfo(int actionID) override;
     bool HasListItems() const override { return true; }
-    CFileItemPtr GetCurrentListItem(int offset = 0) override;
+    std::shared_ptr<CFileItem> GetCurrentListItem(int offset = 0) override;
 
     void SetProgInfo(const std::shared_ptr<CPVREpgInfoTag> &tag);
 
-    static void ShowFor(const CFileItemPtr& item);
+    static void ShowFor(const std::shared_ptr<CFileItem> &item);
 
   protected:
     void OnInitWindow() override;

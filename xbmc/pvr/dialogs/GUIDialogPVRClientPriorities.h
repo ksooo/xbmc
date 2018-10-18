@@ -9,15 +9,15 @@
 #pragma once
 
 #include <map>
+#include <memory>
+#include <string>
 
 #include "settings/dialogs/GUIDialogSettingsManualBase.h"
 
-#include "pvr/addons/PVRClients.h"
-
-class CSetting;
-
 namespace PVR
 {
+  class CPVRClient;
+
   class CGUIDialogPVRClientPriorities : public CGUIDialogSettingsManualBase
   {
   public:
@@ -37,7 +37,7 @@ namespace PVR
     void InitializeSettings() override;
 
   private:
-    CPVRClientMap m_clients;
+    std::map<int, std::shared_ptr<CPVRClient>> m_clients;
     std::map<std::string, int> m_changedValues;
   };
 } // namespace PVR

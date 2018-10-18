@@ -25,7 +25,9 @@
 #include "pvr/addons/PVRClients.h"
 #include "pvr/dialogs/GUIDialogPVRGuideSearch.h"
 #include "pvr/epg/EpgContainer.h"
+#include "pvr/epg/EpgInfoTag.h"
 #include "pvr/epg/EpgSearchFilter.h"
+#include "pvr/recordings/PVRRecording.h"
 
 using namespace PVR;
 using namespace KODI::MESSAGING;
@@ -58,6 +60,10 @@ namespace
     CServiceBroker::GetPVRManager().EpgContainer().GetEPGSearch(*m_items, *m_filter);
   }
 } // unnamed namespace
+
+CGUIWindowPVRSearchBase::~CGUIWindowPVRSearchBase()
+{
+}
 
 CGUIWindowPVRSearchBase::CGUIWindowPVRSearchBase(bool bRadio, int id, const std::string &xmlFile) :
   CGUIWindowPVRBase(bRadio, id, xmlFile),

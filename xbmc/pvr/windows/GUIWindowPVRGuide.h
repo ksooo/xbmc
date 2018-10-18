@@ -17,9 +17,13 @@
 #include "pvr/PVRChannelNumberInputHandler.h"
 #include "pvr/windows/GUIWindowPVRBase.h"
 
+class CFileItemList;
+class CGUIMessage;
+
 namespace PVR
 {
   class CGUIEPGGridContainer;
+  class CPVRChannelGroup;
   class CPVRRefreshTimelineItemsThread;
 
   class CGUIWindowPVRGuideBase : public CGUIWindowPVRBase, public CPVRChannelNumberInputHandler

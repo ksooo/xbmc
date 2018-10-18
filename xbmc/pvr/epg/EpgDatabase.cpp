@@ -18,7 +18,9 @@
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 
+#include "pvr/epg/Epg.h"
 #include "pvr/epg/EpgContainer.h"
+#include "pvr/epg/EpgInfoTag.h"
 
 using namespace dbiplus;
 using namespace PVR;

@@ -8,7 +8,12 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
+
 #include "guilib/GUIDialog.h"
+
+class CFileItem;
 
 namespace PVR
 {
@@ -19,14 +24,14 @@ namespace PVR
     ~CGUIDialogPVRRadioRDSInfo(void) override = default;
     bool OnMessage(CGUIMessage& message) override;
     bool HasListItems() const override { return true; }
-    CFileItemPtr GetCurrentListItem(int offset = 0) override;
+    std::shared_ptr<CFileItem> GetCurrentListItem(int offset = 0) override;
 
   protected:
     void OnInitWindow() override;
     void OnDeinitWindow(int nextWindowID) override;
 
   private:
-    CFileItemPtr m_rdsItem;
+    std::shared_ptr<CFileItem> m_rdsItem;
 
     bool m_InfoPresent = false;
     bool m_LabelInfoNewsPresent = false;

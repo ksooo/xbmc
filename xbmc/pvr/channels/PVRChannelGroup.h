@@ -10,22 +10,29 @@
 
 #include <map>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include "XBDateTime.h"
 #include "settings/lib/ISettingCallback.h"
+#include "utils/Observer.h"
 
-#include "pvr/channels/PVRChannel.h"
+#include "pvr/channels/PVRChannelNumber.h"
 
 class CFileItem;
-typedef std::shared_ptr<CFileItem> CFileItemPtr;
+class CFileItemList;
+
+// PVR Addon API types
+struct PVR_CHANNEL_GROUP;
 
 namespace PVR
 {
 #define PVR_GROUP_TYPE_DEFAULT      0
 #define PVR_GROUP_TYPE_INTERNAL     1
 #define PVR_GROUP_TYPE_USER_DEFINED 2
+
+  class CPVRChannel;
 
   struct PVRChannelGroupMember
   {
@@ -270,14 +277,14 @@ namespace PVR
      * @param iCurrentChannel The channelid of the current channel that is playing, or -1 if none
      * @return The requested channel.
      */
-    CFileItemPtr GetLastPlayedChannel(int iCurrentChannel = -1) const;
+    std::shared_ptr<CFileItem> GetLastPlayedChannel(int iCurrentChannel = -1) const;
 
     /*!
      * @brief Get a channel given it's channel number.
      * @param channelNumber The channel number.
      * @return The channel or NULL if it wasn't found.
      */
-    CFileItemPtr GetByChannelNumber(const CPVRChannelNumber &channelNumber) const;
+    std::shared_ptr<CFileItem> GetByChannelNumber(const CPVRChannelNumber &channelNumber) const;
 
     /*!
      * @brief Get the channel number in this group of the given channel.
@@ -291,14 +298,14 @@ namespace PVR
      * @param channel The current channel.
      * @return The channel or NULL if it wasn't found.
      */
-    CFileItemPtr GetNextChannel(const std::shared_ptr<CPVRChannel> &channel) const;
+    std::shared_ptr<CFileItem> GetNextChannel(const std::shared_ptr<CPVRChannel> &channel) const;
 
     /*!
      * @brief Get the previous channel in this group.
      * @param channel The current channel.
      * @return The channel or NULL if it wasn't found.
      */
-    CFileItemPtr GetPreviousChannel(const std::shared_ptr<CPVRChannel> &channel) const;
+    std::shared_ptr<CFileItem> GetPreviousChannel(const std::shared_ptr<CPVRChannel> &channel) const;
 
     /*!
      * @brief Get a channel given it's channel ID.

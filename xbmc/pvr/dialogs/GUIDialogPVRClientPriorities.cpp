@@ -12,12 +12,14 @@
 #include <cstdlib>
 
 #include "ServiceBroker.h"
+#include "addons/PVRClient.h"
 #include "settings/lib/Setting.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #include "utils/log.h"
 
 #include "pvr/PVRManager.h"
+#include "pvr/addons/PVRClients.h"
 
 using namespace PVR;
 

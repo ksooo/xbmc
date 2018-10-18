@@ -19,6 +19,9 @@
 #include "utils/StringUtils.h"
 
 #include "pvr/PVRManager.h"
+#include "pvr/channels/PVRChannel.h"
+#include "pvr/epg/EpgInfoTag.h"
+#include "pvr/recordings/PVRRecording.h"
 
 using namespace PVR;
 

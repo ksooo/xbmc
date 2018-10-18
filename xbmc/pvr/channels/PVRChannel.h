@@ -12,7 +12,6 @@
 #include <string>
 #include <utility>
 
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "threads/CriticalSection.h"
 #include "utils/ISerializable.h"
 #include "utils/ISortable.h"
@@ -22,6 +21,9 @@
 
 class CVariant;
 class CFileItemList;
+
+// PVR Addon API types
+struct PVR_CHANNEL;
 
 namespace PVR
 {

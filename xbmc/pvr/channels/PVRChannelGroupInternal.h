@@ -8,11 +8,16 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "pvr/channels/PVRChannelGroup.h"
 
 namespace PVR
 {
   enum class PVREvent;
+
+  class CPVRChannel;
 
   class CPVRChannelGroupInternal : public CPVRChannelGroup
   {

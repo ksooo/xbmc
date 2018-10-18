@@ -13,8 +13,9 @@
 #include <utility>
 #include <vector>
 
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of PVR_TIMER_TYPE_* value usage in this file
 
+// PVR Addon API types
 struct PVR_TIMER_TYPE;
 
 namespace PVR

@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of PVR_SIGNAL_STATUS and PVR_DESCRAMBLE_INFO in this file
 #include "guilib/guiinfo/GUIInfoProvider.h"
 #include "threads/CriticalSection.h"
 #include "threads/Thread.h"
@@ -104,8 +104,6 @@ namespace PVR
     void CharInfoMux(std::string &strValue) const;
     void CharInfoProvider(std::string &strValue) const;
 
-    /** @name PVRGUIInfo data */
-    //@{
     CPVRGUIAnyTimerInfo   m_anyTimersInfo; // tv + radio
     CPVRGUITVTimerInfo    m_tvTimersInfo;
     CPVRGUIRadioTimerInfo m_radioTimersInfo;
@@ -136,8 +134,6 @@ namespace PVR
     bool                            m_bIsRecordingPlayingChannel;
     std::string                     m_strPlayingTVGroup;
     std::string                     m_strPlayingRadioGroup;
-
-    //@}
 
     PVR_SIGNAL_STATUS               m_qualityInfo;       /*!< stream quality information */
     PVR_DESCRAMBLE_INFO             m_descrambleInfo;    /*!< stream descramble information */

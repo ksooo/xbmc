@@ -13,19 +13,22 @@
 #include <vector>
 
 #include "XBDateTime.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
+#include "threads/CriticalSection.h"
 #include "utils/ISerializable.h"
 #include "utils/ISortable.h"
 
-#include "pvr/channels/PVRChannel.h"
-#include "pvr/recordings/PVRRecording.h"
-#include "pvr/timers/PVRTimerInfoTag.h"
-
 class CVariant;
+
+// PVR Addon API types
+struct EPG_TAG;
+struct PVR_EDL_ENTRY;
 
 namespace PVR
 {
   class CPVREpg;
+  class CPVRChannel;
+  class CPVRRecording;
+  class CPVRTimerInfoTag;
 
   class CPVREpgInfoTag final : public ISerializable, public ISortable, public std::enable_shared_from_this<CPVREpgInfoTag>
   {
@@ -507,8 +510,8 @@ namespace PVR
     int                      m_iSeriesNumber = 0;   /*!< series number */
     int                      m_iEpisodeNumber = 0;  /*!< episode number */
     int                      m_iEpisodePart = 0;    /*!< episode part number */
-    unsigned int m_iUniqueBroadcastID = EPG_TAG_INVALID_UID;   /*!< unique broadcast ID */
-    unsigned int m_iUniqueChannelID = PVR_CHANNEL_INVALID_UID; /*!< unique channel ID */
+    unsigned int             m_iUniqueBroadcastID = 0; /*!< unique broadcast ID */
+    unsigned int             m_iUniqueChannelID = 0;   /*!< unique channel ID */
     std::string              m_strTitle;            /*!< title */
     std::string              m_strPlotOutline;      /*!< plot outline */
     std::string              m_strPlot;             /*!< plot */
@@ -525,7 +528,7 @@ namespace PVR
     CDateTime                m_startTime;           /*!< event start time */
     CDateTime                m_endTime;             /*!< event end time */
     CDateTime                m_firstAired;          /*!< first airdate */
-    unsigned int m_iFlags = EPG_TAG_FLAG_UNDEFINED; /*!< the flags applicable to this EPG entry */
+    unsigned int             m_iFlags = 0;          /*!< the flags applicable to this EPG entry */
     std::string              m_strSeriesLink;       /*!< series link */
 
     mutable CCriticalSection m_critSection;

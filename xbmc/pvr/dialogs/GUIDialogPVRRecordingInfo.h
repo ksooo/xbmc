@@ -8,7 +8,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include "guilib/GUIDialog.h"
+
+class CFileItem;
 
 namespace PVR
 {
@@ -20,16 +24,16 @@ namespace PVR
     bool OnMessage(CGUIMessage& message) override;
     bool OnInfo(int actionID) override;
     bool HasListItems() const override { return true; }
-    CFileItemPtr GetCurrentListItem(int offset = 0) override;
+    std::shared_ptr<CFileItem> GetCurrentListItem(int offset = 0) override;
 
     void SetRecording(const CFileItem *item);
 
-    static void ShowFor(const CFileItemPtr& item);
+    static void ShowFor(const std::shared_ptr<CFileItem>& item);
 
   private:
     bool OnClickButtonOK(CGUIMessage &message);
     bool OnClickButtonPlay(CGUIMessage &message);
 
-    CFileItemPtr m_recordItem;
+    std::shared_ptr<CFileItem> m_recordItem;
   };
 }

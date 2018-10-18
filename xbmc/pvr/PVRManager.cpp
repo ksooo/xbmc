@@ -31,9 +31,13 @@
 #include "pvr/addons/PVRClients.h"
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/channels/PVRChannelGroupInternal.h"
+#include "pvr/channels/PVRChannelGroups.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
+#include "pvr/epg/EpgInfoTag.h"
+#include "pvr/recordings/PVRRecording.h"
 #include "pvr/recordings/PVRRecordings.h"
 #include "pvr/recordings/PVRRecordingsPath.h"
+#include "pvr/timers/PVRTimerInfoTag.h"
 #include "pvr/timers/PVRTimers.h"
 
 using namespace PVR;
@@ -730,7 +734,7 @@ std::shared_ptr<CPVRChannelGroup> CPVRManager::GetPlayingGroup(bool bRadio /* = 
   return std::shared_ptr<CPVRChannelGroup>();
 }
 
-void CPVRManager::OnPlaybackStarted(const CFileItemPtr item)
+void CPVRManager::OnPlaybackStarted(const std::shared_ptr<CFileItem>& item)
 {
   m_playingChannel.reset();
   m_playingRecording.reset();
@@ -770,7 +774,7 @@ void CPVRManager::OnPlaybackStarted(const CFileItemPtr item)
   m_epgContainer.OnPlaybackStarted(item);
 }
 
-void CPVRManager::OnPlaybackStopped(const CFileItemPtr item)
+void CPVRManager::OnPlaybackStopped(const std::shared_ptr<CFileItem>& item)
 {
   // Playback ended due to user interaction
 
@@ -801,7 +805,7 @@ void CPVRManager::OnPlaybackStopped(const CFileItemPtr item)
   m_epgContainer.OnPlaybackStopped(item);
 }
 
-void CPVRManager::OnPlaybackEnded(const CFileItemPtr item)
+void CPVRManager::OnPlaybackEnded(const std::shared_ptr<CFileItem>& item)
 {
   // Playback ended, but not due to user interaction
   OnPlaybackStopped(item);
