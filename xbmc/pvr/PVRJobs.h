@@ -9,15 +9,17 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of PVR_CONNECTION_STATE in this file 
 #include "threads/SystemClock.h"
 #include "utils/Job.h"
 
 namespace PVR
 {
   class CPVRClient;
+
+  enum class PVRClientConnectionState;
 
   class CPVRPlayChannelOnStartupJob : public CJob
   {
@@ -170,7 +172,7 @@ namespace PVR
   class CPVRClientConnectionJob : public CJob
   {
   public:
-    CPVRClientConnectionJob(CPVRClient *client, std::string connectString, PVR_CONNECTION_STATE state, std::string message)
+    CPVRClientConnectionJob(CPVRClient *client, std::string connectString, PVRClientConnectionState state, std::string message)
     : m_client(client), m_connectString(connectString), m_state(state), m_message(message) {}
     ~CPVRClientConnectionJob() override = default;
     const char *GetType() const override { return "pvr-client-connection"; }
@@ -179,7 +181,7 @@ namespace PVR
   private:
     CPVRClient *m_client;
     std::string m_connectString;
-    PVR_CONNECTION_STATE m_state;
+    PVRClientConnectionState m_state;
     std::string m_message;
   };
 

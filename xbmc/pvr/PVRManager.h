@@ -44,6 +44,8 @@ namespace PVR
   class CPVRRecordings;
   class CPVRTimers;
 
+  enum class PVRClientConnectionState;
+
   enum class PVREvent
   {
     // PVR Manager states
@@ -429,7 +431,7 @@ namespace PVR
     /*!
      * @brief Signal a connection change of a client
      */
-    void ConnectionStateChange(CPVRClient *client, std::string connectString, PVR_CONNECTION_STATE state, std::string message);
+    void ConnectionStateChange(CPVRClient *client, std::string connectString, PVRClientConnectionState state, std::string message);
 
     /*!
      * @brief Query the events available for CEventStream

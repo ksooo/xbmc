@@ -15,7 +15,6 @@
 #include <vector>
 
 #include "addons/binary-addons/AddonDll.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 
 // PVR Addon API types
 struct EPG_TAG;
@@ -64,6 +63,19 @@ namespace PVR
     INVALID_PARAMETERS = -7, /*!< @brief the parameters of the method that was called are invalid for this operation */
     RECORDING_RUNNING  = -8, /*!< @brief a recording is running, so the timer can't be deleted without doing a forced delete */
     FAILED             = -9, /*!< @brief the command failed */
+  };
+
+  // Wrapper for Addon API enum PVR_CONNECTION_STATE
+  enum class PVRClientConnectionState
+  {
+    UNKNOWN            = 0,  /*!< @brief unknown state (e.g. not yet tried to connect) */
+    SERVER_UNREACHABLE = 1,  /*!< @brief backend server is not reachable (e.g. server not existing or network down)*/
+    SERVER_MISMATCH    = 2,  /*!< @brief backend server is reachable, but there is not the expected type of server running (e.g. HTSP required, but FTP running at given server:port) */
+    VERSION_MISMATCH   = 3,  /*!< @brief backend server is reachable, but server version does not match client requirements */
+    ACCESS_DENIED      = 4,  /*!< @brief backend server is reachable, but denies client access (e.g. due to wrong credentials) */
+    CONNECTED          = 5,  /*!< @brief connection to backend server is established */
+    DISCONNECTED       = 6,  /*!< @brief no connection to backend server (e.g. due to network errors or client initiated disconnect)*/
+    CONNECTING         = 7,  /*!< @brief connecting to backend */
   };
 
   class CPVRClient : public ADDON::CAddonDll
@@ -119,19 +131,19 @@ namespace PVR
      * @brief Gets the backend connection state.
      * @return the backend connection state.
      */
-    PVR_CONNECTION_STATE GetConnectionState(void) const;
+    PVRClientConnectionState GetConnectionState(void) const;
 
     /*!
      * @brief Sets the backend connection state.
      * @param state the new backend connection state.
      */
-    void SetConnectionState(PVR_CONNECTION_STATE state);
+    void SetConnectionState(PVRClientConnectionState state);
 
     /*!
      * @brief Gets the backend's previous connection state.
      * @return the backend's previous  connection state.
      */
-    PVR_CONNECTION_STATE GetPreviousConnectionState(void) const;
+    PVRClientConnectionState GetPreviousConnectionState(void) const;
 
     /*!
      * @brief signal to PVRManager this client should be ignored
@@ -708,7 +720,7 @@ namespace PVR
      * @brief Get the interface table used between addon and Kodi.
      * @todo This function will be removed after old callback library system is removed.
      */
-    AddonInstance_PVR* GetInstanceInterface();
+    AddonInstance_PVR* GetInstanceInterface() { return m_struct.get(); }
 
   private:
     /*!
@@ -778,151 +790,10 @@ namespace PVR
                           bool bIsImplemented = true,
                           bool bCheckReadyToUse = true) const;
 
-    /*!
-     * @brief Callback functions from addon to kodi
-     */
-    //@{
-
-    /*!
-     * @brief Transfer a channel group from the add-on to Kodi. The group will be created if it doesn't exist.
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param handle The handle parameter that Kodi used when requesting the channel groups list
-     * @param entry The entry to transfer to Kodi
-     */
-    static void cb_transfer_channel_group(void* kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL_GROUP* entry);
-
-    /*!
-     * @brief Transfer a channel group member entry from the add-on to Kodi. The channel will be added to the group if the group can be found.
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param handle The handle parameter that Kodi used when requesting the channel group members list
-     * @param entry The entry to transfer to Kodi
-     */
-    static void cb_transfer_channel_group_member(void* kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL_GROUP_MEMBER* entry);
-
-    /*!
-     * @brief Transfer an EPG tag from the add-on to Kodi
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param handle The handle parameter that Kodi used when requesting the EPG data
-     * @param entry The entry to transfer to Kodi
-     */
-    static void cb_transfer_epg_entry(void* kodiInstance, const ADDON_HANDLE handle, const EPG_TAG* entry);
-
-    /*!
-     * @brief Transfer a channel entry from the add-on to Kodi
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param handle The handle parameter that Kodi used when requesting the channel list
-     * @param entry The entry to transfer to Kodi
-     */
-    static void cb_transfer_channel_entry(void* kodiInstance, const ADDON_HANDLE handle, const PVR_CHANNEL* entry);
-
-    /*!
-     * @brief Transfer a timer entry from the add-on to Kodi
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param handle The handle parameter that Kodi used when requesting the timers list
-     * @param entry The entry to transfer to Kodi
-     */
-    static void cb_transfer_timer_entry(void* kodiInstance, const ADDON_HANDLE handle, const PVR_TIMER* entry);
-
-    /*!
-     * @brief Transfer a recording entry from the add-on to Kodi
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param handle The handle parameter that Kodi used when requesting the recordings list
-     * @param entry The entry to transfer to Kodi
-     */
-    static void cb_transfer_recording_entry(void* kodiInstance, const ADDON_HANDLE handle, const PVR_RECORDING* entry);
-
-    /*!
-     * @brief Add or replace a menu hook for the context menu for this add-on
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param hook The hook to add.
-     */
-    static void cb_add_menu_hook(void* kodiInstance, PVR_MENUHOOK* hook);
-
-    /*!
-     * @brief Display a notification in Kodi that a recording started or stopped on the server
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param strName The name of the recording to display
-     * @param strFileName The filename of the recording
-     * @param bOnOff True when recording started, false when it stopped
-     */
-    static void cb_recording(void* kodiInstance, const char* strName, const char* strFileName, bool bOnOff);
-
-    /*!
-     * @brief Request Kodi to update it's list of channels
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     */
-    static void cb_trigger_channel_update(void* kodiInstance);
-
-    /*!
-     * @brief Request Kodi to update it's list of timers
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     */
-    static void cb_trigger_timer_update(void* kodiInstance);
-
-    /*!
-     * @brief Request Kodi to update it's list of recordings
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     */
-    static void cb_trigger_recording_update(void* kodiInstance);
-
-    /*!
-     * @brief Request Kodi to update it's list of channel groups
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     */
-    static void cb_trigger_channel_groups_update(void* kodiInstance);
-
-    /*!
-     * @brief Schedule an EPG update for the given channel channel
-     * @param kodiInstance A pointer to the add-on
-     * @param iChannelUid The unique id of the channel for this add-on
-     */
-    static void cb_trigger_epg_update(void* kodiInstance, unsigned int iChannelUid);
-
-    /*!
-     * @brief Free a packet that was allocated with AllocateDemuxPacket
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param pPacket The packet to free.
-     */
-    static void cb_free_demux_packet(void* kodiInstance, DemuxPacket* pPacket);
-
-    /*!
-     * @brief Allocate a demux packet. Free with FreeDemuxPacket
-     * @param kodiInstance Pointer to Kodi's CPVRClient class.
-     * @param iDataSize The size of the data that will go into the packet
-     * @return The allocated packet.
-     */
-    static DemuxPacket* cb_allocate_demux_packet(void* kodiInstance, int iDataSize = 0);
-
-    /*!
-     * @brief Notify a state change for a PVR backend connection
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param strConnectionString The connection string reported by the backend that can be displayed in the UI.
-     * @param newState The new state.
-     * @param strMessage A localized addon-defined string representing the new state, that can be displayed
-     *        in the UI or NULL if the Kodi-defined default string for the new state shall be displayed.
-     */
-    static void cb_connection_state_change(void* kodiInstance, const char* strConnectionString, PVR_CONNECTION_STATE newState, const char *strMessage);
-
-    /*!
-     * @brief Notify a state change for an EPG event
-     * @param kodiInstance Pointer to Kodi's CPVRClient class
-     * @param tag The EPG event.
-     * @param newState The new state.
-     * @param newState The new state. For EPG_EVENT_CREATED and EPG_EVENT_UPDATED, tag must be filled with all available
-     *        event data, not just a delta. For EPG_EVENT_DELETED, it is sufficient to fill EPG_TAG.iUniqueBroadcastId
-     */
-    static void cb_epg_event_state_change(void* kodiInstance, EPG_TAG* tag, EPG_EVENT_STATE newState);
-
-    /*! @todo remove the use complete from them, or add as generl function?!
-     * Returns the ffmpeg codec id from given ffmpeg codec string name
-     */
-    static xbmc_codec_t cb_get_codec_by_name(const void* kodiInstance, const char* strCodecName);
-    //@}
-
     std::atomic<bool>      m_bReadyToUse;          /*!< true if this add-on is initialised (ADDON_Create returned true), false otherwise */
     std::atomic<bool>      m_bBlockAddonCalls;     /*!< true if no add-on API calls are allowed */
-    PVR_CONNECTION_STATE   m_connectionState;      /*!< the backend connection state */
-    PVR_CONNECTION_STATE   m_prevConnectionState;  /*!< the previous backend connection state */
+    PVRClientConnectionState m_connectionState;    /*!< the backend connection state */
+    PVRClientConnectionState m_prevConnectionState;  /*!< the previous backend connection state */
     bool                   m_ignoreClient;         /*!< signals to PVRManager to ignore this client until it has been connected */
     std::vector<std::shared_ptr<CPVRTimerType>> m_timertypes; /*!< timer types supported by this backend */
     int                    m_iClientId;            /*!< unique ID of the client */
@@ -944,6 +815,6 @@ namespace PVR
 
     mutable CCriticalSection m_critSection;
 
-    const std::unique_ptr<AddonInstance_PVR> m_struct;
+    std::unique_ptr<AddonInstance_PVR> m_struct;
   };
 }

@@ -581,7 +581,7 @@ void CPVRClients::OnPowerSavingDeactivated()
 }
 
 void CPVRClients::ConnectionStateChange(
-  CPVRClient *client, std::string &strConnectionString, PVR_CONNECTION_STATE newState, std::string &strMessage)
+  CPVRClient *client, std::string &strConnectionString, PVRClientConnectionState newState, std::string &strMessage)
 {
   if (!client)
     return;
@@ -592,29 +592,29 @@ void CPVRClients::ConnectionStateChange(
 
   switch (newState)
   {
-    case PVR_CONNECTION_STATE_SERVER_UNREACHABLE:
+    case PVRClientConnectionState::SERVER_UNREACHABLE:
       iMsg = 35505; // Server is unreachable
       break;
-    case PVR_CONNECTION_STATE_SERVER_MISMATCH:
+    case PVRClientConnectionState::SERVER_MISMATCH:
       iMsg = 35506; // Server does not respond properly
       break;
-    case PVR_CONNECTION_STATE_VERSION_MISMATCH:
+    case PVRClientConnectionState::VERSION_MISMATCH:
       iMsg = 35507; // Server version is not compatible
       break;
-    case PVR_CONNECTION_STATE_ACCESS_DENIED:
+    case PVRClientConnectionState::ACCESS_DENIED:
       iMsg = 35508; // Access denied
       break;
-    case PVR_CONNECTION_STATE_CONNECTED:
+    case PVRClientConnectionState::CONNECTED:
       bError = false;
       iMsg = 36034; // Connection established
-      if (client->GetPreviousConnectionState() == PVR_CONNECTION_STATE_UNKNOWN ||
-          client->GetPreviousConnectionState() == PVR_CONNECTION_STATE_CONNECTING)
+      if (client->GetPreviousConnectionState() == PVRClientConnectionState::UNKNOWN ||
+          client->GetPreviousConnectionState() == PVRClientConnectionState::CONNECTING)
         bNotify = false;
       break;
-    case PVR_CONNECTION_STATE_DISCONNECTED:
+    case PVRClientConnectionState::DISCONNECTED:
       iMsg = 36030; // Connection lost
       break;
-    case PVR_CONNECTION_STATE_CONNECTING:
+    case PVRClientConnectionState::CONNECTING:
       bError = false;
       iMsg = 35509; // Connecting
       bNotify = false;
@@ -634,7 +634,7 @@ void CPVRClients::ConnectionStateChange(
   // Notify user.
   CJobManager::GetInstance().AddJob(new CPVREventlogJob(bNotify, bError, client->Name(), strMsg, client->Icon()), nullptr);
 
-  if (newState == PVR_CONNECTION_STATE_CONNECTED)
+  if (newState == PVRClientConnectionState::CONNECTED)
   {
     // update properties on connect
     if (!client->GetAddonProperties())

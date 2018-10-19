@@ -15,7 +15,6 @@
 #include <vector>
 
 #include "addons/AddonManager.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of PVR_CONNECTION_STATE in this file
 #include "threads/CriticalSection.h"
 
 namespace ADDON
@@ -26,6 +25,7 @@ namespace ADDON
 namespace PVR
 {
   enum class PVRClientError;
+  enum class PVRClientConnectionState;
 
   class CPVRChannelGroupInternal;
   class CPVRChannelGroup;
@@ -309,7 +309,7 @@ namespace PVR
      * @param newState The new connection state.
      * @param strMessage A human readable message providing additional information.
      */
-    void ConnectionStateChange(CPVRClient *client, std::string &strConnectionString, PVR_CONNECTION_STATE newState, std::string &strMessage);
+    void ConnectionStateChange(CPVRClient *client, std::string &strConnectionString, PVRClientConnectionState newState, std::string &strMessage);
 
   private:
     /*!
