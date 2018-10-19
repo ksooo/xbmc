@@ -8,7 +8,7 @@
 
 #include "Edl.h"
 #include "FileItem.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of enum PVR_EDL_ENTRY usage in this file
+#include "addons/PVRClientEdlEntry.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "filesystem/File.h"
@@ -570,7 +570,7 @@ bool CEdl::ReadPvr(const CFileItem &fileItem)
     return false;
   }
 
-  std::vector<PVR_EDL_ENTRY> edl;
+  std::vector<PVR::CPVRClientEdlEntry> edl;
 
   if (fileItem.HasPVRRecordingInfoTag())
   {
@@ -588,32 +588,30 @@ bool CEdl::ReadPvr(const CFileItem &fileItem)
     return false;
   }
 
-  std::vector<PVR_EDL_ENTRY>::const_iterator it;
+  std::vector<PVR::CPVRClientEdlEntry>::const_iterator it;
   for (it = edl.begin(); it != edl.end(); ++it)
   {
     Cut cut;
-    cut.start = it->start;
-    cut.end = it->end;
+    cut.start = it->GetStart();
+    cut.end = it->GetEnd();
 
-    switch (it->type)
-    {
-    case PVR_EDL_TYPE_CUT:
+    if (it->IsCut())
       cut.action = CUT;
-      break;
-    case PVR_EDL_TYPE_MUTE:
+    else if (it->IsMute())
       cut.action = MUTE;
-      break;
-    case PVR_EDL_TYPE_SCENE:
+    else if (it->IsScene())
+    {
       if (!AddSceneMarker(cut.end))
       {
         CLog::Log(LOGWARNING, "%s - Error adding scene marker for pvr recording", __FUNCTION__);
       }
       continue;
-    case PVR_EDL_TYPE_COMBREAK:
+    }
+    else if (it->IsCommBreak())
       cut.action = COMM_BREAK;
-      break;
-    default:
-      CLog::Log(LOGINFO, "%s - Ignoring entry of unknown type: %d", __FUNCTION__, it->type);
+    else
+    {
+      CLog::Log(LOGINFO, "%s - Ignoring entry of unknown type", __FUNCTION__);
       continue;
     }
 

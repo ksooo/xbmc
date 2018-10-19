@@ -10,6 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
+#include "addons/PVRClientEdlEntry.h"
 #include "addons/PVRClientCapabilities.h"
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "guilib/LocalizeStrings.h"
@@ -342,9 +343,9 @@ void CPVRRecording::UpdateMetadata(CVideoDatabase &db)
   m_bGotMetaData = true;
 }
 
-std::vector<PVR_EDL_ENTRY> CPVRRecording::GetEdl() const
+std::vector<CPVRClientEdlEntry> CPVRRecording::GetEdl() const
 {
-  std::vector<PVR_EDL_ENTRY> edls;
+  std::vector<CPVRClientEdlEntry> edls;
 
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (client && client->GetClientCapabilities()->SupportsRecordingsEdl())

@@ -22,7 +22,6 @@ struct PVR_CHANNEL;
 struct PVR_CHANNEL_GROUP;
 struct PVR_CHANNEL_GROUP_MEMBER;
 struct PVR_DESCRAMBLE_INFO;
-struct PVR_EDL_ENTRY;
 struct PVR_MENUHOOK;
 struct PVR_NAMED_VALUE;
 struct PVR_RECORDING;
@@ -40,8 +39,9 @@ namespace PVR
 {
   class CPVRChannelGroup;
   class CPVRChannelGroups;
-  class CPVRClientMenuHook;
   class CPVRClientCapabilities;
+  class CPVRClientEdlEntry;
+  class CPVRClientMenuHook;
   class CPVRClientMenuHooks;
   class CPVREpg;
   class CPVRRecordings;
@@ -423,7 +423,7 @@ namespace PVR
     * @param edls The edit decision list (empty on error).
     * @return PVR_ERROR_NO_ERROR on success, respective error code otherwise.
     */
-    PVRClientError GetRecordingEdl(const CPVRRecording &recording, std::vector<PVR_EDL_ENTRY> &edls);
+    PVRClientError GetRecordingEdl(const CPVRRecording &recording, std::vector<CPVRClientEdlEntry> &edls);
 
     /*!
     * @brief Retrieve the edit decision list (EDL) from the backend.
@@ -431,7 +431,7 @@ namespace PVR
     * @param edls The edit decision list (empty on error).
     * @return PVR_ERROR_NO_ERROR on success, respective error code otherwise.
     */
-    PVRClientError GetEpgTagEdl(const std::shared_ptr<const CPVREpgInfoTag> &epgTag, std::vector<PVR_EDL_ENTRY> &edls);
+    PVRClientError GetEpgTagEdl(const std::shared_ptr<const CPVREpgInfoTag> &epgTag, std::vector<CPVRClientEdlEntry> &edls);
 
     //@}
     /** @name PVR timer methods */

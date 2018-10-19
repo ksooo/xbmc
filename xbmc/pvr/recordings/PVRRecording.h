@@ -35,12 +35,12 @@ class CVideoDatabase;
 class CVariant;
 
 // PVR Addon API types
-struct PVR_EDL_ENTRY;
 struct PVR_RECORDING;
 
 namespace PVR
 {
   class CPVRChannel;
+  class CPVRClientEdlEntry;
 
   /*!
    * @brief Representation of a CPVRRecording unique ID.
@@ -173,7 +173,7 @@ namespace PVR
      * @brief Retrieve the edit decision list (EDL) of a recording on the backend.
      * @return The edit decision list (empty on error)
      */
-    std::vector<PVR_EDL_ENTRY> GetEdl() const;
+    std::vector<CPVRClientEdlEntry> GetEdl() const;
 
     /*!
      * @brief Get the resume point and play count from the database if the

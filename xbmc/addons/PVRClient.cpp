@@ -18,6 +18,7 @@ extern "C" {
 
 #include "ServiceBroker.h"
 #include "addons/PVRClientCapabilities.h"
+#include "addons/PVRClientEdlEntry.h"
 #include "addons/PVRClientMenuHooks.h"
 #include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "cores/VideoPlayer/DVDDemuxers/DVDDemuxUtils.h"
@@ -1206,7 +1207,7 @@ PVRClientError CPVRClient::FillEpgTagStreamFileItem(CFileItem &fileItem)
   });
 }
 
-PVRClientError CPVRClient::GetEpgTagEdl(const std::shared_ptr<const CPVREpgInfoTag> &epgTag, std::vector<PVR_EDL_ENTRY> &edls)
+PVRClientError CPVRClient::GetEpgTagEdl(const std::shared_ptr<const CPVREpgInfoTag> &epgTag, std::vector<CPVRClientEdlEntry> &edls)
 {
   edls.clear();
   return DoAddonCall(__FUNCTION__, [&epgTag, &edls](const AddonInstance* addon) {
@@ -1219,7 +1220,7 @@ PVRClientError CPVRClient::GetEpgTagEdl(const std::shared_ptr<const CPVREpgInfoT
     {
       edls.reserve(size);
       for (int i = 0; i < size; ++i)
-        edls.emplace_back(edl_array[i]);
+        edls.emplace_back(CPVRClientEdlEntry(edl_array[i]));
     }
     return error;
   }, m_clientCapabilities->SupportsEpgTagEdl());
@@ -1367,7 +1368,7 @@ PVRClientError CPVRClient::GetRecordingLastPlayedPosition(const CPVRRecording &r
   }, m_clientCapabilities->SupportsRecordingsLastPlayedPosition());
 }
 
-PVRClientError CPVRClient::GetRecordingEdl(const CPVRRecording &recording, std::vector<PVR_EDL_ENTRY> &edls)
+PVRClientError CPVRClient::GetRecordingEdl(const CPVRRecording &recording, std::vector<CPVRClientEdlEntry> &edls)
 {
   edls.clear();
   return DoAddonCall(__FUNCTION__, [&recording, &edls](const AddonInstance* addon) {
@@ -1381,7 +1382,7 @@ PVRClientError CPVRClient::GetRecordingEdl(const CPVRRecording &recording, std::
     {
       edls.reserve(size);
       for (int i = 0; i < size; ++i)
-        edls.emplace_back(edl_array[i]);
+        edls.emplace_back(CPVRClientEdlEntry(edl_array[i]));
     }
     return error;
   }, m_clientCapabilities->SupportsRecordingsEdl());

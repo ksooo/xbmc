@@ -21,12 +21,12 @@ class CVariant;
 
 // PVR Addon API types
 struct EPG_TAG;
-struct PVR_EDL_ENTRY;
 
 namespace PVR
 {
   class CPVREpg;
   class CPVRChannel;
+  class CPVRClientEdlEntry;
   class CPVRRecording;
   class CPVRTimerInfoTag;
 
@@ -442,7 +442,7 @@ namespace PVR
      * @brief Retrieve the edit decision list (EDL) of an EPG tag.
      * @return The edit decision list (empty on error)
      */
-    std::vector<PVR_EDL_ENTRY> GetEdl() const;
+    std::vector<CPVRClientEdlEntry> GetEdl() const;
 
     /*!
      * @brief Check whether this tag has any series attributes.
