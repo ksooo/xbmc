@@ -12,6 +12,7 @@
 
 #include "addons/PVRClient.h"
 #include "addons/PVRClientCapabilities.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of EPG_EVENT_CONTENTMASK_* + EPG_TAG_INVALID_UID usage in this file
 #include "EpgContainer.h"
 #include "EpgDatabase.h"
 #include "ServiceBroker.h"
@@ -423,16 +424,16 @@ bool CPVREpg::UpdateEntry(const std::shared_ptr<CPVREpgInfoTag> &tag, bool bUpda
   return true;
 }
 
-bool CPVREpg::UpdateEntry(const std::shared_ptr<CPVREpgInfoTag> &tag, EPG_EVENT_STATE newState, bool bUpdateDatabase)
+bool CPVREpg::UpdateEntry(const std::shared_ptr<CPVREpgInfoTag> &tag, EpgEventState newState, bool bUpdateDatabase)
 {
   bool bRet = true;
   bool bNotify = true;
 
-  if (newState == EPG_EVENT_CREATED || newState == EPG_EVENT_UPDATED)
+  if (newState == EpgEventState::CREATED || newState == EpgEventState::UPDATED)
   {
     bRet = UpdateEntry(tag, bUpdateDatabase);
   }
-  else if (newState == EPG_EVENT_DELETED)
+  else if (newState == EpgEventState::DELETED)
   {
     CSingleLock lock(m_critSection);
     auto it = m_tags.begin();
@@ -468,7 +469,7 @@ bool CPVREpg::UpdateEntry(const std::shared_ptr<CPVREpgInfoTag> &tag, EPG_EVENT_
   }
   else
   {
-    CLog::LogF(LOGERROR, "Unknown epg event state value: %d", newState);
+    CLog::LogF(LOGERROR, "Unknown epg event state value: %d", static_cast<int>(newState));
     bRet = false;
   }
 

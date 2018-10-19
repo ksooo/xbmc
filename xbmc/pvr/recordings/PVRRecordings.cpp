@@ -14,6 +14,7 @@
 #include "ServiceBroker.h"
 #include "URL.h"
 #include "addons/PVRClient.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of EPG_TAG_INVALID_UID usage in this file
 #include "filesystem/Directory.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"

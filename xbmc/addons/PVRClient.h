@@ -78,6 +78,14 @@ namespace PVR
     CONNECTING         = 7,  /*!< @brief connecting to backend */
   };
 
+  // Wrapper for Addon API enum EPG_EVENT_STATE
+  enum class EpgEventState
+  {
+    CREATED = 0,  /*!< @brief event created */
+    UPDATED = 1,  /*!< @brief event updated */
+    DELETED = 2,  /*!< @brief event deleted */
+  };
+
   class CPVRClient : public ADDON::CAddonDll
   {
   public:

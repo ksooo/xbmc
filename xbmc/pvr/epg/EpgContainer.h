@@ -12,7 +12,6 @@
 #include <memory>
 
 #include "XBDateTime.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of enum EPG_EVENT_STATE usage in this file
 #include "threads/CriticalSection.h"
 #include "threads/Thread.h"
 #include "utils/Observer.h"
@@ -33,6 +32,8 @@ namespace PVR
   class CPVREpgInfoTag;
   class CPVREpgSearchFilter;
   class CPVRTimerInfoTag;
+
+  enum class EpgEventState;
 
   class CPVREpgContainer : public Observer, public Observable, private CThread
   {
@@ -165,7 +166,7 @@ namespace PVR
      * @param tag The epg tag containing the updated data
      * @param eNewState The kind of change (CREATED, UPDATED, DELETED)
      */
-    void UpdateFromClient(const std::shared_ptr<CPVREpgInfoTag> &tag, EPG_EVENT_STATE eNewState);
+    void UpdateFromClient(const std::shared_ptr<CPVREpgInfoTag> &tag, EpgEventState eNewState);
 
     /*!
      * @brief Get the number of past days to show in the guide and to import from backends.

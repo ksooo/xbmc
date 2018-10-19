@@ -11,6 +11,7 @@
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
 #include "addons/PVRClientCapabilities.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h"
 #include "guilib/LocalizeStrings.h"
 #include "messaging/helpers/DialogOKHelper.h"
 #include "settings/AdvancedSettings.h"

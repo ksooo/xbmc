@@ -10,6 +10,7 @@
 
 #include "FileItem.h"
 #include "ServiceBroker.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of EPG_EVENT_CONTENTMASK_* + EPG_TAG_INVALID_UID usage in this file
 #include "utils/TextSearch.h"
 #include "utils/log.h"
 

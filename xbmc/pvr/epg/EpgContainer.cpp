@@ -12,6 +12,7 @@
 
 #include "FileItem.h"
 #include "ServiceBroker.h"
+#include "addons/PVRClient.h"
 #include "guilib/LocalizeStrings.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
@@ -72,13 +73,13 @@ class CEpgTagStateChange
 {
 public:
   CEpgTagStateChange() = default;
-  CEpgTagStateChange(const std::shared_ptr<CPVREpgInfoTag> &tag, EPG_EVENT_STATE eNewState) : m_epgtag(tag), m_state(eNewState) {}
+  CEpgTagStateChange(const std::shared_ptr<CPVREpgInfoTag> &tag, EpgEventState eNewState) : m_epgtag(tag), m_state(eNewState) {}
 
   void Deliver();
 
 private:
   std::shared_ptr<CPVREpgInfoTag> m_epgtag;
-  EPG_EVENT_STATE m_state = EPG_EVENT_CREATED;
+  EpgEventState m_state = EpgEventState::CREATED;
 };
 
 void CEpgTagStateChange::Deliver()
@@ -843,7 +844,7 @@ void CPVREpgContainer::UpdateRequest(int iClientID, unsigned int iUniqueChannelI
   m_updateRequests.emplace_back(CEpgUpdateRequest(iClientID, iUniqueChannelID));
 }
 
-void CPVREpgContainer::UpdateFromClient(const std::shared_ptr<CPVREpgInfoTag> &tag, EPG_EVENT_STATE eNewState)
+void CPVREpgContainer::UpdateFromClient(const std::shared_ptr<CPVREpgInfoTag> &tag, EpgEventState eNewState)
 {
   CSingleLock lock(m_epgTagChangesLock);
   m_epgTagChanges.emplace_back(CEpgTagStateChange(tag, eNewState));

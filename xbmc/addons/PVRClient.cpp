@@ -411,7 +411,8 @@ namespace
       return;
     }
 
-    CServiceBroker::GetPVRManager().EpgContainer().UpdateFromClient(std::make_shared<CPVREpgInfoTag>(*tag, client->GetID()), newState);
+    CServiceBroker::GetPVRManager().EpgContainer().UpdateFromClient(
+      std::make_shared<CPVREpgInfoTag>(*tag, client->GetID()), static_cast<EpgEventState>(newState));
   }
 
   class CCodecIds

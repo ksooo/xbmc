@@ -8,6 +8,7 @@
 
 #include "Edl.h"
 #include "FileItem.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of enum PVR_EDL_ENTRY usage in this file
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "filesystem/File.h"

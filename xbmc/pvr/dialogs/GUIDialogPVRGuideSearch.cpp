@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "ServiceBroker.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of EPG_EVENT_CONTENTMASK_* usage in this file
 #include "guilib/GUIMessage.h"
 #include "guilib/GUIEditControl.h"
 #include "guilib/LocalizeStrings.h"

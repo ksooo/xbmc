@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "XBDateTime.h"
-#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of enum EPG_EVENT_STATE usage in this file
 #include "threads/CriticalSection.h"
 #include "utils/Observer.h"
 
@@ -28,6 +27,8 @@ namespace PVR
   class CPVRChannel;
   class CPVREpgInfoTag;
   class CPVREpgSearchFilter;
+
+  enum class EpgEventState;
 
   class CPVREpg : public Observable
   {
@@ -197,7 +198,7 @@ namespace PVR
      * @param bUpdateDatabase If set to true, this event will be persisted in the database.
      * @return True if it was updated successfully, false otherwise.
      */
-    bool UpdateEntry(const std::shared_ptr<CPVREpgInfoTag> &tag, EPG_EVENT_STATE newState, bool bUpdateDatabase);
+    bool UpdateEntry(const std::shared_ptr<CPVREpgInfoTag> &tag, EpgEventState newState, bool bUpdateDatabase);
 
     /*!
      * @brief Update the EPG from 'start' till 'end'.

@@ -11,6 +11,7 @@
 #include <cstdlib>
 
 #include "ServiceBroker.h"
+#include "addons/kodi-addon-dev-kit/include/kodi/xbmc_pvr_types.h" // @todo get rid of EPG_TAG_INVALID_UI + EPG_GRNRE_USE_STRING  usage in this file
 #include "dbwrappers/dataset.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
