@@ -34,6 +34,7 @@ struct PVR_TIMER;
 
 struct DemuxPacket;
 
+struct AddonInstance_PVR;
 struct KodiToAddonFuncTable_PVR;
 
 namespace PVR
@@ -707,7 +708,7 @@ namespace PVR
      * @brief Get the interface table used between addon and Kodi.
      * @todo This function will be removed after old callback library system is removed.
      */
-    AddonInstance_PVR* GetInstanceInterface() { return &m_struct; }
+    AddonInstance_PVR* GetInstanceInterface();
 
   private:
     /*!
@@ -943,6 +944,6 @@ namespace PVR
 
     mutable CCriticalSection m_critSection;
 
-    AddonInstance_PVR m_struct;
+    const std::unique_ptr<AddonInstance_PVR> m_struct;
   };
 }

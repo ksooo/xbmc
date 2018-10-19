@@ -54,7 +54,8 @@ namespace PVR
 #define DEFAULT_INFO_STRING_VALUE "unknown"
 
 CPVRClient::CPVRClient(CAddonInfo addonInfo)
-  : CAddonDll(std::move(addonInfo))
+  : CAddonDll(std::move(addonInfo)),
+    m_struct(new AddonInstance_PVR)
 {
   ResetProperties();
 }
@@ -119,30 +120,29 @@ void CPVRClient::ResetProperties(int iClientId /* = PVR_INVALID_CLIENT_ID */)
   m_timertypes.clear();
   m_clientCapabilities.reset();
 
-  m_struct = {{0}};
-  m_struct.props.strUserPath = m_strUserPath.c_str();
-  m_struct.props.strClientPath = m_strClientPath.c_str();
-  m_struct.props.iEpgMaxDays = CServiceBroker::GetPVRManager().EpgContainer().GetFutureDaysToDisplay();
+  m_struct->props.strUserPath = m_strUserPath.c_str();
+  m_struct->props.strClientPath = m_strClientPath.c_str();
+  m_struct->props.iEpgMaxDays = CServiceBroker::GetPVRManager().EpgContainer().GetFutureDaysToDisplay();
 
-  m_struct.toKodi.kodiInstance = this;
-  m_struct.toKodi.TransferEpgEntry = cb_transfer_epg_entry;
-  m_struct.toKodi.TransferChannelEntry = cb_transfer_channel_entry;
-  m_struct.toKodi.TransferTimerEntry = cb_transfer_timer_entry;
-  m_struct.toKodi.TransferRecordingEntry = cb_transfer_recording_entry;
-  m_struct.toKodi.AddMenuHook = cb_add_menu_hook;
-  m_struct.toKodi.Recording = cb_recording;
-  m_struct.toKodi.TriggerChannelUpdate = cb_trigger_channel_update;
-  m_struct.toKodi.TriggerChannelGroupsUpdate = cb_trigger_channel_groups_update;
-  m_struct.toKodi.TriggerTimerUpdate = cb_trigger_timer_update;
-  m_struct.toKodi.TriggerRecordingUpdate = cb_trigger_recording_update;
-  m_struct.toKodi.TriggerEpgUpdate = cb_trigger_epg_update;
-  m_struct.toKodi.FreeDemuxPacket = cb_free_demux_packet;
-  m_struct.toKodi.AllocateDemuxPacket = cb_allocate_demux_packet;
-  m_struct.toKodi.TransferChannelGroup = cb_transfer_channel_group;
-  m_struct.toKodi.TransferChannelGroupMember = cb_transfer_channel_group_member;
-  m_struct.toKodi.ConnectionStateChange = cb_connection_state_change;
-  m_struct.toKodi.EpgEventStateChange = cb_epg_event_state_change;
-  m_struct.toKodi.GetCodecByName = cb_get_codec_by_name;
+  m_struct->toKodi.kodiInstance = this;
+  m_struct->toKodi.TransferEpgEntry = cb_transfer_epg_entry;
+  m_struct->toKodi.TransferChannelEntry = cb_transfer_channel_entry;
+  m_struct->toKodi.TransferTimerEntry = cb_transfer_timer_entry;
+  m_struct->toKodi.TransferRecordingEntry = cb_transfer_recording_entry;
+  m_struct->toKodi.AddMenuHook = cb_add_menu_hook;
+  m_struct->toKodi.Recording = cb_recording;
+  m_struct->toKodi.TriggerChannelUpdate = cb_trigger_channel_update;
+  m_struct->toKodi.TriggerChannelGroupsUpdate = cb_trigger_channel_groups_update;
+  m_struct->toKodi.TriggerTimerUpdate = cb_trigger_timer_update;
+  m_struct->toKodi.TriggerRecordingUpdate = cb_trigger_recording_update;
+  m_struct->toKodi.TriggerEpgUpdate = cb_trigger_epg_update;
+  m_struct->toKodi.FreeDemuxPacket = cb_free_demux_packet;
+  m_struct->toKodi.AllocateDemuxPacket = cb_allocate_demux_packet;
+  m_struct->toKodi.TransferChannelGroup = cb_transfer_channel_group;
+  m_struct->toKodi.TransferChannelGroupMember = cb_transfer_channel_group_member;
+  m_struct->toKodi.ConnectionStateChange = cb_connection_state_change;
+  m_struct->toKodi.EpgEventStateChange = cb_epg_event_state_change;
+  m_struct->toKodi.GetCodecByName = cb_get_codec_by_name;
 }
 
 ADDON_STATUS CPVRClient::Create(int iClientId)
@@ -155,9 +155,10 @@ ADDON_STATUS CPVRClient::Create(int iClientId)
   ResetProperties(iClientId);
 
   /* initialise the add-on */
-  bool bReadyToUse(false);
   CLog::LogFC(LOGDEBUG, LOGPVR, "Creating PVR add-on instance '%s'", Name().c_str());
-  if ((status = CAddonDll::Create(ADDON_INSTANCE_PVR, &m_struct, &m_struct.props)) == ADDON_STATUS_OK)
+  bool bReadyToUse = false;
+  status = CAddonDll::Create(ADDON_INSTANCE_PVR, m_struct.get(), &m_struct->props);
+  if (status == ADDON_STATUS_OK)
     bReadyToUse = GetAddonProperties();
 
   m_bReadyToUse = bReadyToUse;
@@ -559,7 +560,7 @@ PVRClientError CPVRClient::GetDriveSpace(long long &iTotal, long long &iUsed)
   return DoAddonCall(__FUNCTION__, [this, &iTotal, &iUsed](const AddonInstance* addon) {
     long long iTotalSpace = 0;
     long long iUsedSpace = 0;
-    PVRClientError error = static_cast<PVRClientError>(m_struct.toAddon.GetDriveSpace(&iTotalSpace, &iUsedSpace));
+    PVRClientError error = static_cast<PVRClientError>(m_struct->toAddon.GetDriveSpace(&iTotalSpace, &iUsedSpace));
     if (error == PVRClientError::NO_ERROR)
     {
       iTotal = iTotalSpace;
@@ -1205,7 +1206,7 @@ PVRClientError CPVRClient::DoAddonCall(const char* strFunctionName, std::functio
     return PVRClientError::SERVER_ERROR;
 
   // Call.
-  const PVRClientError error = function(&m_struct.toAddon);
+  const PVRClientError error = function(&m_struct->toAddon);
 
   // Log error, if any.
   if (error != PVRClientError::NO_ERROR && error != PVRClientError::NOT_IMPLEMENTED)
@@ -1761,6 +1762,11 @@ private:
 xbmc_codec_t CPVRClient::cb_get_codec_by_name(const void* kodiInstance, const char* strCodecName)
 {
   return CCodecIds::GetInstance().GetCodecByName(strCodecName);
+}
+
+AddonInstance_PVR* CPVRClient::GetInstanceInterface()
+{
+  return m_struct.get();
 }
 
 }
