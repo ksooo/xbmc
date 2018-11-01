@@ -12,9 +12,10 @@
 #include "addons/BinaryAddonCache.h"
 #include "guilib/LocalizeStrings.h"
 #include "messaging/ApplicationMessenger.h"
-#include "pvr/PVRJobs.h"
+#include "pvr/PVREventlogJob.h"
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannelGroupInternal.h"
+#include "utils/JobManager.h"
 #include "utils/log.h"
 
 #include <functional>
@@ -236,8 +237,14 @@ void CPVRClients::OnAddonEvent(const AddonEvent& event)
       typeid(event) == typeid(AddonEvents::ReInstalled))
   {
     // update addons
-    if (CServiceBroker::GetAddonMgr().HasType(event.id, ADDON_PVRDLL))
-      CJobManager::GetInstance().AddJob(new CPVRUpdateAddonsJob(event.id), nullptr);
+    const std::string id = event.id;
+    if (CServiceBroker::GetAddonMgr().HasType(id, ADDON_PVRDLL))
+    {
+      CJobManager::GetInstance().Submit([this, id] {
+        UpdateAddons(id);
+        return true;
+      });
+    }
   }
 }
 
@@ -575,8 +582,10 @@ void CPVRClients::OnPowerSavingDeactivated()
   });
 }
 
-void CPVRClients::ConnectionStateChange(
-  CPVRClient* client, std::string& strConnectionString, PVR_CONNECTION_STATE newState, std::string& strMessage)
+void CPVRClients::ConnectionStateChange(CPVRClient* client,
+                                        const std::string& strConnectionString,
+                                        PVR_CONNECTION_STATE newState,
+                                        const std::string& strMessage)
 {
   if (!client)
     return;

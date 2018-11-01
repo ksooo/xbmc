@@ -11,7 +11,7 @@
 #include "ServiceBroker.h"
 #include "addons/PVRClient.h"
 #include "pvr/PVRDatabase.h"
-#include "pvr/PVRJobs.h"
+#include "pvr/PVREventlogJob.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
 #include "pvr/channels/PVRChannel.h"
