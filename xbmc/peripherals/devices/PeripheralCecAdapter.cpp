@@ -1471,15 +1471,15 @@ bool CPeripheralCecAdapterUpdateThread::UpdateConfiguration(libcec_configuration
   return true;
 }
 
-bool CPeripheralCecAdapterUpdateThread::WaitReady(void)
+bool CPeripheralCecAdapterUpdateThread::WaitReady(bool bActivateSource)
 {
   // don't wait if we're not powering up anything
-  if (m_configuration.wakeDevices.IsEmpty() && m_configuration.bActivateSource == 0)
+  if (m_configuration.wakeDevices.IsEmpty() && !bActivateSource)
     return true;
 
   // wait for the TV if we're configured to become the active source.
   // wait for the first device in the wake list otherwise.
-  cec_logical_address waitFor = (m_configuration.bActivateSource == 1) ?
+  cec_logical_address waitFor = bActivateSource ?
       CECDEVICE_TV :
       m_configuration.wakeDevices.primary;
 
@@ -1541,17 +1541,59 @@ std::string CPeripheralCecAdapterUpdateThread::UpdateAudioSystemStatus(void)
 bool CPeripheralCecAdapterUpdateThread::SetInitialConfiguration(void)
 {
   // the option to make XBMC the active source is set
-  if (m_configuration.bActivateSource == 1)
+  bool bActivateSource = m_configuration.bActivateSource == 1;
+
+  if (!bActivateSource)
+  {
+    // LG TV hack: We must set Kodi as active source if the TV is already on / turning on; othwerwise TV does not pass control to Kodi.
+    const cec_power_status powerStatus = m_adapter->m_cecAdapter->GetDevicePowerStatus(CECDEVICE_TV);
+    bActivateSource = (powerStatus == CEC_POWER_STATUS_ON) || (powerStatus == CEC_POWER_STATUS_IN_TRANSITION_STANDBY_TO_ON);
+
+    if (bActivateSource && powerStatus == CEC_POWER_STATUS_IN_TRANSITION_STANDBY_TO_ON)
+      CLog::Log(LOGNOTICE, "##### %s : TV is powering on.", __FUNCTION__);
+
+    if (bActivateSource && powerStatus == CEC_POWER_STATUS_ON)
+    {
+      const cec_logical_address activeSource = m_adapter->m_cecAdapter->GetActiveSource();
+      CLog::Log(LOGNOTICE, "!!!!! %s : TV is powered on. Active source is %d.", __FUNCTION__, activeSource);
+
+      if (activeSource != CECDEVICE_TV && activeSource != CECDEVICE_UNKNOWN)
+      {
+        CLog::Log(LOGNOTICE, "##### %s : Not forcing set active source.", __FUNCTION__);
+        bActivateSource = false;
+      }
+      else
+      {
+        CLog::Log(LOGNOTICE, "##### %s : Forcing set active source.", __FUNCTION__);
+      }
+    }
+  }
+
+  if (bActivateSource)
+  {
+    CLog::Log(LOGNOTICE, "##### %s : Calling SetActiveSource.", __FUNCTION__);
     m_adapter->m_cecAdapter->SetActiveSource();
+  }
+  else
+  {
+    CLog::Log(LOGNOTICE, "##### %s : Skipping SetActiveSource.", __FUNCTION__);
+  }
 
   // devices to wake are set
   cec_logical_addresses tvOnly;
   tvOnly.Clear(); tvOnly.Set(CECDEVICE_TV);
   if (!m_configuration.wakeDevices.IsEmpty() && (m_configuration.wakeDevices != tvOnly || m_configuration.bActivateSource == 0))
+  {
+    CLog::Log(LOGNOTICE, "##### %s : Calling PowerOnDevices", __FUNCTION__);
     m_adapter->m_cecAdapter->PowerOnDevices(CECDEVICE_BROADCAST);
+  }
+  else
+  {
+    CLog::Log(LOGNOTICE, "##### %s : Skipping PowerOnDevices", __FUNCTION__);
+  }
 
   // wait until devices are powered up
-  if (!WaitReady())
+  if (!WaitReady(bActivateSource))
     return false;
 
   UpdateMenuLanguage();

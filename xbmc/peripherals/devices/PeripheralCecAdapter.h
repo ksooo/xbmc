@@ -187,7 +187,7 @@ namespace PERIPHERALS
   protected:
     void UpdateMenuLanguage(void);
     std::string UpdateAudioSystemStatus(void);
-    bool WaitReady(void);
+    bool WaitReady(bool bActivateSource);
     bool SetInitialConfiguration(void);
     void Process(void) override;
 
