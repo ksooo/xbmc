@@ -3181,7 +3181,8 @@ std::string CFileItem::GetFolderThumb(const std::string &folderJPG /* = "folder.
   if (IsMultiPath())
     strFolder = CMultiPathDirectory::GetFirstPath(m_strPath);
 
-  if (IsPlugin())
+  if (IsPlugin() ||
+      IsPVR())
     return "";
 
   return URIUtils::AddFileToFolder(strFolder, folderJPG);
