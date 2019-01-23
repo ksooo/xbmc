@@ -23,6 +23,7 @@
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "threads/SystemClock.h"
 #include "utils/log.h"
 #include "utils/POUtils.h"
 #include "utils/StringUtils.h"
@@ -55,6 +56,36 @@ bool CWeatherJob::DoWork()
   if (!CServiceBroker::GetAddonMgr().GetAddon(CServiceBroker::GetSettingsComponent()->GetSettings()->GetString(CSettings::SETTING_WEATHER_ADDON), addon, ADDON_SCRIPT_WEATHER))
     return false;
 
+  // In case of error, retry max 5 times, but unconditionally stop after 5 minutes
+  int nTries = 5;
+  XbmcThreads::EndTime timeout(5 * 60 * 1000);
+
+  while (!ShouldCancel(0, 0) && (nTries > 0))
+  {
+    if (timeout.IsTimePast())
+    {
+      CLog::Log(LOGERROR, "WEATHER: timeout while downloading data!");
+      return false;
+    }
+
+    if (nTries < 5)
+      CLog::Log(LOGNOTICE, "WEATHER: retrying to download data - tries left: %d", nTries);
+
+    nTries--;
+
+    if (UpdateData(addon))
+      return true;
+
+    if (!ShouldCancel(0, 0) && (nTries > 0))
+      Sleep(5000);
+  }
+
+  CLog::Log(LOGERROR, "WEATHER: no data after max retries!");
+  return false;
+}
+
+bool CWeatherJob::UpdateData(const AddonPtr& addon)
+{
   // initialize our sys.argv variables
   std::vector<std::string> argv;
   argv.push_back(addon->LibPath());
@@ -80,10 +111,21 @@ bool CWeatherJob::DoWork()
     // and send a message that we're done
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL,0,0,GUI_MSG_WEATHER_FETCHED);
     CServiceBroker::GetGUI()->GetWindowManager().SendThreadMessage(msg);
+
+    /* Check for success. Not perfect, but no way to get the return code from script execution. */
+    if (m_info.currentConditions.empty() || m_info.currentConditions == "N/A")
+    {
+      CLog::Log(LOGERROR, "WEATHER: No data after weather download!");
+      return false;
+    }
   }
   else
+  {
     CLog::Log(LOGERROR, "WEATHER: Weather download failed!");
+    return false;
+  }
 
+  CLog::Log(LOGNOTICE, "WEATHER: Weather download okay!");
   return true;
 }
 
