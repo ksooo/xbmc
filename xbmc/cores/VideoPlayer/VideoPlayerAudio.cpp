@@ -80,8 +80,8 @@ bool CVideoPlayerAudio::OpenStream(CDVDStreamInfo hints)
 {
   CLog::Log(LOGINFO, "Finding audio codec for: %i", hints.codec);
   bool allowpassthrough = !CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_VIDEOPLAYER_USEDISPLAYASCLOCK);
-  if (m_processInfo.IsRealtimeStream())
-    allowpassthrough = false;
+//  if (m_processInfo.IsRealtimeStream())
+//    allowpassthrough = false;
 
   CAEStreamInfo::DataType streamType =
       m_audioSink.GetPassthroughStreamType(hints.codec, hints.samplerate, hints.profile);
@@ -607,8 +607,8 @@ bool CVideoPlayerAudio::SwitchCodecIfNeeded()
 {
   CLog::Log(LOGDEBUG, "CVideoPlayerAudio: stream props changed, checking for passthrough");
   bool allowpassthrough = !CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_VIDEOPLAYER_USEDISPLAYASCLOCK);
-  if (m_processInfo.IsRealtimeStream() || m_synctype == SYNC_RESAMPLE)
-    allowpassthrough = false;
+ // if (m_processInfo.IsRealtimeStream() || m_synctype == SYNC_RESAMPLE)
+ //   allowpassthrough = false;
 
   CAEStreamInfo::DataType streamType = m_audioSink.GetPassthroughStreamType(
       m_streaminfo.codec, m_streaminfo.samplerate, m_streaminfo.profile);
