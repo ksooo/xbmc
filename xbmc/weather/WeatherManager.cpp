@@ -53,10 +53,17 @@ CWeatherManager::~CWeatherManager(void)
 
 std::string CWeatherManager::BusyInfo(int info) const
 {
-  if (info == WEATHER_IMAGE_CURRENT_ICON)
-    return URIUtils::AddFileToFolder(ICON_ADDON_PATH, "na.png");
+  if (m_info.lastUpdateTime.empty())
+  {
+    /* No data present. Show placeholder ("n/a", "busy", ...) */
+    if (info == WEATHER_IMAGE_CURRENT_ICON)
+      return URIUtils::AddFileToFolder(ICON_ADDON_PATH, "na.png");
 
-  return CInfoLoader::BusyInfo(info);
+    return CInfoLoader::BusyInfo(info);
+  }
+
+  /* Use outdated data - better than just a placeholder */
+  return TranslateInfo(info);
 }
 
 std::string CWeatherManager::TranslateInfo(int info) const
