@@ -104,22 +104,27 @@ void CGUIEPGGridContainerModel::Initialize(const std::unique_ptr<CFileItemList> 
   }
 
   /* check for invalid start and end time */
-  if (gridStart >= gridEnd)
+  CDateTime gridStartLocal;
+  gridStartLocal.SetFromUTCDateTime(gridStart);
+  CDateTime gridEndLocal;
+  gridEndLocal.SetFromUTCDateTime(gridEnd);
+
+  if (gridStartLocal >= gridEndLocal)
   {
     // default to start "now minus GRID_START_PADDING minutes" and end "start plus one page".
-    m_gridStart = CDateTime::GetUTCDateTime() - CDateTimeSpan(0, 0, GetGridStartPadding(), 0);
+    m_gridStart = CDateTime::GetCurrentDateTime() - CDateTimeSpan(0, 0, GetGridStartPadding(), 0);
     m_gridEnd = m_gridStart + CDateTimeSpan(0, 0, iBlocksPerPage * MINSPERBLOCK, 0);
   }
-  else if (gridStart > (CDateTime::GetUTCDateTime() - CDateTimeSpan(0, 0, GetGridStartPadding(), 0)))
+  else if (gridStartLocal > (CDateTime::GetCurrentDateTime() - CDateTimeSpan(0, 0, GetGridStartPadding(), 0)))
   {
     // adjust to start "now minus GRID_START_PADDING minutes".
-    m_gridStart = CDateTime::GetUTCDateTime() - CDateTimeSpan(0, 0, GetGridStartPadding(), 0);
-    m_gridEnd = gridEnd;
+    m_gridStart = CDateTime::GetCurrentDateTime() - CDateTimeSpan(0, 0, GetGridStartPadding(), 0);
+    m_gridEnd = gridEndLocal;
   }
   else
   {
-    m_gridStart = gridStart;
-    m_gridEnd = gridEnd;
+    m_gridStart = gridStartLocal;
+    m_gridEnd = gridEndLocal;
   }
 
   // roundup
@@ -128,16 +133,13 @@ void CGUIEPGGridContainerModel::Initialize(const std::unique_ptr<CFileItemList> 
 
   ////////////////////////////////////////////////////////////////////////
   // Create ruler items
-  CDateTime ruler;
-  ruler.SetFromUTCDateTime(m_gridStart);
-  CDateTime rulerEnd;
-  rulerEnd.SetFromUTCDateTime(m_gridEnd);
+  CDateTime ruler(m_gridStart);
   CFileItemPtr rulerItem(new CFileItem(ruler.GetAsLocalizedDate(true)));
   rulerItem->SetProperty("DateLabel", true);
   m_rulerItems.emplace_back(rulerItem);
 
   const CDateTimeSpan unit(0, 0, iRulerUnit * MINSPERBLOCK, 0);
-  for (; ruler < rulerEnd; ruler += unit)
+  for (; ruler < m_gridEnd; ruler += unit)
   {
     rulerItem.reset(new CFileItem(ruler.GetAsLocalizedTime("", false)));
     rulerItem->SetLabel2(ruler.GetAsLocalizedDate(true));
@@ -182,10 +184,10 @@ void CGUIEPGGridContainerModel::Initialize(const std::unique_ptr<CFileItemList> 
         // Note: Start block of an event is start-time-based calculated block + 1,
         //       unless start times matches exactly the begin of a block.
 
-        if (tag->EpgID() != iEpgId || gridCursor < tag->StartAsUTC() || m_gridEnd <= tag->StartAsUTC())
+        if (tag->EpgID() != iEpgId || gridCursor < tag->StartAsLocalTime() || m_gridEnd <= tag->StartAsLocalTime())
           break;
 
-        if (gridCursor < tag->EndAsUTC())
+        if (gridCursor < tag->EndAsLocalTime())
         {
           m_gridIndex[channel][block].item = item;
           m_gridIndex[channel][block].progIndex = progIdx;
@@ -292,10 +294,10 @@ void CGUIEPGGridContainerModel::FindChannelAndBlockIndex(int channelUid, unsigne
       {
         tag = m_programmeItems[progIdx]->GetEPGInfoTag();
 
-        if (tag->EpgID() != iEpgId || gridCursor < tag->StartAsUTC() || m_gridEnd <= tag->StartAsUTC())
+        if (tag->EpgID() != iEpgId || gridCursor < tag->StartAsLocalTime() || m_gridEnd <= tag->StartAsLocalTime())
           break; // next block
 
-        if (gridCursor < tag->EndAsUTC())
+        if (gridCursor < tag->EndAsLocalTime())
         {
           if (broadcastUid > 0 && tag->UniqueBroadcastID() == broadcastUid)
           {
@@ -444,12 +446,12 @@ int CGUIEPGGridContainerModel::GetBlock(const CDateTime &datetime) const
 
 int CGUIEPGGridContainerModel::GetNowBlock() const
 {
-  return GetBlock(CDateTime::GetUTCDateTime()) - GetPageNowOffset();
+  return GetBlock(CDateTime::GetCurrentDateTime()) - GetPageNowOffset();
 }
 
 int CGUIEPGGridContainerModel::GetFirstEventBlock(const CPVREpgInfoTagPtr &event) const
 {
-  const CDateTime eventStart = event->StartAsUTC();
+  const CDateTime eventStart = event->StartAsLocalTime();
   int diff;
 
   if (m_gridStart == eventStart)
@@ -469,5 +471,5 @@ int CGUIEPGGridContainerModel::GetLastEventBlock(const CPVREpgInfoTagPtr &event)
 {
   // Last block of a tag is always the block calculated using event's end time, not rounded up.
   // Refer to CGUIEPGGridContainerModel::Refresh, where the model is created, for details!
-  return GetBlock(event->EndAsUTC());
+  return GetBlock(event->EndAsLocalTime());
 }
