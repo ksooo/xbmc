@@ -146,21 +146,6 @@ typedef struct _SYSTEMTIME
   unsigned short wMilliseconds;
 } SYSTEMTIME, *PSYSTEMTIME, *LPSYSTEMTIME;
 
-typedef struct _TIME_ZONE_INFORMATION {
-  long Bias;
-  wchar_t StandardName[32];
-  SYSTEMTIME StandardDate;
-  long StandardBias;
-  wchar_t DaylightName[32];
-  SYSTEMTIME DaylightDate;
-  long DaylightBias;
-} TIME_ZONE_INFORMATION, *PTIME_ZONE_INFORMATION, *LPTIME_ZONE_INFORMATION;
-
-#define TIME_ZONE_ID_INVALID    ((DWORD)0xFFFFFFFF)
-#define TIME_ZONE_ID_UNKNOWN    0
-#define TIME_ZONE_ID_STANDARD   1
-#define TIME_ZONE_ID_DAYLIGHT   2
-
 // Thread
 #define THREAD_BASE_PRIORITY_LOWRT  15
 #define THREAD_BASE_PRIORITY_MAX    2

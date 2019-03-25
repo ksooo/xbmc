@@ -18,6 +18,5 @@ uint32_t SetFilePointer(HANDLE hFile, int32_t lDistanceToMove,
                       int32_t *lpDistanceToMoveHigh, DWORD dwMoveMethod);
 int SetFilePointerEx(HANDLE hFile, LARGE_INTEGER liDistanceToMove,PLARGE_INTEGER lpNewFilePointer, DWORD dwMoveMethod);
 
-uint32_t GetTimeZoneInformation( LPTIME_ZONE_INFORMATION lpTimeZoneInformation );
 int _stat64(const char *path, struct __stat64 *buffer);
 int _fstat64(int fd, struct __stat64 *buffer);

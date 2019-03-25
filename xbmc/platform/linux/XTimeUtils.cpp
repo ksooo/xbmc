@@ -175,7 +175,12 @@ int LocalFileTimeToFileTime( const FILETIME* lpLocalFileTime, LPFILETIME lpFileT
   l.u.LowPart = lpLocalFileTime->dwLowDateTime;
   l.u.HighPart = lpLocalFileTime->dwHighDateTime;
 
-  l.QuadPart += (unsigned long long) timezone * 10000000;
+  time_t ft;
+  struct tm tm_ft;
+  FileTimeToTimeT(lpLocalFileTime, &ft);
+  localtime_r(&ft, &tm_ft);
+
+  l.QuadPart -= static_cast<unsigned long long>(tm_ft.tm_gmtoff) * 10000000;
 
   lpFileTime->dwLowDateTime = l.u.LowPart;
   lpFileTime->dwHighDateTime = l.u.HighPart;
@@ -183,10 +188,10 @@ int LocalFileTimeToFileTime( const FILETIME* lpLocalFileTime, LPFILETIME lpFileT
   return 1;
 }
 
-int FileTimeToTimeT(const FILETIME* lpLocalFileTime, time_t *pTimeT) {
-
+int FileTimeToTimeT(const FILETIME* lpLocalFileTime, time_t *pTimeT)
+{
   if (lpLocalFileTime == NULL || pTimeT == NULL)
-  return false;
+    return false;
 
   ULARGE_INTEGER fileTime;
   fileTime.u.LowPart  = lpLocalFileTime->dwLowDateTime;
@@ -205,10 +210,10 @@ int FileTimeToTimeT(const FILETIME* lpLocalFileTime, time_t *pTimeT) {
   return 1;
 }
 
-int TimeTToFileTime(time_t timeT, FILETIME* lpLocalFileTime) {
-
+int TimeTToFileTime(time_t timeT, FILETIME* lpLocalFileTime)
+{
   if (lpLocalFileTime == NULL)
-  return false;
+    return false;
 
   ULARGE_INTEGER result;
   result.QuadPart = (unsigned long long) timeT * 10000000;
