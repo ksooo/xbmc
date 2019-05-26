@@ -367,7 +367,7 @@ public:
   void SetParam2(int param2);
   void SetPointer(void* pointer);
   void SetLabel(const std::string& strLabel);
-  void SetLabel(int iString);               // for convenience - looks up in strings.po
+  void SetLabel(int iString);               // for convenience - looks up in strings.xml
   const std::string& GetLabel() const;
   void SetStringParam(const std::string &strParam);
   void SetStringParams(const std::vector<std::string> &params);
