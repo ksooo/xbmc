@@ -309,9 +309,9 @@ static int AddonSettings(const std::vector<std::string>& params)
   return 0;
 }
 
-/*! \brief Open the settings for a given add-on.
-*  \param params The parameters.
-*/
+/*! \brief Open the install from zip dialog.
+ *  \param params The parameters.
+ */
 static int InstallFromZip(const std::vector<std::string>& params)
 {
   CGUIWindowAddonBrowser::InstallFromZip();
@@ -339,11 +339,13 @@ static int StopScript(const std::vector<std::string>& params)
 }
 
 /*! \brief Check add-on repositories for updates.
- *  \param params (ignored)
+ *  \param params The parameters.
+ *  \details params[0] = "showProgress" to show a progress indicator (optional).
  */
 static int UpdateRepos(const std::vector<std::string>& params)
 {
-  CServiceBroker::GetRepositoryUpdater().CheckForUpdates();
+  bool bShowProgress = params.size() > 0 && StringUtils::EqualsNoCase(params[0], "showProgress");
+  CServiceBroker::GetRepositoryUpdater().CheckForUpdates(bShowProgress);
 
   return 0;
 }
@@ -458,9 +460,10 @@ static int UpdateLocals(const std::vector<std::string>& params)
 ///     @param[in] id                    The URL of the script to stop.
 ///   }
 ///   \table_row2_l{
-///     <b>`UpdateAddonRepos`</b>
+///     <b>`UpdateAddonRepos([showprogress])`</b>
 ///     ,
 ///     Triggers a forced update of enabled add-on repositories.
+///     @param[in] showprogress          Add "showProgress" to show a progress indicator (optional).
 ///   }
 ///   \table_row2_l{
 ///     <b>`UpdateLocalAddons`</b>
@@ -478,7 +481,7 @@ CBuiltins::CommandMap CAddonBuiltins::GetOperations() const
            {"addon.opensettings",         {"Open a settings dialog for the addon of the given id", 1, AddonSettings}},
            {"enableaddon",                {"Enables the specified plugin/script", 1, EnableAddon}},
            {"installaddon",               {"Install the specified plugin/script", 1, InstallAddon}},
-           {"installfromzip",             { "Open the install from zip dialog", 0, InstallFromZip}},
+           {"installfromzip",             {"Open the install from zip dialog", 0, InstallFromZip}},
            {"runaddon",                   {"Run the specified plugin/script", 1, RunAddon}},
 #ifdef TARGET_DARWIN
            {"runapplescript",             {"Run the specified AppleScript command", 1, RunScript<true>}},
