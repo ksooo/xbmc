@@ -49,9 +49,9 @@ namespace XBMCAddon
       if (!label2.empty())
         item->SetLabel2( label2 );
       if (!iconImage.empty())
-        CLog::Log(LOGWARNING, "Using iconImage in ListItem constructor results in NOP. Use setArt.");
+        item->SetArt("icon", iconImage);
       if (!thumbnailImage.empty())
-        CLog::Log(LOGWARNING, "Using thumbnailImage in ListItem constructor results in NOP. Use setArt.");
+        item->SetArt("thumb", thumbnailImage);
       if (!path.empty())
         item->SetPath(path);
     }
@@ -109,12 +109,20 @@ namespace XBMCAddon
 
     void ListItem::setIconImage(const String& iconImage)
     {
-      CLog::Log(LOGWARNING, "setIconImage results in NOP. Use setArt.");
+      if (!item) return;
+      {
+        XBMCAddonUtils::GuiLock lock(languageHook, m_offscreen);
+        item->SetArt("icon", iconImage);
+      }
     }
 
     void ListItem::setThumbnailImage(const String& thumbFilename)
     {
-      CLog::Log(LOGWARNING, "setThumbnailImage results in NOP. Use setArt.");
+      if (!item) return;
+      {
+        XBMCAddonUtils::GuiLock lock(languageHook, m_offscreen);
+        item->SetArt("thumb", thumbFilename);
+      }
     }
 
     void ListItem::setArt(const Properties& dictionary)
