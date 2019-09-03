@@ -41,6 +41,7 @@ static const std::map<ActionName, ActionID> ActionMappings =
     { "skipnext"                 , ACTION_NEXT_ITEM },
     { "skipprevious"             , ACTION_PREV_ITEM },
     { "fullscreen"               , ACTION_SHOW_GUI },
+    { "hideplayerinfooractivatepreviouswindow", ACTION_HIDE_PLAYER_INFO_OR_ACTIVATE_PREVIOUS_WINDOW },
     { "aspectratio"              , ACTION_ASPECT_RATIO },
     { "stepforward"              , ACTION_STEP_FORWARD },
     { "stepback"                 , ACTION_STEP_BACK },

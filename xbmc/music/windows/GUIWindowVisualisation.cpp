@@ -21,6 +21,7 @@
 #include "settings/SettingsComponent.h"
 
 using namespace MUSIC_INFO;
+using namespace KODI::GUILIB;
 
 #define START_FADE_LENGTH  2.0f // 2 seconds on startup
 
@@ -66,6 +67,25 @@ bool CGUIWindowVisualisation::OnAction(const CAction &action)
     CServiceBroker::GetGUI()->GetWindowManager().PreviousWindow();
     return true;
     break;
+
+  case ACTION_HIDE_PLAYER_INFO_OR_ACTIVATE_PREVIOUS_WINDOW:
+    {
+      // save the settings
+      CServiceBroker::GetSettingsComponent()->GetSettings()->Save();
+
+      GUIINFO::CPlayerGUIInfo& guiInfo = CServiceBroker::GetGUI()->GetInfoManager().GetInfoProviders().GetPlayerInfoProvider();
+      if (guiInfo.GetShowInfo())
+      {
+        // Close player info
+        guiInfo.SetShowInfo(false);
+      }
+      else
+      {
+        // switch back to the menu
+        CServiceBroker::GetGUI()->GetWindowManager().PreviousWindow();
+      }
+      return true;
+    }
 
   case ACTION_VIS_PRESET_LOCK:
     { // show the locked icon + fall through so that the vis handles the locking

@@ -91,6 +91,8 @@
 #define REMOTE_8                      66
 #define REMOTE_9                      67
 
+#define ACTION_HIDE_PLAYER_INFO_OR_ACTIVATE_PREVIOUS_WINDOW 68 //!< if in a fullscreen window and player info is active, hide it. Activate previous window otherwise.
+
 #define ACTION_PLAYER_PROCESS_INFO    69 //!< show player process info (video decoder, pixel format, pvr signal strength and the like
 #define ACTION_PLAYER_PROGRAM_SELECT  70
 #define ACTION_PLAYER_RESOLUTION_SELECT  71

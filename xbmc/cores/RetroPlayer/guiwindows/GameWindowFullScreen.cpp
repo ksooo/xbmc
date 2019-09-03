@@ -108,6 +108,21 @@ bool CGameWindowFullScreen::OnAction(const CAction &action)
     CServiceBroker::GetGUI()->GetWindowManager().PreviousWindow();
     return true;
   }
+  case ACTION_HIDE_PLAYER_INFO_OR_ACTIVATE_PREVIOUS_WINDOW:
+  {
+    GUIINFO::CPlayerGUIInfo& guiInfo = CServiceBroker::GetGUI()->GetInfoManager().GetInfoProviders().GetPlayerInfoProvider();
+    if (guiInfo.GetShowInfo())
+    {
+      // Close player info
+      guiInfo.SetShowInfo(false);
+    }
+    else
+    {
+      // switch back to the menu
+      CServiceBroker::GetGUI()->GetWindowManager().PreviousWindow();
+    }
+    return true;
+  }
   case ACTION_ASPECT_RATIO:
   {
     // Toggle the aspect ratio mode (only if the info is onscreen)
