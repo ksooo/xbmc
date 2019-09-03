@@ -383,7 +383,7 @@
       <right mod="alt">PlayerControl(tempoup)</right>
       <a>AudioDelay</a>
       <a mod="ctrl">AudioNextLanguage</a>
-      <escape>Fullscreen</escape>
+      <escape>HidePlayerInfoOrActivatePreviousWindow</escape>
       <c>Playlist</c>
       <v>ActivateWindow(Teletext)</v>
       <v mod="ctrl">VideoNextStream</v>
@@ -415,7 +415,7 @@
       <o>CodecInfo</o>
       <z>AspectRatio</z>
       <zoom>AspectRatio</zoom>
-      <escape>OSD</escape>
+      <escape>HidePlayerInfoOrActivatePreviousWindow</escape>
     </keyboard>
   </FullscreenGame>
   <GameOSD>
@@ -478,7 +478,7 @@
       <down>SkipPrevious</down>
       <o>PlayerProcessInfo</o>
       <l>LockPreset</l>
-      <escape>FullScreen</escape>
+      <escape>HidePlayerInfoOrActivatePreviousWindow</escape>
     </keyboard>
   </Visualisation>
   <MusicOSD>

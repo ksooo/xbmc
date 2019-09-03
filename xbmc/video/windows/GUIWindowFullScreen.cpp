@@ -116,6 +116,22 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
     }
     break;
 
+  case ACTION_HIDE_PLAYER_INFO_OR_ACTIVATE_PREVIOUS_WINDOW:
+    {
+      GUIINFO::CPlayerGUIInfo& guiInfo = CServiceBroker::GetGUI()->GetInfoManager().GetInfoProviders().GetPlayerInfoProvider();
+      if (guiInfo.GetShowInfo())
+      {
+        // Close player info
+        guiInfo.SetShowInfo(false);
+      }
+      else
+      {
+        // switch back to the menu
+        CServiceBroker::GetGUI()->GetWindowManager().PreviousWindow();
+      }
+    }
+    return true;
+
   case ACTION_SHOW_OSD_TIME:
     m_bShowCurrentTime = !m_bShowCurrentTime;
     CServiceBroker::GetGUI()->GetInfoManager().GetInfoProviders().GetPlayerInfoProvider().SetShowTime(m_bShowCurrentTime);
