@@ -12,15 +12,12 @@
 #include "TextureDatabase.h"
 #include "addons/AddonDatabase.h"
 #include "music/MusicDatabase.h"
-#include "pvr/PVRDatabase.h"
-#include "pvr/epg/EpgDatabase.h"
+#include "pvr/PVRComponent.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
 #include "utils/log.h"
 #include "video/VideoDatabase.h"
 #include "view/ViewDatabase.h"
-
-using namespace PVR;
 
 CDatabaseManager::CDatabaseManager() :
   m_bIsUpgrading(false)
@@ -49,8 +46,10 @@ void CDatabaseManager::Initialize()
   { CTextureDatabase db; UpdateDatabase(db); }
   { CMusicDatabase db; UpdateDatabase(db, &advancedSettings->m_databaseMusic); }
   { CVideoDatabase db; UpdateDatabase(db, &advancedSettings->m_databaseVideo); }
-  { CPVRDatabase db; UpdateDatabase(db, &advancedSettings->m_databaseTV); }
-  { CPVREpgDatabase db; UpdateDatabase(db, &advancedSettings->m_databaseEpg); }
+
+  const auto dbs = CServiceBroker::GetPVRComponent().GetDatabases(advancedSettings);
+  for (const auto& db : dbs)
+    UpdateDatabase(*db.instance, db.settings);
 
   CLog::Log(LOGDEBUG, "%s, updating databases... DONE", __FUNCTION__);
 

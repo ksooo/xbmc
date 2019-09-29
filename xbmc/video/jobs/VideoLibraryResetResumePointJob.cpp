@@ -18,8 +18,7 @@
 #include "network/upnp/UPnP.h"
 #endif
 #include "profiles/ProfileManager.h"
-#include "pvr/PVRManager.h"
-#include "pvr/recordings/PVRRecordings.h"
+#include "pvr/PVRComponent.h"
 #include "settings/SettingsComponent.h"
 #include "utils/URIUtils.h"
 #include "video/VideoDatabase.h"
@@ -62,8 +61,7 @@ bool CVideoLibraryResetResumePointJob::Work(CVideoDatabase &db)
       continue;
 #endif
 
-    if (item->HasPVRRecordingInfoTag() &&
-        CServiceBroker::GetPVRManager().Recordings()->ResetResumePoint(item->GetPVRRecordingInfoTag()))
+    if (CServiceBroker::GetPVRComponent().ResetRecordingResumePoint(item))
       continue;
 
     resetItems.emplace_back(item);

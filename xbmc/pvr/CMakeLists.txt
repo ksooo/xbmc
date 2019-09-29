@@ -1,4 +1,5 @@
 set(SOURCES PVRActionListener.cpp
+            PVRComponent.cpp
             PVRGUIInfo.cpp
             PVRManager.cpp
             PVRDatabase.cpp
@@ -19,6 +20,7 @@ set(SOURCES PVRActionListener.cpp
             PVRThumbLoader.cpp)
 
 set(HEADERS PVRActionListener.h
+            PVRComponent.h
             PVRDatabase.h
             PVRGUIInfo.h
             PVRManager.h

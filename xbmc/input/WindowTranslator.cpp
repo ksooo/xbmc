@@ -11,8 +11,7 @@
 #include "Application.h"
 #include "ServiceBroker.h"
 #include "guilib/WindowIDs.h"
-#include "pvr/PVRGUIActions.h"
-#include "pvr/PVRManager.h"
+#include "pvr/PVRComponent.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -276,34 +275,25 @@ int CWindowTranslator::GetVirtualWindow(int windowId)
     // check if we're in a DVD menu
     if (g_application.GetAppPlayer().IsInMenu())
       return WINDOW_VIDEO_MENU;
+
     // special casing for Live TV
-    else if (g_application.CurrentFileItem().HasPVRChannelInfoTag())
-    {
-      if (CServiceBroker::GetPVRManager().GUIActions()->GetChannelNumberInputHandler().HasChannelNumber())
-        return WINDOW_FULLSCREEN_LIVETV_INPUT;
-      else if (CServiceBroker::GetPVRManager().GUIActions()->GetChannelNavigator().IsPreview())
-        return WINDOW_FULLSCREEN_LIVETV_PREVIEW;
-      else
-        return WINDOW_FULLSCREEN_LIVETV;
-    }
+    int id = CServiceBroker::GetPVRComponent().GetFullscreenWindowID(g_application.CurrentFileItem());
+    if (id != WINDOW_INVALID)
+      return id;
+
     // special casing for numeric seek
-    else if (g_application.GetAppPlayer().GetSeekHandler().HasTimeCode())
+    if (g_application.GetAppPlayer().GetSeekHandler().HasTimeCode())
       return WINDOW_VIDEO_TIME_SEEK;
   }
   else if (windowId == WINDOW_VISUALISATION)
   {
     // special casing for PVR radio
-    if (g_application.CurrentFileItem().HasPVRChannelInfoTag())
-    {
-      if (CServiceBroker::GetPVRManager().GUIActions()->GetChannelNumberInputHandler().HasChannelNumber())
-        return WINDOW_FULLSCREEN_RADIO_INPUT;
-      else if (CServiceBroker::GetPVRManager().GUIActions()->GetChannelNavigator().IsPreview())
-        return WINDOW_FULLSCREEN_RADIO_PREVIEW;
-      else
-        return WINDOW_FULLSCREEN_RADIO;
-    }
+    int id = CServiceBroker::GetPVRComponent().GetFullscreenWindowID(g_application.CurrentFileItem());
+    if (id != WINDOW_INVALID)
+      return id;
+
     // special casing for numeric seek
-    else if (g_application.GetAppPlayer().GetSeekHandler().HasTimeCode())
+    if (g_application.GetAppPlayer().GetSeekHandler().HasTimeCode())
       return WINDOW_VIDEO_TIME_SEEK;
   }
 

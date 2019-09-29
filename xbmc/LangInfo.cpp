@@ -16,7 +16,7 @@
 #include "addons/RepositoryUpdater.h"
 #include "guilib/LocalizeStrings.h"
 #include "messaging/ApplicationMessenger.h"
-#include "pvr/PVRManager.h"
+#include "pvr/PVRComponent.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
@@ -34,7 +34,6 @@
 #include <algorithm>
 #include <stdexcept>
 
-using namespace PVR;
 using namespace KODI::MESSAGING;
 
 static std::string shortDateFormats[] = {
@@ -672,9 +671,9 @@ bool CLangInfo::SetLanguage(std::string language /* = "" */, bool reloadServices
 
   if (reloadServices)
   {
-    // also tell our weather and skin to reload as these are localized
+    // also inform weather, pvr and skin about the locale change
     CServiceBroker::GetWeatherManager().Refresh();
-    CServiceBroker::GetPVRManager().LocalizationChanged();
+    CServiceBroker::GetPVRComponent().OnLocaleChanged();
     CApplicationMessenger::GetInstance().PostMsg(TMSG_EXECUTE_BUILT_IN, -1, -1, nullptr, "ReloadSkin");
   }
 

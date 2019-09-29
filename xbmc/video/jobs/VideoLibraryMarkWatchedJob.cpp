@@ -15,8 +15,7 @@
 #ifdef HAS_UPNP
 #include "network/upnp/UPnP.h"
 #endif
-#include "pvr/PVRManager.h"
-#include "pvr/recordings/PVRRecordings.h"
+#include "pvr/PVRComponent.h"
 #include "profiles/ProfileManager.h"
 #include "settings/SettingsComponent.h"
 #include "ServiceBroker.h"
@@ -67,8 +66,7 @@ bool CVideoLibraryMarkWatchedJob::Work(CVideoDatabase &db)
       continue;
 #endif
 
-    if (item->HasPVRRecordingInfoTag() &&
-        CServiceBroker::GetPVRManager().Recordings()->MarkWatched(item->GetPVRRecordingInfoTag(), m_mark))
+    if (CServiceBroker::GetPVRComponent().MarkRecordingWatched(item, m_mark))
     {
       if (m_mark)
         db.IncrementPlayCount(*item);

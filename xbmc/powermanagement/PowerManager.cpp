@@ -20,7 +20,7 @@
 #include "interfaces/AnnouncementManager.h"
 #include "interfaces/builtins/Builtins.h"
 #include "network/Network.h"
-#include "pvr/PVRManager.h"
+#include "pvr/PVRComponent.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "settings/lib/Setting.h"
@@ -177,7 +177,7 @@ void CPowerManager::OnSleep()
 
   CLog::Log(LOGNOTICE, "%s: Running sleep jobs", __FUNCTION__);
 
-  CServiceBroker::GetPVRManager().OnSleep();
+  CServiceBroker::GetPVRComponent().OnSleep();
   StorePlayerState();
   g_application.StopPlaying();
   g_application.StopShutdownTimer();
@@ -213,7 +213,7 @@ void CPowerManager::OnWake()
   CServiceBroker::GetActiveAE()->Resume();
   g_application.UpdateLibraries();
   CServiceBroker::GetWeatherManager().Refresh();
-  CServiceBroker::GetPVRManager().OnWake();
+  CServiceBroker::GetPVRComponent().OnWake();
   RestorePlayerState();
 
   CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::System, "xbmc", "OnWake");

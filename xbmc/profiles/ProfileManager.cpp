@@ -52,7 +52,7 @@
 #include "interfaces/json-rpc/JSONRPC.h" //! @todo Remove me
 #include "network/Network.h" //! @todo Remove me
 #include "network/NetworkServices.h" //! @todo Remove me
-#include "pvr/PVRManager.h" //! @todo Remove me
+#include "pvr/PVRComponent.h" //! @todo Remove me
 #include "video/VideoLibraryQueue.h"//! @todo Remove me
 #include "weather/WeatherManager.h" //! @todo Remove me
 #include "Application.h" //! @todo Remove me
@@ -253,15 +253,13 @@ void CProfileManager::PrepareLoadProfile(unsigned int profileIndex)
 {
   CContextMenuManager &contextMenuManager = CServiceBroker::GetContextMenuManager();
   ADDON::CServiceAddonManager &serviceAddons = CServiceBroker::GetServiceAddons();
-  PVR::CPVRManager &pvrManager = CServiceBroker::GetPVRManager();
   CNetworkBase &networkManager = CServiceBroker::GetNetwork();
 
   contextMenuManager.Deinit();
 
   serviceAddons.Stop();
 
-  // stop PVR related services
-  pvrManager.Stop();
+  CServiceBroker::GetPVRComponent().Stop();
 
   if (profileIndex != 0 || !IsMasterProfile())
     networkManager.NetworkMessage(CNetwork::SERVICES_DOWN, 1);
@@ -368,7 +366,6 @@ void CProfileManager::FinalizeLoadProfile()
 {
   CContextMenuManager &contextMenuManager = CServiceBroker::GetContextMenuManager();
   ADDON::CServiceAddonManager &serviceAddons = CServiceBroker::GetServiceAddons();
-  PVR::CPVRManager &pvrManager = CServiceBroker::GetPVRManager();
   CNetworkBase &networkManager = CServiceBroker::GetNetwork();
   ADDON::CAddonMgr &addonManager = CServiceBroker::GetAddonMgr();
   CWeatherManager &weatherManager = CServiceBroker::GetWeatherManager();
@@ -404,8 +401,7 @@ void CProfileManager::FinalizeLoadProfile()
   // Restart context menu manager
   contextMenuManager.Init();
 
-  // restart PVR services
-  pvrManager.Init();
+  CServiceBroker::GetPVRComponent().Restart();
 
   favouritesManager.ReInit(GetProfileUserDataFolder());
 

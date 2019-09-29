@@ -130,8 +130,7 @@
 #include "addons/settings/GUIDialogAddonSettings.h"
 
 // PVR related include Files
-#include "pvr/PVRGUIActions.h"
-#include "pvr/PVRManager.h"
+#include "pvr/PVRComponent.h"
 
 #include "video/dialogs/GUIDialogFullScreenInfo.h"
 #include "dialogs/GUIDialogCache.h"
@@ -205,7 +204,6 @@ using namespace VIDEO;
 using namespace MUSIC_INFO;
 using namespace EVENTSERVER;
 using namespace JSONRPC;
-using namespace PVR;
 using namespace PERIPHERALS;
 using namespace KODI;
 using namespace KODI::MESSAGING;
@@ -1625,7 +1623,7 @@ bool CApplication::OnAction(const CAction &action)
   if (action.GetID() == ACTION_BUILT_IN_FUNCTION)
   {
     if (!CBuiltins::GetInstance().IsSystemPowerdownCommand(action.GetName()) ||
-        CServiceBroker::GetPVRManager().GUIActions()->CanSystemPowerdown())
+        CServiceBroker::GetPVRComponent().CanSystemPowerdown())
     {
       CBuiltins::GetInstance().Execute(action.GetName());
       m_navigationTimer.StartZero();
@@ -1738,8 +1736,7 @@ bool CApplication::OnAction(const CAction &action)
   }
 
   // Now check with the player if action can be handled.
-  bool bIsPlayingPVRChannel = (CServiceBroker::GetPVRManager().IsStarted() &&
-                               CurrentFileItem().IsPVRChannel());
+  bool bIsPlayingPVRChannel = CurrentFileItem().IsPVRChannel();
 
   bool bNotifyPlayer = false;
   if (CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow() == WINDOW_FULLSCREEN_VIDEO)
@@ -1998,7 +1995,7 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
   uint32_t msg = pMsg->dwMessage;
   if (msg == TMSG_SYSTEM_POWERDOWN)
   {
-    if (CServiceBroker::GetPVRManager().GUIActions()->CanSystemPowerdown())
+    if (CServiceBroker::GetPVRComponent().CanSystemPowerdown())
       msg = pMsg->param1; // perform requested shutdown action
     else
       return; // no shutdown
@@ -2694,7 +2691,7 @@ bool CApplication::PlayMedia(CFileItem& item, const std::string &player, int iPl
   }
   else if (item.IsPVR())
   {
-    return CServiceBroker::GetPVRManager().GUIActions()->PlayMedia(CFileItemPtr(new CFileItem(item)));
+    return CServiceBroker::GetPVRComponent().PlayMedia(std::make_shared<CFileItem>(item));
   }
 
   CURL path(item.GetPath());
@@ -3020,7 +3017,7 @@ void CApplication::OnPlayBackEnded()
 {
   CLog::LogF(LOGDEBUG ,"CApplication::OnPlayBackEnded");
 
-  CServiceBroker::GetPVRManager().OnPlaybackEnded(m_itemCurrentFile);
+  CServiceBroker::GetPVRComponent().OnPlaybackEnded(m_itemCurrentFile);
 
   CVariant data(CVariant::VariantTypeObject);
   data["end"] = true;
@@ -3052,7 +3049,7 @@ void CApplication::OnPlayBackStarted(const CFileItem &file)
     CJobManager::GetInstance().PauseJobs();
   }
 
-  CServiceBroker::GetPVRManager().OnPlaybackStarted(m_itemCurrentFile);
+  CServiceBroker::GetPVRComponent().OnPlaybackStarted(m_itemCurrentFile);
   m_stackHelper.OnPlayBackStarted(file);
 
   m_playerEvent.Reset();
@@ -3142,7 +3139,7 @@ void CApplication::OnPlayBackStopped()
 {
   CLog::LogF(LOGDEBUG, "CApplication::OnPlayBackStopped");
 
-  CServiceBroker::GetPVRManager().OnPlaybackStopped(m_itemCurrentFile);
+  CServiceBroker::GetPVRComponent().OnPlaybackStopped(m_itemCurrentFile);
 
   CVariant data(CVariant::VariantTypeObject);
   data["end"] = false;
@@ -3634,8 +3631,6 @@ void CApplication::ActivateScreenSaver(bool forceType /*= false */)
       bUseDim = true;
     else if (m_appPlayer.IsPlayingVideo() && settings->GetBool(CSettings::SETTING_SCREENSAVER_USEDIMONPAUSE))
       bUseDim = true;
-    else if (CServiceBroker::GetPVRManager().GUIActions()->IsRunningChannelScan())
-      bUseDim = true;
 
     if (bUseDim)
       m_screensaverIdInUse = "screensaver.xbmc.builtin.dim";
@@ -3685,7 +3680,7 @@ void CApplication::CheckShutdown()
       || CMusicLibraryQueue::GetInstance().IsRunning()
       || CVideoLibraryQueue::GetInstance().IsRunning()
       || CServiceBroker::GetGUI()->GetWindowManager().IsWindowActive(WINDOW_DIALOG_PROGRESS) // progress dialog is onscreen
-      || !CServiceBroker::GetPVRManager().GUIActions()->CanSystemPowerdown(false))
+      || !CServiceBroker::GetPVRComponent().CanSystemPowerdown(false))
   {
     m_shutdownTimer.StartZero();
     return;
@@ -3969,7 +3964,7 @@ bool CApplication::ExecuteXBMCAction(std::string actionStr, const CGUIListItemPt
   if (CBuiltins::GetInstance().HasCommand(actionStr))
   {
     if (!CBuiltins::GetInstance().IsSystemPowerdownCommand(actionStr) ||
-        CServiceBroker::GetPVRManager().GUIActions()->CanSystemPowerdown())
+        CServiceBroker::GetPVRComponent().CanSystemPowerdown())
       CBuiltins::GetInstance().Execute(actionStr);
   }
   else

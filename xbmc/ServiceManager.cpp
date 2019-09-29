@@ -28,6 +28,7 @@
 #include "peripherals/Peripherals.h"
 #include "powermanagement/PowerManager.h"
 #include "profiles/ProfileManager.h"
+#include "pvr/PVRComponent.h"
 #include "pvr/PVRManager.h"
 #include "utils/FileExtensionProvider.h"
 #include "utils/log.h"
@@ -127,6 +128,7 @@ bool CServiceManager::InitStageTwo(const CAppParamParser &params, const std::str
   m_vfsAddonCache->Init();
 
   m_PVRManager.reset(new PVR::CPVRManager());
+  m_PVRComponent.reset(new PVR::CPVRComponent());
 
   m_dataCacheCore.reset(new CDataCacheCore());
 
@@ -209,6 +211,7 @@ void CServiceManager::DeinitStageTwo()
   m_binaryAddonCache.reset();
   m_dataCacheCore.reset();
   m_PVRManager.reset();
+  m_PVRComponent.reset();
   m_vfsAddonCache.reset();
   m_repositoryUpdater.reset();
   m_binaryAddonManager.reset();
@@ -269,6 +272,11 @@ XBPython& CServiceManager::GetXBPython()
 PVR::CPVRManager& CServiceManager::GetPVRManager()
 {
   return *m_PVRManager;
+}
+
+PVR::CPVRComponent& CServiceManager::GetPVRComponent()
+{
+  return *m_PVRComponent;
 }
 
 CContextMenuManager& CServiceManager::GetContextMenuManager()

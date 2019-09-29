@@ -100,28 +100,7 @@
 #include "pictures/GUIDialogPictureInfo.h"
 #include "addons/settings/GUIDialogAddonSettings.h"
 #include "addons/GUIDialogAddonInfo.h"
-
-/* PVR related include Files */
-#include "pvr/PVRManager.h"
-#include "pvr/dialogs/GUIDialogPVRChannelGuide.h"
-#include "pvr/dialogs/GUIDialogPVRChannelManager.h"
-#include "pvr/dialogs/GUIDialogPVRChannelsOSD.h"
-#include "pvr/dialogs/GUIDialogPVRClientPriorities.h"
-#include "pvr/dialogs/GUIDialogPVRGroupManager.h"
-#include "pvr/dialogs/GUIDialogPVRGuideControls.h"
-#include "pvr/dialogs/GUIDialogPVRGuideInfo.h"
-#include "pvr/dialogs/GUIDialogPVRGuideSearch.h"
-#include "pvr/dialogs/GUIDialogPVRRadioRDSInfo.h"
-#include "pvr/dialogs/GUIDialogPVRRecordingInfo.h"
-#include "pvr/dialogs/GUIDialogPVRRecordingSettings.h"
-#include "pvr/dialogs/GUIDialogPVRTimerSettings.h"
-#include "pvr/windows/GUIWindowPVRChannels.h"
-#include "pvr/windows/GUIWindowPVRGuide.h"
-#include "pvr/windows/GUIWindowPVRRecordings.h"
-#include "pvr/windows/GUIWindowPVRSearch.h"
-#include "pvr/windows/GUIWindowPVRTimerRules.h"
-#include "pvr/windows/GUIWindowPVRTimers.h"
-
+#include "pvr/PVRComponent.h"
 #include "video/dialogs/GUIDialogTeletext.h"
 #include "dialogs/GUIDialogSlider.h"
 #include "dialogs/GUIDialogPlayEject.h"
@@ -144,7 +123,6 @@
 #include "games/dialogs/osd/DialogGameVolume.h"
 
 using namespace KODI;
-using namespace PVR;
 using namespace PERIPHERALS;
 using namespace MESSAGING;
 
@@ -248,30 +226,7 @@ void CGUIWindowManager::CreateWindows()
 
   /* Load PVR related Windows and Dialogs */
   Add(new CGUIDialogTeletext);
-  Add(new CGUIWindowPVRTVChannels);
-  Add(new CGUIWindowPVRTVRecordings);
-  Add(new CGUIWindowPVRTVGuide);
-  Add(new CGUIWindowPVRTVTimers);
-  Add(new CGUIWindowPVRTVTimerRules);
-  Add(new CGUIWindowPVRTVSearch);
-  Add(new CGUIWindowPVRRadioChannels);
-  Add(new CGUIWindowPVRRadioRecordings);
-  Add(new CGUIWindowPVRRadioGuide);
-  Add(new CGUIWindowPVRRadioTimers);
-  Add(new CGUIWindowPVRRadioTimerRules);
-  Add(new CGUIWindowPVRRadioSearch);
-  Add(new CGUIDialogPVRRadioRDSInfo);
-  Add(new CGUIDialogPVRGuideInfo);
-  Add(new CGUIDialogPVRRecordingInfo);
-  Add(new CGUIDialogPVRTimerSettings);
-  Add(new CGUIDialogPVRGroupManager);
-  Add(new CGUIDialogPVRChannelManager);
-  Add(new CGUIDialogPVRGuideSearch);
-  Add(new CGUIDialogPVRChannelsOSD);
-  Add(new CGUIDialogPVRChannelGuide);
-  Add(new CGUIDialogPVRRecordingSettings);
-  Add(new CGUIDialogPVRClientPriorities);
-  Add(new CGUIDialogPVRGuideControls);
+  CServiceBroker::GetPVRComponent().CreateWindowsAndDialogs(this);
 
   Add(new CGUIDialogSelect);
   Add(new CGUIDialogMusicInfo);
@@ -356,33 +311,8 @@ bool CGUIWindowManager::DestroyWindows()
     DestroyWindow(WINDOW_DIALOG_SUBTITLES);
 
     /* Delete PVR related windows and dialogs */
-    DestroyWindow(WINDOW_TV_CHANNELS);
-    DestroyWindow(WINDOW_TV_RECORDINGS);
-    DestroyWindow(WINDOW_TV_GUIDE);
-    DestroyWindow(WINDOW_TV_TIMERS);
-    DestroyWindow(WINDOW_TV_TIMER_RULES);
-    DestroyWindow(WINDOW_TV_SEARCH);
-    DestroyWindow(WINDOW_RADIO_CHANNELS);
-    DestroyWindow(WINDOW_RADIO_RECORDINGS);
-    DestroyWindow(WINDOW_RADIO_GUIDE);
-    DestroyWindow(WINDOW_RADIO_TIMERS);
-    DestroyWindow(WINDOW_RADIO_TIMER_RULES);
-    DestroyWindow(WINDOW_RADIO_SEARCH);
-    DestroyWindow(WINDOW_DIALOG_PVR_GUIDE_INFO);
-    DestroyWindow(WINDOW_DIALOG_PVR_RECORDING_INFO);
-    DestroyWindow(WINDOW_DIALOG_PVR_TIMER_SETTING);
-    DestroyWindow(WINDOW_DIALOG_PVR_GROUP_MANAGER);
-    DestroyWindow(WINDOW_DIALOG_PVR_CHANNEL_MANAGER);
-    DestroyWindow(WINDOW_DIALOG_PVR_GUIDE_SEARCH);
-    DestroyWindow(WINDOW_DIALOG_PVR_CHANNEL_SCAN);
-    DestroyWindow(WINDOW_DIALOG_PVR_RADIO_RDS_INFO);
-    DestroyWindow(WINDOW_DIALOG_PVR_UPDATE_PROGRESS);
-    DestroyWindow(WINDOW_DIALOG_PVR_OSD_CHANNELS);
-    DestroyWindow(WINDOW_DIALOG_PVR_CHANNEL_GUIDE);
+    CServiceBroker::GetPVRComponent().DestroyWindowsAndDialogs(this);
     DestroyWindow(WINDOW_DIALOG_OSD_TELETEXT);
-    DestroyWindow(WINDOW_DIALOG_PVR_RECORDING_SETTING);
-    DestroyWindow(WINDOW_DIALOG_PVR_CLIENT_PRIORITIES);
-    DestroyWindow(WINDOW_DIALOG_PVR_GUIDE_CONTROLS);
 
     DestroyWindow(WINDOW_DIALOG_TEXT_VIEWER);
     DestroyWindow(WINDOW_DIALOG_PLAY_EJECT);

@@ -23,7 +23,7 @@
 #include "addons/Webinterface.h"
 #include "games/addons/GameClient.h"
 #include "games/controllers/Controller.h"
-#include "pvr/addons/PVRClient.h"
+#include "pvr/PVRComponent.h"
 #include "utils/StringUtils.h"
 
 using namespace KODI;
@@ -70,7 +70,7 @@ AddonPtr CAddonBuilder::Generate(const AddonInfoPtr& info, TYPE type)
   case ADDON_SCREENSAVER:
     return std::make_shared<CAddonDll>(info, type);
   case ADDON_PVRDLL:
-    return std::make_shared<PVR::CPVRClient>(info);
+    return CServiceBroker::GetPVRComponent().CreatePVRAddonInstance(info);
   case ADDON_GAMEDLL:
     return std::make_shared<GAME::CGameClient>(info);
   case ADDON_PLUGIN:

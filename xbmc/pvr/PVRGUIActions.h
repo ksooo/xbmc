@@ -282,9 +282,9 @@ namespace PVR
     bool SwitchToChannel(const std::shared_ptr<CFileItem>& item, bool bCheckResume) const;
 
     /*!
-     * @brief Playback the given file item.
+     * @brief Start playback of the given file item.
      * @param item containing a channel or a recording.
-     * @return True if the item could be played, false otherwise.
+     * @return True if the playback of the item could be started, false otherwise.
      */
     bool PlayMedia(const std::shared_ptr<CFileItem>& item) const;
 
@@ -350,7 +350,7 @@ namespace PVR
      *        (shutdown/reboot/suspend/hibernate) without stopping any active
      *        recordings and/or without preventing the start of recordings
      *        scheduled for now + pvrpowermanagement.backendidletime.
-     * @param bAskUser True to informs user in case of potential
+     * @param bAskUser True to inform user in case of potential
      *        data loss. User can decide to allow powerdown anyway. False to
      *        not to ask user and to not confirm power down.
      * @return True if system can be safely powered down, false otherwise.

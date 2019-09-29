@@ -24,8 +24,7 @@
 #include "profiles/Profile.h"
 #include "profiles/ProfileManager.h"
 #include "profiles/dialogs/GUIDialogProfileSettings.h"
-#include "pvr/PVRGUIActions.h"
-#include "pvr/PVRManager.h"
+#include "pvr/PVRComponent.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "utils/StringUtils.h"
@@ -127,8 +126,7 @@ bool CGUIWindowLoginScreen::OnAction(const CAction &action)
   {
     std::string actionName = action.GetName();
     StringUtils::ToLower(actionName);
-    if ((actionName.find("shutdown") != std::string::npos) &&
-        CServiceBroker::GetPVRManager().GUIActions()->CanSystemPowerdown())
+    if ((actionName.find("shutdown") != std::string::npos) && CServiceBroker::GetPVRComponent().CanSystemPowerdown())
       CBuiltins::GetInstance().Execute(action.GetName());
     return true;
   }

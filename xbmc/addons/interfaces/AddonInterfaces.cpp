@@ -18,7 +18,7 @@
 #include "games/addons/GameClient.h"
 #include "messaging/ApplicationMessenger.h"
 #include "peripherals/addons/PeripheralAddon.h"
-#include "pvr/addons/PVRClient.h"
+#include "pvr/PVRComponent.h"
 #include "utils/log.h"
 
 using namespace KODI;
@@ -121,7 +121,7 @@ void* CAddonInterfaces::PVRLib_RegisterMe(void *addonData)
     return nullptr;
   }
 
-  return dynamic_cast<PVR::CPVRClient*>(addon->m_addon)->GetInstanceInterface();
+  return CServiceBroker::GetPVRComponent().GetPVRAddonInstanceInterface(addon->m_addon);
 }
 
 void CAddonInterfaces::PVRLib_UnRegisterMe(void *addonData, void *cbTable)
