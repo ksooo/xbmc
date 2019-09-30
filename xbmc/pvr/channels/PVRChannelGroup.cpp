@@ -93,7 +93,7 @@ bool CPVRChannelGroup::Load(std::vector<std::shared_ptr<CPVRChannel>>& channelsT
   const std::shared_ptr<CSettings> settings = CServiceBroker::GetSettingsComponent()->GetSettings();
   m_bUsingBackendChannelOrder   = settings->GetBool(CSettings::SETTING_PVRMANAGER_BACKENDCHANNELORDER);
   m_bUsingBackendChannelNumbers = settings->GetBool(CSettings::SETTING_PVRMANAGER_USEBACKENDCHANNELNUMBERS) &&
-                                  CServiceBroker::GetPVRManager().Clients()->EnabledClientAmount() == 1;
+                                  CPVRManager::Get().Clients()->EnabledClientAmount() == 1;
   m_bStartGroupChannelNumbersFromOne = settings->GetBool(CSettings::SETTING_PVRMANAGER_STARTGROUPCHANNELNUMBERSFROMONE) && !m_bUsingBackendChannelNumbers;
 
   int iChannelCount = m_iGroupId > 0 ? LoadFromDb() : 0;
@@ -241,7 +241,7 @@ void CPVRChannelGroup::SortByChannelNumber(void)
 
 bool CPVRChannelGroup::UpdateClientPriorities()
 {
-  const std::shared_ptr<CPVRClients> clients = CServiceBroker::GetPVRManager().Clients();
+  const std::shared_ptr<CPVRClients> clients = CPVRManager::Get().Clients();
   bool bChanged = false;
 
   CSingleLock lock(m_critSection);
@@ -327,7 +327,7 @@ std::shared_ptr<CPVRChannel> CPVRChannelGroup::GetLastPlayedChannel(int iCurrent
   {
     channel = it->second.channel;
     if (channel->ChannelID() != iCurrentChannel &&
-        CServiceBroker::GetPVRManager().Clients()->IsCreatedClient(channel->ClientID()) &&
+        CPVRManager::Get().Clients()->IsCreatedClient(channel->ClientID()) &&
         channel->LastWatched() > 0 &&
         (!returnChannel || channel->LastWatched() > returnChannel->LastWatched()))
     {
@@ -460,7 +460,7 @@ void CPVRChannelGroup::GetChannelNumbers(std::vector<std::string>& channelNumber
 
 int CPVRChannelGroup::LoadFromDb(bool bCompress /* = false */)
 {
-  const std::shared_ptr<CPVRDatabase> database(CServiceBroker::GetPVRManager().GetTVDatabase());
+  const std::shared_ptr<CPVRDatabase> database(CPVRManager::Get().GetTVDatabase());
   if (!database)
     return -1;
 
@@ -474,7 +474,7 @@ int CPVRChannelGroup::LoadFromDb(bool bCompress /* = false */)
 bool CPVRChannelGroup::LoadFromClients(void)
 {
   /* get the channels from the backends */
-  return CServiceBroker::GetPVRManager().Clients()->GetChannelGroupMembers(this, m_failedClientsForChannelGroupMembers) == PVR_ERROR_NO_ERROR;
+  return CPVRManager::Get().Clients()->GetChannelGroupMembers(this, m_failedClientsForChannelGroupMembers) == PVR_ERROR_NO_ERROR;
 }
 
 bool CPVRChannelGroup::AddAndUpdateChannels(const CPVRChannelGroup& channels, bool bUseBackendChannelNumbers)
@@ -692,7 +692,7 @@ bool CPVRChannelGroup::IsGroupMember(int iChannelId) const
 bool CPVRChannelGroup::Persist(void)
 {
   bool bReturn(true);
-  const std::shared_ptr<CPVRDatabase> database(CServiceBroker::GetPVRManager().GetTVDatabase());
+  const std::shared_ptr<CPVRDatabase> database(CPVRManager::Get().GetTVDatabase());
 
   CSingleLock lock(m_critSection);
 
@@ -728,7 +728,7 @@ bool CPVRChannelGroup::Renumber(void)
   bool bReturn(false);
   unsigned int iChannelNumber(0);
   bool bUsingBackendChannelNumbers(CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_PVRMANAGER_USEBACKENDCHANNELNUMBERS) &&
-                                 CServiceBroker::GetPVRManager().Clients()->EnabledClientAmount() == 1);
+                                 CPVRManager::Get().Clients()->EnabledClientAmount() == 1);
   bool bStartGroupChannelNumbersFromOne(CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_PVRMANAGER_STARTGROUPCHANNELNUMBERSFROMONE) &&
                                         !bUsingBackendChannelNumbers);
 
@@ -814,7 +814,7 @@ void CPVRChannelGroup::OnSettingChanged(std::shared_ptr<const CSetting> setting)
     return;
 
   //! @todo while pvr manager is starting up do accept setting changes.
-  if(!CServiceBroker::GetPVRManager().IsStarted())
+  if(!CPVRManager::Get().IsStarted())
   {
     CLog::Log(LOGWARNING, "Channel group setting change ignored while PVR Manager is starting\n");
     return;
@@ -827,7 +827,7 @@ void CPVRChannelGroup::OnSettingChanged(std::shared_ptr<const CSetting> setting)
     const std::shared_ptr<CSettings> settings = CServiceBroker::GetSettingsComponent()->GetSettings();
     bool bUsingBackendChannelOrder   = settings->GetBool(CSettings::SETTING_PVRMANAGER_BACKENDCHANNELORDER);
     bool bUsingBackendChannelNumbers = settings->GetBool(CSettings::SETTING_PVRMANAGER_USEBACKENDCHANNELNUMBERS) &&
-                                       CServiceBroker::GetPVRManager().Clients()->EnabledClientAmount() == 1;
+                                       CPVRManager::Get().Clients()->EnabledClientAmount() == 1;
     bool bStartGroupChannelNumbersFromOne = settings->GetBool(CSettings::SETTING_PVRMANAGER_STARTGROUPCHANNELNUMBERSFROMONE) && !bUsingBackendChannelNumbers;
 
     CSingleLock lock(m_critSection);
@@ -1002,7 +1002,7 @@ time_t CPVRChannelGroup::LastWatched(void) const
 
 bool CPVRChannelGroup::SetLastWatched(time_t iLastWatched)
 {
-  const std::shared_ptr<CPVRDatabase> database(CServiceBroker::GetPVRManager().GetTVDatabase());
+  const std::shared_ptr<CPVRDatabase> database(CPVRManager::Get().GetTVDatabase());
 
   CSingleLock lock(m_critSection);
 

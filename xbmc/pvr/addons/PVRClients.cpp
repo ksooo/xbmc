@@ -150,7 +150,7 @@ void CPVRClients::UpdateAddons(const std::string& changedAddonId /*= ""*/)
 
   if (!addonsToCreate.empty() || !addonsToReCreate.empty() || !addonsToDestroy.empty())
   {
-    CServiceBroker::GetPVRManager().Stop();
+    CPVRManager::Get().Stop();
 
     for (const auto& addon : addonsToCreate)
     {
@@ -192,7 +192,7 @@ void CPVRClients::UpdateAddons(const std::string& changedAddonId /*= ""*/)
       }
     }
 
-    CServiceBroker::GetPVRManager().Start();
+    CPVRManager::Get().Start();
   }
 }
 
@@ -204,7 +204,7 @@ bool CPVRClients::RequestRestart(AddonPtr addon, bool bDataChanged)
 bool CPVRClients::StopClient(const AddonPtr& addon, bool bRestart)
 {
   // stop playback if needed
-  if (CServiceBroker::GetPVRManager().PlaybackState()->IsPlaying())
+  if (CPVRManager::Get().PlaybackState()->IsPlaying())
     CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_STOP);
 
   CSingleLock lock(m_critSection);
@@ -653,7 +653,7 @@ void CPVRClients::ConnectionStateChange(CPVRClient* client,
     if (!client->GetAddonProperties())
       CLog::LogF(LOGERROR, "Error reading PVR client properties");
 
-    CServiceBroker::GetPVRManager().Start();
+    CPVRManager::Get().Start();
   }
 }
 

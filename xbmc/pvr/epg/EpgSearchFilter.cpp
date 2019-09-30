@@ -42,14 +42,14 @@ void CPVREpgSearchFilter::Reset()
   m_iMinimumDuration         = EPG_SEARCH_UNSET;
   m_iMaximumDuration         = EPG_SEARCH_UNSET;
 
-  m_startDateTime.SetFromUTCDateTime(CServiceBroker::GetPVRManager().EpgContainer().GetFirstEPGDate());
+  m_startDateTime.SetFromUTCDateTime(CPVRManager::Get().EpgContainer().GetFirstEPGDate());
   if (!m_startDateTime.IsValid())
   {
     CLog::Log(LOGWARNING, "No valid epg start time. Defaulting search start time to 'now'");
     m_startDateTime.SetFromUTCDateTime(CDateTime::GetUTCDateTime()); // default to 'now'
   }
 
-  m_endDateTime.SetFromUTCDateTime(CServiceBroker::GetPVRManager().EpgContainer().GetLastEPGDate());
+  m_endDateTime.SetFromUTCDateTime(CPVRManager::Get().EpgContainer().GetLastEPGDate());
   if (!m_endDateTime.IsValid())
   {
     CLog::Log(LOGWARNING, "No valid epg end time. Defaulting search end time to search start time plus 10 days");
@@ -115,7 +115,7 @@ bool CPVREpgSearchFilter::MatchSearchTerm(const std::shared_ptr<CPVREpgInfoTag>&
   if (!m_strSearchTerm.empty())
   {
     CTextSearch search(m_strSearchTerm, m_bIsCaseSensitive, SEARCH_DEFAULT_OR);
-    bReturn = !CServiceBroker::GetPVRManager().IsParentalLocked(tag);
+    bReturn = !CPVRManager::Get().IsParentalLocked(tag);
     if (bReturn)
       bReturn = search.Search(tag->Title()) ||
                 search.Search(tag->PlotOutline()) ||
@@ -176,7 +176,7 @@ bool CPVREpgSearchFilter::MatchChannelNumber(const std::shared_ptr<CPVREpgInfoTa
 
   if (m_channelNumber.IsValid())
   {
-    const std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().ChannelGroups()->GetChannelForEpgTag(tag);
+    const std::shared_ptr<CPVRChannel> channel = CPVRManager::Get().ChannelGroups()->GetChannelForEpgTag(tag);
     bReturn = channel && (m_channelNumber ==  channel->ChannelNumber());
   }
 
@@ -189,10 +189,10 @@ bool CPVREpgSearchFilter::MatchChannelGroup(const std::shared_ptr<CPVREpgInfoTag
 
   if (m_iChannelGroup != EPG_SEARCH_UNSET)
   {
-    std::shared_ptr<CPVRChannelGroup> group = CServiceBroker::GetPVRManager().ChannelGroups()->GetByIdFromAll(m_iChannelGroup);
+    std::shared_ptr<CPVRChannelGroup> group = CPVRManager::Get().ChannelGroups()->GetByIdFromAll(m_iChannelGroup);
     if (group)
     {
-      const std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().ChannelGroups()->GetChannelForEpgTag(tag);
+      const std::shared_ptr<CPVRChannel> channel = CPVRManager::Get().ChannelGroups()->GetChannelForEpgTag(tag);
       bReturn = (channel && group->IsGroupMember(channel));
     }
   }
@@ -204,7 +204,7 @@ bool CPVREpgSearchFilter::MatchFreeToAir(const std::shared_ptr<CPVREpgInfoTag>& 
 {
   if (m_bFreeToAirOnly)
   {
-    const std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().ChannelGroups()->GetChannelForEpgTag(tag);
+    const std::shared_ptr<CPVRChannel> channel = CPVRManager::Get().ChannelGroups()->GetChannelForEpgTag(tag);
     return channel && !channel->IsEncrypted();
   }
 
@@ -213,10 +213,10 @@ bool CPVREpgSearchFilter::MatchFreeToAir(const std::shared_ptr<CPVREpgInfoTag>& 
 
 bool CPVREpgSearchFilter::MatchTimers(const std::shared_ptr<CPVREpgInfoTag>& tag) const
 {
-  return (!m_bIgnorePresentTimers || !CServiceBroker::GetPVRManager().Timers()->GetTimerForEpgTag(tag));
+  return (!m_bIgnorePresentTimers || !CPVRManager::Get().Timers()->GetTimerForEpgTag(tag));
 }
 
 bool CPVREpgSearchFilter::MatchRecordings(const std::shared_ptr<CPVREpgInfoTag>& tag) const
 {
-  return (!m_bIgnorePresentRecordings || !CServiceBroker::GetPVRManager().Recordings()->GetRecordingForEpgTag(tag));
+  return (!m_bIgnorePresentRecordings || !CPVRManager::Get().Recordings()->GetRecordingForEpgTag(tag));
 }

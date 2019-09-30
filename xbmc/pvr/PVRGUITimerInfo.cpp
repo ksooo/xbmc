@@ -209,60 +209,60 @@ const std::string& CPVRGUITimerInfo::GetNextTimer() const
 
 int CPVRGUIAnyTimerInfo::AmountActiveTimers()
 {
-  return CServiceBroker::GetPVRManager().Timers()->AmountActiveTimers();
+  return CPVRManager::Get().Timers()->AmountActiveTimers();
 }
 
 int CPVRGUIAnyTimerInfo::AmountActiveRecordings()
 {
-  return CServiceBroker::GetPVRManager().Timers()->AmountActiveRecordings();
+  return CPVRManager::Get().Timers()->AmountActiveRecordings();
 }
 
 std::vector<std::shared_ptr<CPVRTimerInfoTag>> CPVRGUIAnyTimerInfo::GetActiveRecordings()
 {
-  return CServiceBroker::GetPVRManager().Timers()->GetActiveRecordings();
+  return CPVRManager::Get().Timers()->GetActiveRecordings();
 }
 
 std::shared_ptr<CPVRTimerInfoTag> CPVRGUIAnyTimerInfo::GetNextActiveTimer()
 {
-  return CServiceBroker::GetPVRManager().Timers()->GetNextActiveTimer();
+  return CPVRManager::Get().Timers()->GetNextActiveTimer();
 }
 
 int CPVRGUITVTimerInfo::AmountActiveTimers()
 {
-  return CServiceBroker::GetPVRManager().Timers()->AmountActiveTVTimers();
+  return CPVRManager::Get().Timers()->AmountActiveTVTimers();
 }
 
 int CPVRGUITVTimerInfo::AmountActiveRecordings()
 {
-  return CServiceBroker::GetPVRManager().Timers()->AmountActiveTVRecordings();
+  return CPVRManager::Get().Timers()->AmountActiveTVRecordings();
 }
 
 std::vector<std::shared_ptr<CPVRTimerInfoTag>> CPVRGUITVTimerInfo::GetActiveRecordings()
 {
-  return CServiceBroker::GetPVRManager().Timers()->GetActiveTVRecordings();
+  return CPVRManager::Get().Timers()->GetActiveTVRecordings();
 }
 
 std::shared_ptr<CPVRTimerInfoTag> CPVRGUITVTimerInfo::GetNextActiveTimer()
 {
-  return CServiceBroker::GetPVRManager().Timers()->GetNextActiveTVTimer();
+  return CPVRManager::Get().Timers()->GetNextActiveTVTimer();
 }
 
 int CPVRGUIRadioTimerInfo::AmountActiveTimers()
 {
-  return CServiceBroker::GetPVRManager().Timers()->AmountActiveRadioTimers();
+  return CPVRManager::Get().Timers()->AmountActiveRadioTimers();
 }
 
 int CPVRGUIRadioTimerInfo::AmountActiveRecordings()
 {
-  return CServiceBroker::GetPVRManager().Timers()->AmountActiveRadioRecordings();
+  return CPVRManager::Get().Timers()->AmountActiveRadioRecordings();
 }
 
 std::vector<std::shared_ptr<CPVRTimerInfoTag>> CPVRGUIRadioTimerInfo::GetActiveRecordings()
 {
-  return CServiceBroker::GetPVRManager().Timers()->GetActiveRadioRecordings();
+  return CPVRManager::Get().Timers()->GetActiveRadioRecordings();
 }
 
 std::shared_ptr<CPVRTimerInfoTag> CPVRGUIRadioTimerInfo::GetNextActiveTimer()
 {
-  return CServiceBroker::GetPVRManager().Timers()->GetNextActiveRadioTimer();
+  return CPVRManager::Get().Timers()->GetNextActiveRadioTimer();
 }

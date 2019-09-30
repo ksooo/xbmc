@@ -61,7 +61,7 @@ bool CGUIDialogPVRRecordingInfo::OnClickButtonPlay(CGUIMessage& message)
     Close();
 
     if (m_recordItem)
-      CServiceBroker::GetPVRManager().GUIActions()->PlayRecording(m_recordItem, true /* check resume */);
+      CPVRManager::Get().GUIActions()->PlayRecording(m_recordItem, true /* check resume */);
 
     bReturn = true;
   }
@@ -78,7 +78,7 @@ bool CGUIDialogPVRRecordingInfo::OnClickButtonFind(CGUIMessage& message)
     Close();
 
     if (m_recordItem)
-      CServiceBroker::GetPVRManager().GUIActions()->FindSimilar(m_recordItem);
+      CPVRManager::Get().GUIActions()->FindSimilar(m_recordItem);
 
     bReturn = true;
   }
@@ -104,6 +104,6 @@ CFileItemPtr CGUIDialogPVRRecordingInfo::GetCurrentListItem(int offset)
 
 void CGUIDialogPVRRecordingInfo::ShowFor(const CFileItemPtr& item)
 {
-  CServiceBroker::GetPVRManager().GUIActions()->ShowRecordingInfo(item);
+  CPVRManager::Get().GUIActions()->ShowRecordingInfo(item);
 }
 

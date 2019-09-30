@@ -103,14 +103,14 @@ void CPVRChannel::Serialize(CVariant& value) const
 bool CPVRChannel::Delete(void)
 {
   bool bReturn = false;
-  const std::shared_ptr<CPVRDatabase> database = CServiceBroker::GetPVRManager().GetTVDatabase();
+  const std::shared_ptr<CPVRDatabase> database = CPVRManager::Get().GetTVDatabase();
   if (!database)
     return bReturn;
 
   const std::shared_ptr<CPVREpg> epg = GetEPG();
   if (epg)
   {
-    CServiceBroker::GetPVRManager().EpgContainer().DeleteEpg(epg, true);
+    CPVRManager::Get().EpgContainer().DeleteEpg(epg, true);
 
     CSingleLock lock(m_critSection);
     m_epg.reset();
@@ -136,7 +136,7 @@ bool CPVRChannel::CreateEPG()
   CSingleLock lock(m_critSection);
   if (!m_epg)
   {
-    m_epg = CServiceBroker::GetPVRManager().EpgContainer().CreateChannelEpg(m_iEpgId,
+    m_epg = CPVRManager::Get().EpgContainer().CreateChannelEpg(m_iEpgId,
                                                                             m_strEPGScraper,
                                                                             std::make_shared<CPVREpgChannelData>(*this));
     if (m_epg)
@@ -191,7 +191,7 @@ bool CPVRChannel::Persist()
       return true;
   }
 
-  const std::shared_ptr<CPVRDatabase> database = CServiceBroker::GetPVRManager().GetTVDatabase();
+  const std::shared_ptr<CPVRDatabase> database = CPVRManager::Get().GetTVDatabase();
   if (database)
   {
     bool bReturn = database->Persist(*this, true);
@@ -353,7 +353,7 @@ bool CPVRChannel::SetLastWatched(time_t iLastWatched)
     }
   }
 
-  const std::shared_ptr<CPVRDatabase> database = CServiceBroker::GetPVRManager().GetTVDatabase();
+  const std::shared_ptr<CPVRDatabase> database = CPVRManager::Get().GetTVDatabase();
   if (database)
     return database->UpdateLastWatched(*this);
 
@@ -384,7 +384,7 @@ bool CPVRChannel::SetClientID(int iClientId)
 
 void CPVRChannel::UpdatePath(const std::string& channelGroup)
 {
-  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CPVRManager::Get().GetClient(m_iClientId);
   if (client)
   {
     CSingleLock lock(m_critSection);
@@ -799,7 +799,7 @@ std::string CPVRChannel::EPGScraper(void) const
 
 bool CPVRChannel::CanRecord(void) const
 {
-  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
+  const std::shared_ptr<CPVRClient> client = CPVRManager::Get().GetClient(m_iClientId);
   return client && client->GetClientCapabilities().SupportsRecordings();
 }
 

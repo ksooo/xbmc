@@ -57,11 +57,6 @@ XBPython& CServiceBroker::GetXBPython()
 }
 #endif
 
-PVR::CPVRManager &CServiceBroker::GetPVRManager()
-{
-  return g_application.m_ServiceManager->GetPVRManager();
-}
-
 PVR::CPVRComponent& CServiceBroker::GetPVRComponent()
 {
   return g_application.m_ServiceManager->GetPVRComponent();

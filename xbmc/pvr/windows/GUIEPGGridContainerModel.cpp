@@ -83,7 +83,7 @@ void CGUIEPGGridContainerModel::Initialize(const std::unique_ptr<CFileItemList>&
       iLastChannelUID = iCurrentChannelUID;
       iLastClientUID = iCurrentClientUID;
 
-      const std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().ChannelGroups()->GetChannelForEpgTag(fileItem->GetEPGInfoTag());
+      const std::shared_ptr<CPVRChannel> channel = CPVRManager::Get().ChannelGroups()->GetChannelForEpgTag(fileItem->GetEPGInfoTag());
       if (!channel)
         continue;
 
@@ -313,7 +313,7 @@ void CGUIEPGGridContainerModel::FindChannelAndBlockIndex(int channelUid, unsigne
 
 unsigned int CGUIEPGGridContainerModel::GetGridStartPadding() const
 {
-  unsigned int iPastMinutes = CServiceBroker::GetPVRManager().EpgContainer().GetPastDaysToDisplay() * 24 * 60;
+  unsigned int iPastMinutes = CPVRManager::Get().EpgContainer().GetPastDaysToDisplay() * 24 * 60;
 
   if (iPastMinutes < GRID_START_PADDING)
     return iPastMinutes;

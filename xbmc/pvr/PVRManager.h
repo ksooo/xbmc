@@ -435,5 +435,13 @@ namespace PVR
 
     CPVRActionListener m_actionListener;
     CPVRSettings m_settings;
+
+  // PVR Manager singleton access
+  public:
+    static void CreateInstance();
+    static void DestroyInstance();
+    static CPVRManager& Get();
+  private:
+    static std::unique_ptr<CPVRManager> m_theManager;
   };
 }

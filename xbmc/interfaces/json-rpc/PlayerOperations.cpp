@@ -153,7 +153,7 @@ JSONRPC_STATUS CPlayerOperations::GetItem(const std::string &method, ITransportL
       fileItem = std::make_shared<CFileItem>(g_application.CurrentFileItem());
       if (IsPVRChannel())
       {
-        const std::shared_ptr<CPVRChannel> currentChannel = CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingChannel();
+        const std::shared_ptr<CPVRChannel> currentChannel = CPVRManager::Get().PlaybackState()->GetPlayingChannel();
         if (currentChannel)
           fileItem = std::make_shared<CFileItem>(currentChannel);
       }
@@ -708,7 +708,7 @@ JSONRPC_STATUS CPlayerOperations::Open(const std::string &method, ITransportLaye
   }
   else if (parameterObject["item"].isMember("channelid"))
   {
-    const std::shared_ptr<CPVRChannelGroupsContainer> channelGroupContainer = CServiceBroker::GetPVRManager().ChannelGroups();
+    const std::shared_ptr<CPVRChannelGroupsContainer> channelGroupContainer = CPVRManager::Get().ChannelGroups();
     if (!channelGroupContainer)
       return FailedToExecute;
 
@@ -716,14 +716,14 @@ JSONRPC_STATUS CPlayerOperations::Open(const std::string &method, ITransportLaye
     if (!channel)
       return InvalidParams;
 
-    if (!CServiceBroker::GetPVRManager().GUIActions()->PlayMedia(std::make_shared<CFileItem>(channel)))
+    if (!CPVRManager::Get().GUIActions()->PlayMedia(std::make_shared<CFileItem>(channel)))
       return FailedToExecute;
 
     return ACK;
   }
   else if (parameterObject["item"].isMember("recordingid"))
   {
-    const std::shared_ptr<CPVRRecordings> recordingsContainer = CServiceBroker::GetPVRManager().Recordings();
+    const std::shared_ptr<CPVRRecordings> recordingsContainer = CPVRManager::Get().Recordings();
     if (!recordingsContainer)
       return FailedToExecute;
 
@@ -731,7 +731,7 @@ JSONRPC_STATUS CPlayerOperations::Open(const std::string &method, ITransportLaye
     if (!recording)
       return InvalidParams;
 
-    if (!CServiceBroker::GetPVRManager().GUIActions()->PlayMedia(std::make_shared<CFileItem>(recording)))
+    if (!CPVRManager::Get().GUIActions()->PlayMedia(std::make_shared<CFileItem>(recording)))
       return FailedToExecute;
 
     return ACK;
@@ -1200,11 +1200,11 @@ int CPlayerOperations::GetActivePlayers()
   int activePlayers = 0;
 
   if (g_application.GetAppPlayer().IsPlayingVideo() ||
-      CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingTV() ||
-      CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingRecording())
+      CPVRManager::Get().PlaybackState()->IsPlayingTV() ||
+      CPVRManager::Get().PlaybackState()->IsPlayingRecording())
     activePlayers |= Video;
   if (g_application.GetAppPlayer().IsPlayingAudio() ||
-      CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingRadio())
+      CPVRManager::Get().PlaybackState()->IsPlayingRadio())
     activePlayers |= Audio;
   if (CServiceBroker::GetGUI()->GetWindowManager().IsWindowActive(WINDOW_SLIDESHOW))
     activePlayers |= Picture;
@@ -1899,13 +1899,13 @@ double CPlayerOperations::ParseTimeInSeconds(const CVariant &time)
 
 bool CPlayerOperations::IsPVRChannel()
 {
-  const std::shared_ptr<CPVRPlaybackState> state = CServiceBroker::GetPVRManager().PlaybackState();
+  const std::shared_ptr<CPVRPlaybackState> state = CPVRManager::Get().PlaybackState();
   return state->IsPlayingTV() || state->IsPlayingRadio();
 }
 
 std::shared_ptr<CPVREpgInfoTag> CPlayerOperations::GetCurrentEpg()
 {
-  const std::shared_ptr<CPVRPlaybackState> state = CServiceBroker::GetPVRManager().PlaybackState();
+  const std::shared_ptr<CPVRPlaybackState> state = CPVRManager::Get().PlaybackState();
   if (!state->IsPlayingTV() && !state->IsPlayingRadio())
     return {};
 

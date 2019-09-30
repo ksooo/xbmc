@@ -543,7 +543,7 @@ bool CEdl::ReadBeyondTV(const std::string& strMovie)
 bool CEdl::ReadPvr(const CFileItem &fileItem)
 {
   const std::string strMovie = fileItem.GetDynPath();
-  if (!CServiceBroker::GetPVRManager().IsStarted())
+  if (!PVR::CPVRManager::Get().IsStarted())
   {
     CLog::Log(LOGERROR, "%s - PVR Manager not started, cannot read Edl for %s", __FUNCTION__, CURL::GetRedacted(strMovie).c_str());
     return false;

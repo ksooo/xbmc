@@ -118,7 +118,7 @@ namespace
 {
   std::string GetEpgTagTitle(const std::shared_ptr<CPVREpgInfoTag>& epgTag)
   {
-    if (CServiceBroker::GetPVRManager().IsParentalLocked(epgTag))
+    if (CPVRManager::Get().IsParentalLocked(epgTag))
       return g_localizeStrings.Get(19266); // Parental locked
     else if (epgTag->Title().empty() &&
              !CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_EPG_HIDENOINFOAVAILABLE))
@@ -167,7 +167,7 @@ CFileItem::CFileItem(const std::shared_ptr<CPVREpgInfoTag>& tag)
     SetArt("icon", tag->Icon());
   else
   {
-    const std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().ChannelGroups()->GetChannelForEpgTag(tag);
+    const std::shared_ptr<CPVRChannel> channel = CPVRManager::Get().ChannelGroups()->GetChannelForEpgTag(tag);
     if (channel)
     {
       if (!channel->IconPath().empty())
@@ -3634,7 +3634,7 @@ CFileItem CFileItem::GetItemToPlay() const
 {
   if (HasEPGInfoTag())
   {
-    const std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().ChannelGroups()->GetChannelForEpgTag(GetEPGInfoTag());
+    const std::shared_ptr<CPVRChannel> channel = CPVRManager::Get().ChannelGroups()->GetChannelForEpgTag(GetEPGInfoTag());
     if (channel)
       return CFileItem(channel);
   }

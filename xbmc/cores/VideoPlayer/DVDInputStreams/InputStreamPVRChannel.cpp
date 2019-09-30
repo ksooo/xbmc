@@ -39,7 +39,7 @@ bool CInputStreamPVRChannel::OpenPVRStream()
 {
   std::shared_ptr<CPVRChannel> channel = m_item.GetPVRChannelInfoTag();
   if (!channel)
-    channel = CServiceBroker::GetPVRManager().ChannelGroups()->GetByPath(m_item.GetPath());
+    channel = CPVRManager::Get().ChannelGroups()->GetByPath(m_item.GetPath());
 
   if (!channel)
     CLog::Log(LOGERROR, "CInputStreamPVRChannel - %s - unable to obtain channel instance for channel %s", __FUNCTION__, m_item.GetPath().c_str());

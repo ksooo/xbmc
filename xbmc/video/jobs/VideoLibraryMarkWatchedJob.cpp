@@ -15,8 +15,8 @@
 #ifdef HAS_UPNP
 #include "network/upnp/UPnP.h"
 #endif
-#include "pvr/PVRComponent.h"
 #include "profiles/ProfileManager.h"
+#include "pvr/PVRComponent.h"
 #include "settings/SettingsComponent.h"
 #include "ServiceBroker.h"
 #include "utils/URIUtils.h"

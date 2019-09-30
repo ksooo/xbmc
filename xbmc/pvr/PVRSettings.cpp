@@ -173,12 +173,12 @@ bool CPVRSettings::IsSettingVisible(const std::string& condition, const std::str
   if (settingId == CSettings::SETTING_PVRMANAGER_USEBACKENDCHANNELNUMBERS)
   {
     // Setting is only visible if exactly one PVR client is enabeld.
-    return CServiceBroker::GetPVRManager().Clients()->EnabledClientAmount() == 1;
+    return CPVRManager::Get().Clients()->EnabledClientAmount() == 1;
   }
   else if (settingId == CSettings::SETTING_PVRMANAGER_CLIENTPRIORITIES)
   {
     // Setting is only visible if more than one PVR client is enabeld.
-    return CServiceBroker::GetPVRManager().Clients()->EnabledClientAmount() > 1;
+    return CPVRManager::Get().Clients()->EnabledClientAmount() > 1;
   }
   else
   {
@@ -189,5 +189,5 @@ bool CPVRSettings::IsSettingVisible(const std::string& condition, const std::str
 
 bool CPVRSettings::CheckParentalPin(const std::string& condition, const std::string& value, std::shared_ptr<const CSetting> setting, void* data)
 {
-  return CServiceBroker::GetPVRManager().GUIActions()->CheckParentalPIN() == ParentalCheckResult::SUCCESS;
+  return CPVRManager::Get().GUIActions()->CheckParentalPIN() == ParentalCheckResult::SUCCESS;
 }

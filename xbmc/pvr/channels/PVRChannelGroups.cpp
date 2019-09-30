@@ -50,7 +50,7 @@ bool CPVRChannelGroups::GetGroupsFromClients(void)
   if (! CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_PVRMANAGER_SYNCCHANNELGROUPS))
     return true;
 
-  return CServiceBroker::GetPVRManager().Clients()->GetChannelGroups(this, m_failedClientsForChannelGroups) == PVR_ERROR_NO_ERROR;
+  return CPVRManager::Get().Clients()->GetChannelGroups(this, m_failedClientsForChannelGroups) == PVR_ERROR_NO_ERROR;
 }
 
 bool CPVRChannelGroups::Update(const CPVRChannelGroup& group, bool bUpdateFromClient /* = false */)
@@ -130,7 +130,7 @@ std::shared_ptr<CPVRChannel> CPVRChannelGroups::GetByPath(const CPVRChannelsPath
     const std::shared_ptr<CPVRChannelGroup> group = GetByName(path.GetGroupName());
     if (group)
       return group->GetByUniqueID(path.GetChannelUID(),
-                                  CServiceBroker::GetPVRManager().Clients()->GetClientId(path.GetClientID()));
+                                  CPVRManager::Get().Clients()->GetClientId(path.GetClientID()));
   }
 
   return {};
@@ -241,7 +241,7 @@ bool CPVRChannelGroups::Update(bool bChannelsOnly /* = false */)
         group->IsInternalGroup() &&
         CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_bPVRChannelIconsAutoScan)
     {
-      CServiceBroker::GetPVRManager().TriggerSearchMissingChannelIcons(group);
+      CPVRManager::Get().TriggerSearchMissingChannelIcons(group);
     }
   }
 
@@ -300,7 +300,7 @@ bool CPVRChannelGroups::LoadUserDefinedChannelGroups(void)
 
 bool CPVRChannelGroups::Load(void)
 {
-  const std::shared_ptr<CPVRDatabase> database(CServiceBroker::GetPVRManager().GetTVDatabase());
+  const std::shared_ptr<CPVRDatabase> database(CPVRManager::Get().GetTVDatabase());
   if (!database)
     return false;
 
@@ -543,7 +543,7 @@ bool CPVRChannelGroups::DeleteGroup(const CPVRChannelGroup& group)
   if (group.GroupID() > 0)
   {
     // delete the group from the database
-    const std::shared_ptr<CPVRDatabase> database(CServiceBroker::GetPVRManager().GetTVDatabase());
+    const std::shared_ptr<CPVRDatabase> database(CPVRManager::Get().GetTVDatabase());
     return database ? database->Delete(group) : false;
   }
   return bFound;

@@ -29,7 +29,6 @@
 #include "powermanagement/PowerManager.h"
 #include "profiles/ProfileManager.h"
 #include "pvr/PVRComponent.h"
-#include "pvr/PVRManager.h"
 #include "utils/FileExtensionProvider.h"
 #include "utils/log.h"
 #include "weather/WeatherManager.h"
@@ -127,7 +126,6 @@ bool CServiceManager::InitStageTwo(const CAppParamParser &params, const std::str
   m_vfsAddonCache.reset(new ADDON::CVFSAddonCache());
   m_vfsAddonCache->Init();
 
-  m_PVRManager.reset(new PVR::CPVRManager());
   m_PVRComponent.reset(new PVR::CPVRComponent());
 
   m_dataCacheCore.reset(new CDataCacheCore());
@@ -175,7 +173,7 @@ bool CServiceManager::InitStageThree(const std::shared_ptr<CProfileManager>& pro
     *profileManager));
 
   m_contextMenuManager->Init();
-  m_PVRManager->Init();
+  m_PVRComponent->Init();
 
   m_playerCoreFactory.reset(new CPlayerCoreFactory(*profileManager));
 
@@ -188,7 +186,7 @@ void CServiceManager::DeinitStageThree()
   init_level = 2;
 
   m_playerCoreFactory.reset();
-  m_PVRManager->Deinit();
+  m_PVRComponent->Deinit();
   m_contextMenuManager->Deinit();
   m_gameServices.reset();
   m_peripherals->Clear();
@@ -210,7 +208,6 @@ void CServiceManager::DeinitStageTwo()
   m_favouritesService.reset();
   m_binaryAddonCache.reset();
   m_dataCacheCore.reset();
-  m_PVRManager.reset();
   m_PVRComponent.reset();
   m_vfsAddonCache.reset();
   m_repositoryUpdater.reset();
@@ -268,11 +265,6 @@ XBPython& CServiceManager::GetXBPython()
   return *m_XBPython;
 }
 #endif
-
-PVR::CPVRManager& CServiceManager::GetPVRManager()
-{
-  return *m_PVRManager;
-}
 
 PVR::CPVRComponent& CServiceManager::GetPVRComponent()
 {

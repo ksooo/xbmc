@@ -113,7 +113,7 @@ void CPVRGUIInfo::Start(void)
 void CPVRGUIInfo::Stop(void)
 {
   StopThread();
-  CServiceBroker::GetPVRManager().Events().Unsubscribe(this);
+  CPVRManager::Get().Events().Unsubscribe(this);
 
   CGUIComponent* gui = CServiceBroker::GetGUI();
   if (gui)
@@ -135,7 +135,7 @@ void CPVRGUIInfo::Process(void)
   int toggleInterval = CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_iPVRInfoToggleInterval / 1000;
 
   /* updated on request */
-  CServiceBroker::GetPVRManager().Events().Subscribe(this, &CPVRGUIInfo::Notify);
+  CPVRManager::Get().Events().Subscribe(this, &CPVRGUIInfo::Notify);
   UpdateTimersCache();
 
   /* update the backend cache once initially */
@@ -196,11 +196,11 @@ void CPVRGUIInfo::UpdateQualityData(void)
 
   if (CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_PVRPLAYBACK_SIGNALQUALITY))
   {
-    bool bIsPlayingRecording = CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingRecording();
+    bool bIsPlayingRecording = CPVRManager::Get().PlaybackState()->IsPlayingRecording();
     if (!bIsPlayingRecording)
     {
       std::shared_ptr<CPVRClient> client;
-      CServiceBroker::GetPVRManager().Clients()->GetCreatedClient(CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingClientID(), client);
+      CPVRManager::Get().Clients()->GetCreatedClient(CPVRManager::Get().PlaybackState()->GetPlayingClientID(), client);
       if (client && client->SignalQuality(qualityInfo) == PVR_ERROR_NO_ERROR)
       {
         m_qualityInfo = qualityInfo;
@@ -214,11 +214,11 @@ void CPVRGUIInfo::UpdateDescrambleData(void)
   PVR_DESCRAMBLE_INFO descrambleInfo;
   ClearDescrambleInfo(descrambleInfo);
 
-  bool bIsPlayingRecording = CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingRecording();
+  bool bIsPlayingRecording = CPVRManager::Get().PlaybackState()->IsPlayingRecording();
   if (!bIsPlayingRecording)
   {
     std::shared_ptr<CPVRClient> client;
-    CServiceBroker::GetPVRManager().Clients()->GetCreatedClient(CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingClientID(), client);
+    CPVRManager::Get().Clients()->GetCreatedClient(CPVRManager::Get().PlaybackState()->GetPlayingClientID(), client);
     if (client && client->GetDescrambleInfo(descrambleInfo) == PVR_ERROR_NO_ERROR)
     {
       m_descrambleInfo = descrambleInfo;
@@ -228,7 +228,7 @@ void CPVRGUIInfo::UpdateDescrambleData(void)
 
 void CPVRGUIInfo::UpdateMisc(void)
 {
-  CPVRManager& mgr = CServiceBroker::GetPVRManager();
+  CPVRManager& mgr = CPVRManager::Get();
   bool bStarted = mgr.IsStarted();
   const std::shared_ptr<CPVRPlaybackState> state = mgr.PlaybackState();
 
@@ -274,7 +274,7 @@ void CPVRGUIInfo::UpdateTimeshiftData(void)
 
 bool CPVRGUIInfo::InitCurrentItem(CFileItem* item)
 {
-  CServiceBroker::GetPVRManager().PublishEvent(PVREvent::CurrentItem);
+  CPVRManager::Get().PublishEvent(PVREvent::CurrentItem);
   return false;
 }
 
@@ -478,7 +478,7 @@ bool CPVRGUIInfo::GetListItemAndPlayerLabel(const CFileItem* item, const CGUIInf
         // associated with the epg event of a timer, if any, and not the title of the timer.
         if (epgTag)
         {
-          bool bLocked = CServiceBroker::GetPVRManager().IsParentalLocked(epgTag);
+          bool bLocked = CPVRManager::Get().IsParentalLocked(epgTag);
           strValue = bLocked ? g_localizeStrings.Get(19266) /* Parental locked */ : epgTag->Title();
         }
         if (strValue.empty() && !CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_EPG_HIDENOINFOAVAILABLE))
@@ -501,14 +501,14 @@ bool CPVRGUIInfo::GetListItemAndPlayerLabel(const CFileItem* item, const CGUIInf
       case LISTITEM_PLOT:
       case VIDEOPLAYER_NEXT_PLOT:
       case LISTITEM_NEXT_PLOT:
-        if (!CServiceBroker::GetPVRManager().IsParentalLocked(epgTag))
+        if (!CPVRManager::Get().IsParentalLocked(epgTag))
           strValue = epgTag->Plot();
         return true;
       case VIDEOPLAYER_PLOT_OUTLINE:
       case LISTITEM_PLOT_OUTLINE:
       case VIDEOPLAYER_NEXT_PLOT_OUTLINE:
       case LISTITEM_NEXT_PLOT_OUTLINE:
-        if (!CServiceBroker::GetPVRManager().IsParentalLocked(epgTag))
+        if (!CPVRManager::Get().IsParentalLocked(epgTag))
           strValue = epgTag->PlotOutline();
         return true;
       case LISTITEM_DATE:
@@ -550,7 +550,7 @@ bool CPVRGUIInfo::GetListItemAndPlayerLabel(const CFileItem* item, const CGUIInf
         return true;
       case VIDEOPLAYER_ORIGINALTITLE:
       case LISTITEM_ORIGINALTITLE:
-        if (!CServiceBroker::GetPVRManager().IsParentalLocked(epgTag))
+        if (!CPVRManager::Get().IsParentalLocked(epgTag))
           strValue = epgTag->OriginalTitle();
         return true;
       case VIDEOPLAYER_YEAR:
@@ -582,7 +582,7 @@ bool CPVRGUIInfo::GetListItemAndPlayerLabel(const CFileItem* item, const CGUIInf
         return false;
       case VIDEOPLAYER_EPISODENAME:
       case LISTITEM_EPISODENAME:
-        if (!CServiceBroker::GetPVRManager().IsParentalLocked(epgTag))
+        if (!CPVRManager::Get().IsParentalLocked(epgTag))
           strValue = epgTag->EpisodeName();
         return true;
       case VIDEOPLAYER_CAST:
@@ -870,7 +870,7 @@ bool CPVRGUIInfo::GetPVRLabel(const CFileItem* item, const CGUIInfo& info, std::
       CharInfoTotalDiskSpace(strValue);
       return true;
     case PVR_CHANNEL_NUMBER_INPUT:
-      strValue = CServiceBroker::GetPVRManager().GUIActions()->GetChannelNumberInputHandler().GetChannelNumberLabel();
+      strValue = CPVRManager::Get().GUIActions()->GetChannelNumberInputHandler().GetChannelNumberLabel();
       return true;
   }
 
@@ -1133,7 +1133,7 @@ bool CPVRGUIInfo::GetListItemAndPlayerBool(const CFileItem* item, const CGUIInfo
     case LISTITEM_ISRECORDING:
       if (item->IsPVRChannel())
       {
-        bValue = CServiceBroker::GetPVRManager().Timers()->IsRecordingOnChannel(*item->GetPVRChannelInfoTag());
+        bValue = CPVRManager::Get().Timers()->IsRecordingOnChannel(*item->GetPVRChannelInfoTag());
         return true;
       }
       else if (item->IsEPG() || item->IsPVRTimer())
@@ -1163,7 +1163,7 @@ bool CPVRGUIInfo::GetListItemAndPlayerBool(const CFileItem* item, const CGUIInfo
       {
         const std::shared_ptr<CPVREpgInfoTag> epgTag = CPVRItem(item).GetEpgInfoTag();
         if (epgTag)
-          bValue = !!CServiceBroker::GetPVRManager().Timers()->GetTimerForEpgTag(epgTag);
+          bValue = !!CPVRManager::Get().Timers()->GetTimerForEpgTag(epgTag);
         return true;
       }
       break;
@@ -1226,7 +1226,7 @@ bool CPVRGUIInfo::GetListItemAndPlayerBool(const CFileItem* item, const CGUIInfo
       {
         const std::shared_ptr<CPVREpgInfoTag> epgTag = CPVRItem(item).GetEpgInfoTag();
         if (epgTag)
-          bValue = !!CServiceBroker::GetPVRManager().Recordings()->GetRecordingForEpgTag(epgTag);
+          bValue = !!CPVRManager::Get().Recordings()->GetRecordingForEpgTag(epgTag);
         return true;
       }
       break;
@@ -1289,7 +1289,7 @@ bool CPVRGUIInfo::GetListItemAndPlayerBool(const CFileItem* item, const CGUIInfo
       {
         const std::shared_ptr<CPVRRecording> recording = item->GetPVRRecordingInfoTag();
         const std::shared_ptr<CPVREpg> epg = recording->Channel() ? recording->Channel()->GetEPG() : nullptr;
-        const std::shared_ptr<CPVREpgInfoTag> epgTag = CServiceBroker::GetPVRManager().EpgContainer().GetTagById(epg, recording->BroadcastUid());
+        const std::shared_ptr<CPVREpgInfoTag> epgTag = CPVRManager::Get().EpgContainer().GetTagById(epg, recording->BroadcastUid());
         bValue = (epgTag && epgTag->IsActive());
         return true;
       }
@@ -1297,7 +1297,7 @@ bool CPVRGUIInfo::GetListItemAndPlayerBool(const CFileItem* item, const CGUIInfo
     case PLAYER_IS_CHANNEL_PREVIEW_ACTIVE:
       if (item->IsPVRChannel())
       {
-        if (CServiceBroker::GetPVRManager().GUIActions()->GetChannelNavigator().IsPreviewAndShowInfo())
+        if (CPVRManager::Get().GUIActions()->GetChannelNavigator().IsPreviewAndShowInfo())
         {
           bValue = true;
         }
@@ -1547,7 +1547,7 @@ void CPVRGUIInfo::CharInfoEncryption(std::string& strValue) const
   }
   else
   {
-    const std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingChannel();
+    const std::shared_ptr<CPVRChannel> channel = CPVRManager::Get().PlaybackState()->GetPlayingChannel();
     if (channel)
     {
       strValue = channel->EncryptionName();
@@ -1593,7 +1593,7 @@ void CPVRGUIInfo::UpdateBackendCache(void)
     std::vector<SBackend> backendProperties;
     {
       CSingleExit exit(m_critSection);
-      backendProperties = CServiceBroker::GetPVRManager().Clients()->GetBackendProperties();
+      backendProperties = CPVRManager::Get().Clients()->GetBackendProperties();
     }
 
     m_backendProperties = backendProperties;

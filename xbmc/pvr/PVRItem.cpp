@@ -49,7 +49,7 @@ namespace PVR
   {
     if (m_item->IsEPG())
     {
-      const std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().ChannelGroups()->GetChannelForEpgTag(m_item->GetEPGInfoTag());
+      const std::shared_ptr<CPVRChannel> channel = CPVRManager::Get().ChannelGroups()->GetChannelForEpgTag(m_item->GetEPGInfoTag());
       if (channel)
         return channel->GetEPGNext();
     }
@@ -78,7 +78,7 @@ namespace PVR
     }
     else if (m_item->IsEPG())
     {
-      return CServiceBroker::GetPVRManager().ChannelGroups()->GetChannelForEpgTag(m_item->GetEPGInfoTag());
+      return CPVRManager::Get().ChannelGroups()->GetChannelForEpgTag(m_item->GetEPGInfoTag());
     }
     else if (m_item->IsPVRTimer())
     {
@@ -99,11 +99,11 @@ namespace PVR
     }
     else if (m_item->IsEPG())
     {
-      return CServiceBroker::GetPVRManager().Timers()->GetTimerForEpgTag(m_item->GetEPGInfoTag());
+      return CPVRManager::Get().Timers()->GetTimerForEpgTag(m_item->GetEPGInfoTag());
     }
     else if (m_item->IsPVRChannel())
     {
-      return CServiceBroker::GetPVRManager().Timers()->GetActiveTimerForChannel(m_item->GetPVRChannelInfoTag());
+      return CPVRManager::Get().Timers()->GetActiveTimerForChannel(m_item->GetPVRChannelInfoTag());
     }
     else
     {
@@ -120,7 +120,7 @@ namespace PVR
     }
     else if (m_item->IsEPG())
     {
-      return CServiceBroker::GetPVRManager().Recordings()->GetRecordingForEpgTag(m_item->GetEPGInfoTag());
+      return CPVRManager::Get().Recordings()->GetRecordingForEpgTag(m_item->GetEPGInfoTag());
     }
     else
     {

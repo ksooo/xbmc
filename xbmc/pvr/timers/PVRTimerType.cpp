@@ -26,7 +26,7 @@ using namespace PVR;
 const std::vector<std::shared_ptr<CPVRTimerType>> CPVRTimerType::GetAllTypes()
 {
   std::vector<std::shared_ptr<CPVRTimerType>> allTypes;
-  CServiceBroker::GetPVRManager().Clients()->GetTimerTypes(allTypes);
+  CPVRManager::Get().Clients()->GetTimerTypes(allTypes);
 
   // Add local reminder timer types. Local reminders are always available.
   int iTypeId = PVR_TIMER_TYPE_NONE;

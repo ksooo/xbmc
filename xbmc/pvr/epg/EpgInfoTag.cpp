@@ -238,7 +238,7 @@ void CPVREpgInfoTag::ToSortable(SortItem& sortable, Field field) const
 
 CDateTime CPVREpgInfoTag::GetCurrentPlayingTime() const
 {
-  if (CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingChannel(ClientID(), UniqueChannelID()))
+  if (CPVRManager::Get().PlaybackState()->IsPlayingChannel(ClientID(), UniqueChannelID()))
   {
     // start time valid?
     time_t startTime = CServiceBroker::GetDataCacheCore().GetStartTime();
@@ -633,7 +633,7 @@ std::vector<PVR_EDL_ENTRY> CPVREpgInfoTag::GetEdl() const
   std::vector<PVR_EDL_ENTRY> edls;
 
   CSingleLock lock(m_critSection);
-  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_channelData->ClientId());
+  const std::shared_ptr<CPVRClient> client = CPVRManager::Get().GetClient(m_channelData->ClientId());
 
   if (client && client->GetClientCapabilities().SupportsEpgTagEdl())
     client->GetEpgTagEdl(shared_from_this(), edls);
@@ -662,7 +662,7 @@ bool CPVREpgInfoTag::IsRecordable(void) const
   bool bIsRecordable = false;
 
   CSingleLock lock(m_critSection);
-  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_channelData->ClientId());
+  const std::shared_ptr<CPVRClient> client = CPVRManager::Get().GetClient(m_channelData->ClientId());
   if (!client || (client->IsRecordable(shared_from_this(), bIsRecordable) != PVR_ERROR_NO_ERROR))
   {
     // event end time based fallback
@@ -676,7 +676,7 @@ bool CPVREpgInfoTag::IsPlayable(void) const
   bool bIsPlayable = false;
 
   CSingleLock lock(m_critSection);
-  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_channelData->ClientId());
+  const std::shared_ptr<CPVRClient> client = CPVRManager::Get().GetClient(m_channelData->ClientId());
   if (!client || (client->IsPlayable(shared_from_this(), bIsPlayable) != PVR_ERROR_NO_ERROR))
   {
     // fallback

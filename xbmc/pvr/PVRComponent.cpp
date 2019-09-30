@@ -45,27 +45,43 @@
 
 using namespace PVR;
 
-CPVRComponent::CPVRComponent() = default;
+CPVRComponent::CPVRComponent()
+{
+  CPVRManager::CreateInstance();
+}
 
-CPVRComponent::~CPVRComponent() = default;
+CPVRComponent::~CPVRComponent()
+{
+  CPVRManager::DestroyInstance();
+}
 
 ////////////////////////////////////////////////////
 // services
 ////////////////////////////////////////////////////
 
+void CPVRComponent::Init()
+{
+  CPVRManager::Get().Init();
+}
+
+void CPVRComponent::Deinit()
+{
+  CPVRManager::Get().Deinit();
+}
+
 void CPVRComponent::Stop()
 {
-  CServiceBroker::GetPVRManager().Stop();
+  CPVRManager::Get().Stop();
 }
 
 void CPVRComponent::Restart()
 {
-  CServiceBroker::GetPVRManager().Init();
+  CPVRManager::Get().Init();
 }
 
 bool CPVRComponent::IsStarted() const
 {
-  return CServiceBroker::GetPVRManager().IsStarted();
+  return CPVRManager::Get().IsStarted();
 }
 
 ////////////////////////////////////////////////////
@@ -172,9 +188,9 @@ int CPVRComponent::GetFullscreenWindowID(const CFileItem& item) const
   {
     bool bRadio = item.GetPVRChannelInfoTag()->IsRadio();
 
-    if (CServiceBroker::GetPVRManager().GUIActions()->GetChannelNumberInputHandler().HasChannelNumber())
+    if (CPVRManager::Get().GUIActions()->GetChannelNumberInputHandler().HasChannelNumber())
       return bRadio ? WINDOW_FULLSCREEN_RADIO_INPUT : WINDOW_FULLSCREEN_LIVETV_INPUT;
-    else if (CServiceBroker::GetPVRManager().GUIActions()->GetChannelNavigator().IsPreview())
+    else if (CPVRManager::Get().GUIActions()->GetChannelNavigator().IsPreview())
       return bRadio ? WINDOW_FULLSCREEN_RADIO_PREVIEW : WINDOW_FULLSCREEN_LIVETV_PREVIEW;
     else
       return bRadio ? WINDOW_FULLSCREEN_RADIO : WINDOW_FULLSCREEN_LIVETV;
@@ -220,7 +236,7 @@ CGUIViewState* CPVRComponent::GetViewState(int windowId, const CFileItemList& it
 
 void CPVRComponent::OnLocaleChanged()
 {
-  CServiceBroker::GetPVRManager().LocalizationChanged();
+  CPVRManager::Get().LocalizationChanged();
 }
 
 ////////////////////////////////////////////////////
@@ -229,17 +245,17 @@ void CPVRComponent::OnLocaleChanged()
 
 void CPVRComponent::OnSleep()
 {
-  CServiceBroker::GetPVRManager().OnSleep();
+  CPVRManager::Get().OnSleep();
 }
 
 void CPVRComponent::OnWake()
 {
-  CServiceBroker::GetPVRManager().OnWake();
+  CPVRManager::Get().OnWake();
 }
 
 bool CPVRComponent::CanSystemPowerdown(bool bAskUser /*= true*/) const
 {
-  return CServiceBroker::GetPVRManager().GUIActions()->CanSystemPowerdown(bAskUser);
+  return CPVRManager::Get().GUIActions()->CanSystemPowerdown(bAskUser);
 }
 
 ////////////////////////////////////////////////////
@@ -248,22 +264,22 @@ bool CPVRComponent::CanSystemPowerdown(bool bAskUser /*= true*/) const
 
 bool CPVRComponent::PlayMedia(const std::shared_ptr<CFileItem>& item) const
 {
-  return CServiceBroker::GetPVRManager().GUIActions()->PlayMedia(item);
+  return CPVRManager::Get().GUIActions()->PlayMedia(item);
 }
 
 void CPVRComponent::OnPlaybackStarted(const std::shared_ptr<CFileItem>& item)
 {
-  CServiceBroker::GetPVRManager().OnPlaybackStarted(item);
+  CPVRManager::Get().OnPlaybackStarted(item);
 }
 
 void CPVRComponent::OnPlaybackStopped(const std::shared_ptr<CFileItem>& item)
 {
-  CServiceBroker::GetPVRManager().OnPlaybackStopped(item);
+  CPVRManager::Get().OnPlaybackStopped(item);
 }
 
 void CPVRComponent::OnPlaybackEnded(const std::shared_ptr<CFileItem>& item)
 {
-  CServiceBroker::GetPVRManager().OnPlaybackEnded(item);
+  CPVRManager::Get().OnPlaybackEnded(item);
 }
 
 ////////////////////////////////////////////////////
@@ -292,12 +308,12 @@ bool CPVRComponent::ResetRecordingResumePoint(const std::shared_ptr<CFileItem>& 
 {
   return recording &&
          recording->HasPVRRecordingInfoTag() &&
-         CServiceBroker::GetPVRManager().Recordings()->ResetResumePoint(recording->GetPVRRecordingInfoTag());
+         CPVRManager::Get().Recordings()->ResetResumePoint(recording->GetPVRRecordingInfoTag());
 }
 
 bool CPVRComponent::MarkRecordingWatched(const std::shared_ptr<CFileItem>& recording, bool bWatched)
 {
   return recording &&
          recording->HasPVRRecordingInfoTag() &&
-         CServiceBroker::GetPVRManager().Recordings()->MarkWatched(recording->GetPVRRecordingInfoTag(), bWatched);
+         CPVRManager::Get().Recordings()->MarkWatched(recording->GetPVRRecordingInfoTag(), bWatched);
 }

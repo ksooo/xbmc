@@ -11,7 +11,7 @@
 #include "FileItem.h"
 #include "ServiceBroker.h"
 #include "XBDateTime.h"
-#include "addons/PVRClient.h"
+#include "pvr/addons/PVRClient.h"
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/channels/PVRChannelGroup.h"
@@ -101,7 +101,7 @@ void CPVRPlaybackState::OnPlaybackStarted(const std::shared_ptr<CFileItem> item)
 
   if (m_playingClientId != -1)
   {
-    const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_playingClientId);
+    const std::shared_ptr<CPVRClient> client = CPVRManager::Get().GetClient(m_playingClientId);
     if (client)
       m_strPlayingClientName = client->GetFriendlyName();
   }
@@ -264,13 +264,13 @@ int CPVRPlaybackState::GetPlayingClientID() const
 
 bool CPVRPlaybackState::IsRecording() const
 {
-  return CServiceBroker::GetPVRManager().Timers()->IsRecording();
+  return CPVRManager::Get().Timers()->IsRecording();
 }
 
 bool CPVRPlaybackState::IsRecordingOnPlayingChannel() const
 {
   const std::shared_ptr<CPVRChannel> currentChannel = GetPlayingChannel();
-  return currentChannel && CServiceBroker::GetPVRManager().Timers()->IsRecordingOnChannel(*currentChannel);
+  return currentChannel && CPVRManager::Get().Timers()->IsRecordingOnChannel(*currentChannel);
 }
 
 bool CPVRPlaybackState::IsPlayingActiveRecording() const
@@ -288,17 +288,17 @@ bool CPVRPlaybackState::CanRecordOnPlayingChannel() const
 void CPVRPlaybackState::SetPlayingGroup(const std::shared_ptr<CPVRChannelGroup>& group)
 {
   if (group)
-    CServiceBroker::GetPVRManager().ChannelGroups()->Get(group->IsRadio())->SetSelectedGroup(group);
+    CPVRManager::Get().ChannelGroups()->Get(group->IsRadio())->SetSelectedGroup(group);
 }
 
 void CPVRPlaybackState::SetPlayingGroup(const std::shared_ptr<CPVRChannel>& channel)
 {
-  const std::shared_ptr<CPVRChannelGroup> group = CServiceBroker::GetPVRManager().ChannelGroups()->GetSelectedGroup(channel->IsRadio());
+  const std::shared_ptr<CPVRChannelGroup> group = CPVRManager::Get().ChannelGroups()->GetSelectedGroup(channel->IsRadio());
   if (!group || !group->IsGroupMember(channel))
   {
     // The channel we'll switch to is not part of the current selected group.
     // Set the first group as the selected group where the channel is a member.
-    CPVRChannelGroups* channelGroups = CServiceBroker::GetPVRManager().ChannelGroups()->Get(channel->IsRadio());
+    CPVRChannelGroups* channelGroups = CPVRManager::Get().ChannelGroups()->Get(channel->IsRadio());
     const std::vector<std::shared_ptr<CPVRChannelGroup>> groups = channelGroups->GetGroupsByChannel(channel, true);
     if (!groups.empty())
       channelGroups->SetSelectedGroup(groups.front());
@@ -307,7 +307,7 @@ void CPVRPlaybackState::SetPlayingGroup(const std::shared_ptr<CPVRChannel>& chan
 
 std::shared_ptr<CPVRChannelGroup> CPVRPlaybackState::GetPlayingGroup(bool bRadio) const
 {
-  return CServiceBroker::GetPVRManager().ChannelGroups()->GetSelectedGroup(bRadio);
+  return CPVRManager::Get().ChannelGroups()->GetSelectedGroup(bRadio);
 }
 
 void CPVRPlaybackState::UpdateLastWatched(const std::shared_ptr<CPVRChannel>& channel, const CDateTime& time)
@@ -321,5 +321,5 @@ void CPVRPlaybackState::UpdateLastWatched(const std::shared_ptr<CPVRChannel>& ch
   const std::shared_ptr<CPVRChannelGroup> group = GetPlayingGroup(channel->IsRadio());
   group->SetLastWatched(iTime);
 
-  CServiceBroker::GetPVRManager().ChannelGroups()->SetLastPlayedGroup(group);
+  CPVRManager::Get().ChannelGroups()->SetLastPlayedGroup(group);
 }

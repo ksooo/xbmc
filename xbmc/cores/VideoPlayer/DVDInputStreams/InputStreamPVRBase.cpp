@@ -21,7 +21,7 @@ CInputStreamPVRBase::CInputStreamPVRBase(IVideoPlayer* pPlayer, const CFileItem&
   : CDVDInputStream(DVDSTREAM_TYPE_PVRMANAGER, fileitem),
     m_eof(true),
     m_StreamProps(new PVR_STREAM_PROPERTIES()),
-    m_client(CServiceBroker::GetPVRManager().GetClient(fileitem))
+    m_client(PVR::CPVRManager::Get().GetClient(fileitem))
 {
   if (!m_client)
     CLog::Log(LOGERROR, "CInputStreamPVRBase - %s - unable to obtain pvr addon instance for item '%s'", __FUNCTION__, fileitem.GetPath().c_str());

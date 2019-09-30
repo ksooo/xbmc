@@ -27,7 +27,6 @@ namespace ANNOUNCEMENT
 namespace PVR
 {
   class CPVRComponent;
-  class CPVRManager;
 }
 
 namespace PLAYLIST
@@ -86,7 +85,6 @@ public:
   static ADDON::CBinaryAddonCache &GetBinaryAddonCache();
   static ADDON::CVFSAddonCache &GetVFSAddonCache();
   static XBPython &GetXBPython();
-  static PVR::CPVRManager &GetPVRManager();
   static PVR::CPVRComponent& GetPVRComponent();
   static CContextMenuManager& GetContextMenuManager();
   static CDataCacheCore& GetDataCacheCore();

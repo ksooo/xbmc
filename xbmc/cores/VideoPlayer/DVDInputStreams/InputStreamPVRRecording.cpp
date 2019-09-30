@@ -30,7 +30,7 @@ bool CInputStreamPVRRecording::OpenPVRStream()
 {
   std::shared_ptr<CPVRRecording> recording = m_item.GetPVRRecordingInfoTag();
   if (!recording)
-    recording = CServiceBroker::GetPVRManager().Recordings()->GetByPath(m_item.GetPath());
+    recording = CPVRManager::Get().Recordings()->GetByPath(m_item.GetPath());
 
   if (!recording)
     CLog::Log(LOGERROR, "CInputStreamPVRRecording - %s - unable to obtain recording instance for recording %s", __FUNCTION__, m_item.GetPath().c_str());

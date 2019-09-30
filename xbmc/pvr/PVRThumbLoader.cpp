@@ -47,7 +47,7 @@ void CPVRThumbLoader::OnLoaderFinish()
   if (m_bInvalidated)
   {
     m_bInvalidated = false;
-    CServiceBroker::GetPVRManager().PublishEvent(PVREvent::ChannelGroupsInvalidated);
+    CPVRManager::Get().PublishEvent(PVREvent::ChannelGroupsInvalidated);
   }
   CThumbLoader::OnLoaderFinish();
 }

@@ -30,7 +30,7 @@ using namespace PVR;
  */
 static int SearchMissingIcons(const std::vector<std::string>& params)
 {
-  CServiceBroker::GetPVRManager().TriggerSearchMissingChannelIcons();
+  CPVRManager::Get().TriggerSearchMissingChannelIcons();
   return 0;
 }
 
@@ -39,7 +39,7 @@ static int SearchMissingIcons(const std::vector<std::string>& params)
  */
 static int ToggleRecordPlayingChannel(const std::vector<std::string>& params)
 {
-  CServiceBroker::GetPVRManager().GUIActions()->ToggleRecordingOnPlayingChannel();
+  CPVRManager::Get().GUIActions()->ToggleRecordingOnPlayingChannel();
   return 0;
 }
 

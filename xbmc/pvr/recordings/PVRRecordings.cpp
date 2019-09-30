@@ -37,8 +37,8 @@ void CPVRRecordings::UpdateFromClients(void)
 {
   CSingleLock lock(m_critSection);
   Unload();
-  CServiceBroker::GetPVRManager().Clients()->GetRecordings(this, false);
-  CServiceBroker::GetPVRManager().Clients()->GetRecordings(this, true);
+  CPVRManager::Get().Clients()->GetRecordings(this, false);
+  CPVRManager::Get().Clients()->GetRecordings(this, true);
 }
 
 int CPVRRecordings::Load(void)
@@ -73,7 +73,7 @@ void CPVRRecordings::Update(void)
   m_bIsUpdating = false;
   lock.Leave();
 
-  CServiceBroker::GetPVRManager().PublishEvent(PVREvent::RecordingsInvalidated);
+  CPVRManager::Get().PublishEvent(PVREvent::RecordingsInvalidated);
 }
 
 int CPVRRecordings::GetNumTVRecordings() const
@@ -258,7 +258,7 @@ bool CPVRRecordings::ChangeRecordingsPlayCount(const std::shared_ptr<CPVRRecordi
         recording->SetResumePoint(CBookmark());
       }
 
-      CServiceBroker::GetPVRManager().PublishEvent(PVREvent::RecordingsInvalidated);
+      CPVRManager::Get().PublishEvent(PVREvent::RecordingsInvalidated);
       return true;
     }
   }
@@ -290,7 +290,7 @@ bool CPVRRecordings::ResetResumePoint(const std::shared_ptr<CPVRRecording>& reco
       db.ClearBookMarksOfFile(recording->m_strFileNameAndPath, CBookmark::RESUME);
       recording->SetResumePoint(CBookmark());
 
-      CServiceBroker::GetPVRManager().PublishEvent(PVREvent::RecordingsInvalidated);
+      CPVRManager::Get().PublishEvent(PVREvent::RecordingsInvalidated);
     }
   }
   return bResult;

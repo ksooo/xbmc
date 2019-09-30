@@ -821,3 +821,22 @@ bool CPVRManager::CreateChannelEpgs(void)
   m_bEpgsCreated = bEpgsCreated;
   return m_bEpgsCreated;
 }
+
+// PVR Manager singleton access
+
+std::unique_ptr<CPVRManager> CPVRManager::m_theManager;
+
+void CPVRManager::CreateInstance()
+{
+  m_theManager.reset(new CPVRManager);
+}
+
+void CPVRManager::DestroyInstance()
+{
+  m_theManager.reset();
+}
+
+CPVRManager& CPVRManager::Get()
+{
+  return *m_theManager;
+}

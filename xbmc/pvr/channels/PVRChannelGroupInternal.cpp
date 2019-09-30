@@ -37,7 +37,7 @@ CPVRChannelGroupInternal::CPVRChannelGroupInternal(bool bRadio)
 CPVRChannelGroupInternal::~CPVRChannelGroupInternal(void)
 {
   Unload();
-  CServiceBroker::GetPVRManager().Events().Unsubscribe(this);
+  CPVRManager::Get().Events().Unsubscribe(this);
 }
 
 bool CPVRChannelGroupInternal::Load(std::vector<std::shared_ptr<CPVRChannel>>& channelsToRemove)
@@ -45,7 +45,7 @@ bool CPVRChannelGroupInternal::Load(std::vector<std::shared_ptr<CPVRChannel>>& c
   if (CPVRChannelGroup::Load(channelsToRemove))
   {
     UpdateChannelPaths();
-    CServiceBroker::GetPVRManager().Events().Subscribe(this, &CPVRChannelGroupInternal::OnPVRManagerEvent);
+    CPVRManager::Get().Events().Subscribe(this, &CPVRChannelGroupInternal::OnPVRManagerEvent);
     return true;
   }
 
@@ -163,7 +163,7 @@ bool CPVRChannelGroupInternal::RemoveFromGroup(const std::shared_ptr<CPVRChannel
     return false;
 
   /* check if this channel is currently playing if we are hiding it */
-  const std::shared_ptr<CPVRChannel> currentChannel = CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingChannel();
+  const std::shared_ptr<CPVRChannel> currentChannel = CPVRManager::Get().PlaybackState()->GetPlayingChannel();
   if (currentChannel && currentChannel == channel)
   {
     HELPERS::ShowOKDialogText(CVariant{19098}, CVariant{19102});
@@ -195,7 +195,7 @@ bool CPVRChannelGroupInternal::RemoveFromGroup(const std::shared_ptr<CPVRChannel
 
 int CPVRChannelGroupInternal::LoadFromDb(bool bCompress /* = false */)
 {
-  const std::shared_ptr<CPVRDatabase> database(CServiceBroker::GetPVRManager().GetTVDatabase());
+  const std::shared_ptr<CPVRDatabase> database(CPVRManager::Get().GetTVDatabase());
   if (!database)
     return -1;
 
@@ -212,7 +212,7 @@ int CPVRChannelGroupInternal::LoadFromDb(bool bCompress /* = false */)
 bool CPVRChannelGroupInternal::LoadFromClients(void)
 {
   /* get the channels from the backends */
-  return CServiceBroker::GetPVRManager().Clients()->GetChannels(this, m_failedClientsForChannels) == PVR_ERROR_NO_ERROR;
+  return CPVRManager::Get().Clients()->GetChannels(this, m_failedClientsForChannels) == PVR_ERROR_NO_ERROR;
 }
 
 bool CPVRChannelGroupInternal::IsGroupMember(const std::shared_ptr<CPVRChannel>& channel) const
@@ -297,7 +297,7 @@ void CPVRChannelGroupInternal::CreateChannelEpg(const std::shared_ptr<CPVRChanne
 
 bool CPVRChannelGroupInternal::CreateChannelEpgs(bool bForce /* = false */)
 {
-  if (!CServiceBroker::GetPVRManager().EpgContainer().IsStarted())
+  if (!CPVRManager::Get().EpgContainer().IsStarted())
     return false;
 
   {
@@ -317,5 +317,5 @@ bool CPVRChannelGroupInternal::CreateChannelEpgs(bool bForce /* = false */)
 void CPVRChannelGroupInternal::OnPVRManagerEvent(const PVR::PVREvent& event)
 {
   if (event == PVREvent::ManagerStarted)
-    CServiceBroker::GetPVRManager().TriggerEpgsCreate();
+    CPVRManager::Get().TriggerEpgsCreate();
 }

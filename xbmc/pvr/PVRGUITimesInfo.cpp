@@ -53,15 +53,15 @@ void CPVRGUITimesInfo::Reset()
 
 void CPVRGUITimesInfo::UpdatePlayingTag()
 {
-  const std::shared_ptr<CPVRChannel> currentChannel = CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingChannel();
-  std::shared_ptr<CPVREpgInfoTag> currentTag = CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingEpgTag();
+  const std::shared_ptr<CPVRChannel> currentChannel = CPVRManager::Get().PlaybackState()->GetPlayingChannel();
+  std::shared_ptr<CPVREpgInfoTag> currentTag = CPVRManager::Get().PlaybackState()->GetPlayingEpgTag();
 
   if (currentChannel || currentTag)
   {
     if (currentChannel && !currentTag)
       currentTag = currentChannel->GetEPGNow();
 
-    const std::shared_ptr<CPVRChannelGroupsContainer> groups = CServiceBroker::GetPVRManager().ChannelGroups();
+    const std::shared_ptr<CPVRChannelGroupsContainer> groups = CPVRManager::Get().ChannelGroups();
 
     CSingleLock lock(m_critSection);
 
@@ -88,7 +88,7 @@ void CPVRGUITimesInfo::UpdatePlayingTag()
   }
   else
   {
-    const std::shared_ptr<CPVRRecording> recording = CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingRecording();
+    const std::shared_ptr<CPVRRecording> recording = CPVRManager::Get().PlaybackState()->GetPlayingRecording();
     if (recording)
     {
       CSingleLock lock(m_critSection);
@@ -100,7 +100,7 @@ void CPVRGUITimesInfo::UpdatePlayingTag()
 
 void CPVRGUITimesInfo::UpdateTimeshiftData()
 {
-  if (!CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingTV() && !CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingRadio())
+  if (!CPVRManager::Get().PlaybackState()->IsPlayingTV() && !CPVRManager::Get().PlaybackState()->IsPlayingRadio())
   {
     // If nothing is playing (anymore), there is no need to update data.
     Reset();
@@ -112,7 +112,7 @@ void CPVRGUITimesInfo::UpdateTimeshiftData()
   int64_t iPlayTime, iMinTime, iMaxTime;
   CServiceBroker::GetDataCacheCore().GetPlayTimes(iStartTime, iPlayTime, iMinTime, iMaxTime);
   bool bPlaying = CServiceBroker::GetDataCacheCore().GetSpeed() == 1.0;
-  const std::shared_ptr<CPVRChannel> playingChannel = CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingChannel();
+  const std::shared_ptr<CPVRChannel> playingChannel = CPVRManager::Get().PlaybackState()->GetPlayingChannel();
 
   CSingleLock lock(m_critSection);
 

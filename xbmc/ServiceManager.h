@@ -27,7 +27,6 @@ namespace ADDON
 namespace PVR
 {
   class CPVRComponent;
-  class CPVRManager;
 }
 
 namespace PLAYLIST
@@ -97,7 +96,6 @@ public:
 #ifdef HAS_PYTHON
   XBPython& GetXBPython();
 #endif
-  PVR::CPVRManager& GetPVRManager();
   PVR::CPVRComponent& GetPVRComponent();
   CContextMenuManager& GetContextMenuManager();
   CDataCacheCore& GetDataCacheCore();
@@ -149,7 +147,6 @@ protected:
 #ifdef HAS_PYTHON
   std::unique_ptr<XBPython> m_XBPython;
 #endif
-  std::unique_ptr<PVR::CPVRManager> m_PVRManager;
   std::unique_ptr<PVR::CPVRComponent> m_PVRComponent;
   std::unique_ptr<CContextMenuManager, delete_contextMenuManager> m_contextMenuManager;
   std::unique_ptr<CDataCacheCore, delete_dataCacheCore> m_dataCacheCore;

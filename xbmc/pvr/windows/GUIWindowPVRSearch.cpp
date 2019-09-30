@@ -61,7 +61,7 @@ namespace
 
   void AsyncSearchAction::Run()
   {
-    std::vector<std::shared_ptr<CPVREpgInfoTag>> results = CServiceBroker::GetPVRManager().EpgContainer().GetAllTags();
+    std::vector<std::shared_ptr<CPVREpgInfoTag>> results = CPVRManager::Get().EpgContainer().GetAllTags();
     for (auto it = results.begin(); it != results.end();)
     {
       it = results.erase(std::remove_if(results.begin(),
@@ -122,7 +122,7 @@ void CGUIWindowPVRSearchBase::SetItemToSearch(const CFileItemPtr& item)
   else
   {
     const std::shared_ptr<CPVREpgInfoTag> epgTag(CPVRItem(item).GetEpgInfoTag());
-    if (epgTag && !CServiceBroker::GetPVRManager().IsParentalLocked(epgTag))
+    if (epgTag && !CPVRManager::Get().IsParentalLocked(epgTag))
       m_searchfilter->SetSearchPhrase(epgTag->Title());
   }
 
@@ -180,7 +180,7 @@ bool CGUIWindowPVRSearchBase::OnMessage(CGUIMessage& message)
             if (URIUtils::PathEquals(pItem->GetPath(), "pvr://guide/searchresults/search/"))
               OpenDialogSearch();
             else
-               CServiceBroker::GetPVRManager().GUIActions()->ShowEPGInfo(pItem);
+               CPVRManager::Get().GUIActions()->ShowEPGInfo(pItem);
             return true;
           }
 
@@ -190,7 +190,7 @@ bool CGUIWindowPVRSearchBase::OnMessage(CGUIMessage& message)
             return true;
 
           case ACTION_RECORD:
-            CServiceBroker::GetPVRManager().GUIActions()->ToggleTimer(pItem);
+            CPVRManager::Get().GUIActions()->ToggleTimer(pItem);
             return true;
         }
       }

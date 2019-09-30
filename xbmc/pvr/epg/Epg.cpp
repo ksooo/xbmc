@@ -596,7 +596,7 @@ bool CPVREpg::UpdateFromScraper(time_t start, time_t end, bool bForceUpdate)
   }
   else if (m_strScraperName == "client")
   {
-    if (!CServiceBroker::GetPVRManager().EpgsCreated())
+    if (!CPVRManager::Get().EpgsCreated())
       return false;
 
     if (!m_channelData->IsEPGEnabled() || m_channelData->IsHidden())
@@ -605,7 +605,7 @@ bool CPVREpg::UpdateFromScraper(time_t start, time_t end, bool bForceUpdate)
       return true;
     }
 
-    const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_channelData->ClientId());
+    const std::shared_ptr<CPVRClient> client = CPVRManager::Get().GetClient(m_channelData->ClientId());
     if (client)
     {
       if (!client->GetClientCapabilities().SupportsEPG())

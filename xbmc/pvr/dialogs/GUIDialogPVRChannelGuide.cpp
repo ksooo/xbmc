@@ -35,7 +35,7 @@ void CGUIDialogPVRChannelGuide::OnInitWindow()
 {
   // no user-specific channel is set; use current playing channel
   if (!m_channel)
-    m_channel = CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingChannel();
+    m_channel = CPVRManager::Get().PlaybackState()->GetPlayingChannel();
 
   if (!m_channel)
   {

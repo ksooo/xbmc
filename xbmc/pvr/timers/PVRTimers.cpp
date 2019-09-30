@@ -100,7 +100,7 @@ bool CPVRTimers::Load(void)
 
   Update(); // update from clients
 
-  CServiceBroker::GetPVRManager().EpgContainer().Events().Subscribe(this, &CPVRTimers::Notify);
+  CPVRManager::Get().EpgContainer().Events().Subscribe(this, &CPVRTimers::Notify);
   Create();
 
   return bReturn;
@@ -109,7 +109,7 @@ bool CPVRTimers::Load(void)
 void CPVRTimers::Unload()
 {
   StopThread();
-  CServiceBroker::GetPVRManager().EpgContainer().Events().Unsubscribe(this);
+  CPVRManager::Get().EpgContainer().Events().Unsubscribe(this);
 
   // remove all tags
   CSingleLock lock(m_critSection);
@@ -128,13 +128,13 @@ bool CPVRTimers::Update(void)
   CLog::LogFC(LOGDEBUG, LOGPVR, "Updating timers");
   CPVRTimersContainer newTimerList;
   std::vector<int> failedClients;
-  CServiceBroker::GetPVRManager().Clients()->GetTimers(&newTimerList, failedClients);
+  CPVRManager::Get().Clients()->GetTimers(&newTimerList, failedClients);
   return UpdateEntries(newTimerList, failedClients);
 }
 
 bool CPVRTimers::LoadFromDatabase()
 {
-  const std::shared_ptr<CPVRDatabase> database = CServiceBroker::GetPVRManager().GetTVDatabase();
+  const std::shared_ptr<CPVRDatabase> database = CPVRManager::Get().GetTVDatabase();
   if (database)
   {
     bool bChanged = false;
@@ -352,14 +352,14 @@ bool CPVRTimers::UpdateEntries(const CPVRTimersContainer& timers, const std::vec
 
     NotifyTimersEvent(bAddedOrDeleted);
 
-    if (!timerNotifications.empty() && CServiceBroker::GetPVRManager().IsStarted())
+    if (!timerNotifications.empty() && CPVRManager::Get().IsStarted())
     {
       CPVREventlogJob* job = new CPVREventlogJob;
 
       /* queue notifications / fill eventlog */
       for (const auto& entry : timerNotifications)
       {
-        const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(entry.first);
+        const std::shared_ptr<CPVRClient> client = CPVRManager::Get().GetClient(entry.first);
         if (client)
         {
           job->AddEvent(m_settings.GetBoolValue(CSettings::SETTING_PVRRECORD_TIMERNOTIFICATIONS),
@@ -401,7 +401,7 @@ namespace
     else
     {
       // match any channel
-      const std::vector<std::shared_ptr<CPVREpg>> epgs = CServiceBroker::GetPVRManager().EpgContainer().GetAllEpgs();
+      const std::vector<std::shared_ptr<CPVREpg>> epgs = CPVRManager::Get().EpgContainer().GetAllEpgs();
       for (const auto& epg : epgs)
       {
         std::vector<std::shared_ptr<CPVREpgInfoTag>> tags = epg->GetTags();
@@ -440,7 +440,7 @@ namespace
       // rule matches "any channel" => we need to check all channels
       if (!bFetchedAllEpgs)
       {
-        const std::vector<std::shared_ptr<CPVREpg>> epgs = CServiceBroker::GetPVRManager().EpgContainer().GetAllEpgs();
+        const std::vector<std::shared_ptr<CPVREpg>> epgs = CPVRManager::Get().EpgContainer().GetAllEpgs();
         for (const auto& epg : epgs)
         {
           const std::shared_ptr<CPVRTimerRuleMatcher> matcher = std::make_shared<CPVRTimerRuleMatcher>(timer, now);
@@ -524,7 +524,7 @@ bool CPVRTimers::UpdateEntries(int iMaxNotificationDelay)
           {
             // reminder is due / over due. announce it.
             m_remindersToAnnounce.push(timer);
-            CServiceBroker::GetPVRManager().PublishEvent(PVREvent::AnnounceReminder);
+            CPVRManager::Get().PublishEvent(PVREvent::AnnounceReminder);
           }
 
           if (timer->EndAsUTC() >= now)
@@ -1223,7 +1223,7 @@ void CPVRTimers::Notify(const PVREvent& event)
   switch (static_cast<PVREvent>(event))
   {
     case PVREvent::EpgContainer:
-      CServiceBroker::GetPVRManager().TriggerTimersUpdate();
+      CPVRManager::Get().TriggerTimersUpdate();
       break;
     case PVREvent::Epg:
     case PVREvent::EpgItemUpdate:
@@ -1325,5 +1325,5 @@ std::shared_ptr<CPVRTimerInfoTag> CPVRTimers::GetById(unsigned int iTimerId) con
 
 void CPVRTimers::NotifyTimersEvent(bool bAddedOrDeleted /* = true */)
 {
-  CServiceBroker::GetPVRManager().PublishEvent(bAddedOrDeleted ? PVREvent::TimersInvalidated : PVREvent::Timers);
+  CPVRManager::Get().PublishEvent(bAddedOrDeleted ? PVREvent::TimersInvalidated : PVREvent::Timers);
 }

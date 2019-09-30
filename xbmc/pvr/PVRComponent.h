@@ -45,6 +45,16 @@ public:
   ////////////////////////////////////////////////////
 
   /*!
+   * @brief Init PVR services, load addons, load data.
+   */
+  void Init();
+
+  /*!
+   * @brief Deinit PVR services, unload data, unload addons.
+   */
+  void Deinit();
+
+  /*!
    * @brief Stop all PVR services.
    */
   void Stop();

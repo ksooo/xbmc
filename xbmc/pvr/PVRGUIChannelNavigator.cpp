@@ -118,12 +118,12 @@ namespace PVR
 
   std::shared_ptr<CPVRChannel> CPVRGUIChannelNavigator::GetNextOrPrevChannel(bool bNext)
   {
-    const bool bPlayingRadio = CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingRadio();
-    const bool bPlayingTV = CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingTV();
+    const bool bPlayingRadio = CPVRManager::Get().PlaybackState()->IsPlayingRadio();
+    const bool bPlayingTV = CPVRManager::Get().PlaybackState()->IsPlayingTV();
 
     if (bPlayingTV || bPlayingRadio)
     {
-      const std::shared_ptr<CPVRChannelGroup> group = CServiceBroker::GetPVRManager().PlaybackState()->GetPlayingGroup(bPlayingRadio);
+      const std::shared_ptr<CPVRChannelGroup> group = CPVRManager::Get().PlaybackState()->GetPlayingGroup(bPlayingRadio);
       if (group)
       {
         CSingleLock lock(m_critSection);
@@ -178,7 +178,7 @@ namespace PVR
     }
 
     if (item)
-      CServiceBroker::GetPVRManager().GUIActions()->SwitchToChannel(item, false);
+      CPVRManager::Get().GUIActions()->SwitchToChannel(item, false);
   }
 
   bool CPVRGUIChannelNavigator::IsPreview() const

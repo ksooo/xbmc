@@ -75,7 +75,7 @@ void CGUIDialogPVRGroupManager::SetRadio(bool bIsRadio)
 
 bool CGUIDialogPVRGroupManager::PersistChanges(void)
 {
-  return CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)->PersistAll();
+  return CPVRManager::Get().ChannelGroups()->Get(m_bIsRadio)->PersistAll();
 }
 
 bool CGUIDialogPVRGroupManager::ActionButtonOk(CGUIMessage& message)
@@ -107,10 +107,10 @@ bool CGUIDialogPVRGroupManager::ActionButtonNewGroup(CGUIMessage& message)
       if (strGroupName != "")
       {
         /* add the group if it doesn't already exist */
-        CPVRChannelGroups* groups = CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio);
+        CPVRChannelGroups* groups = CPVRManager::Get().ChannelGroups()->Get(m_bIsRadio);
         if (groups->AddGroup(strGroupName))
         {
-          CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)->GetByName(strGroupName)->SetGroupType(PVR_GROUP_TYPE_USER_DEFINED);
+          CPVRManager::Get().ChannelGroups()->Get(m_bIsRadio)->GetByName(strGroupName)->SetGroupType(PVR_GROUP_TYPE_USER_DEFINED);
           m_iSelectedChannelGroup = groups->Size() - 1;
           Update();
         }
@@ -145,7 +145,7 @@ bool CGUIDialogPVRGroupManager::ActionButtonDeleteGroup(CGUIMessage& message)
     if (pDialog->IsConfirmed())
     {
       ClearSelectedGroupsThumbnail();
-      if (CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)->DeleteGroup(*m_selectedGroup))
+      if (CPVRManager::Get().ChannelGroups()->Get(m_bIsRadio)->DeleteGroup(*m_selectedGroup))
         Update();
     }
 
@@ -446,11 +446,11 @@ void CGUIDialogPVRGroupManager::Update()
 
   /* select a group or select the default group if no group was selected */
   CFileItemPtr pItem = m_channelGroups->Get(m_viewChannelGroups.GetSelectedItem());
-  m_selectedGroup = CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)->GetByName(pItem->m_strTitle);
+  m_selectedGroup = CPVRManager::Get().ChannelGroups()->Get(m_bIsRadio)->GetByName(pItem->m_strTitle);
   if (m_selectedGroup)
   {
     /* set this group in the pvrmanager, so it becomes the selected group in other dialogs too */
-    CServiceBroker::GetPVRManager().PlaybackState()->SetPlayingGroup(m_selectedGroup);
+    CPVRManager::Get().PlaybackState()->SetPlayingGroup(m_selectedGroup);
     SET_CONTROL_LABEL(CONTROL_CURRENT_GROUP_LABEL, m_selectedGroup->GroupName());
     SET_CONTROL_SELECTED(GetID(), BUTTON_HIDE_GROUP, m_selectedGroup->IsHidden());
 
@@ -496,7 +496,7 @@ void CGUIDialogPVRGroupManager::Update()
       }
 
       /* for the center part, get all channels of the "all" channels group that are not in this group */
-      const std::shared_ptr<CPVRChannelGroup> allGroup = CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(m_bIsRadio);
+      const std::shared_ptr<CPVRChannelGroup> allGroup = CPVRManager::Get().ChannelGroups()->GetGroupAll(m_bIsRadio);
       const std::vector<PVRChannelGroupMember> allGroupMembers = allGroup->GetMembers(CPVRChannelGroup::Include::ONLY_VISIBLE);
       for (const auto& groupMember : allGroupMembers)
       {

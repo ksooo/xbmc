@@ -72,8 +72,8 @@ void CPVRClient::StopRunningInstance()
   if (addon)
   {
     // stop the pvr manager and stop and unload the running pvr addon. pvr manager will be restarted on demand.
-    CServiceBroker::GetPVRManager().Stop();
-    CServiceBroker::GetPVRManager().Clients()->StopClient(addon, false);
+    CPVRManager::Get().Stop();
+    CPVRManager::Get().Clients()->StopClient(addon, false);
   }
 }
 
@@ -93,7 +93,7 @@ void CPVRClient::OnPreUnInstall()
 ADDON::AddonPtr CPVRClient::GetRunningInstance() const
 {
   ADDON::AddonPtr addon;
-  CServiceBroker::GetPVRManager().Clients()->GetClient(ID(), addon);
+  CPVRManager::Get().Clients()->GetClient(ID(), addon);
   return addon;
 }
 
@@ -124,7 +124,7 @@ void CPVRClient::ResetProperties(int iClientId /* = PVR_INVALID_CLIENT_ID */)
   m_struct = {{0}};
   m_struct.props.strUserPath = m_strUserPath.c_str();
   m_struct.props.strClientPath = m_strClientPath.c_str();
-  m_struct.props.iEpgMaxDays = CServiceBroker::GetPVRManager().EpgContainer().GetFutureDaysToDisplay();
+  m_struct.props.iEpgMaxDays = CPVRManager::Get().EpgContainer().GetFutureDaysToDisplay();
 
   m_struct.toKodi.kodiInstance = this;
   m_struct.toKodi.TransferEpgEntry = cb_transfer_epg_entry;
@@ -1427,7 +1427,7 @@ void CPVRClient::SetPriority(int iPriority)
     m_iPriority = iPriority;
     if (m_iClientId > PVR_INVALID_CLIENT_ID)
     {
-      CServiceBroker::GetPVRManager().GetTVDatabase()->Persist(*this);
+      CPVRManager::Get().GetTVDatabase()->Persist(*this);
       m_bPriorityFetched = true;
     }
   }
@@ -1438,7 +1438,7 @@ int CPVRClient::GetPriority() const
   CSingleLock lock(m_critSection);
   if (!m_bPriorityFetched && m_iClientId > PVR_INVALID_CLIENT_ID)
   {
-    m_iPriority = CServiceBroker::GetPVRManager().GetTVDatabase()->GetPriority(*this);
+    m_iPriority = CPVRManager::Get().GetTVDatabase()->GetPriority(*this);
     m_bPriorityFetched = true;
   }
   return m_iPriority;
@@ -1486,7 +1486,7 @@ void CPVRClient::cb_transfer_channel_group_member(void* kodiInstance, const ADDO
     return;
   }
 
-  std::shared_ptr<CPVRChannel> channel  = CServiceBroker::GetPVRManager().ChannelGroups()->GetByUniqueID(member->iChannelUniqueId, client->GetID());
+  std::shared_ptr<CPVRChannel> channel  = CPVRManager::Get().ChannelGroups()->GetByUniqueID(member->iChannelUniqueId, client->GetID());
   if (!channel)
   {
     CLog::LogF(LOGERROR, "Cannot find group '%s' or channel '%d'", member->strGroupName, member->iChannelUniqueId);
@@ -1577,7 +1577,7 @@ void CPVRClient::cb_transfer_timer_entry(void* kodiInstance, const ADDON_HANDLE 
   }
 
   /* Note: channel can be NULL here, for instance for epg-based timer rules ("record on any channel" condition). */
-  std::shared_ptr<CPVRChannel> channel = CServiceBroker::GetPVRManager().ChannelGroups()->GetByUniqueID(timer->iClientChannelUid, client->GetID());
+  std::shared_ptr<CPVRChannel> channel = CPVRManager::Get().ChannelGroups()->GetByUniqueID(timer->iClientChannelUid, client->GetID());
 
   /* transfer this entry to the timers container */
   std::shared_ptr<CPVRTimerInfoTag> transferTimer(new CPVRTimerInfoTag(*timer, channel, client->GetID()));
@@ -1623,25 +1623,25 @@ void CPVRClient::cb_recording(void* kodiInstance, const char* strName, const cha
 void CPVRClient::cb_trigger_channel_update(void* kodiInstance)
 {
   /* update the channels table in the next iteration of the pvrmanager's main loop */
-  CServiceBroker::GetPVRManager().TriggerChannelsUpdate();
+  CPVRManager::Get().TriggerChannelsUpdate();
 }
 
 void CPVRClient::cb_trigger_timer_update(void* kodiInstance)
 {
   /* update the timers table in the next iteration of the pvrmanager's main loop */
-  CServiceBroker::GetPVRManager().TriggerTimersUpdate();
+  CPVRManager::Get().TriggerTimersUpdate();
 }
 
 void CPVRClient::cb_trigger_recording_update(void* kodiInstance)
 {
   /* update the recordings table in the next iteration of the pvrmanager's main loop */
-  CServiceBroker::GetPVRManager().TriggerRecordingsUpdate();
+  CPVRManager::Get().TriggerRecordingsUpdate();
 }
 
 void CPVRClient::cb_trigger_channel_groups_update(void* kodiInstance)
 {
   /* update all channel groups in the next iteration of the pvrmanager's main loop */
-  CServiceBroker::GetPVRManager().TriggerChannelGroupsUpdate();
+  CPVRManager::Get().TriggerChannelGroupsUpdate();
 }
 
 void CPVRClient::cb_trigger_epg_update(void* kodiInstance, unsigned int iChannelUid)
@@ -1653,7 +1653,7 @@ void CPVRClient::cb_trigger_epg_update(void* kodiInstance, unsigned int iChannel
     return;
   }
 
-  CServiceBroker::GetPVRManager().EpgContainer().UpdateRequest(client->GetID(), iChannelUid);
+  CPVRManager::Get().EpgContainer().UpdateRequest(client->GetID(), iChannelUid);
 }
 
 void CPVRClient::cb_free_demux_packet(void* kodiInstance, DemuxPacket* pPacket)
@@ -1687,7 +1687,7 @@ void CPVRClient::cb_connection_state_change(void* kodiInstance, const char* strC
   if (strMessage != nullptr)
     msg = strMessage;
 
-  CServiceBroker::GetPVRManager().ConnectionStateChange(client, std::string(strConnectionString), newState, msg);
+  CPVRManager::Get().ConnectionStateChange(client, std::string(strConnectionString), newState, msg);
 }
 
 void CPVRClient::cb_epg_event_state_change(void* kodiInstance, EPG_TAG* tag, EPG_EVENT_STATE newState)
@@ -1701,7 +1701,7 @@ void CPVRClient::cb_epg_event_state_change(void* kodiInstance, EPG_TAG* tag, EPG
 
   // Note: channel data and epg id may not yet be available. Tag will be fully initialized later.
   const std::shared_ptr<CPVREpgInfoTag> epgTag = std::make_shared<CPVREpgInfoTag>(*tag, client->GetID(), nullptr, -1);
-  CServiceBroker::GetPVRManager().EpgContainer().UpdateFromClient(epgTag, newState);
+  CPVRManager::Get().EpgContainer().UpdateFromClient(epgTag, newState);
 }
 
 class CCodecIds

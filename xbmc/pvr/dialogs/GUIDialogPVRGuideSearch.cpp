@@ -62,12 +62,12 @@ void CGUIDialogPVRGuideSearch::UpdateChannelSpin(void)
 
   std::shared_ptr<CPVRChannelGroup> group;
   if (iChannelGroup == EPG_SEARCH_UNSET)
-    group = CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(m_searchFilter->IsRadio());
+    group = CPVRManager::Get().ChannelGroups()->GetGroupAll(m_searchFilter->IsRadio());
   else
-    group = CServiceBroker::GetPVRManager().ChannelGroups()->GetByIdFromAll(iChannelGroup);
+    group = CPVRManager::Get().ChannelGroups()->GetByIdFromAll(iChannelGroup);
 
   if (!group)
-    group = CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(m_searchFilter->IsRadio());
+    group = CPVRManager::Get().ChannelGroups()->GetGroupAll(m_searchFilter->IsRadio());
 
   m_channelNumbersMap.clear();
   const std::vector<PVRChannelGroupMember> groupMembers(group->GetMembers(CPVRChannelGroup::Include::ONLY_VISIBLE));
@@ -95,7 +95,7 @@ void CGUIDialogPVRGuideSearch::UpdateGroupsSpin(void)
   std::vector< std::pair<std::string, int> > labels;
 
   /* groups */
-  std::vector<std::shared_ptr<CPVRChannelGroup>> groups = CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_searchFilter->IsRadio())->GetMembers();
+  std::vector<std::shared_ptr<CPVRChannelGroup>> groups = CPVRManager::Get().ChannelGroups()->Get(m_searchFilter->IsRadio())->GetMembers();
   for (std::vector<std::shared_ptr<CPVRChannelGroup>>::const_iterator it = groups.begin(); it != groups.end(); ++it)
     labels.emplace_back((*it)->GroupName(), (*it)->GroupID());
 

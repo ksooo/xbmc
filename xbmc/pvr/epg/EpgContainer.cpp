@@ -45,7 +45,7 @@ private:
 
 void CEpgUpdateRequest::Deliver()
 {
-  const std::shared_ptr<CPVREpg> epg = CServiceBroker::GetPVRManager().EpgContainer().GetByChannelUid(m_iClientID, m_iUniqueChannelID);
+  const std::shared_ptr<CPVREpg> epg = CPVRManager::Get().EpgContainer().GetByChannelUid(m_iClientID, m_iUniqueChannelID);
   if (!epg)
   {
     CLog::LogF(LOGERROR, "Unable to obtain EPG for client %d and channel %d! Unable to deliver the epg update request!",
@@ -71,7 +71,7 @@ private:
 
 void CEpgTagStateChange::Deliver()
 {
-  CPVREpgContainer& epgContainer = CServiceBroker::GetPVRManager().EpgContainer();
+  CPVREpgContainer& epgContainer = CPVRManager::Get().EpgContainer();
 
   const std::shared_ptr<CPVREpg> epg = epgContainer.GetByChannelUid(m_epgtag->ClientID(), m_epgtag->UniqueChannelID());
   if (!epg)
@@ -169,7 +169,7 @@ public:
 
   bool DoWork() override
   {
-    CServiceBroker::GetPVRManager().EpgContainer().Start(false);
+    CPVRManager::Get().EpgContainer().Start(false);
     return true;
   }
 };
@@ -217,7 +217,7 @@ void CPVREpgContainer::Start(bool bAsync)
 
   if (!bStop)
   {
-    CServiceBroker::GetPVRManager().TriggerEpgsCreate();
+    CPVRManager::Get().TriggerEpgsCreate();
     CLog::Log(LOGNOTICE, "EPG thread started");
   }
 }
@@ -327,7 +327,7 @@ void CPVREpgContainer::Process(void)
     }
 
     /* update the EPG */
-    if (!InterruptUpdate() && bUpdateEpg && CServiceBroker::GetPVRManager().EpgsCreated() && UpdateEPG())
+    if (!InterruptUpdate() && bUpdateEpg && CPVRManager::Get().EpgsCreated() && UpdateEPG())
       m_bIsInitialising = false;
 
     /* clean up old entries */
@@ -355,7 +355,7 @@ void CPVREpgContainer::Process(void)
     /* check for pending EPG tag changes */
 
     // during Kodi startup, addons may push updates very early, even before EPGs are ready to use.
-    if (!m_bStop && CServiceBroker::GetPVRManager().EpgsCreated())
+    if (!m_bStop && CPVRManager::Get().EpgsCreated())
     {
       unsigned int iProcessed = 0;
       XbmcThreads::EndTime processTimeslice(1000); // max 1 sec per cycle, regardless of how many events are in the queue
@@ -787,7 +787,7 @@ bool CPVREpgContainer::CheckPlayingEvents(void)
     iNextEpgActiveTagCheck += CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_iEpgActiveTagCheckInterval;
 
     /* pvr tags always start on the full minute */
-    if (CServiceBroker::GetPVRManager().IsStarted())
+    if (CPVRManager::Get().IsStarted())
       iNextEpgActiveTagCheck -= iNextEpgActiveTagCheck % 60;
 
     bReturn = true;

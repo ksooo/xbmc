@@ -43,8 +43,8 @@ CGUIDialogPVRChannelsOSD::CGUIDialogPVRChannelsOSD()
 
 CGUIDialogPVRChannelsOSD::~CGUIDialogPVRChannelsOSD()
 {
-  CServiceBroker::GetPVRManager().Events().Unsubscribe(this);
-  CServiceBroker::GetPVRManager().EpgContainer().Events().Unsubscribe(this);
+  CPVRManager::Get().Events().Unsubscribe(this);
+  CPVRManager::Get().EpgContainer().Events().Unsubscribe(this);
 }
 
 bool CGUIDialogPVRChannelsOSD::OnMessage(CGUIMessage& message)
@@ -73,7 +73,7 @@ bool CGUIDialogPVRChannelsOSD::OnMessage(CGUIMessage& message)
 
 void CGUIDialogPVRChannelsOSD::OnInitWindow()
 {
-  if (!CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingTV() && !CServiceBroker::GetPVRManager().PlaybackState()->IsPlayingRadio())
+  if (!CPVRManager::Get().PlaybackState()->IsPlayingTV() && !CPVRManager::Get().PlaybackState()->IsPlayingRadio())
   {
     Close();
     return;
@@ -88,7 +88,7 @@ void CGUIDialogPVRChannelsOSD::OnDeinitWindow(int nextWindowID)
 {
   if (m_group)
   {
-    CServiceBroker::GetPVRManager().GUIActions()->SetSelectedItemPath(m_group->IsRadio(), m_viewControl.GetSelectedItemPath());
+    CPVRManager::Get().GUIActions()->SetSelectedItemPath(m_group->IsRadio(), m_viewControl.GetSelectedItemPath());
 
     // next OnInitWindow will set the group which is then selected
     m_group.reset();
@@ -105,7 +105,7 @@ bool CGUIDialogPVRChannelsOSD::OnAction(const CAction& action)
     case ACTION_MOUSE_LEFT_CLICK:
     {
       // If direct channel number input is active, select the entered channel.
-      if (CServiceBroker::GetPVRManager().GUIActions()->GetChannelNumberInputHandler().CheckInputAndExecuteAction())
+      if (CPVRManager::Get().GUIActions()->GetChannelNumberInputHandler().CheckInputAndExecuteAction())
         return true;
 
       if (m_viewControl.HasControl(GetFocusedControlID()))
@@ -123,11 +123,11 @@ bool CGUIDialogPVRChannelsOSD::OnAction(const CAction& action)
       SaveControlStates();
 
       // switch to next or previous group
-      const CPVRChannelGroups* groups = CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_group->IsRadio());
+      const CPVRChannelGroups* groups = CPVRManager::Get().ChannelGroups()->Get(m_group->IsRadio());
       const std::shared_ptr<CPVRChannelGroup> nextGroup = action.GetID() == ACTION_NEXT_CHANNELGROUP
                                                         ? groups->GetNextGroup(*m_group)
                                                         : groups->GetPreviousGroup(*m_group);
-      CServiceBroker::GetPVRManager().PlaybackState()->SetPlayingGroup(nextGroup);
+      CPVRManager::Get().PlaybackState()->SetPlayingGroup(nextGroup);
       m_group = nextGroup;
       Init();
       Update();
@@ -164,7 +164,7 @@ bool CGUIDialogPVRChannelsOSD::OnAction(const CAction& action)
 
 void CGUIDialogPVRChannelsOSD::Update()
 {
-  CPVRManager& pvrMgr = CServiceBroker::GetPVRManager();
+  CPVRManager& pvrMgr = CPVRManager::Get();
   pvrMgr.Events().Subscribe(this, &CGUIDialogPVRChannelsOSD::Notify);
   pvrMgr.EpgContainer().Events().Subscribe(this, &CGUIDialogPVRChannelsOSD::Notify);
 
@@ -236,7 +236,7 @@ void CGUIDialogPVRChannelsOSD::GotoChannel(int item)
   if (CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_PVRMENU_CLOSECHANNELOSDONSWITCH))
     Close();
 
-  CServiceBroker::GetPVRManager().GUIActions()->SwitchToChannel(itemptr, true /* bCheckResume */);
+  CPVRManager::Get().GUIActions()->SwitchToChannel(itemptr, true /* bCheckResume */);
 }
 
 void CGUIDialogPVRChannelsOSD::Notify(const PVREvent& event)

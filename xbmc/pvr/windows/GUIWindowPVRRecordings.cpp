@@ -170,7 +170,7 @@ void CGUIWindowPVRRecordingsBase::UpdateButtons()
   CGUIRadioButtonControl* btnShowDeleted = static_cast<CGUIRadioButtonControl*>(GetControl(CONTROL_BTNSHOWDELETED));
   if (btnShowDeleted)
   {
-    btnShowDeleted->SetVisible(m_bRadio ? CServiceBroker::GetPVRManager().Recordings()->HasDeletedRadioRecordings() : CServiceBroker::GetPVRManager().Recordings()->HasDeletedTVRecordings());
+    btnShowDeleted->SetVisible(m_bRadio ? CPVRManager::Get().Recordings()->HasDeletedRadioRecordings() : CPVRManager::Get().Recordings()->HasDeletedTVRecordings());
     btnShowDeleted->SetSelected(m_bShowDeletedRecordings);
   }
 
@@ -217,7 +217,7 @@ bool CGUIWindowPVRRecordingsBase::OnMessage(CGUIMessage& message)
 
               if (message.GetParam1() == ACTION_PLAYER_PLAY)
               {
-                CServiceBroker::GetPVRManager().GUIActions()->PlayRecording(item, true /* check resume */);
+                CPVRManager::Get().GUIActions()->PlayRecording(item, true /* check resume */);
                 bReturn = true;
               }
               else
@@ -229,15 +229,15 @@ bool CGUIWindowPVRRecordingsBase::OnMessage(CGUIMessage& message)
                     bReturn = true;
                     break;
                   case SELECT_ACTION_PLAY_OR_RESUME:
-                    CServiceBroker::GetPVRManager().GUIActions()->PlayRecording(item, true /* check resume */);
+                    CPVRManager::Get().GUIActions()->PlayRecording(item, true /* check resume */);
                     bReturn = true;
                     break;
                   case SELECT_ACTION_RESUME:
-                    CServiceBroker::GetPVRManager().GUIActions()->ResumePlayRecording(item, true /* fall back to play if no resume possible */);
+                    CPVRManager::Get().GUIActions()->ResumePlayRecording(item, true /* fall back to play if no resume possible */);
                     bReturn = true;
                     break;
                   case SELECT_ACTION_INFO:
-                    CServiceBroker::GetPVRManager().GUIActions()->ShowRecordingInfo(item);
+                    CPVRManager::Get().GUIActions()->ShowRecordingInfo(item);
                     bReturn = true;
                     break;
                   default:
@@ -253,11 +253,11 @@ bool CGUIWindowPVRRecordingsBase::OnMessage(CGUIMessage& message)
               bReturn = true;
               break;
             case ACTION_SHOW_INFO:
-              CServiceBroker::GetPVRManager().GUIActions()->ShowRecordingInfo(item);
+              CPVRManager::Get().GUIActions()->ShowRecordingInfo(item);
               bReturn = true;
               break;
             case ACTION_DELETE_ITEM:
-              CServiceBroker::GetPVRManager().GUIActions()->DeleteRecording(item);
+              CPVRManager::Get().GUIActions()->DeleteRecording(item);
               bReturn = true;
               break;
             default:
@@ -323,7 +323,7 @@ bool CGUIWindowPVRRecordingsBase::OnContextButtonDeleteAll(CFileItem* item, CONT
 {
   if (button == CONTEXT_BUTTON_DELETE_ALL)
   {
-    CServiceBroker::GetPVRManager().GUIActions()->DeleteAllRecordingsFromTrash();
+    CPVRManager::Get().GUIActions()->DeleteAllRecordingsFromTrash();
     return true;
   }
 
