@@ -10,8 +10,10 @@
 
 #include "FileItem.h"
 #include "ServiceBroker.h"
+#include "URL.h"
 #include "addons/IAddon.h"
 #include "addons/addoninfo/AddonInfo.h"
+#include "cores/Cut.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/WindowIDs.h"
 #include "pvr/PVRDatabase.h"
@@ -21,6 +23,8 @@
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/channels/PVRChannelsPath.h"
 #include "pvr/epg/EpgDatabase.h"
+#include "pvr/epg/EpgInfoTag.h"
+#include "pvr/recordings/PVRRecording.h"
 #include "pvr/recordings/PVRRecordings.h"
 #include "pvr/dialogs/GUIDialogPVRChannelGuide.h"
 #include "pvr/dialogs/GUIDialogPVRChannelManager.h"
@@ -42,6 +46,7 @@
 #include "pvr/windows/GUIWindowPVRTimerRules.h"
 #include "pvr/windows/GUIWindowPVRTimers.h"
 #include "settings/AdvancedSettings.h"
+#include "utils/log.h"
 
 using namespace PVR;
 
@@ -316,4 +321,67 @@ bool CPVRComponent::MarkRecordingWatched(const std::shared_ptr<CFileItem>& recor
   return recording &&
          recording->HasPVRRecordingInfoTag() &&
          CPVRManager::Get().Recordings()->MarkWatched(recording->GetPVRRecordingInfoTag(), bWatched);
+}
+
+////////////////////////////////////////////////////
+// EDL
+////////////////////////////////////////////////////
+
+std::vector<EDL::Cut> CPVRComponent::GetCutlist(const CFileItem& item)
+{
+  std::vector<EDL::Cut> cutlist;
+
+  if (!CPVRManager::Get().IsStarted())
+  {
+    CLog::LogF(LOGERROR, "PVR Manager not started, cannot read EDL for %s", CURL::GetRedacted(item.GetDynPath()).c_str());
+    return cutlist;
+  }
+
+  std::vector<PVR_EDL_ENTRY> edl;
+
+  if (item.HasPVRRecordingInfoTag())
+  {
+    CLog::LogFC(LOGDEBUG, LOGPVR, "Reading EDL for recording: %s", item.GetPVRRecordingInfoTag()->m_strTitle.c_str());
+    edl = item.GetPVRRecordingInfoTag()->GetEdl();
+  }
+  else if (item.HasEPGInfoTag())
+  {
+    CLog::LogFC(LOGDEBUG, LOGPVR, "Reading EDL for EPG tag: %s", item.GetEPGInfoTag()->Title().c_str());
+    edl = item.GetEPGInfoTag()->GetEdl();
+  }
+  else
+  {
+    CLog::LogF(LOGERROR, "Unknown file item type : %s", CURL::GetRedacted(item.GetDynPath()).c_str());
+    return cutlist;
+  }
+
+  for (const auto& entry : edl)
+  {
+    EDL::Cut cut;
+    cut.start = entry.start;
+    cut.end = entry.end;
+
+    switch (entry.type)
+    {
+    case PVR_EDL_TYPE_CUT:
+      cut.action = EDL::Action::CUT;
+      break;
+    case PVR_EDL_TYPE_MUTE:
+      cut.action = EDL::Action::MUTE;
+      break;
+    case PVR_EDL_TYPE_SCENE:
+      cut.action = EDL::Action::SCENE;
+      break;
+    case PVR_EDL_TYPE_COMBREAK:
+      cut.action = EDL::Action::COMM_BREAK;
+      break;
+    default:
+      CLog::LogF(LOGWARNING, "Ignoring entry of unknown EDL type: %d", entry.type);
+      continue;
+    }
+
+    cutlist.emplace_back(cut);
+  }
+
+  return cutlist;
 }

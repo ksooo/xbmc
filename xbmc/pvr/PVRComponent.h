@@ -24,6 +24,11 @@ class CAddonInfo;
 class IAddon;
 }
 
+namespace EDL
+{
+struct Cut;
+}
+
 namespace PVR
 {
 
@@ -236,6 +241,12 @@ public:
    * @return True on success, false otherwise
    */
   bool MarkRecordingWatched(const std::shared_ptr<CFileItem>& recording, bool bWatched);
+
+  ////////////////////////////////////////////////////
+  // EDL
+  ////////////////////////////////////////////////////
+
+  std::vector<EDL::Cut> GetCutlist(const CFileItem& item);
 };
 
 }
