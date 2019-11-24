@@ -70,6 +70,7 @@ public:
   CCPUInfo(void);
   ~CCPUInfo();
 
+  bool SupportsCPUUsage() const { return m_SupportsCPUUsage; }
   int getUsedPercentage();
   int getCPUCount() const { return m_cpuCount; }
   float getCPUFrequency();
@@ -116,6 +117,7 @@ private:
   unsigned long long m_idleTicks;
   unsigned long long m_ioTicks;
 
+  bool m_SupportsCPUUsage = true;
   int          m_lastUsedPercentage;
   XbmcThreads::EndTime m_nextUsedReadTime;
   std::string  m_cpuModel;

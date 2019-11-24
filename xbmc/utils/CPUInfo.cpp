@@ -488,6 +488,17 @@ CCPUInfo::CCPUInfo(void)
   if (HasNeon())
     m_cpuFeatures |= CPU_FEATURE_NEON;
 
+#if defined(TARGET_DARWIN)
+  m_SupportsCPUUsage = true;
+#else
+  unsigned long long userTicks;
+  unsigned long long niceTicks;
+  unsigned long long systemTicks;
+  unsigned long long idleTicks;
+  unsigned long long ioTicks;
+
+  m_SupportsCPUUsage = !!readProcStat(userTicks, niceTicks, systemTicks, idleTicks, ioTicks);
+#endif
 }
 
 CCPUInfo::~CCPUInfo()
@@ -885,21 +896,24 @@ bool CCPUInfo::readProcStat(unsigned long long& user, unsigned long long& nice,
 std::string CCPUInfo::GetCoresUsageString() const
 {
   std::string strCores;
-  if (!m_cores.empty())
+  if (SupportsCPUUsage())
   {
-    for (std::map<int, CoreInfo>::const_iterator it = m_cores.begin(); it != m_cores.end(); ++it)
+    if (!m_cores.empty())
     {
-      if (!strCores.empty())
-        strCores += ' ';
-      if (it->second.m_fPct < 10.0)
-        strCores += StringUtils::Format("#%d: %1.1f%%", it->first, it->second.m_fPct);
-      else
-        strCores += StringUtils::Format("#%d: %3.0f%%", it->first, it->second.m_fPct);
+      for (std::map<int, CoreInfo>::const_iterator it = m_cores.begin(); it != m_cores.end(); ++it)
+      {
+        if (!strCores.empty())
+          strCores += ' ';
+        if (it->second.m_fPct < 10.0)
+          strCores += StringUtils::Format("#%d: %1.1f%%", it->first, it->second.m_fPct);
+        else
+          strCores += StringUtils::Format("#%d: %3.0f%%", it->first, it->second.m_fPct);
+      }
     }
-  }
-  else
-  {
-    strCores += StringUtils::Format("%3.0f%%", double(m_lastUsedPercentage));
+    else
+    {
+      strCores += StringUtils::Format("%3.0f%%", double(m_lastUsedPercentage));
+    }
   }
   return strCores;
 }
