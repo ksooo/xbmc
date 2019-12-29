@@ -20,6 +20,7 @@
 #include "pvr/PVRItem.h"
 #include "pvr/PVRManager.h"
 #include "pvr/dialogs/GUIDialogPVRGuideSearch.h"
+#include "pvr/epg/Epg.h"
 #include "pvr/epg/EpgContainer.h"
 #include "pvr/epg/EpgInfoTag.h"
 #include "pvr/epg/EpgSearchFilter.h"
@@ -61,16 +62,23 @@ namespace
 
   void AsyncSearchAction::Run()
   {
-    std::vector<std::shared_ptr<CPVREpgInfoTag>> results = CServiceBroker::GetPVRManager().EpgContainer().GetAllTags();
-    for (auto it = results.begin(); it != results.end();)
+    std::vector<std::shared_ptr<CPVREpgInfoTag>> results;
+
+    const std::vector<std::shared_ptr<CPVREpg>> epgs =
+        CServiceBroker::GetPVRManager().EpgContainer().GetAllEpgs();
+    for (const auto& epg : epgs)
     {
-      it = results.erase(std::remove_if(results.begin(),
-                                        results.end(),
-                                        [this](const std::shared_ptr<CPVREpgInfoTag>& entry)
-                                        {
-                                          return !m_filter->FilterEntry(entry);
-                                        }),
-                         results.end());
+      std::vector<std::shared_ptr<CPVREpgInfoTag>> tags = epg->GetTags();
+      for (auto it = tags.begin(); it != tags.end();)
+      {
+        it = tags.erase(std::remove_if(tags.begin(), tags.end(),
+                                       [this](const std::shared_ptr<CPVREpgInfoTag>& entry) {
+                                         return !m_filter->FilterEntry(entry);
+                                       }),
+                        tags.end());
+      }
+
+      results.insert(results.end(), tags.begin(), tags.end());
     }
 
     if (m_filter->ShouldRemoveDuplicates())

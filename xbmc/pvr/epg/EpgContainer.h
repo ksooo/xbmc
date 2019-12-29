@@ -147,12 +147,6 @@ namespace PVR
     std::shared_ptr<CPVREpgInfoTag> GetTagById(const std::shared_ptr<CPVREpg>& epg, unsigned int iBroadcastId) const;
 
     /*!
-     * @brief Get all EPG tags.
-     * @return The tags.
-     */
-    std::vector<std::shared_ptr<CPVREpgInfoTag>> GetAllTags() const;
-
-    /*!
      * @brief Notify EPG container that there are pending manual EPG updates
      * @param bHasPendingUpdates The new value
      */

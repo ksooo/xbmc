@@ -466,20 +466,6 @@ std::shared_ptr<CPVREpgInfoTag> CPVREpgContainer::GetTagById(const std::shared_p
   return retval;
 }
 
-std::vector<std::shared_ptr<CPVREpgInfoTag>> CPVREpgContainer::GetAllTags() const
-{
-  std::vector<std::shared_ptr<CPVREpgInfoTag>> allTags;
-
-  CSingleLock lock(m_critSection);
-  for (const auto& epgEntry : m_epgIdToEpgMap)
-  {
-    const std::vector<std::shared_ptr<CPVREpgInfoTag>> epgTags = epgEntry.second->GetTags();
-    allTags.insert(allTags.end(), epgTags.begin(), epgTags.end());
-  }
-
-  return allTags;
-}
-
 void CPVREpgContainer::InsertFromDB(const std::shared_ptr<CPVREpg>& newEpg)
 {
   // table might already have been created when pvr channels were loaded
