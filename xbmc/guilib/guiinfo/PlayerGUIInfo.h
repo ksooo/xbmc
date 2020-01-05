@@ -68,6 +68,7 @@ private:
   std::string GetContentRanges(int iInfo) const;
   std::vector<std::pair<float, float>> GetCutList(CDataCacheCore& data, time_t duration) const;
   std::vector<std::pair<float, float>> GetChapters(CDataCacheCore& data, time_t duration) const;
+  std::vector<std::pair<float, float>> GetSceneMarkers(CDataCacheCore& data, time_t duration) const;
 };
 
 } // namespace GUIINFO

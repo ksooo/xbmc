@@ -41,6 +41,8 @@ public:
   int GetLastCutTime() const;
   void SetLastCutTime(const int iCutTime);
 
+  const std::vector<int> GetSceneMarkers() const { return m_vecSceneMarkers; }
+
   bool GetNextSceneMarker(bool bPlus, const int iClock, int *iSceneMarker);
 
   static std::string MillisecondsToTimeString(const int iMilliseconds);

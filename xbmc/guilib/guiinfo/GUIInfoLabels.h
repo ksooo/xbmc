@@ -73,6 +73,7 @@
 #define PLAYER_ICON                  66
 #define PLAYER_CUTLIST               67
 #define PLAYER_CHAPTERS              68
+#define PLAYER_SCENEMARKERS          69
 
 #define WEATHER_CONDITIONS_TEXT     100
 #define WEATHER_TEMPERATURE         101

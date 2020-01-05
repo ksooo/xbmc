@@ -293,6 +293,7 @@ bool CPlayerGUIInfo::GetLabel(std::string& value, const CFileItem *item, int con
       return true;
     case PLAYER_CUTLIST:
     case PLAYER_CHAPTERS:
+    case PLAYER_SCENEMARKERS:
       value = GetContentRanges(info.m_info);
       return true;
 
@@ -613,6 +614,9 @@ std::string CPlayerGUIInfo::GetContentRanges(int iInfo) const
       case PLAYER_CHAPTERS:
         ranges = GetChapters(data, duration);
         break;
+      case PLAYER_SCENEMARKERS:
+        ranges = GetSceneMarkers(data, duration);
+        break;
       default:
         CLog::Log(LOGERROR, "CPlayerGUIInfo::GetContentRanges(%i) - unhandled guiinfo", iInfo);
         break;
@@ -656,6 +660,26 @@ std::vector<std::pair<float, float>> CPlayerGUIInfo::GetChapters(CDataCacheCore&
   for (const auto& chapter : chapters)
   {
     float marker = chapter.second * 1000 * 100.0f / duration;
+    if (marker != 0)
+      ranges.emplace_back(std::make_pair(lastMarker, marker));
+
+    lastMarker = marker;
+  }
+  return ranges;
+}
+
+std::vector<std::pair<float, float>> CPlayerGUIInfo::GetSceneMarkers(CDataCacheCore& data,
+                                                                     time_t duration) const
+{
+  std::vector<std::pair<float, float>> ranges;
+
+  std::vector<int> markers = data.GetCSceneMarkers();
+  std::sort(markers.begin(), markers.end());
+
+  float lastMarker = 0.0f;
+  for (const auto& m : markers)
+  {
+    float marker = m * 100.0f / duration;
     if (marker != 0)
       ranges.emplace_back(std::make_pair(lastMarker, marker));
 

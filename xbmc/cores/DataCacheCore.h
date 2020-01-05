@@ -64,6 +64,8 @@ public:
   std::vector<EDL::Cut> GetCutList() const;
   void SetChapters(const std::vector<std::pair<std::string, int64_t>>& chapters);
   std::vector<std::pair<std::string, int64_t>> GetChapters() const;
+  void SetSceneMarkers(const std::vector<int>& sceneMarkers);
+  std::vector<int> GetCSceneMarkers() const;
 
   // render info
   void SetRenderClockSync(bool enabled);
@@ -157,6 +159,7 @@ protected:
   {
     std::vector<EDL::Cut> m_cutList;
     std::vector<std::pair<std::string, int64_t>> m_chapters; // name and position for chapters
+    std::vector<int> m_sceneMarkers;
   } m_contentInfo;
 
   CCriticalSection m_renderSection;
