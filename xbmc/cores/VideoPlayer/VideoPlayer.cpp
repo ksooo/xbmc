@@ -3038,17 +3038,54 @@ void CVideoPlayer::Seek(bool bPlus, bool bLargeStep, bool bChapterOverride)
   if (!m_State.canseek)
     return;
 
-  if (bLargeStep && bChapterOverride && GetChapter() > 0 && GetChapterCount() > 1)
+  if (bLargeStep && bChapterOverride)
   {
-    if (!bPlus)
+    const bool bHasChapters = GetChapter() > 0 && GetChapterCount() > 1;
+    const bool bHasScenemarkers = m_Edl.HasSceneMarker();
+    if (bHasChapters || bHasScenemarkers)
     {
-      SeekChapter(GetChapter() - 1);
-      return;
-    }
-    else if (GetChapter() < GetChapterCount())
-    {
-      SeekChapter(GetChapter() + 1);
-      return;
+      // check wheter to jump to next/previous chapter or scene marker
+
+      int64_t iChapterPos = -1;
+      if (bHasChapters)
+        iChapterPos = bPlus ? GetChapterPos(GetChapter() + 1) : GetChapterPos(GetChapter() - 1);
+
+      int iScenePos = -1;
+      if (bHasScenemarkers)
+      {
+        /*
+         * There is a 5 second grace period applied when seeking for scenes backwards. If there is no
+         * grace period applied it is impossible to go backwards past a scene marker.
+         */
+        int64_t clock = GetTime();
+        if (!bPlus && clock > 5 * 1000) // 5 seconds
+          clock -= 5 * 1000;
+
+        m_Edl.GetNextSceneMarker(bPlus, clock, &iScenePos);
+        iScenePos /= 1000;
+      }
+
+      bool bChapterSeek = bHasChapters && !bHasScenemarkers;
+      bool bSceneSeek = bHasScenemarkers && !bHasChapters;
+
+      if (!bChapterSeek && !bSceneSeek)
+      {
+        // both chapters and scene markers are present. check which one to use...
+        bChapterSeek = bPlus ? iChapterPos < iScenePos : iChapterPos > iScenePos;
+        bSceneSeek = !bChapterSeek;
+      }
+
+      if (bChapterSeek)
+      {
+        SeekChapter(bPlus ? GetChapter() + 1 : GetChapter() - 1);
+        return;
+      }
+
+      if (bSceneSeek)
+      {
+        SeekScene(bPlus);
+        return;
+      }
     }
   }
 
