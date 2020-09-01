@@ -380,8 +380,8 @@ namespace XBMCAddon
     String translatePath(const String& path)
     {
       XBMC_TRACE;
-      CLog::Log(LOGWARNING, "xbmc.translatePath is deprecated and might be removed in future kodi "
-                            "versions. Please use xbmcvfs.translatePath instead.");
+//      CLog::Log(LOGWARNING, "xbmc.translatePath is deprecated and might be removed in future kodi "
+//                            "versions. Please use xbmcvfs.translatePath instead.");
       return CSpecialProtocol::TranslatePath(path);
     }
 
