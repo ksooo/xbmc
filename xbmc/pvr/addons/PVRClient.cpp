@@ -178,6 +178,8 @@ void CPVRClient::Destroy()
   CLog::LogFC(LOGDEBUG, LOGPVR, "Destroying PVR add-on instance '{}'", GetFriendlyName());
 
   /* destroy the add-on */
+  m_bBlockAddonCalls = true;
+
   DestroyInstance();
 
   if (m_menuhooks)
@@ -1643,10 +1645,17 @@ void CPVRClient::cb_transfer_channel_group(void* kodiInstance,
     return;
   }
 
+  CPVRClient* client = static_cast<CPVRClient*>(kodiInstance);
   CPVRChannelGroups* kodiGroups = static_cast<CPVRChannelGroups*>(handle->dataAddress);
-  if (!group || !kodiGroups)
+  if (!client || !group || !kodiGroups)
   {
     CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
     return;
   }
 
@@ -1676,6 +1685,12 @@ void CPVRClient::cb_transfer_channel_group_member(void* kodiInstance,
   if (!member || !client || !group)
   {
     CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
     return;
   }
 
@@ -1713,6 +1728,12 @@ void CPVRClient::cb_transfer_epg_entry(void* kodiInstance,
     return;
   }
 
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   /* transfer this entry to the epg */
   kodiEpg->UpdateEntry(epgentry, client->GetID());
 }
@@ -1733,6 +1754,12 @@ void CPVRClient::cb_transfer_channel_entry(void* kodiInstance,
   if (!channel || !client || !kodiChannels)
   {
     CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
     return;
   }
 
@@ -1760,6 +1787,12 @@ void CPVRClient::cb_transfer_recording_entry(void* kodiInstance,
     return;
   }
 
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   /* transfer this entry to the recordings container */
   std::shared_ptr<CPVRRecording> transferRecording(new CPVRRecording(*recording, client->GetID()));
   kodiRecordings->UpdateFromClient(transferRecording);
@@ -1783,6 +1816,12 @@ void CPVRClient::cb_transfer_timer_entry(void* kodiInstance,
     return;
   }
 
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   /* Note: channel can be NULL here, for instance for epg-based timer rules ("record on any channel" condition). */
   std::shared_ptr<CPVRChannel> channel =
       CServiceBroker::GetPVRManager().ChannelGroups()->GetByUniqueID(timer->iClientChannelUid,
@@ -1803,6 +1842,12 @@ void CPVRClient::cb_add_menu_hook(void* kodiInstance, const PVR_MENUHOOK* hook)
     return;
   }
 
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   client->GetMenuHooks()->AddHook(*hook);
 }
 
@@ -1815,6 +1860,12 @@ void CPVRClient::cb_recording_notification(void* kodiInstance,
   if (!client || !strFileName)
   {
     CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
     return;
   }
 
@@ -1837,24 +1888,76 @@ void CPVRClient::cb_recording_notification(void* kodiInstance,
 
 void CPVRClient::cb_trigger_channel_update(void* kodiInstance)
 {
+  CPVRClient* client = static_cast<CPVRClient*>(kodiInstance);
+  if (!client)
+  {
+    CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   /* update the channels table in the next iteration of the pvrmanager's main loop */
   CServiceBroker::GetPVRManager().TriggerChannelsUpdate();
 }
 
 void CPVRClient::cb_trigger_timer_update(void* kodiInstance)
 {
+  CPVRClient* client = static_cast<CPVRClient*>(kodiInstance);
+  if (!client)
+  {
+    CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   /* update the timers table in the next iteration of the pvrmanager's main loop */
   CServiceBroker::GetPVRManager().TriggerTimersUpdate();
 }
 
 void CPVRClient::cb_trigger_recording_update(void* kodiInstance)
 {
+  CPVRClient* client = static_cast<CPVRClient*>(kodiInstance);
+  if (!client)
+  {
+    CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   /* update the recordings table in the next iteration of the pvrmanager's main loop */
   CServiceBroker::GetPVRManager().TriggerRecordingsUpdate();
 }
 
 void CPVRClient::cb_trigger_channel_groups_update(void* kodiInstance)
 {
+  CPVRClient* client = static_cast<CPVRClient*>(kodiInstance);
+  if (!client)
+  {
+    CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   /* update all channel groups in the next iteration of the pvrmanager's main loop */
   CServiceBroker::GetPVRManager().TriggerChannelGroupsUpdate();
 }
@@ -1868,16 +1971,48 @@ void CPVRClient::cb_trigger_epg_update(void* kodiInstance, unsigned int iChannel
     return;
   }
 
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   CServiceBroker::GetPVRManager().EpgContainer().UpdateRequest(client->GetID(), iChannelUid);
 }
 
 void CPVRClient::cb_free_demux_packet(void* kodiInstance, DEMUX_PACKET* pPacket)
 {
+  CPVRClient* client = static_cast<CPVRClient*>(kodiInstance);
+  if (!client)
+  {
+    CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return;
+  }
+
   CDVDDemuxUtils::FreeDemuxPacket(static_cast<DemuxPacket*>(pPacket));
 }
 
 DEMUX_PACKET* CPVRClient::cb_allocate_demux_packet(void* kodiInstance, int iDataSize)
 {
+  CPVRClient* client = static_cast<CPVRClient*>(kodiInstance);
+  if (!client)
+  {
+    CLog::LogF(LOGERROR, "Invalid handler data");
+    return nullptr;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return nullptr;
+  }
+
   return CDVDDemuxUtils::AllocateDemuxPacket(iDataSize);
 }
 
@@ -1890,6 +2025,12 @@ void CPVRClient::cb_connection_state_change(void* kodiInstance,
   if (!client || !strConnectionString)
   {
     CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
     return;
   }
 
@@ -1919,6 +2060,12 @@ void CPVRClient::cb_epg_event_state_change(void* kodiInstance,
   if (!client || !tag)
   {
     CLog::LogF(LOGERROR, "Invalid handler data");
+    return;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
     return;
   }
 
@@ -1992,6 +2139,19 @@ private:
 
 PVR_CODEC CPVRClient::cb_get_codec_by_name(const void* kodiInstance, const char* strCodecName)
 {
+  const CPVRClient* client = static_cast<const CPVRClient*>(kodiInstance);
+  if (!client)
+  {
+    CLog::LogF(LOGERROR, "Invalid handler data");
+    return PVR_INVALID_CODEC;
+  }
+
+  if (client->m_bBlockAddonCalls)
+  {
+    CLog::LogF(LOGWARNING, "Ignoring PVR client callback");
+    return PVR_INVALID_CODEC;
+  }
+
   return CCodecIds::GetInstance().GetCodecByName(strCodecName);
 }
 
