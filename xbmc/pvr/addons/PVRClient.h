@@ -1062,6 +1062,16 @@ private:
                         bool bCheckReadyToUse = true) const;
 
   /*!
+   * @brief Wraps an addon callback function call in order to do common pre and post function invocation actions.
+   * @param strFunctionName The function name, for logging purposes.
+   * @param kodiInstance The addon instance pointer.
+   * @param function The function to wrap. It must take one parameter of type CPVRClient*.
+   */
+  static void HandleAddonCallback(const char* strFunctionName,
+                                  void* kodiInstance,
+                                  const std::function<void(CPVRClient* client)>& function);
+
+  /*!
    * @brief Callback functions from addon to kodi
    */
   //@{
