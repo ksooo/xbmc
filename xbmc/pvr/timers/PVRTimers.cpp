@@ -503,9 +503,13 @@ bool CPVRTimers::UpdateEntries(int iMaxNotificationDelay)
         if (timer->IsEpgBased())
         {
           // update data from current epg tag
-          const std::shared_ptr<CPVREpgInfoTag> epgTag = timer->GetEpgInfoTag();
+          const std::shared_ptr<CPVREpgInfoTag> epgTag =
+              CServiceBroker::GetPVRManager().EpgContainer().GetTagById(timer->Channel()->GetEPG(),
+                                                                        timer->UniqueBroadcastID());
           if (epgTag)
           {
+            timer->SetEpgInfoTag(epgTag);
+
             bool bStartChanged = !timer->m_bStartAnyTime && epgTag->StartAsUTC() != timer->StartAsUTC();
             bool bEndChanged = !timer->m_bEndAnyTime && epgTag->EndAsUTC() != timer->EndAsUTC();
             if (bStartChanged || bEndChanged)
