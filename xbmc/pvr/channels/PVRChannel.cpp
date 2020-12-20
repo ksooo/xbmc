@@ -150,6 +150,17 @@ bool CPVRChannel::CreateEPG()
       return true;
     }
   }
+  else
+  {
+    if (!CServiceBroker::GetPVRManager().EpgContainer().GetById(m_iEpgId))
+    {
+      CLog::LogF(LOGERROR, "BUG: channel '{}' uses outdated epg instance!", ChannelName());
+
+      // workaround
+      m_epg = CServiceBroker::GetPVRManager().EpgContainer().CreateChannelEpg(
+          m_iEpgId, m_strEPGScraper, std::make_shared<CPVREpgChannelData>(*this));
+    }
+  }
   return false;
 }
 
