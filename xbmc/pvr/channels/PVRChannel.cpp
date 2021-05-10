@@ -14,7 +14,6 @@
 #include "pvr/PVRDatabase.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClient.h"
-#include "pvr/channels/PVRChannelsPath.h"
 #include "pvr/epg/Epg.h"
 #include "pvr/epg/EpgChannelData.h"
 #include "pvr/epg/EpgContainer.h"
@@ -378,12 +377,6 @@ bool CPVRChannel::SetLastWatched(time_t iLastWatched)
   return false;
 }
 
-bool CPVRChannel::IsEmpty() const
-{
-  CSingleLock lock(m_critSection);
-  return m_strFileNameAndPath.empty();
-}
-
 /********** Client related channel methods **********/
 
 bool CPVRChannel::SetClientID(int iClientId)
@@ -398,18 +391,6 @@ bool CPVRChannel::SetClientID(int iClientId)
   }
 
   return false;
-}
-
-void CPVRChannel::UpdatePath(const std::string& channelGroup)
-{
-  const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
-  if (client)
-  {
-    CSingleLock lock(m_critSection);
-    const std::string strFileNameAndPath = CPVRChannelsPath(m_bIsRadio, channelGroup, client->ID(), m_iUniqueId);
-    if (m_strFileNameAndPath != strFileNameAndPath)
-      m_strFileNameAndPath = strFileNameAndPath;
-  }
 }
 
 std::string CPVRChannel::GetEncryptionName(int iCaid)
@@ -755,12 +736,6 @@ std::string CPVRChannel::MimeType() const
 {
   CSingleLock lock(m_critSection);
   return m_strMimeType;
-}
-
-std::string CPVRChannel::Path() const
-{
-  CSingleLock lock(m_critSection);
-  return m_strFileNameAndPath;
 }
 
 bool CPVRChannel::IsEncrypted() const

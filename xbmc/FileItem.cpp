@@ -131,9 +131,11 @@ namespace
   }
 } // unnamed namespace
 
-void CFileItem::FillMusicInfoTag(const std::shared_ptr<CPVRChannel>& channel, const std::shared_ptr<CPVREpgInfoTag>& tag)
+void CFileItem::FillMusicInfoTag(const std::shared_ptr<CPVRChannelGroupMember>& groupMember,
+                                 const std::shared_ptr<CPVREpgInfoTag>& tag)
 {
-  if (channel && channel->IsRadio() && !HasMusicInfoTag())
+  if (groupMember && groupMember->Channel() && groupMember->Channel()->IsRadio() &&
+      !HasMusicInfoTag())
   {
     CMusicInfoTag* musictag = GetMusicInfoTag(); // create (!) the music tag.
 
@@ -149,7 +151,7 @@ void CFileItem::FillMusicInfoTag(const std::shared_ptr<CPVRChannel>& channel, co
       musictag->SetTitle(g_localizeStrings.Get(19055)); // no information available
     }
 
-    musictag->SetURL(channel->Path());
+    musictag->SetURL(groupMember->Path());
     musictag->SetLoaded(true);
   }
 }
@@ -173,20 +175,23 @@ CFileItem::CFileItem(const std::shared_ptr<PVR::CPVREpgInfoTag>& tag,
   if (!groupMember)
     groupMember = CServiceBroker::GetPVRManager().GUIActions()->GetChannelGroupMember(*this);
 
-  std::shared_ptr<CPVRChannel> channel;
-  if (groupMember)
-    channel = groupMember->Channel();
-
   if (!tag->Icon().empty())
     SetArt("icon", tag->Icon());
-  else if (channel && !channel->IconPath().empty())
-    SetArt("icon", channel->IconPath());
-  else if (tag->IsRadio())
-    SetArt("icon", "DefaultAudio.png");
   else
-    SetArt("icon", "DefaultTVShows.png");
+  {
+    std::shared_ptr<CPVRChannel> channel;
+    if (groupMember)
+      channel = groupMember->Channel();
 
-  FillMusicInfoTag(channel, tag);
+    if (channel && !channel->IconPath().empty())
+      SetArt("icon", channel->IconPath());
+    else if (tag->IsRadio())
+      SetArt("icon", "DefaultAudio.png");
+    else
+      SetArt("icon", "DefaultTVShows.png");
+  }
+
+  FillMusicInfoTag(groupMember, tag);
   FillInMimeType(false);
 }
 
@@ -199,7 +204,7 @@ CFileItem::CFileItem(const std::shared_ptr<CPVRChannelGroupMember>& channelGroup
 
   m_pvrChannelGroupMemberInfoTag = channelGroupMember;
 
-  m_strPath = channel->Path();
+  m_strPath = channelGroupMember->Path();
   m_bIsFolder = false;
 
   SetLabel(channel->ChannelName());
@@ -212,10 +217,10 @@ CFileItem::CFileItem(const std::shared_ptr<CPVRChannelGroupMember>& channelGroup
     SetArt("icon", "DefaultTVShows.png");
 
   SetProperty("channelid", channel->ChannelID());
-  SetProperty("path", channel->Path());
+  SetProperty("path", channelGroupMember->Path());
   SetArt("thumb", channel->IconPath());
 
-  FillMusicInfoTag(channel, epgNow);
+  FillMusicInfoTag(channelGroupMember, epgNow);
   FillInMimeType(false);
 }
 
