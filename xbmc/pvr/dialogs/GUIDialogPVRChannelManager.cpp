@@ -838,11 +838,11 @@ void CGUIDialogPVRChannelManager::SaveList()
   }
 
   group->SortAndRenumber();
-  group->Persist();
   m_bContainsChanges = false;
   SetItemsUnchanged();
   auto channelGroups = CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio);
-  channelGroups->PropagateChannelNumbersAndPersist();
+  channelGroups->UpdateChannelNumbersFromAllChannelsGroup();
+  channelGroups->PersistAll();
   pDlgProgress->Close();
 }
 
