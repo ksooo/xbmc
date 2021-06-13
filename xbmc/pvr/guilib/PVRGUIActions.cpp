@@ -565,7 +565,7 @@ namespace PVR
             return;
         }
 
-        m_actions.insert(std::make_pair(eAction, m_actions.size()));
+        m_actions.insert(std::make_pair(eAction, static_cast<int>(m_actions.size())));
       }
     }
 
