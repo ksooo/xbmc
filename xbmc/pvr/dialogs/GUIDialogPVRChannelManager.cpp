@@ -735,8 +735,7 @@ void CGUIDialogPVRChannelManager::Update()
     channelFile->SetProperty("Icon", channel->IconPath());
     channelFile->SetProperty("EPGSource", 0);
     channelFile->SetProperty("ParentalLocked", channel->IsLocked());
-    channelFile->SetProperty("Number",
-                             StringUtils::Format("%i", member->ChannelNumber().GetChannelNumber()));
+    channelFile->SetProperty("Number", member->ChannelNumber().FormattedChannelNumber());
 
     const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(*channelFile);
     if (client)
