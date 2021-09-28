@@ -21,7 +21,7 @@ class CAndroidUtils : public ISettingCallback
 public:
   CAndroidUtils();
   ~CAndroidUtils() override = default;
-  bool GetNativeResolution(RESOLUTION_INFO* res) const;
+  bool GetNativeResolution(RESOLUTION_INFO& res) const;
   bool SetNativeResolution(const RESOLUTION_INFO& res);
   bool ProbeResolutions(std::vector<RESOLUTION_INFO>& resolutions);
   bool UpdateDisplayModes();
@@ -32,6 +32,6 @@ public:
   void OnSettingChanged(const std::shared_ptr<const CSetting>& setting) override;
 
 protected:
-  mutable int m_width;
-  mutable int m_height;
+  mutable int m_width = 0;
+  mutable int m_height = 0;
 };
