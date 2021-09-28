@@ -133,66 +133,7 @@ const std::string CAndroidUtils::SETTING_LIMITGUI = "videoscreen.limitgui";
 
 CAndroidUtils::CAndroidUtils()
 {
-  if (CJNIBase::GetSDKVersion() >= 24)
-  {
-    fetchDisplayModes();
-    for (const auto& res : s_res_displayModes)
-    {
-      // find max supported resolution
-      if (res.iWidth > m_width || res.iHeight > m_height)
-      {
-        m_width = res.iWidth;
-        m_height = res.iHeight;
-      }
-    }
-  }
-
-  if (!m_width || !m_height)
-  {
-    // Property available on some devices
-    const std::string displaySize = CJNISystemProperties::get("sys.display-size", "");
-    if (!displaySize.empty())
-    {
-      const std::vector<std::string> aSize = StringUtils::Split(displaySize, "x");
-      if (aSize.size() == 2)
-      {
-        m_width = StringUtils::IsInteger(aSize[0]) ? atoi(aSize[0].c_str()) : 0;
-        m_height = StringUtils::IsInteger(aSize[1]) ? atoi(aSize[1].c_str()) : 0;
-      }
-      CLog::Log(LOGDEBUG, "CAndroidUtils: display-size: %s(%dx%d)", displaySize.c_str(), m_width, m_height);
-    }
-  }
-
-  CLog::Log(LOGDEBUG, "CAndroidUtils: maximum resolution: %dx%d", m_width, m_height);
-  const int limit = CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
-      CAndroidUtils::SETTING_LIMITGUI);
-  switch (limit)
-  {
-    case 0: // auto
-      m_width = 0;
-      m_height = 0;
-      break;
-
-    case 9999:  // unlimited
-      break;
-
-    case 720:
-      if (m_height > 720)
-      {
-        m_width = 1280;
-        m_height = 720;
-      }
-      break;
-
-    case 1080:
-      if (m_height > 1080)
-      {
-        m_width = 1920;
-        m_height = 1080;
-      }
-      break;
-  }
-  CLog::Log(LOGDEBUG, "CAndroidUtils: selected resolution: %dx%d", m_width, m_height);
+  UpdateDisplayModes();
 
   CServiceBroker::GetSettingsComponent()->GetSettings()->GetSettingsManager()->RegisterCallback(
       this, {CAndroidUtils::SETTING_LIMITGUI});
@@ -328,8 +269,71 @@ bool CAndroidUtils::ProbeResolutions(std::vector<RESOLUTION_INFO>& resolutions)
 
 bool CAndroidUtils::UpdateDisplayModes()
 {
+  m_width = 0;
+  m_height = 0;
+
   if (CJNIBase::GetSDKVersion() >= 24)
+  {
     fetchDisplayModes();
+    for (const auto& res : s_res_displayModes)
+    {
+      // find max supported resolution
+      if (res.iWidth > m_width || res.iHeight > m_height)
+      {
+        m_width = res.iWidth;
+        m_height = res.iHeight;
+      }
+    }
+  }
+
+  if (!m_width || !m_height)
+  {
+    // Property available on some devices
+    const std::string displaySize = CJNISystemProperties::get("sys.display-size", "");
+    if (!displaySize.empty())
+    {
+      const std::vector<std::string> aSize = StringUtils::Split(displaySize, "x");
+      if (aSize.size() == 2)
+      {
+        m_width = StringUtils::IsInteger(aSize[0]) ? std::atoi(aSize[0].c_str()) : 0;
+        m_height = StringUtils::IsInteger(aSize[1]) ? std::atoi(aSize[1].c_str()) : 0;
+      }
+      CLog::Log(LOGDEBUG, "CAndroidUtils::UpdateDisplayModes: display-size: %s(%dx%d)",
+                displaySize.c_str(), m_width, m_height);
+    }
+  }
+
+  CLog::Log(LOGDEBUG, "CAndroidUtils::UpdateDisplayModes: maximum resolution: %dx%d", m_width,
+            m_height);
+  const int limit = CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
+      CAndroidUtils::SETTING_LIMITGUI);
+  switch (limit)
+  {
+    case 0: // auto
+      m_width = 0;
+      m_height = 0;
+      break;
+
+    case 9999: // unlimited
+      break;
+
+    case 720:
+      if (m_height > 720)
+      {
+        m_width = 1280;
+        m_height = 720;
+      }
+      break;
+
+    case 1080:
+      if (m_height > 1080)
+      {
+        m_width = 1920;
+        m_height = 1080;
+      }
+      break;
+  }
+  CLog::Log(LOGDEBUG, "CAndroidUtils: selected resolution: %dx%d", m_width, m_height);
   return true;
 }
 
