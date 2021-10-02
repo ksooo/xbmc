@@ -193,8 +193,28 @@ bool CAndroidUtils::SetNativeResolution(const RESOLUTION_INFO& res)
 
   if (s_hasModeApi)
   {
-    CXBMCApp::SetDisplayMode(std::atoi(res.strId.c_str()), res.fRefreshRate);
-    s_res_cur_displayMode = res;
+    UpdateDisplayModes();
+
+    bool modeValid = false;
+    for (const auto& mode : s_res_displayModes)
+    {
+      if (mode.strId == res.strId)
+      {
+        modeValid = true;
+        break;
+      }
+    }
+
+    if (modeValid)
+    {
+      CXBMCApp::SetDisplayMode(std::atoi(res.strId.c_str()), res.fRefreshRate);
+      s_res_cur_displayMode = res;
+    }
+    else
+    {
+      CLog::Log(LOGERROR, "CAndroidUtils::SetNativeResolution: Invalid resolution!");
+      return false;
+    }
   }
   else
   {
