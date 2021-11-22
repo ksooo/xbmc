@@ -16,9 +16,10 @@
 namespace PVR
 {
 
-CPVRClientMenuHook::CPVRClientMenuHook(const std::string& addonId, const PVR_MENUHOOK& hook)
-: m_addonId(addonId),
-  m_hook(new PVR_MENUHOOK(hook))
+CPVRClientMenuHook::CPVRClientMenuHook(const std::string& addonId,
+                                       int iClientId,
+                                       const PVR_MENUHOOK& hook)
+  : m_addonId(addonId), m_iClientId(iClientId), m_hook(new PVR_MENUHOOK(hook))
 {
   if (hook.category != PVR_MENUHOOK_UNKNOWN &&
       hook.category != PVR_MENUHOOK_ALL &&
@@ -36,7 +37,7 @@ bool CPVRClientMenuHook::operator ==(const CPVRClientMenuHook& right) const
   if (this == &right)
     return true;
 
-  return m_addonId == right.m_addonId &&
+  return m_addonId == right.m_addonId && m_iClientId == right.m_iClientId &&
          m_hook->iHookId == right.m_hook->iHookId &&
          m_hook->iLocalizedStringId == right.m_hook->iLocalizedStringId &&
          m_hook->category == right.m_hook->category;
@@ -77,9 +78,9 @@ bool CPVRClientMenuHook::IsSettingsHook() const
   return m_hook->category == PVR_MENUHOOK_SETTING;
 }
 
-std::string CPVRClientMenuHook::GetAddonId() const
+int CPVRClientMenuHook::GetClientId() const
 {
-  return m_addonId;
+  return m_iClientId;
 }
 
 unsigned int CPVRClientMenuHook::GetId() const
@@ -102,7 +103,7 @@ void CPVRClientMenuHooks::AddHook(const PVR_MENUHOOK& addonHook)
   if (!m_hooks)
     m_hooks.reset(new std::vector<CPVRClientMenuHook>());
 
-  const CPVRClientMenuHook hook(m_addonId, addonHook);
+  const CPVRClientMenuHook hook(m_addonId, m_iClientId, addonHook);
   m_hooks->emplace_back(hook);
   CPVRContextMenuManager::GetInstance().AddMenuHook(hook);
 }

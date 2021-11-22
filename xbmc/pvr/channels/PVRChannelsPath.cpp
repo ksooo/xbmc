@@ -69,7 +69,10 @@ CPVRChannelsPath::CPVRChannelsPath(const std::string& strPath)
         std::vector<std::string> tokens = StringUtils::Split(segment, "_");
         if (tokens.size() == 2)
         {
-          m_clientID = tokens[0];
+          std::string clientID = tokens[0];
+          if (!clientID.empty() && clientID.find_first_not_of("0123456789") == std::string::npos)
+            m_iClientID = std::atoi(clientID.c_str());
+
           tokens = StringUtils::Split(tokens[1], ".");
           if (tokens.size() == 2 && tokens[1] == "pvr")
           {
@@ -79,9 +82,10 @@ CPVRChannelsPath::CPVRChannelsPath(const std::string& strPath)
           }
         }
 
-        if (!m_clientID.empty() && m_iChannelUID >= 0)
+        if (m_iClientID >= 0 && m_iChannelUID >= 0)
         {
-          m_kind = Kind::CHANNEL; // pvr://channels/(tv|radio)/<groupname>/<addonid>_<channeluid>.pvr
+          m_kind =
+              Kind::CHANNEL; // pvr://channels/(tv|radio)/<groupname>/<clientid>_<channeluid>.pvr
         }
         else
         {
@@ -141,17 +145,20 @@ CPVRChannelsPath::CPVRChannelsPath(bool bRadio, const std::string& strGroupName)
     m_path.append("/");
 }
 
-CPVRChannelsPath::CPVRChannelsPath(bool bRadio, const std::string& strGroupName, const std::string& strClientID, int iChannelUID)
+CPVRChannelsPath::CPVRChannelsPath(bool bRadio,
+                                   const std::string& strGroupName,
+                                   int iClientID,
+                                   int iChannelUID)
   : m_bRadio(bRadio)
 {
-  if (!strGroupName.empty() && !strClientID.empty() && iChannelUID >= 0)
+  if (!strGroupName.empty() && iClientID >= 0 && iChannelUID >= 0)
   {
     m_kind = Kind::CHANNEL;
     m_group = strGroupName;
-    m_clientID = strClientID;
+    m_iClientID = iClientID;
     m_iChannelUID = iChannelUID;
     m_path = StringUtils::Format("pvr://channels/{}/{}/{}_{}.pvr", bRadio ? "radio" : "tv",
-                                 CURL::Encode(m_group), m_clientID, m_iChannelUID);
+                                 CURL::Encode(m_group), m_iClientID, m_iChannelUID);
   }
 }
 

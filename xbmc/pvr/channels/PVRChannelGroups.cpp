@@ -128,9 +128,7 @@ std::shared_ptr<CPVRChannelGroupMember> CPVRChannelGroups::GetChannelGroupMember
   {
     const std::shared_ptr<CPVRChannelGroup> group = GetByName(path.GetGroupName());
     if (group)
-      return group->GetByUniqueID(
-          {CServiceBroker::GetPVRManager().Clients()->GetClientId(path.GetClientID()),
-           path.GetChannelUID()});
+      return group->GetByUniqueID({path.GetClientID(), path.GetChannelUID()});
   }
 
   return {};

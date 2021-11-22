@@ -59,8 +59,8 @@ namespace PVR
 
 #define DEFAULT_INFO_STRING_VALUE "unknown"
 
-CPVRClient::CPVRClient(const ADDON::AddonInfoPtr& addonInfo)
-  : IAddonInstanceHandler(ADDON_INSTANCE_PVR, addonInfo)
+CPVRClient::CPVRClient(int iClientid, const ADDON::AddonInfoPtr& addonInfo)
+  : IAddonInstanceHandler(ADDON_INSTANCE_PVR, addonInfo), m_iClientId(iClientid)
 {
   // Create all interface parts independent to make API changes easier if
   // something is added
@@ -84,7 +84,7 @@ void CPVRClient::StopRunningInstance()
 {
   // stop the pvr manager and stop and unload the running pvr addon. pvr manager will be restarted on demand.
   CServiceBroker::GetPVRManager().Stop();
-  CServiceBroker::GetPVRManager().Clients()->StopClient(ID(), false);
+  CServiceBroker::GetPVRManager().Clients()->StopClient(m_iClientId, false);
 }
 
 void CPVRClient::OnPreInstall()
@@ -98,11 +98,10 @@ void CPVRClient::OnPreUnInstall()
   StopRunningInstance();
 }
 
-void CPVRClient::ResetProperties(int iClientId /* = PVR_INVALID_CLIENT_ID */)
+void CPVRClient::ResetProperties()
 {
   CSingleLock lock(m_critSection);
 
-  /* initialise members */
   m_strUserPath = CSpecialProtocol::TranslatePath(Profile());
   m_strClientPath = CSpecialProtocol::TranslatePath(Path());
   m_bReadyToUse = false;
@@ -112,7 +111,6 @@ void CPVRClient::ResetProperties(int iClientId /* = PVR_INVALID_CLIENT_ID */)
   m_connectionState = PVR_CONNECTION_STATE_UNKNOWN;
   m_prevConnectionState = PVR_CONNECTION_STATE_UNKNOWN;
   m_ignoreClient = false;
-  m_iClientId = iClientId;
   m_iPriority = 0;
   m_bPriorityFetched = false;
   m_strBackendVersion = DEFAULT_INFO_STRING_VALUE;
@@ -157,13 +155,13 @@ void CPVRClient::ResetProperties(int iClientId /* = PVR_INVALID_CLIENT_ID */)
   memset(m_struct.toAddon, 0, sizeof(KodiToAddonFuncTable_PVR));
 }
 
-ADDON_STATUS CPVRClient::Create(int iClientId)
+ADDON_STATUS CPVRClient::Create()
 {
-  ADDON_STATUS status(ADDON_STATUS_UNKNOWN);
-  if (iClientId <= PVR_INVALID_CLIENT_ID)
+  ADDON_STATUS status = ADDON_STATUS_UNKNOWN;
+  if (m_iClientId <= PVR_INVALID_CLIENT_ID)
     return status;
 
-  ResetProperties(iClientId);
+  ResetProperties();
 
   /* initialise the add-on */
   bool bReadyToUse(false);
@@ -210,11 +208,8 @@ void CPVRClient::Continue()
 
 void CPVRClient::ReCreate()
 {
-  int iClientID(m_iClientId);
   Destroy();
-
-  /* recreate the instance */
-  Create(iClientID);
+  Create();
 }
 
 bool CPVRClient::ReadyToUse() const
@@ -1597,7 +1592,7 @@ PVR_ERROR CPVRClient::OnPowerSavingDeactivated()
 std::shared_ptr<CPVRClientMenuHooks> CPVRClient::GetMenuHooks()
 {
   if (!m_menuhooks)
-    m_menuhooks.reset(new CPVRClientMenuHooks(ID()));
+    m_menuhooks.reset(new CPVRClientMenuHooks(ID(), m_iClientId));
 
   return m_menuhooks;
 }

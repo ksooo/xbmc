@@ -305,7 +305,7 @@ private:
 class CPVRClient : public ADDON::IAddonInstanceHandler
 {
 public:
-  explicit CPVRClient(const ADDON::AddonInfoPtr& addonInfo);
+  CPVRClient(int iClientid, const ADDON::AddonInfoPtr& addonInfo);
   ~CPVRClient() override;
 
   void OnPreInstall() override;
@@ -316,9 +316,8 @@ public:
 
   /*!
    * @brief Initialise the instance of this add-on.
-   * @param iClientId The ID of this add-on.
    */
-  ADDON_STATUS Create(int iClientId);
+  ADDON_STATUS Create();
 
   /*!
    * @brief Stop this add-on instance. No more client add-on access after this call.
@@ -1039,9 +1038,9 @@ public:
 
 private:
   /*!
-   * @brief Resets all class members to their defaults. Called by the constructors.
+   * @brief Resets all class members to their defaults, except client id.
    */
-  void ResetProperties(int iClientId = PVR_INVALID_CLIENT_ID);
+  void ResetProperties();
 
   /*!
    * @brief reads the client's properties.
@@ -1314,7 +1313,7 @@ private:
       m_ignoreClient; /*!< signals to PVRManager to ignore this client until it has been connected */
   std::vector<std::shared_ptr<CPVRTimerType>>
       m_timertypes; /*!< timer types supported by this backend */
-  int m_iClientId; /*!< unique ID of the client */
+  const int m_iClientId; /*!< unique ID of the client */
   mutable int m_iPriority; /*!< priority of the client */
   mutable bool m_bPriorityFetched;
 

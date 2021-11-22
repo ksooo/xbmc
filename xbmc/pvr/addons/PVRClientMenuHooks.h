@@ -23,7 +23,7 @@ namespace PVR
     CPVRClientMenuHook() = delete;
     virtual ~CPVRClientMenuHook() = default;
 
-    CPVRClientMenuHook(const std::string& addonId, const PVR_MENUHOOK& hook);
+    CPVRClientMenuHook(const std::string& addonId, int iClientId, const PVR_MENUHOOK& hook);
 
     bool operator ==(const CPVRClientMenuHook& right) const;
 
@@ -35,13 +35,14 @@ namespace PVR
     bool IsDeletedRecordingHook() const;
     bool IsSettingsHook() const;
 
-    std::string GetAddonId() const;
+    int GetClientId() const;
     unsigned int GetId() const;
     unsigned int GetLabelId() const;
     std::string GetLabel() const;
 
   private:
     std::string m_addonId;
+    int m_iClientId = -1;
     std::shared_ptr<PVR_MENUHOOK> m_hook;
   };
 
@@ -51,7 +52,10 @@ namespace PVR
     CPVRClientMenuHooks() = default;
     virtual ~CPVRClientMenuHooks() = default;
 
-    explicit CPVRClientMenuHooks(const std::string& addonId) : m_addonId(addonId) {}
+    CPVRClientMenuHooks(const std::string& addonId, int iClientId)
+      : m_addonId(addonId), m_iClientId(iClientId)
+    {
+    }
 
     void AddHook(const PVR_MENUHOOK& addonHook);
     void Clear();
@@ -68,6 +72,7 @@ namespace PVR
         const std::function<bool(const CPVRClientMenuHook& hook)>& function) const;
 
     std::string m_addonId;
+    int m_iClientId = -1;
     std::unique_ptr<std::vector<CPVRClientMenuHook>> m_hooks;
   };
 }

@@ -91,14 +91,6 @@ namespace PVR
     bool RequestRestart(const std::string& id, bool bDataChanged) override;
 
     /*!
-     * @brief Stop a client.
-     * @param id The client to stop.
-     * @param bRestart If true, restart the client.
-     * @return True if the client was found, false otherwise.
-     */
-    bool StopClient(const std::string& id, bool bRestart);
-
-    /*!
      * @brief Handle addon events (enable, disable, ...).
      * @param event The addon event.
      */
@@ -162,6 +154,14 @@ namespace PVR
      * @return The amount of enabled clients.
      */
     int EnabledClientAmount() const;
+
+    /*!
+     * @brief Stop a client.
+     * @param iClientId The id of the client to stop.
+     * @param bRestart If true, restart the client.
+     * @return True if the client was found, false otherwise.
+     */
+    bool StopClient(int iClientId, bool bRestart);
 
     /*!
      * @brief Get a list of the enabled client infos.
@@ -387,17 +387,10 @@ namespace PVR
 
     /*!
      * @brief Check whether a client is known.
-     * @param id The addon id to check.
+     * @param iClientId The client id to check.
      * @return True if this client is known, false otherwise.
      */
-    bool IsKnownClient(const std::string& id) const;
-
-    /*!
-     * @brief Check whether an given addon instance is a created pvr client.
-     * @param id The addon id.
-     * @return True if the the addon represents a created client, false otherwise.
-     */
-    bool IsCreatedClient(const std::string& id) const;
+    bool IsKnownClient(int iClientId) const;
 
     /*!
      * @brief Get all created clients and clients not (yet) ready to use.
