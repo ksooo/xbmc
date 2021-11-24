@@ -10,6 +10,7 @@
 
 #include "GUIUserMessages.h"
 #include "addons/binary-addons/AddonDll.h"
+#include "addons/binary-addons/AddonInstanceHandler.h"
 #include "addons/gui/GUIDialogAddonSettings.h"
 #include "addons/settings/AddonSettings.h"
 #include "filesystem/SpecialProtocol.h"
@@ -210,14 +211,40 @@ bool Interface_Base::is_setting_using_default(void* kodiBase, const char* id)
     return false;
   }
 
-  if (!addon->HasSettings())
+  SettingPtr setting = nullptr;
+
+  //! @todo Compat hack! Additional param instanceID needed!
+  const std::vector<std::string> tokens = StringUtils::Split(id, "::");
+  if (tokens.size() == 2)
   {
-    CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
-              addon->Name());
-    return false;
+    const std::string instanceID = tokens.at(0);
+    const std::string settingName = tokens.at(1);
+
+    IAddonInstanceHandler* handler = addon->GetInstanceHandler(instanceID);
+    if (handler)
+    {
+      if (!handler->HasSettings())
+      {
+        CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                  addon->Name());
+        return false;
+      }
+
+      setting = handler->GetSettings()->GetSetting(settingName);
+    }
+  }
+  else
+  {
+    if (!addon->HasSettings())
+    {
+      CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                addon->Name());
+      return false;
+    }
+
+    setting = addon->GetSettings()->GetSetting(id);
   }
 
-  auto setting = addon->GetSettings()->GetSetting(id);
   if (setting == nullptr)
   {
     CLog::Log(LOGERROR, "Interface_Base::{} - can't find setting '{}' in '{}'", __func__, id,
@@ -239,14 +266,40 @@ bool Interface_Base::get_setting_bool(void* kodiBase, const char* id, bool* valu
     return false;
   }
 
-  if (!addon->HasSettings())
+  SettingPtr setting = nullptr;
+
+  //! @todo Compat hack! Additional param instanceID needed!
+  const std::vector<std::string> tokens = StringUtils::Split(id, "::");
+  if (tokens.size() == 2)
   {
-    CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
-              addon->Name());
-    return false;
+    const std::string instanceID = tokens.at(0);
+    const std::string settingName = tokens.at(1);
+
+    IAddonInstanceHandler* handler = addon->GetInstanceHandler(instanceID);
+    if (handler)
+    {
+      if (!handler->HasSettings())
+      {
+        CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                  addon->Name());
+        return false;
+      }
+
+      setting = handler->GetSettings()->GetSetting(settingName);
+    }
+  }
+  else
+  {
+    if (!addon->HasSettings())
+    {
+      CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                addon->Name());
+      return false;
+    }
+
+    setting = addon->GetSettings()->GetSetting(id);
   }
 
-  auto setting = addon->GetSettings()->GetSetting(id);
   if (setting == nullptr)
   {
     CLog::Log(LOGERROR, "Interface_Base::{} - can't find setting '{}' in '{}'", __func__, id,
@@ -276,14 +329,40 @@ bool Interface_Base::get_setting_int(void* kodiBase, const char* id, int* value)
     return false;
   }
 
-  if (!addon->HasSettings())
+  SettingPtr setting = nullptr;
+
+  //! @todo Compat hack! Additional param instanceID needed!
+  const std::vector<std::string> tokens = StringUtils::Split(id, "::");
+  if (tokens.size() == 2)
   {
-    CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
-              addon->Name());
-    return false;
+    const std::string instanceID = tokens.at(0);
+    const std::string settingName = tokens.at(1);
+
+    IAddonInstanceHandler* handler = addon->GetInstanceHandler(instanceID);
+    if (handler)
+    {
+      if (!handler->HasSettings())
+      {
+        CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                  addon->Name());
+        return false;
+      }
+
+      setting = handler->GetSettings()->GetSetting(settingName);
+    }
+  }
+  else
+  {
+    if (!addon->HasSettings())
+    {
+      CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                addon->Name());
+      return false;
+    }
+
+    setting = addon->GetSettings()->GetSetting(id);
   }
 
-  auto setting = addon->GetSettings()->GetSetting(id);
   if (setting == nullptr)
   {
     CLog::Log(LOGERROR, "Interface_Base::{} - can't find setting '{}' in '{}'", __func__, id,
@@ -316,14 +395,40 @@ bool Interface_Base::get_setting_float(void* kodiBase, const char* id, float* va
     return false;
   }
 
-  if (!addon->HasSettings())
+  SettingPtr setting = nullptr;
+
+  //! @todo Compat hack! Additional param instanceID needed!
+  const std::vector<std::string> tokens = StringUtils::Split(id, "::");
+  if (tokens.size() == 2)
   {
-    CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
-              addon->Name());
-    return false;
+    const std::string instanceID = tokens.at(0);
+    const std::string settingName = tokens.at(1);
+
+    IAddonInstanceHandler* handler = addon->GetInstanceHandler(instanceID);
+    if (handler)
+    {
+      if (!handler->HasSettings())
+      {
+        CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                  addon->Name());
+        return false;
+      }
+
+      setting = handler->GetSettings()->GetSetting(settingName);
+    }
+  }
+  else
+  {
+    if (!addon->HasSettings())
+    {
+      CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                addon->Name());
+      return false;
+    }
+
+    setting = addon->GetSettings()->GetSetting(id);
   }
 
-  auto setting = addon->GetSettings()->GetSetting(id);
   if (setting == nullptr)
   {
     CLog::Log(LOGERROR, "Interface_Base::{} - can't find setting '{}' in '{}'", __func__, id,
@@ -353,14 +458,40 @@ bool Interface_Base::get_setting_string(void* kodiBase, const char* id, char** v
     return false;
   }
 
-  if (!addon->HasSettings())
+  SettingPtr setting = nullptr;
+
+  //! @todo Compat hack! Additional param instanceID needed!
+  const std::vector<std::string> tokens = StringUtils::Split(id, "::");
+  if (tokens.size() == 2)
   {
-    CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
-              addon->Name());
-    return false;
+    const std::string instanceID = tokens.at(0);
+    const std::string settingName = tokens.at(1);
+
+    IAddonInstanceHandler* handler = addon->GetInstanceHandler(instanceID);
+    if (handler)
+    {
+      if (!handler->HasSettings())
+      {
+        CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                  addon->Name());
+        return false;
+      }
+
+      setting = handler->GetSettings()->GetSetting(settingName);
+    }
+  }
+  else
+  {
+    if (!addon->HasSettings())
+    {
+      CLog::Log(LOGERROR, "Interface_Base::{} - couldn't get settings for add-on '{}'", __func__,
+                addon->Name());
+      return false;
+    }
+
+    setting = addon->GetSettings()->GetSetting(id);
   }
 
-  auto setting = addon->GetSettings()->GetSetting(id);
   if (setting == nullptr)
   {
     CLog::Log(LOGERROR, "Interface_Base::{} - can't find setting '{}' in '{}'", __func__, id,

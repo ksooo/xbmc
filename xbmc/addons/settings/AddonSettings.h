@@ -27,11 +27,13 @@ struct StringSettingOption;
 namespace ADDON
 {
   class IAddon;
+  class IAddonInstanceHandler;
 
   class CAddonSettings : public CSettingsBase, public CSettingCreator, public CSettingControlCreator, public ISettingCallback
   {
   public:
     explicit CAddonSettings(const std::shared_ptr<const IAddon>& addon);
+    explicit CAddonSettings(const std::shared_ptr<const IAddonInstanceHandler>& addon);
     ~CAddonSettings() override = default;
 
     // specialization of CSettingsBase
@@ -47,7 +49,7 @@ namespace ADDON
     // implementation of ISettingCallback
     void OnSettingAction(const std::shared_ptr<const CSetting>& setting) override;
 
-    std::shared_ptr<const IAddon> GetAddon() { return m_addon.lock(); }
+    const std::string& GetAddonId() const { return m_addonId; }
 
     bool Initialize(const CXBMCTinyXML& doc, bool allowEmpty = false);
     bool Load(const CXBMCTinyXML& doc);
@@ -124,7 +126,6 @@ namespace ADDON
                                              std::string& current,
                                              void* data);
 
-    std::weak_ptr<const IAddon> m_addon;
     // store these values so that we don't always have to access the weak pointer
     const std::string m_addonId;
     const std::string m_addonPath;

@@ -34,6 +34,7 @@ namespace ADDON
     AddonDllPtr GetAddon(IAddonInstanceHandler* handler);
     void ReleaseAddon(IAddonInstanceHandler* handler);
     size_t UsedInstanceCount() const;
+    IAddonInstanceHandler* GetInstanceHandler(const std::string& instanceID) const;
 
     AddonDllPtr GetActiveAddon();
 

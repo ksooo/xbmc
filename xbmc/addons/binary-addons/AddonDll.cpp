@@ -280,6 +280,14 @@ void CAddonDll::DestroyInstance(ADDON_INSTANCE_HANDLER instanceClass)
     Destroy();
 }
 
+IAddonInstanceHandler* CAddonDll::GetInstanceHandler(const std::string& instanceID) const
+{
+  if (m_binaryAddonBase)
+    return m_binaryAddonBase->GetInstanceHandler(instanceID);
+
+  return nullptr;
+}
+
 bool CAddonDll::IsInUse() const
 {
   if (m_informer)

@@ -69,6 +69,17 @@ size_t CBinaryAddonBase::UsedInstanceCount() const
   return m_activeAddonHandlers.size();
 }
 
+IAddonInstanceHandler* CBinaryAddonBase::GetInstanceHandler(const std::string& instanceID) const
+{
+  CSingleLock lock(m_critSection);
+  for (const auto& instance : m_activeAddonHandlers)
+  {
+    if (instance->InstanceID() == instanceID)
+      return instance;
+  }
+  return nullptr;
+}
+
 AddonDllPtr CBinaryAddonBase::GetActiveAddon()
 {
   CSingleLock lock(m_critSection);

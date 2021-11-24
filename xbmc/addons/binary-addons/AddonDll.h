@@ -30,6 +30,8 @@ namespace ADDON
  */
 using ADDON_INSTANCE_HANDLER = const void*;
 
+class IAddonInstanceHandler;
+
 /*!
  * @brief Information class for use on addon type managers.
  *
@@ -105,6 +107,8 @@ public:
    * @param[in] instanceClass The from Kodi used class for active instance
    */
   void DestroyInstance(ADDON_INSTANCE_HANDLER instanceClass);
+
+  IAddonInstanceHandler* GetInstanceHandler(const std::string& instanceID) const;
 
   bool IsInUse() const override;
   void RegisterInformer(CAddonDllInformer* informer);
