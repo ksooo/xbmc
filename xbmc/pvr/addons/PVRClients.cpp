@@ -127,7 +127,10 @@ void CPVRClients::UpdateAddons(const std::string& changedAddonId /*= ""*/)
         }
         else
         {
-          client = std::make_shared<CPVRClient>(iClientId, addon);
+          const std::string strClientId = addon->ID(); //! @todo obtain instance ids
+          client = std::make_shared<CPVRClient>(
+              iClientId, addon,
+              StringUtils::Format("special://profile/addon_data/%s/", strClientId.c_str()));
           if (!client)
           {
             CLog::LogF(LOGERROR, "Severe error, incorrect add-on type");
@@ -142,6 +145,41 @@ void CPVRClients::UpdateAddons(const std::string& changedAddonId /*= ""*/)
           addonsToReCreate.emplace_back(iClientId);
         else
           addonsToDestroy.emplace_back(iClientId);
+      }
+
+      //! @todo PoC only !!!
+      if (addon->ID() == "pvr.hts")
+      {
+        int iClientId = ClientIdFromAddonId("pvr.hts.2");
+
+        if (bEnabled && (!IsKnownClient(iClientId) || !IsCreatedClient(iClientId)))
+        {
+          std::shared_ptr<CPVRClient> client;
+          if (IsKnownClient(iClientId))
+          {
+            GetClient(iClientId, client);
+          }
+          else
+          {
+            const std::string strClientId = "pvr.hts.2";
+            client = std::make_shared<CPVRClient>(
+                iClientId, addon,
+                StringUtils::Format("special://profile/addon_data/%s/", strClientId.c_str()));
+            if (!client)
+            {
+              CLog::LogF(LOGERROR, "Severe error, incorrect add-on type");
+              continue;
+            }
+          }
+          addonsToCreate.emplace_back(client);
+        }
+        else if (IsCreatedClient(iClientId))
+        {
+          if (bEnabled)
+            addonsToReCreate.emplace_back(iClientId);
+          else
+            addonsToDestroy.emplace_back(iClientId);
+        }
       }
     }
   }
@@ -159,6 +197,7 @@ void CPVRClients::UpdateAddons(const std::string& changedAddonId /*= ""*/)
         CLog::LogF(LOGERROR, "Failed to create add-on {}, status = {}", addon->Name(), status);
         if (status == ADDON_STATUS_PERMANENT_FAILURE)
         {
+          //! @todo disable the whole addon in case one instance cannot be creted?
           CServiceBroker::GetAddonMgr().DisableAddon(addon->ID(),
                                                      AddonDisabledReason::PERMANENT_FAILURE);
           CJobManager::GetInstance().AddJob(new CPVREventLogJob(true, true, addon->Name(),
@@ -200,6 +239,8 @@ void CPVRClients::UpdateAddons(const std::string& changedAddonId /*= ""*/)
 
 bool CPVRClients::RequestRestart(const std::string& id, bool bDataChanged)
 {
+  //! @todo in future, there can be multiple instances matching id, all must be stopped here.
+
   return StopClient(GetClientId(id), true);
 }
 
@@ -274,6 +315,8 @@ bool CPVRClients::GetClient(int iClientId, std::shared_ptr<CPVRClient>& addon) c
 
 int CPVRClients::GetClientId(const std::string& strId) const
 {
+  //! @todo in future, there can be multiple instances matching strId
+
   CSingleLock lock(m_critSection);
   for (const auto& entry : m_clientMap)
   {
@@ -401,6 +444,23 @@ PVR_ERROR CPVRClients::GetCreatedClients(CPVRClientMap& clientsReady, std::vecto
     else
     {
       clientsNotReady.emplace_back(iClientId);
+    }
+
+    //! @todo PoC only
+    if (addon->ID() == "pvr.hts")
+    {
+      int iClientId = ClientIdFromAddonId("pvr.hts.2");
+      std::shared_ptr<CPVRClient> client;
+      GetClient(iClientId, client);
+
+      if (client && client->ReadyToUse() && !client->IgnoreClient())
+      {
+        clientsReady.insert(std::make_pair(iClientId, client));
+      }
+      else
+      {
+        clientsNotReady.emplace_back(iClientId);
+      }
     }
   }
 

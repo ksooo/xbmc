@@ -305,7 +305,7 @@ private:
 class CPVRClient : public ADDON::IAddonInstanceHandler
 {
 public:
-  CPVRClient(int iClientid, const ADDON::AddonInfoPtr& addonInfo);
+  CPVRClient(int iClientid, const ADDON::AddonInfoPtr& addonInfo, const std::string& profilePath);
   ~CPVRClient() override;
 
   void OnPreInstall() override;

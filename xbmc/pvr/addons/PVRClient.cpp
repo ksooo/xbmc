@@ -59,8 +59,10 @@ namespace PVR
 
 #define DEFAULT_INFO_STRING_VALUE "unknown"
 
-CPVRClient::CPVRClient(int iClientid, const ADDON::AddonInfoPtr& addonInfo)
-  : IAddonInstanceHandler(ADDON_INSTANCE_PVR, addonInfo), m_iClientId(iClientid)
+CPVRClient::CPVRClient(int iClientid,
+                       const ADDON::AddonInfoPtr& addonInfo,
+                       const std::string& profilePath)
+  : IAddonInstanceHandler(ADDON_INSTANCE_PVR, addonInfo, profilePath), m_iClientId(iClientid)
 {
   // Create all interface parts independent to make API changes easier if
   // something is added
