@@ -234,10 +234,10 @@ namespace XBMCAddon
       }
       else if (lowerKey == "totaltime")
       {
-        CLog::Log(LOGWARNING,
-                  "\"{}\" in ListItem.setProperty() is deprecated and might be removed in future "
-                  "Kodi versions. Please use InfoTagVideo.setResumePoint().",
-                  lowerKey);
+//        CLog::Log(LOGWARNING,
+//                  "\"{}\" in ListItem.setProperty() is deprecated and might be removed in future "
+//                  "Kodi versions. Please use InfoTagVideo.setResumePoint().",
+//                  lowerKey);
 
         CBookmark resumePoint(GetVideoInfoTag()->GetResumePoint());
         resumePoint.totalTimeInSeconds = atof(value.c_str());
@@ -245,10 +245,10 @@ namespace XBMCAddon
       }
       else if (lowerKey == "resumetime")
       {
-        CLog::Log(LOGWARNING,
-                  "\"{}\" in ListItem.setProperty() is deprecated and might be removed in future "
-                  "Kodi versions. Please use InfoTagVideo.setResumePoint().",
-                  lowerKey);
+//        CLog::Log(LOGWARNING,
+//                  "\"{}\" in ListItem.setProperty() is deprecated and might be removed in future "
+//                  "Kodi versions. Please use InfoTagVideo.setResumePoint().",
+//                  lowerKey);
 
         xbmc::InfoTagVideo::setResumePointRaw(GetVideoInfoTag(), atof(value.c_str()));
       }
@@ -535,13 +535,13 @@ namespace XBMCAddon
           }
         }
 
-        if (hasDeprecatedInfoLabel)
-        {
-          CLog::Log(
-            LOGWARNING,
-            "Setting most video properties through ListItem.setInfo() is deprecated and might be "
-            "removed in future Kodi versions. Please use the respective setter in InfoTagVideo.");
-        }
+//        if (hasDeprecatedInfoLabel)
+//        {
+//          CLog::Log(
+//            LOGWARNING,
+//            "Setting most video properties through ListItem.setInfo() is deprecated and might be "
+//            "removed in future Kodi versions. Please use the respective setter in InfoTagVideo.");
+//        }
       }
       else if (StringUtils::CompareNoCase(type, "music") == 0)
       {
@@ -799,11 +799,11 @@ namespace XBMCAddon
 
     void ListItem::addStreamInfo(const char* cType, const Properties& dictionary)
     {
-      CLog::Log(
-          LOGWARNING,
-          "ListItem.addStreamInfo() is deprecated and might be removed in future Kodi versions. "
-          "Please use InfoTagVideo.addVideoStream(), InfoTagVideo.addAudioStream() and "
-          "InfoTagVideo.addSubtitleStream().");
+//      CLog::Log(
+//          LOGWARNING,
+//          "ListItem.addStreamInfo() is deprecated and might be removed in future Kodi versions. "
+//          "Please use InfoTagVideo.addVideoStream(), InfoTagVideo.addAudioStream() and "
+//          "InfoTagVideo.addSubtitleStream().");
 
       XBMCAddonUtils::GuiLock lock(languageHook, m_offscreen);
 
