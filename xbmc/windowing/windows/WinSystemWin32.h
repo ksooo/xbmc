@@ -94,6 +94,7 @@ public:
   bool Show(bool raise = true) override;
   std::string GetClipboardText() override;
   bool UseLimitedColor() override;
+  bool HasSystemSdrPeakLuminance() override;
 
   // videosync
   std::unique_ptr<CVideoSync> GetVideoSync(void *clock) override;
@@ -111,7 +112,8 @@ public:
   virtual bool DPIChanged(WORD dpi, RECT windowRect) const;
   bool IsMinimized() const { return m_bMinimized; }
   void SetMinimized(bool minimized);
-  int GetGuiSdrPeakLuminance() const;
+  float GetGuiSdrPeakLuminance() const;
+  void CacheSystemSdrPeakLuminance();
 
   // touchscreen support
   typedef BOOL(WINAPI *pGetGestureInfo)(HGESTUREINFO, PGESTUREINFO);
@@ -209,6 +211,9 @@ protected:
 
   static const char* SETTING_WINDOW_TOP;
   static const char* SETTING_WINDOW_LEFT;
+
+  bool m_validSystemSdrPeakLuminance{false};
+  float m_systemSdrPeakLuminance{.0f};
 };
 
 extern HWND g_hWnd;

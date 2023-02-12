@@ -102,6 +102,14 @@ bool HasPowerOffFeature(const std::string& condition,
   return CServiceBroker::GetPeripherals().SupportsFeature(PERIPHERALS::FEATURE_POWER_OFF);
 }
 
+bool HasSystemSdrPeakLuminance(const std::string& condition,
+                               const std::string& value,
+                               const SettingConstPtr& setting,
+                               void* data)
+{
+  return CServiceBroker::GetWinSystem()->HasSystemSdrPeakLuminance();
+}
+
 bool IsHDRDisplay(const std::string& condition,
                   const std::string& value,
                   const SettingConstPtr& setting,
@@ -439,6 +447,7 @@ void CSettingConditions::Initialize()
   m_complexConditions.emplace("hasrumblefeature", HasRumbleFeature);
   m_complexConditions.emplace("hasrumblecontroller", HasRumbleController);
   m_complexConditions.emplace("haspowerofffeature", HasPowerOffFeature);
+  m_complexConditions.emplace("hassystemsdrpeakluminance", HasSystemSdrPeakLuminance);
   m_complexConditions.emplace("ishdrdisplay", IsHDRDisplay);
   m_complexConditions.emplace("ismasteruser", IsMasterUser);
   m_complexConditions.emplace("hassubtitlesfontextensions", HasSubtitlesFontExtensions);
