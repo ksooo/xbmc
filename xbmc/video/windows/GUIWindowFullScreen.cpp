@@ -10,6 +10,7 @@
 
 #include "FileItem.h"
 #include "GUIInfoManager.h"
+#include "GUIUserMessages.h"
 #include "GUIWindowFullScreenDefines.h"
 #include "ServiceBroker.h"
 #include "application/Application.h"
@@ -28,8 +29,8 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "utils/StringUtils.h"
+#include "video/VideoInfoTag.h"
 #include "video/ViewModeSettings.h"
-#include "video/dialogs/GUIDialogFullScreenInfo.h"
 #include "video/dialogs/GUIDialogSubtitleSettings.h"
 #include "windowing/WinSystem.h"
 
@@ -46,6 +47,23 @@ using namespace MESSAGING;
 #if defined(TARGET_DARWIN)
 static CPosixResourceCounter m_resourceCounter;
 #endif
+
+namespace
+{
+// Opened on top of another modal dialog, the info dialog would take that dialog's input.
+bool IsOtherModalDialogActive()
+{
+  const int dialogId{
+      CServiceBroker::GetGUI()->GetWindowManager().GetTopmostModalDialog(true) & WINDOW_ID_MASK};
+  return dialogId != WINDOW_INVALID && dialogId != WINDOW_DIALOG_FULLSCREEN_INFO;
+}
+
+void SetPlayerShowInfo(bool showInfo)
+{
+  CServiceBroker::GetGUI()->GetInfoManager().GetInfoProviders().GetPlayerInfoProvider().SetShowInfo(
+      showInfo);
+}
+} // unnamed namespace
 
 CGUIWindowFullScreen::CGUIWindowFullScreen()
   : CGUIWindow(WINDOW_FULLSCREEN_VIDEO, "VideoFullScreen.xml"), m_dwShowViewModeTimeout{}
@@ -126,16 +144,9 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
     break;
 
   case ACTION_SHOW_INFO:
-    {
-      CGUIDialogFullScreenInfo* pDialog = CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogFullScreenInfo>(WINDOW_DIALOG_FULLSCREEN_INFO);
-      if (pDialog)
-      {
-        CFileItem item(g_application.CurrentFileItem());
-        pDialog->Open();
-        return true;
-      }
-      break;
-    }
+    m_initTimer.Stop();
+    ShowInfo(ShowInfoMode::TOGGLE_INFO);
+    return true;
 
   case ACTION_ASPECT_RATIO:
     { // toggle the aspect ratio mode (only if the info is onscreen)
@@ -241,11 +252,18 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
 
       CServiceBroker::GetWinSystem()->GetGfxContext().SetFullScreenVideo(false);
 
+      m_lastPlaybackPath.erase();
+
       return true;
     }
   case GUI_MSG_SETFOCUS:
   case GUI_MSG_LOSTFOCUS:
     if (message.GetSenderId() != WINDOW_FULLSCREEN_VIDEO) return true;
+    break;
+
+  case GUI_MSG_SHOW_INFO:
+    // Show/hide the info dialog
+    ShowInfo(message.GetParam1() == 1 ? ShowInfoMode::SHOW_INFO : ShowInfoMode::HIDE_INFO);
     break;
   }
 
@@ -371,6 +389,38 @@ void CGUIWindowFullScreen::FrameMove()
     }
     m_viewModeChanged = false;
   }
+
+  CGUIComponent* gui = CServiceBroker::GetGUI();
+  if (gui)
+  {
+    // check for change of the playing tag
+    CGUIInfoManager& infoMgr = gui->GetInfoManager();
+    const CVideoInfoTag* tag = infoMgr.GetCurrentMovieTag();
+    if (tag && tag->GetPath() != m_lastPlaybackPath)
+    {
+      m_lastPlaybackPath = tag->GetPath();
+
+      // fade in
+      m_initTimer.StartZero();
+
+      // Show the info dialog
+      CGUIMessage msg(GUI_MSG_SHOW_INFO, GetID(), GetID(), 1);
+      gui->GetWindowManager().SendThreadMessage(msg);
+    }
+    else if (m_initTimer.IsRunning() && m_initTimer.GetElapsedSeconds() >
+                                            static_cast<float>(
+                                                CServiceBroker::GetSettingsComponent()
+                                                    ->GetAdvancedSettings()
+                                                    ->m_videoInfoDuration))
+    {
+      // reached end of fade in, fade out again
+      m_initTimer.Stop();
+
+      // Hide the info dialog
+      CGUIMessage msg(GUI_MSG_SHOW_INFO, GetID(), GetID(), 0);
+      gui->GetWindowManager().SendThreadMessage(msg);
+    }
+  }
 }
 
 void CGUIWindowFullScreen::Process(unsigned int currentTime, CDirtyRegionList &dirtyregion)
@@ -429,6 +479,43 @@ void CGUIWindowFullScreen::SeekChapter(int iChapter)
   appPlayer->SeekChapter(iChapter);
 }
 
+void CGUIWindowFullScreen::ShowInfo(ShowInfoMode mode)
+{
+  CGUIDialog* dialog =
+      CServiceBroker::GetGUI()->GetWindowManager().GetDialog(WINDOW_DIALOG_FULLSCREEN_INFO);
+
+  if (dialog)
+  {
+    bool show = true;
+    switch (mode)
+    {
+      case ShowInfoMode::SHOW_INFO:
+        if (IsOtherModalDialogActive())
+        {
+          // let the skin show the info without a modal dialog
+          SetPlayerShowInfo(true);
+          return;
+        }
+        show = true;
+        break;
+      case ShowInfoMode::HIDE_INFO:
+        show = false;
+        break;
+      case ShowInfoMode::TOGGLE_INFO:
+        show = !dialog->IsDialogRunning();
+        break;
+    }
+
+    if (show)
+      dialog->Open();
+    else if (dialog->IsDialogRunning())
+      dialog->Close();
+    else
+      SetPlayerShowInfo(false);
+
+    MarkDirtyRegion();
+  }
+}
 void CGUIWindowFullScreen::ToggleOSD()
 {
   CGUIDialog *pOSD = GetOSD();
