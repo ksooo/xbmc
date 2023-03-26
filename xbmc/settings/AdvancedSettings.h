@@ -180,6 +180,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     float m_slideshowPanAmount;
 
     int m_songInfoDuration;
+    int m_videoInfoDuration;
     int m_logLevel;
     int m_logLevelHint;
     std::string m_cddbAddress;
