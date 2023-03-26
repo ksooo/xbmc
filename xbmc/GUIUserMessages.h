@@ -143,3 +143,6 @@ constexpr const int GUI_MSG_PLAYBACK_AVSTARTED      = GUI_MSG_USER + 44;
 // Sent to notify system sleep/wake
 constexpr const int GUI_MSG_SYSTEM_SLEEP  			= GUI_MSG_USER + 45;
 constexpr const int GUI_MSG_SYSTEM_WAKE 			= GUI_MSG_USER + 46;
+
+// Message sent to CGUIWindowFullScreen to show/hide fullscreen info
+constexpr const int GUI_MSG_SHOW_INFO = GUI_MSG_USER + 47;
