@@ -148,3 +148,6 @@ constexpr const int GUI_MSG_PLAYBACK_PAUSED = GUI_MSG_USER + 47;
 constexpr const int GUI_MSG_PLAYBACK_RESUMED = GUI_MSG_USER + 48;
 constexpr const int GUI_MSG_PLAYBACK_SEEKED = GUI_MSG_USER + 49;
 constexpr const int GUI_MSG_PLAYBACK_SPEED_CHANGED = GUI_MSG_USER + 50;
+
+// Message sent to CGUIWindowFullScreen to show/hide fullscreen info
+constexpr const int GUI_MSG_SHOW_INFO = GUI_MSG_USER + 51;
