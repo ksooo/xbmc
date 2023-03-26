@@ -187,6 +187,7 @@ void CAdvancedSettings::Initialize()
   m_slideshowBlackBarCompensation = 20.0f;
 
   m_songInfoDuration = 10;
+  m_videoInfoDuration = 5;
 
   m_cddbAddress = "gnudb.gnudb.org";
   m_addSourceOnTop = false;
@@ -918,6 +919,7 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
   XMLUtils::GetBoolean(pRootElement, "canwindowed", m_canWindowed);
 
   XMLUtils::GetInt(pRootElement, "songinfoduration", m_songInfoDuration, 0, INT_MAX);
+  XMLUtils::GetInt(pRootElement, "videoinfoduration", m_videoInfoDuration, 0, INT_MAX);
   XMLUtils::GetInt(pRootElement, "playlistretries", m_playlistRetries, -1, 5000);
   XMLUtils::GetInt(pRootElement, "playlisttimeout", m_playlistTimeout, 0, 5000);
 
