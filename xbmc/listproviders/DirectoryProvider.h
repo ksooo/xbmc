@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "BackgroundInfoLoader.h"
 #include "IListProvider.h"
 #include "addons/AddonEvents.h"
 #include "addons/RepositoryUpdater.h"
@@ -17,6 +18,7 @@
 #include "threads/CriticalSection.h"
 #include "utils/Job.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -24,24 +26,17 @@ class CFileItem;
 class TiXmlElement;
 class CVariant;
 
+class CThumbLoaders;
+
 namespace PVR
 {
   enum class PVREvent;
 }
 
-enum class InfoTagType
-{
-  VIDEO,
-  AUDIO,
-  PICTURE,
-  PROGRAM,
-  PVR,
-};
-
-class CDirectoryProvider :
-  public IListProvider,
-  public IJobCallback,
-  public ANNOUNCEMENT::IAnnouncer
+class CDirectoryProvider : public IListProvider,
+                           public IJobCallback,
+                           public ANNOUNCEMENT::IAnnouncer,
+                           public IBackgroundLoaderObserver
 {
 public:
   typedef enum
@@ -82,6 +77,10 @@ public:
 
   // callback from directory job
   void OnJobComplete(unsigned int jobID, bool success, CJob *job) override;
+
+  // callback from background thumb loader
+  void OnItemLoaded(CFileItem* item) override;
+
 private:
   UpdateState      m_updateState;
   unsigned int     m_jobID;
@@ -97,7 +96,9 @@ private:
   unsigned int m_currentLimit{0};
   BrowseMode m_currentBrowse{BrowseMode::AUTO};
   std::vector<CGUIStaticItemPtr> m_items;
-  std::vector<InfoTagType> m_itemTypes;
+  bool m_hasVideo{false};
+  bool m_hasAudio{false};
+  const std::shared_ptr<CThumbLoaders> m_thumbLoaders;
   mutable CCriticalSection m_section;
 
   bool UpdateURL();

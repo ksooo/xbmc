@@ -40,6 +40,7 @@
 #include "video/guilib/VideoPlayActionProcessor.h"
 #include "video/guilib/VideoSelectActionProcessor.h"
 
+#include <map>
 #include <memory>
 #include <mutex>
 #include <utility>
@@ -47,6 +48,66 @@
 using namespace XFILE;
 using namespace KODI::MESSAGING;
 using namespace PVR;
+
+class CThumbLoaders
+{
+public:
+  explicit CThumbLoaders(IBackgroundLoaderObserver* observer) : m_observer(observer) {}
+  virtual ~CThumbLoaders() {}
+
+  bool LoadItem(const std::shared_ptr<CFileItem>& item)
+  {
+    std::unique_lock<CCriticalSection> lock(m_section);
+    return GetThumbLoader(item)->LoadItem(item.get());
+  }
+
+private:
+  enum class InfoTagType
+  {
+    VIDEO,
+    AUDIO,
+    PICTURE,
+    PVR,
+    PROGRAM,
+  };
+
+  template<class CThumbLoaderClass>
+  std::shared_ptr<CThumbLoader> GetThumbLoader(InfoTagType type)
+  {
+    std::shared_ptr<CThumbLoader> thumbLoader;
+    const auto it = m_thumbloaders.find(type);
+    if (it != m_thumbloaders.cend())
+    {
+      thumbLoader = (*it).second;
+    }
+    else
+    {
+      thumbLoader = std::make_shared<CThumbLoaderClass>();
+      thumbLoader->SetObserver(m_observer);
+      thumbLoader->OnLoaderStart();
+      m_thumbloaders.insert({type, thumbLoader});
+    }
+    return thumbLoader;
+  }
+
+  std::shared_ptr<CThumbLoader> GetThumbLoader(const std::shared_ptr<CFileItem>& item)
+  {
+    if (item->IsVideo())
+      return GetThumbLoader<CVideoThumbLoader>(InfoTagType::VIDEO);
+    if (item->IsAudio())
+      return GetThumbLoader<CMusicThumbLoader>(InfoTagType::AUDIO);
+    if (item->IsPicture())
+      return GetThumbLoader<CPictureThumbLoader>(InfoTagType::PICTURE);
+    if (item->IsPVRChannelGroup())
+      return GetThumbLoader<CPVRThumbLoader>(InfoTagType::PVR);
+
+    return GetThumbLoader<CProgramThumbLoader>(InfoTagType::PROGRAM);
+  }
+
+  CCriticalSection m_section;
+  IBackgroundLoaderObserver* m_observer{nullptr};
+  std::map<InfoTagType, std::shared_ptr<CThumbLoader>> m_thumbloaders;
+};
 
 class CDirectoryJob : public CJob
 {
@@ -56,13 +117,15 @@ public:
                 SortDescription sort,
                 int limit,
                 CDirectoryProvider::BrowseMode browse,
-                int parentID)
+                int parentID,
+                const std::shared_ptr<CThumbLoaders>& thumbLoaders)
     : m_url(url),
       m_target(target),
       m_sort(sort),
       m_limit(limit),
       m_browse(browse),
-      m_parentID(parentID)
+      m_parentID(parentID),
+      m_thumbLoaders(thumbLoaders)
   { }
   ~CDirectoryJob() override = default;
 
@@ -100,7 +163,12 @@ public:
         if (item->HasProperty("node.visible"))
           item->SetVisibleCondition(item->GetProperty("node.visible").asString(), m_parentID);
 
-        getThumbLoader(item)->LoadItem(item.get());
+        if (!m_hasVideo && item->IsVideo())
+          m_hasVideo = true;
+        if (!m_hasAudio && item->IsAudio())
+          m_hasAudio = true;
+
+        m_thumbLoaders->LoadItem(item);
 
         m_items.push_back(item);
       }
@@ -130,52 +198,11 @@ public:
     return true;
   }
 
-  std::shared_ptr<CThumbLoader> getThumbLoader(const CGUIStaticItemPtr& item)
-  {
-    if (item->IsVideo())
-    {
-      initThumbLoader<CVideoThumbLoader>(InfoTagType::VIDEO);
-      return m_thumbloaders[InfoTagType::VIDEO];
-    }
-    if (item->IsAudio())
-    {
-      initThumbLoader<CMusicThumbLoader>(InfoTagType::AUDIO);
-      return m_thumbloaders[InfoTagType::AUDIO];
-    }
-    if (item->IsPicture())
-    {
-      initThumbLoader<CPictureThumbLoader>(InfoTagType::PICTURE);
-      return m_thumbloaders[InfoTagType::PICTURE];
-    }
-    if (item->IsPVRChannelGroup())
-    {
-      initThumbLoader<CPVRThumbLoader>(InfoTagType::PVR);
-      return m_thumbloaders[InfoTagType::PVR];
-    }
-    initThumbLoader<CProgramThumbLoader>(InfoTagType::PROGRAM);
-    return m_thumbloaders[InfoTagType::PROGRAM];
-  }
-
-  template<class CThumbLoaderClass>
-  void initThumbLoader(InfoTagType type)
-  {
-    if (!m_thumbloaders.count(type))
-    {
-      std::shared_ptr<CThumbLoader> thumbLoader = std::make_shared<CThumbLoaderClass>();
-      thumbLoader->OnLoaderStart();
-      m_thumbloaders.insert(make_pair(type, thumbLoader));
-    }
-  }
-
   const std::vector<CGUIStaticItemPtr> &GetItems() const { return m_items; }
-  const std::string &GetTarget() const { return m_target; }
-  std::vector<InfoTagType> GetItemTypes(std::vector<InfoTagType> &itemTypes) const
-  {
-    itemTypes.clear();
-    for (const auto& i : m_thumbloaders)
-      itemTypes.push_back(i.first);
-    return itemTypes;
-  }
+  const std::string& GetTarget() const { return m_target; }
+  bool HasVideo() const { return m_hasVideo; }
+  bool HasAudio() const { return m_hasAudio; }
+
 private:
   std::string m_url;
   std::string m_target;
@@ -183,15 +210,18 @@ private:
   unsigned int m_limit;
   CDirectoryProvider::BrowseMode m_browse{CDirectoryProvider::BrowseMode::AUTO};
   int m_parentID;
+  const::std::shared_ptr<CThumbLoaders> m_thumbLoaders;
   std::vector<CGUIStaticItemPtr> m_items;
-  std::map<InfoTagType, std::shared_ptr<CThumbLoader> > m_thumbloaders;
+  bool m_hasVideo{false};
+  bool m_hasAudio{false};
 };
 
-CDirectoryProvider::CDirectoryProvider(const TiXmlElement *element, int parentID)
- : IListProvider(parentID),
-   m_updateState(OK),
-   m_jobID(0),
-   m_currentLimit(0)
+CDirectoryProvider::CDirectoryProvider(const TiXmlElement* element, int parentID)
+  : IListProvider(parentID),
+    m_updateState(OK),
+    m_jobID(0),
+    m_currentLimit(0),
+    m_thumbLoaders(new CThumbLoaders(this))
 {
   assert(element);
   if (!element->NoChildren())
@@ -274,9 +304,10 @@ bool CDirectoryProvider::Update(bool forceRefresh)
     CLog::Log(LOGDEBUG, "CDirectoryProvider[{}]: refreshing..", m_currentUrl);
     if (m_jobID)
       CServiceBroker::GetJobManager()->CancelJob(m_jobID);
+
     m_jobID = CServiceBroker::GetJobManager()->AddJob(
         new CDirectoryJob(m_currentUrl, m_target.GetLabel(m_parentID, false), m_currentSort,
-                          m_currentLimit, m_currentBrowse, m_parentID),
+                          m_currentLimit, m_currentBrowse, m_parentID, m_thumbLoaders),
         this);
   }
 
@@ -301,10 +332,8 @@ void CDirectoryProvider::Announce(ANNOUNCEMENT::AnnouncementFlag flag,
     std::unique_lock<CCriticalSection> lock(m_section);
     // we don't need to refresh anything if there are no fitting
     // items in this list provider for the announcement flag
-    if (((flag & ANNOUNCEMENT::VideoLibrary) &&
-         (std::find(m_itemTypes.begin(), m_itemTypes.end(), InfoTagType::VIDEO) == m_itemTypes.end())) ||
-        ((flag & ANNOUNCEMENT::AudioLibrary) &&
-         (std::find(m_itemTypes.begin(), m_itemTypes.end(), InfoTagType::AUDIO) == m_itemTypes.end())))
+    if (((flag & ANNOUNCEMENT::VideoLibrary) && !m_hasVideo) ||
+        ((flag & ANNOUNCEMENT::AudioLibrary) && !m_hasAudio))
       return;
 
     if (flag & ANNOUNCEMENT::Player)
@@ -402,7 +431,8 @@ void CDirectoryProvider::Reset()
     m_items.clear();
     m_currentTarget.clear();
     m_currentUrl.clear();
-    m_itemTypes.clear();
+    m_hasVideo = false;
+    m_hasAudio = false;
     m_currentSort.sortBy = SortByNone;
     m_currentSort.sortOrder = SortOrderAscending;
     m_currentLimit = 0;
@@ -434,13 +464,23 @@ void CDirectoryProvider::OnJobComplete(unsigned int jobID, bool success, CJob *j
   std::unique_lock<CCriticalSection> lock(m_section);
   if (success)
   {
-    m_items = static_cast<CDirectoryJob*>(job)->GetItems();
-    m_currentTarget = static_cast<CDirectoryJob*>(job)->GetTarget();
-    static_cast<CDirectoryJob*>(job)->GetItemTypes(m_itemTypes);
+    auto dirJob = static_cast<CDirectoryJob*>(job);
+
+    m_items = dirJob->GetItems();
+    m_currentTarget = dirJob->GetTarget();
+    m_hasVideo = dirJob->HasVideo();
+    m_hasAudio = dirJob->HasAudio();
+
     if (m_updateState == OK)
       m_updateState = DONE;
   }
   m_jobID = 0;
+}
+
+void CDirectoryProvider::OnItemLoaded(CFileItem* item)
+{
+  std::unique_lock<CCriticalSection> lock(m_section);
+  m_updateState = INVALIDATED;
 }
 
 std::string CDirectoryProvider::GetTarget(const CFileItem& item) const
