@@ -9,6 +9,7 @@
 #pragma once
 
 #include "playlists/PlayListTypes.h"
+#include "utils/ContentUtils.h"
 #include "video/VideoDatabase.h"
 #include "video/VideoThumbLoader.h"
 #include "windows/GUIMediaWindow.h"
@@ -33,7 +34,9 @@ public:
   bool OnMessage(CGUIMessage& message) override;
   bool OnAction(const CAction &action) override;
 
-  void PlayMovie(const CFileItem* item, const std::string& player = "");
+  void PlayMedia(const std::shared_ptr<CFileItem>& item,
+                 const std::string& player = "",
+                 ContentUtils::PlayMode mode = ContentUtils::PlayMode::CHECK_AUTO_PLAY_NEXT_ITEM);
 
   /*! \brief Gets called to process the "info" action for the given file item
    Default implementation shows a dialog containing information for the movie/episode/...
