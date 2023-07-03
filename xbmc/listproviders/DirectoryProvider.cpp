@@ -496,8 +496,9 @@ bool CDirectoryProvider::OnInfo(const CGUIListItemPtr& item)
   {
     auto mediaType = fileItem->GetVideoInfoTag()->m_type;
     if (mediaType == MediaTypeMovie || mediaType == MediaTypeTvShow ||
-        mediaType == MediaTypeEpisode || mediaType == MediaTypeVideo ||
-        mediaType == MediaTypeVideoCollection || mediaType == MediaTypeMusicVideo)
+        mediaType == MediaTypeSeason || mediaType == MediaTypeEpisode ||
+        mediaType == MediaTypeVideo || mediaType == MediaTypeVideoCollection ||
+        mediaType == MediaTypeMusicVideo)
     {
       CGUIDialogVideoInfo::ShowFor(*fileItem);
       return true;
