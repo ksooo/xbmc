@@ -33,8 +33,6 @@ public:
   bool OnMessage(CGUIMessage& message) override;
   bool OnAction(const CAction &action) override;
 
-  void PlayMovie(const CFileItem* item, const std::string& player = "");
-
   /*! \brief Gets called to process the "info" action for the given file item
    Default implementation shows a dialog containing information for the movie/episode/...
    represented by the file item.
