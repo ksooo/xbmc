@@ -576,7 +576,9 @@ namespace VIDEO
       return ret;
     }
 
-    if (ProgressCancelled(pDlgProgress, pItem->m_bIsFolder ? 20353 : 20361, pItem->GetLabel()))
+    if (ProgressCancelled(pDlgProgress, pItem->m_bIsFolder ? 20353 : 20361,
+                          pItem->m_bIsFolder ? pItem->GetVideoInfoTag()->m_strShowTitle
+                                             : pItem->GetVideoInfoTag()->m_strTitle))
       return INFO_CANCELLED;
 
     if (m_handle)
@@ -1721,8 +1723,7 @@ namespace VIDEO
   {
     if (pDlgProgress)
     {
-      pDlgProgress->SetLine(1, CVariant{showInfo.m_strTitle});
-      pDlgProgress->SetLine(2, CVariant{20361});
+      pDlgProgress->SetLine(1, CVariant{20361}); // Loading episode details
       pDlgProgress->SetPercentage(0);
       pDlgProgress->ShowProgressBar(true);
       pDlgProgress->Progress();
@@ -1737,7 +1738,11 @@ namespace VIDEO
     {
       if (pDlgProgress)
       {
-        pDlgProgress->SetLine(2, CVariant{20361});
+        pDlgProgress->SetLine(1, CVariant{20361}); // Loading episode details
+        pDlgProgress->SetLine(2, StringUtils::Format("{} {}", g_localizeStrings.Get(20373),
+                                                     file->iSeason)); // Season x
+        pDlgProgress->SetLine(3, StringUtils::Format("{} {}", g_localizeStrings.Get(20359),
+                                                     file->iEpisode)); // Episode y
         pDlgProgress->SetPercentage((int)((float)(iCurr++)/iMax*100));
         pDlgProgress->Progress();
       }
@@ -1800,7 +1805,7 @@ namespace VIDEO
 
           if (pDlgProgress)
           {
-            pDlgProgress->SetLine(2, CVariant{20354});
+            pDlgProgress->SetLine(1, CVariant{20354}); // Fetching episode guide
             pDlgProgress->Progress();
           }
 
@@ -1970,7 +1975,8 @@ namespace VIDEO
 
       if (pDialog)
       {
-        pDialog->SetLine(1, CVariant{movieDetails.m_strTitle});
+        if (!pDialog->HasText())
+          pDialog->SetLine(0, CVariant{movieDetails.m_strTitle});
         pDialog->Progress();
       }
 
@@ -2229,7 +2235,6 @@ namespace VIDEO
     {
       progress->SetHeading(CVariant{heading});
       progress->SetLine(0, CVariant{line1});
-      progress->SetLine(2, CVariant{""});
       progress->Progress();
       return progress->IsCanceled();
     }
