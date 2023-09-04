@@ -3,6 +3,7 @@ set(SOURCES Bookmark.cpp
             GUIViewStateVideo.cpp
             PlayerController.cpp
             Teletext.cpp
+            VideoItemArtworkHandler.cpp
             VideoDatabase.cpp
             VideoDbUrl.cpp
             VideoInfoDownloader.cpp
@@ -20,6 +21,7 @@ set(HEADERS Bookmark.h
             PlayerController.h
             Teletext.h
             TeletextDefines.h
+            VideoItemArtworkHandler.h
             VideoDatabase.h
             VideoDbUrl.h
             VideoInfoDownloader.h
