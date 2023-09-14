@@ -3,10 +3,9 @@
 # -----------
 # Finds the RapidJSON library
 #
-# This will define the following variables::
+# This will define the following target:
 #
-# RapidJSON_FOUND - system has RapidJSON parser
-# RapidJSON_INCLUDE_DIRS - the RapidJSON parser include directory
+#   RapidJSON::RapidJSON - The RapidJSON library
 #
 
 if(NOT TARGET RapidJSON::RapidJSON)
@@ -64,7 +63,6 @@ if(NOT TARGET RapidJSON::RapidJSON)
   if(RAPIDJSON_FOUND)
     add_library(RapidJSON::RapidJSON INTERFACE IMPORTED)
     set_target_properties(RapidJSON::RapidJSON PROPERTIES
-                                               FOLDER "External Projects"
                                                INTERFACE_INCLUDE_DIRECTORIES "${RAPIDJSON_INCLUDE_DIRS}")
     if(TARGET rapidjson)
       add_dependencies(RapidJSON::RapidJSON rapidjson)
