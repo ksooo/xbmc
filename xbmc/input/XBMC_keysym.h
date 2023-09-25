@@ -219,7 +219,7 @@ typedef enum
   XBMCK_FAVORITES = 0x14d,
   XBMCK_HOMEPAGE = 0x14e,
   XBMCK_CONFIG = 0x14f,
-  XBMCK_EPG = 0x150,
+  XBMCK_EPG = 0x150,  
 
   // Add any other keys here
 
@@ -232,6 +232,10 @@ typedef enum
   XBMCK_SHUFFLE = 342,
   XBMCK_FASTFORWARD = 343,
   XBMCK_EJECT = 344,
+  
+  // Remote control buttons
+  XBMCK_SUBTITLE = 345,
+  XBMCK_LANGUAGE = 346,
 
   XBMCK_LAST
 } XBMCKey;
