@@ -131,7 +131,7 @@ typedef enum
   XBMCVK_DELETE = 0x87,
   XBMCVK_HOME = 0x88,
   XBMCVK_END = 0x89,
-
+  
   XBMCVK_F1 = 0x90,
   XBMCVK_F2 = 0x91,
   XBMCVK_F3 = 0x92,
@@ -211,7 +211,9 @@ typedef enum
   XBMCVK_HOMEPAGE = 0xEA,
   XBMCVK_CONFIG = 0xEB,
   XBMCVK_EPG = 0xEC,
-
+  XBMCVK_SUBTITLE = 0xED,
+  XBMCVK_LANGUAGE = 0xEE,
+ 
   XBMCVK_LAST = 0xFF
 } XBMCVKey;
 
