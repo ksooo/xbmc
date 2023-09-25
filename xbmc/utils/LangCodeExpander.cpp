@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005-2020 Team Kodi
+ *  Copyright (C) 2005-2023 Team Kodi
  *  This file is part of Kodi - https://kodi.tv
  *
  *  SPDX-License-Identifier: GPL-2.0-or-later
@@ -26,8 +26,8 @@ typedef struct LCENTRY
   const char* name;
 } LCENTRY;
 
-extern const std::array<struct LCENTRY, 186> g_iso639_1;
-extern const std::array<struct LCENTRY, 540> g_iso639_2;
+extern const std::array<struct LCENTRY, 187> g_iso639_1;
+extern const std::array<struct LCENTRY, 541> g_iso639_2;
 
 struct ISO639
 {
@@ -44,7 +44,7 @@ struct ISO3166_1
 };
 
 // declared as extern to allow forward declaration
-extern const std::array<ISO639, 190> LanguageCodes;
+extern const std::array<ISO639, 191> LanguageCodes;
 extern const std::array<ISO3166_1, 245> RegionCodes;
 
 CLangCodeExpander::CLangCodeExpander() = default;
@@ -602,7 +602,7 @@ std::string CLangCodeExpander::FindLanguageCodeWithSubtag(const std::string& str
 }
 
 // clang-format off
-const std::array<struct LCENTRY, 186> g_iso639_1 = {{
+const std::array<struct LCENTRY, 187> g_iso639_1 = {{
     {MAKECODE('\0', '\0', 'a', 'a'), "Afar"},
     {MAKECODE('\0', '\0', 'a', 'b'), "Abkhazian"},
     {MAKECODE('\0', '\0', 'a', 'e'), "Avestan"},
@@ -626,7 +626,7 @@ const std::array<struct LCENTRY, 186> g_iso639_1 = {{
     {MAKECODE('\0', '\0', 'b', 'r'), "Breton"},
     {MAKECODE('\0', '\0', 'b', 's'), "Bosnian"},
     {MAKECODE('\0', '\0', 'c', 'a'), "Catalan"},
-    {MAKECODE('\0', '\0', 'c', 'e'), "Chechen"},
+    {MAKECODE('\0', '\0', 'c', 'e'), "Chechen"},   
     {MAKECODE('\0', '\0', 'c', 'h'), "Chamorro"},
     {MAKECODE('\0', '\0', 'c', 'o'), "Corsican"},
     {MAKECODE('\0', '\0', 'c', 'r'), "Cree"},
@@ -646,11 +646,13 @@ const std::array<struct LCENTRY, 186> g_iso639_1 = {{
     {MAKECODE('\0', '\0', 'e', 't'), "Estonian"},
     {MAKECODE('\0', '\0', 'e', 'u'), "Basque"},
     {MAKECODE('\0', '\0', 'f', 'a'), "Persian"},
+    // fc = unofficial language code for Canadian French
+    {MAKECODE('\0', '\0', 'f', 'c'), "Canadian French"},    
     {MAKECODE('\0', '\0', 'f', 'f'), "Fulah"},
     {MAKECODE('\0', '\0', 'f', 'i'), "Finnish"},
     {MAKECODE('\0', '\0', 'f', 'j'), "Fijian"},
     {MAKECODE('\0', '\0', 'f', 'o'), "Faroese"},
-    {MAKECODE('\0', '\0', 'f', 'r'), "French"},
+    {MAKECODE('\0', '\0', 'f', 'r'), "French"},    
     {MAKECODE('\0', '\0', 'f', 'y'), "Western Frisian"},
     {MAKECODE('\0', '\0', 'g', 'a'), "Irish"},
     {MAKECODE('\0', '\0', 'g', 'd'), "Scottish Gaelic"},
@@ -794,7 +796,7 @@ const std::array<struct LCENTRY, 186> g_iso639_1 = {{
 // clang-format on
 
 // clang-format off
-const std::array<struct LCENTRY, 540> g_iso639_2 = {{
+const std::array<struct LCENTRY, 541> g_iso639_2 = {{
     {MAKECODE('\0', 'a', 'b', 'k'), "Abkhaz"},
     {MAKECODE('\0', 'a', 'b', 'k'), "Abkhazian"},
     {MAKECODE('\0', 'a', 'c', 'e'), "Achinese"},
@@ -867,8 +869,8 @@ const std::array<struct LCENTRY, 540> g_iso639_2 = {{
     {MAKECODE('\0', 'b', 'u', 'l'), "Bulgarian"},
     {MAKECODE('\0', 'b', 'u', 'a'), "Buriat"},
     {MAKECODE('\0', 'b', 'u', 'r'), "Burmese"},
-    {MAKECODE('\0', 'm', 'y', 'a'), "Burmese"},
-    {MAKECODE('\0', 'c', 'a', 'd'), "Caddo"},
+    {MAKECODE('\0', 'm', 'y', 'a'), "Burmese"},    
+	{MAKECODE('\0', 'c', 'a', 'd'), "Caddo"},
     {MAKECODE('\0', 'c', 'a', 'r'), "Carib"},
     {MAKECODE('\0', 's', 'p', 'a'), "Spanish"},
     {MAKECODE('\0', 'c', 'a', 't'), "Catalan"},
@@ -949,6 +951,8 @@ const std::array<struct LCENTRY, 540> g_iso639_2 = {{
     {MAKECODE('\0', 'd', 'u', 't'), "Flemish"},
     {MAKECODE('\0', 'n', 'l', 'd'), "Flemish"},
     {MAKECODE('\0', 'f', 'o', 'n'), "Fon"},
+    // frc = unofficial language code for Canadian French 
+    {MAKECODE('\0', 'f', 'r', 'c'), "French Canadian"},
     {MAKECODE('\0', 'f', 'r', 'e'), "French"},
     {MAKECODE('\0', 'f', 'r', 'a'), "French"},
     {MAKECODE('\0', 'f', 'r', 'm'), "French, Middle (ca.1400-1600)"},
@@ -1343,7 +1347,7 @@ const std::array<struct LCENTRY, 540> g_iso639_2 = {{
 // clang-format on
 
 // clang-format off
-const std::array<ISO639, 190> LanguageCodes = {{
+const std::array<ISO639, 191> LanguageCodes = {{
     {"aa", "aar", NULL, NULL},
     {"ab", "abk", NULL, NULL},
     {"af", "afr", NULL, NULL},
@@ -1366,7 +1370,7 @@ const std::array<ISO639, 190> LanguageCodes = {{
     {"bs", "bos", NULL, NULL},
     {"br", "bre", NULL, NULL},
     {"bg", "bul", NULL, NULL},
-    {"ca", "cat", NULL, NULL},
+    {"ca", "cat", NULL, NULL},       
     {"cs", "cze", "ces", "ces"},
     {"ch", "cha", NULL, NULL},
     {"ce", "che", NULL, NULL},
@@ -1387,8 +1391,10 @@ const std::array<ISO639, 190> LanguageCodes = {{
     {"eu", "baq", NULL, "eus"},
     {"ee", "ewe", NULL, NULL},
     {"fo", "fao", NULL, NULL},
-    {"fa", "per", NULL, "fas"},
-    {"fj", "fij", NULL, NULL},
+    {"fa", "per", NULL, "fas"},    
+	// fc / frc = unofficial language code for Canadian French
+    {"fc", "frc", NULL, NULL},
+	{"fj", "fij", NULL, NULL},
     {"fi", "fin", NULL, NULL},
     {"fr", "fre", "fra", "fra"},
     {"fy", "fry", NULL, NULL},
