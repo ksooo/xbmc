@@ -327,6 +327,7 @@ mark_as_advanced(test_sources)
 copy_files_from_filelist_to_buildtree(${CMAKE_SOURCE_DIR}/cmake/installdata/common/*.txt
                                       ${CMAKE_SOURCE_DIR}/cmake/installdata/${CORE_SYSTEM_NAME}/*.txt)
 
+list(APPEND SKINS "${CMAKE_SOURCE_DIR}/addons/skin.aeonmq9\;${CMAKE_SOURCE_DIR}")
 list(APPEND SKINS "${CMAKE_SOURCE_DIR}/addons/skin.estuary\;${CMAKE_SOURCE_DIR}")
 list(APPEND SKINS "${CMAKE_SOURCE_DIR}/addons/skin.estouchy\;${CMAKE_SOURCE_DIR}")
 
