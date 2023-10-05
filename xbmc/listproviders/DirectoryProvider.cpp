@@ -36,9 +36,12 @@
 #include "utils/Variant.h"
 #include "utils/XMLUtils.h"
 #include "utils/log.h"
+#include "video/VideoInfoTag.h"
 #include "video/VideoThumbLoader.h"
+#include "video/VideoUtils.h"
 #include "video/dialogs/GUIDialogVideoInfo.h"
-#include "video/windows/GUIWindowVideoBase.h"
+#include "video/guilib/VideoPlayActionProcessor.h"
+#include "video/guilib/VideoSelectActionProcessor.h"
 
 #include <memory>
 #include <mutex>
@@ -55,8 +58,14 @@ public:
                 const std::string& target,
                 SortDescription sort,
                 int limit,
+                CDirectoryProvider::BrowseMode browse,
                 int parentID)
-    : m_url(url), m_target(target), m_sort(sort), m_limit(limit), m_parentID(parentID)
+    : m_url(url),
+      m_target(target),
+      m_sort(sort),
+      m_limit(limit),
+      m_browse(browse),
+      m_parentID(parentID)
   { }
   ~CDirectoryJob() override = default;
 
@@ -102,9 +111,10 @@ public:
       if (items.HasProperty("node.target"))
         m_target = items.GetProperty("node.target").asString();
 
-      if (limit < items.Size())
+      if ((m_browse == CDirectoryProvider::BrowseMode::ALWAYS && !items.IsEmpty()) ||
+          (m_browse == CDirectoryProvider::BrowseMode::AUTO && limit < items.Size()))
       {
-        // Add a special item to the end of the limited list, which can be used to open the
+        // Add a special item to the end of the list, which can be used to open the
         // full listing containg all items in the given target window.
         if (!m_target.empty())
         {
@@ -174,6 +184,7 @@ private:
   std::string m_target;
   SortDescription m_sort;
   unsigned int m_limit;
+  CDirectoryProvider::BrowseMode m_browse{CDirectoryProvider::BrowseMode::AUTO};
   int m_parentID;
   std::vector<CGUIStaticItemPtr> m_items;
   std::map<InfoTagType, std::shared_ptr<CThumbLoader> > m_thumbloaders;
@@ -201,6 +212,10 @@ CDirectoryProvider::CDirectoryProvider(const TiXmlElement* element, int parentID
     if (limit)
       m_limit.SetLabel(limit, "", parentID);
 
+    const char* browse = element->Attribute("browse");
+    if (browse)
+      m_browse.SetLabel(browse, "", parentID);
+
     m_url.SetLabel(element->FirstChild()->ValueStr(), "", parentID);
   }
 }
@@ -213,10 +228,12 @@ CDirectoryProvider::CDirectoryProvider(const CDirectoryProvider& other)
     m_sortMethod(other.m_sortMethod),
     m_sortOrder(other.m_sortOrder),
     m_limit(other.m_limit),
+    m_browse(other.m_browse),
     m_currentUrl(other.m_currentUrl),
     m_currentTarget(other.m_currentTarget),
     m_currentSort(other.m_currentSort),
-    m_currentLimit(other.m_currentLimit)
+    m_currentLimit(other.m_currentLimit),
+    m_currentBrowse(other.m_currentBrowse)
 {
 }
 
@@ -240,6 +257,7 @@ bool CDirectoryProvider::Update(bool forceRefresh)
   fireJob |= UpdateURL();
   fireJob |= UpdateSort();
   fireJob |= UpdateLimit();
+  fireJob |= UpdateBrowse();
   fireJob &= !m_currentUrl.empty();
 
   std::unique_lock<CCriticalSection> lock(m_section);
@@ -257,7 +275,7 @@ bool CDirectoryProvider::Update(bool forceRefresh)
       CServiceBroker::GetJobManager()->CancelJob(m_jobID);
     m_jobID = CServiceBroker::GetJobManager()->AddJob(
         new CDirectoryJob(m_currentUrl, m_target.GetLabel(m_parentID, false), m_currentSort,
-                          m_currentLimit, m_parentID),
+                          m_currentLimit, m_currentBrowse, m_parentID),
         this);
   }
 
@@ -387,6 +405,7 @@ void CDirectoryProvider::Reset()
     m_currentSort.sortBy = SortByNone;
     m_currentSort.sortOrder = SortOrderAscending;
     m_currentLimit = 0;
+    m_currentBrowse = BrowseMode::AUTO;
     m_updateState = OK;
   }
 
@@ -449,64 +468,166 @@ bool ExecuteAction(const std::string& execute)
   }
   return false;
 }
+
+bool ExecuteAction(const CExecString& execute)
+{
+  return ExecuteAction(execute.GetExecString());
+}
+
+class CVideoSelectActionProcessor : public VIDEO::GUILIB::CVideoSelectActionProcessorBase
+{
+public:
+  CVideoSelectActionProcessor(CDirectoryProvider& provider, CFileItem& item)
+    : CVideoSelectActionProcessorBase(item), m_provider(provider)
+  {
+  }
+
+protected:
+  bool OnPlayPartSelected(unsigned int part) override
+  {
+    // part numbers are 1-based
+    ExecuteAction({"PlayMedia", m_item, StringUtils::Format("playoffset={}", part - 1)});
+    return true;
+  }
+
+  bool OnResumeSelected() override
+  {
+    ExecuteAction({"PlayMedia", m_item, "resume"});
+    return true;
+  }
+
+  bool OnPlaySelected() override
+  {
+    ExecuteAction({"PlayMedia", m_item, "noresume"});
+    return true;
+  }
+
+  bool OnQueueSelected() override
+  {
+    ExecuteAction({"QueueMedia", m_item, ""});
+    return true;
+  }
+
+  bool OnInfoSelected() override
+  {
+    m_provider.OnInfo(std::make_shared<CFileItem>(m_item));
+    return true;
+  }
+
+  bool OnMoreSelected() override
+  {
+    m_provider.OnContextMenu(std::make_shared<CFileItem>(m_item));
+    return true;
+  }
+
+private:
+  CDirectoryProvider& m_provider;
+};
+
+class CVideoPlayActionProcessor : public VIDEO::GUILIB::CVideoPlayActionProcessorBase
+{
+public:
+  explicit CVideoPlayActionProcessor(CFileItem& item) : CVideoPlayActionProcessorBase(item) {}
+
+protected:
+  bool OnResumeSelected() override
+  {
+    ExecuteAction({"PlayMedia", m_item, "resume"});
+    return true;
+  }
+
+  bool OnPlaySelected() override
+  {
+    ExecuteAction({"PlayMedia", m_item, "noresume"});
+    return true;
+  }
+};
 } // namespace
 
-bool CDirectoryProvider::OnClick(const CGUIListItemPtr &item)
+bool CDirectoryProvider::OnClick(const CGUIListItemPtr& item)
 {
-  CFileItem fileItem(*std::static_pointer_cast<CFileItem>(item));
+  CFileItem targetItem{*std::static_pointer_cast<CFileItem>(item)};
 
-  if (fileItem.HasVideoInfoTag()
-      && CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(CSettings::SETTING_MYVIDEOS_SELECTACTION) == SELECT_ACTION_INFO
-      && OnInfo(item))
-    return true;
+  bool isPlayMedia{false};
+
+  if (targetItem.IsFavourite())
+  {
+    // Resolve the favourite
+    const CFavouritesURL url{targetItem.GetPath()};
+    if (!url.IsValid())
+      return false;
+
+    targetItem = {url.GetTarget(), url.IsDir()};
+    targetItem.LoadDetails();
+
+    isPlayMedia = (url.GetAction() == CFavouritesURL::Action::PLAY_MEDIA);
+  }
+  else
+  {
+    const CExecString exec{targetItem, GetTarget(targetItem)};
+    isPlayMedia = (exec.GetFunction() == "playmedia");
+  }
+
+  // video select action setting is for files only, except exec func is playmedia...
+  if (targetItem.HasVideoInfoTag() && (!targetItem.m_bIsFolder || isPlayMedia))
+  {
+    CVideoSelectActionProcessor proc{*this, targetItem};
+    if (proc.Process())
+      return true;
+  }
+
+  // exec the execute string for the original (!) item
+  CFileItem fileItem{*std::static_pointer_cast<CFileItem>(item)};
 
   if (fileItem.HasProperty("node.target_url"))
     fileItem.SetPath(fileItem.GetProperty("node.target_url").asString());
 
-  // grab and execute the execute string
-  return ExecuteAction(CExecString(fileItem, GetTarget(fileItem)).GetExecString());
+  return ExecuteAction({fileItem, GetTarget(fileItem)});
 }
 
 bool CDirectoryProvider::OnPlay(const CGUIListItemPtr& item)
 {
-  CFileItem fileItem(*std::static_pointer_cast<CFileItem>(item));
+  CFileItem targetItem{*std::static_pointer_cast<CFileItem>(item)};
 
-  if (fileItem.IsFavourite())
+  if (targetItem.IsFavourite())
   {
     // Resolve the favourite
-    const CFavouritesURL url(fileItem.GetPath());
-    if (url.IsValid())
-    {
-      // If action is playmedia, just play it
-      if (url.GetAction() == CFavouritesURL::Action::PLAY_MEDIA)
-        return ExecuteAction(url.GetExecString());
+    const CFavouritesURL url(targetItem.GetPath());
+    if (!url.IsValid())
+      return false;
 
-      CFileItem targetItem(url.GetTarget(), url.IsDir());
-      fileItem = targetItem;
-    }
+    targetItem = {url.GetTarget(), url.IsDir()};
+    targetItem.LoadDetails();
   }
 
-  if (CPlayerUtils::IsItemPlayable(fileItem))
+  // video play action setting is for files and folders...
+  if (targetItem.HasVideoInfoTag() ||
+      (targetItem.m_bIsFolder && VIDEO_UTILS::IsItemPlayable(targetItem)))
   {
-    CExecString exec(fileItem, {});
+    CVideoPlayActionProcessor proc{targetItem};
+    if (proc.Process())
+      return true;
+  }
+
+  if (CPlayerUtils::IsItemPlayable(targetItem))
+  {
+    const CExecString exec{targetItem, GetTarget(targetItem)};
     if (exec.GetFunction() == "playmedia")
     {
-      return ExecuteAction(exec.GetExecString());
+      // exec as is
+      return ExecuteAction(exec);
     }
     else
     {
-      // build and execute a playmedia execute string
-      exec = CExecString("PlayMedia", {StringUtils::Paramify(fileItem.GetPath())});
-      return ExecuteAction(exec.GetExecString());
+      // build a playmedia execute string for given target and exec this
+      return ExecuteAction({"PlayMedia", targetItem, ""});
     }
   }
   return true;
 }
 
-bool CDirectoryProvider::OnInfo(const CGUIListItemPtr& item)
+bool CDirectoryProvider::OnInfo(const std::shared_ptr<CFileItem>& fileItem)
 {
-  auto fileItem = std::static_pointer_cast<CFileItem>(item);
-
   if (fileItem->HasAddonInfo())
   {
     return CGUIDialogAddonInfo::ShowForItem(fileItem);
@@ -535,15 +656,25 @@ bool CDirectoryProvider::OnInfo(const CGUIListItemPtr& item)
   return false;
 }
 
-bool CDirectoryProvider::OnContextMenu(const CGUIListItemPtr& item)
+bool CDirectoryProvider::OnInfo(const CGUIListItemPtr& item)
 {
   auto fileItem = std::static_pointer_cast<CFileItem>(item);
+  return OnInfo(fileItem);
+}
 
+bool CDirectoryProvider::OnContextMenu(const std::shared_ptr<CFileItem>& fileItem)
+{
   const std::string target = GetTarget(*fileItem);
   if (!target.empty())
     fileItem->SetProperty("targetwindow", target);
 
   return CONTEXTMENU::ShowFor(fileItem);
+}
+
+bool CDirectoryProvider::OnContextMenu(const CGUIListItemPtr& item)
+{
+  auto fileItem = std::static_pointer_cast<CFileItem>(item);
+  return OnContextMenu(fileItem);
 }
 
 bool CDirectoryProvider::IsUpdating() const
@@ -585,6 +716,25 @@ bool CDirectoryProvider::UpdateLimit()
 
   m_currentLimit = value;
 
+  return true;
+}
+
+bool CDirectoryProvider::UpdateBrowse()
+{
+  std::unique_lock<CCriticalSection> lock(m_section);
+  const std::string stringValue{m_browse.GetLabel(m_parentID, false)};
+  BrowseMode value{m_currentBrowse};
+  if (StringUtils::EqualsNoCase(stringValue, "always"))
+    value = BrowseMode::ALWAYS;
+  else if (StringUtils::EqualsNoCase(stringValue, "auto"))
+    value = BrowseMode::AUTO;
+  else if (StringUtils::EqualsNoCase(stringValue, "never"))
+    value = BrowseMode::NEVER;
+
+  if (value == m_currentBrowse)
+    return false;
+
+  m_currentBrowse = value;
   return true;
 }
 
