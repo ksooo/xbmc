@@ -217,6 +217,8 @@ bool CGameUtils::HasGameExtension(const std::string& path)
       return true;
   }
 
+// Very expensive, may slow down video ctx menu creation by seconds
+#if 0
   // Check remote add-ons
   gameClients.clear();
   if (CServiceBroker::GetAddonMgr().GetInstallableAddons(gameClients, AddonType::GAMEDLL))
@@ -228,7 +230,7 @@ bool CGameUtils::HasGameExtension(const std::string& path)
         return true;
     }
   }
-
+#endif
   return false;
 }
 
