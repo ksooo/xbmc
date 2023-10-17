@@ -31,14 +31,14 @@ bool CFavouriteContextMenuAction::Execute(const std::shared_ptr<CFileItem>& item
 {
   CFileItemList items;
   CServiceBroker::GetFavouritesService().GetAll(items);
-  for (const auto& favourite : items)
-  {
-    if (favourite->GetPath() == item->GetPath())
-    {
-      if (DoExecute(items, favourite))
-        return CServiceBroker::GetFavouritesService().Save(items);
-    }
-  }
+
+  const auto it = std::find_if(items.cbegin(), items.cend(), [&item](const auto& favourite) {
+    return favourite->GetPath() == item->GetPath();
+  });
+
+  if ((it != items.cend()) && DoExecute(items, *it))
+    return CServiceBroker::GetFavouritesService().Save(items);
+
   return false;
 }
 
@@ -83,7 +83,7 @@ namespace
 {
 std::shared_ptr<CFileItem> ResolveFavouriteItem(const CFileItem& item)
 {
-  const std::shared_ptr<CFileItem> targetItem{
+  std::shared_ptr<CFileItem> targetItem{
       CServiceBroker::GetFavouritesService().ResolveFavourite(item)};
   if (targetItem)
     targetItem->SetProperty("hide_add_remove_favourite", CVariant{true});
