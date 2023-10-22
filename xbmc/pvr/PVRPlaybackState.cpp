@@ -543,7 +543,7 @@ void CPVRPlaybackState::UpdateLastWatched(const std::shared_ptr<CPVRChannelGroup
   time_t iTime;
   time.GetAsTime(iTime);
 
-  channel->Channel()->SetLastWatched(iTime);
+  channel->Channel()->SetLastWatched(iTime, channel->GroupID());
 
   // update last watched timestamp for group
   const bool bRadio = channel->Channel()->IsRadio();
