@@ -2015,18 +2015,6 @@ std::string CFileItem::GetOpticalMediaPath() const
   return std::string();
 }
 
-/**
-* @todo Ideally this (and SetPath) would not be available outside of construction
-* for CFileItem objects, or at least restricted to essentially be equivalent
-* to construction. This would require re-formulating a bunch of CFileItem
-* construction, and also allowing CFileItemList to have its own (public)
-* SetURL() function, so for now we give direct access.
-*/
-void CFileItem::SetURL(const CURL& url)
-{
-  m_strPath = url.Get();
-}
-
 const CURL CFileItem::GetURL() const
 {
   CURL url(m_strPath);

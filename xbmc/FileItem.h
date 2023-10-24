@@ -14,6 +14,7 @@
  */
 
 #include "LockType.h"
+#include "URL.h" // TEMP
 #include "XBDateTime.h"
 #include "guilib/GUIListItem.h"
 #include "threads/CriticalSection.h"
@@ -131,10 +132,10 @@ public:
   CGUIListItem* Clone() const override { return new CFileItem(*this); }
 
   const CURL GetURL() const;
-  void SetURL(const CURL& url);
+  void SetURLX(const CURL& url) { m_strPath = url.Get(); }
   bool IsURL(const CURL& url) const;
   const std::string& GetPath() const { return m_strPath; }
-  void SetPath(const std::string& path) { m_strPath = path; }
+  void SetPathX(const std::string& path) { m_strPath = path; } //! @todo TEMPORARY
   bool IsPath(const std::string& path, bool ignoreURLOptions = false) const;
 
   const CURL GetDynURL() const;
