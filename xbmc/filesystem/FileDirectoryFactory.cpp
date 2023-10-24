@@ -115,7 +115,7 @@ IFileDirectory* CFileDirectoryFactory::Create(const CURL& url, CFileItem* pItem,
             else
             {
               // compressed or more than one file -> create a dir
-              pItem->SetPath(wrap->m_items.GetPath());
+              pItem->SetPathX(wrap->m_items.GetPath());
             }
 
             // Check for folder, if yes return also wrap.
@@ -174,7 +174,7 @@ IFileDirectory* CFileDirectoryFactory::Create(const CURL& url, CFileItem* pItem,
     }
     else
     { // compressed or more than one file -> create a apk dir
-      pItem->SetURL(zipURL);
+      pItem->SetURLX(zipURL);
       return new CAPKDirectory;
     }
     return NULL;
@@ -195,7 +195,7 @@ IFileDirectory* CFileDirectoryFactory::Create(const CURL& url, CFileItem* pItem,
     }
     else
     { // compressed or more than one file -> create a zip dir
-      pItem->SetURL(zipURL);
+      pItem->SetURLX(zipURL);
       return new CZipDirectory;
     }
     return NULL;
@@ -203,7 +203,7 @@ IFileDirectory* CFileDirectoryFactory::Create(const CURL& url, CFileItem* pItem,
   if (url.IsFileType("xbt"))
   {
     CURL xbtUrl = URIUtils::CreateArchivePath("xbt", url);
-    pItem->SetURL(xbtUrl);
+    pItem->SetURLX(xbtUrl);
 
     return new CXbtDirectory();
   }

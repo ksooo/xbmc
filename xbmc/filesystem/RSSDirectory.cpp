@@ -493,7 +493,7 @@ static void ParseItem(CFileItem* item, TiXmlElement* root, const std::string& pa
   if(best != resources.end())
   {
     item->SetMimeType(best->mime);
-    item->SetPath(best->path);
+    item->SetPathX(best->path);
     item->m_dwSize  = best->size;
 
     if(best->duration)
@@ -501,10 +501,10 @@ static void ParseItem(CFileItem* item, TiXmlElement* root, const std::string& pa
 
     /* handling of mimetypes fo directories are sub optimal at best */
     if(best->mime == "application/rss+xml" && StringUtils::StartsWithNoCase(item->GetPath(), "http://"))
-      item->SetPath("rss://" + item->GetPath().substr(7));
+      item->SetPathX("rss://" + item->GetPath().substr(7));
 
     if(best->mime == "application/rss+xml" && StringUtils::StartsWithNoCase(item->GetPath(), "https://"))
-      item->SetPath("rsss://" + item->GetPath().substr(8));
+      item->SetPathX("rsss://" + item->GetPath().substr(8));
 
     if(StringUtils::StartsWithNoCase(item->GetPath(), "rss://")
       || StringUtils::StartsWithNoCase(item->GetPath(), "rsss://"))
@@ -546,7 +546,7 @@ bool CRSSDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   std::string strPath(pathToUrl);
   URIUtils::RemoveSlashAtEnd(strPath);
   std::map<std::string,CDateTime>::iterator it;
-  items.SetPath(strPath);
+  items.SetPathX(strPath);
   std::unique_lock<CCriticalSection> lock(m_section);
   if ((it=m_cache.find(strPath)) != m_cache.end())
   {
@@ -608,7 +608,7 @@ bool CRSSDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   if (ttl)
     mins = strtol(ttl->FirstChild()->Value(),NULL,10);
   time += CDateTimeSpan(0,0,mins,0);
-  items.SetPath(strPath);
+  items.SetPathX(strPath);
   items.Save();
   std::unique_lock<CCriticalSection> lock2(m_section);
   m_cache.insert(make_pair(strPath,time));

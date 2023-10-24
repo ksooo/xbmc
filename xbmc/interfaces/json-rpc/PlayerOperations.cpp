@@ -201,7 +201,7 @@ JSONRPC_STATUS CPlayerOperations::GetItem(const std::string &method, ITransportL
             fileItem->SetFromVideoInfoTag(*currentVideoTag);
             if (fileItem->GetLabel().empty())
               fileItem->SetLabel(originalLabel);
-            fileItem->SetPath(originalPath);   // Ensure path unchanged
+            fileItem->SetPathX(originalPath); // Ensure path unchanged
           }
         }
 
@@ -262,7 +262,7 @@ JSONRPC_STATUS CPlayerOperations::GetItem(const std::string &method, ITransportL
             fileItem->SetFromMusicInfoTag(*currentMusicTag);
             if (fileItem->GetLabel().empty())
               fileItem->SetLabel(originalLabel);
-            fileItem->SetPath(originalPath); // Ensure path unchanged
+            fileItem->SetPathX(originalPath); // Ensure path unchanged
           }
         }
 

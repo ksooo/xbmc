@@ -264,7 +264,7 @@ namespace XFILE
 
         db.Close();
         if (items.Size() <= 0)
-          items.SetPath(videoUrl.ToString());
+          items.SetPathX(videoUrl.ToString());
 
         items.Append(items2);
         if (items2.Size())

@@ -1363,7 +1363,7 @@ bool CGUIDialogVideoInfo::DeleteVideoItem(const std::shared_ptr<CFileItem>& item
     // check if the file/directory can be deleted
     if (CUtil::SupportsWriteFileOperations(strDeletePath))
     {
-      item->SetPath(strDeletePath);
+      item->SetPathX(strDeletePath);
 
       // HACK: stacked files need to be treated as folders in order to be deleted
       if (item->IsStack())

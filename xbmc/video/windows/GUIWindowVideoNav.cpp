@@ -97,7 +97,7 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
   switch (message.GetMessage())
   {
   case GUI_MSG_WINDOW_RESET:
-    m_vecItems->SetPath("");
+    m_vecItems->SetPathX("");
     break;
   case GUI_MSG_WINDOW_DEINIT:
     if (m_thumbLoader.IsLoading())
@@ -157,7 +157,7 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
               *(item.GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item.GetPath()));
               if (!item.GetVideoInfoTag()->IsEmpty())
               {
-                item.SetPath(item.GetVideoInfoTag()->m_strFileNameAndPath);
+                item.SetPathX(item.GetVideoInfoTag()->m_strFileNameAndPath);
                 OnItemInfo(item);
               }
             }

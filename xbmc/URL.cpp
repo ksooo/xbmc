@@ -485,7 +485,7 @@ std::string CURL::GetWithoutUserDetails(bool redact) const
     for (int i=0;i<items.Size();++i)
     {
       CURL url(items[i]->GetPath());
-      items[i]->SetPath(url.GetWithoutUserDetails(redact));
+      items[i]->SetPathX(url.GetWithoutUserDetails(redact));
       newItems.push_back(items[i]->GetPath());
     }
     dir.ConstructStackPath(newItems, strURL);

@@ -971,7 +971,7 @@ namespace XBMCAddon
 
     void ListItem::setPathRaw(const std::string& path)
     {
-      item->SetPath(path);
+      item->SetPathX(path);
     }
 
     void ListItem::setCountRaw(int count)

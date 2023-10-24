@@ -105,7 +105,7 @@ bool CGUIWindowVideoPlaylist::OnMessage(CGUIMessage& message)
 
     case GUI_MSG_WINDOW_INIT:
     {
-      m_vecItems->SetPath("playlistvideo://");
+      m_vecItems->SetPathX("playlistvideo://");
 
       if (!CGUIWindowVideoBase::OnMessage(message))
         return false;

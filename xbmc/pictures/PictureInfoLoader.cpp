@@ -29,7 +29,7 @@ CPictureInfoLoader::~CPictureInfoLoader()
 void CPictureInfoLoader::OnLoaderStart()
 {
   // Load previously cached items from HD
-  m_mapFileItems->SetPath(m_pVecItems->GetPath());
+  m_mapFileItems->SetPathX(m_pVecItems->GetPath());
   m_mapFileItems->Load();
   m_mapFileItems->SetFastLookup(true);
 

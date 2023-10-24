@@ -175,7 +175,7 @@ void CSavestateDatabase::GetSavestateItem(const ISavestate& savestate,
 
   item.SetLabel(label);
   item.SetLabel2(label2);
-  item.SetPath(savestatePath);
+  item.SetPathX(savestatePath);
   item.SetArt("screenshot", MakeThumbnailPath(savestatePath));
   item.SetProperty(SAVESTATE_LABEL, savestate.Label());
   item.SetProperty(SAVESTATE_CAPTION, savestate.Caption());

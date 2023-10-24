@@ -162,9 +162,9 @@ bool CGUIDialogFileBrowser::OnMessage(CGUIMessage& message)
       }
 
       // find the parent folder if we are a file browser (don't do this for folders)
-      m_Directory->SetPath(m_selectedPath);
+      m_Directory->SetPathX(m_selectedPath);
       if (!m_browsingForFolders && !bIsDir)
-        m_Directory->SetPath(URIUtils::GetParentPath(m_selectedPath));
+        m_Directory->SetPathX(URIUtils::GetParentPath(m_selectedPath));
       Update(m_Directory->GetPath());
       m_viewControl.SetSelectedItem(m_selectedPath);
       return CGUIDialog::OnMessage(message);
@@ -281,7 +281,7 @@ bool CGUIDialogFileBrowser::OnMessage(CGUIMessage& message)
             else
             {
               m_history.ClearPathHistory();
-              m_Directory->SetPath("");
+              m_Directory->SetPathX("");
             }
           }
         }
@@ -393,7 +393,7 @@ void CGUIDialogFileBrowser::Update(const std::string &strDirectory)
 
     ClearFileItems();
     m_vecItems->Copy(items);
-    m_Directory->SetPath(strDirectory);
+    m_Directory->SetPathX(strDirectory);
     m_strParentPath = strParentPath;
   }
 

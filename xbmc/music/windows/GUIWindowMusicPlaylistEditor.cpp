@@ -105,7 +105,7 @@ bool CGUIWindowMusicPlaylistEditor::OnMessage(CGUIMessage& message)
   case GUI_MSG_WINDOW_INIT:
     {
       if (m_vecItems->GetPath() == "?")
-        m_vecItems->SetPath("");
+        m_vecItems->SetPathX("");
       CGUIWindowMusicBase::OnMessage(message);
 
       if (message.GetNumStringParams())
@@ -186,14 +186,14 @@ bool CGUIWindowMusicPlaylistEditor::GetDirectory(const std::string &strDirectory
     mdb->SetLabel(g_localizeStrings.Get(14022));
     mdb->SetLabelPreformatted(true);
     mdb->m_bIsShareOrDrive = true;
-    items.SetPath("");
+    items.SetPathX("");
     items.Add(mdb);
 
     CFileItemPtr vdb(new CFileItem("videodb://musicvideos/", true));
     vdb->SetLabel(g_localizeStrings.Get(20389));
     vdb->SetLabelPreformatted(true);
     vdb->m_bIsShareOrDrive = true;
-    items.SetPath("");
+    items.SetPathX("");
     items.Add(vdb);
 
     return true;

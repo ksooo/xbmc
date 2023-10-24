@@ -107,7 +107,7 @@ bool CGUIWindowMusicPlayList::OnMessage(CGUIMessage& message)
       // Setup item cache for tagloader
       m_musicInfoLoader.UseCacheOnHD("special://temp/archive_cache/MusicPlaylist.fi");
 
-      m_vecItems->SetPath("playlistmusic://");
+      m_vecItems->SetPathX("playlistmusic://");
 
       // updatebuttons is called in here
       if (!CGUIWindowMusicBase::OnMessage(message))
@@ -336,7 +336,7 @@ void CGUIWindowMusicPlayList::SavePlayList()
       //  Musicdatabase items should contain the real path instead of a musicdb url
       //  otherwise the user can't save and reuse the playlist when the musicdb gets deleted
       if (pItem->IsMusicDb())
-        pItem->SetPath(pItem->GetMusicInfoTag()->GetURL());
+        pItem->SetPathX(pItem->GetMusicInfoTag()->GetURL());
 
       playlist.Add(pItem);
     }

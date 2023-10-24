@@ -22,7 +22,7 @@ namespace XBMCAddon
       if (listItem == nullptr)
         throw new XBMCAddon::WrongTypeException("None not allowed as argument for listitem");
       AddonClass::Ref<xbmcgui::ListItem> pListItem(listItem);
-      pListItem->item->SetPath(url);
+      pListItem->item->SetPathX(url);
       pListItem->item->m_bIsFolder = isFolder;
 
       // call the directory class to add our item
@@ -39,7 +39,7 @@ namespace XBMCAddon
         const String& url = item.first();
         const XBMCAddon::xbmcgui::ListItem* pListItem = item.second();
         bool bIsFolder = item.GetNumValuesSet() > 2 ? item.third() : false;
-        pListItem->item->SetPath(url);
+        pListItem->item->SetPathX(url);
         pListItem->item->m_bIsFolder = bIsFolder;
         fitems.Add(pListItem->item);
       }

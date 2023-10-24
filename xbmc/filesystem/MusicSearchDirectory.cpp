@@ -30,7 +30,7 @@ bool CMusicSearchDirectory::GetDirectory(const CURL& url, CFileItemList &items)
     return false;
 
   // and retrieve the search details
-  items.SetURL(url);
+  items.SetURLX(url);
   auto start = std::chrono::steady_clock::now();
   CMusicDatabase db;
   db.Open();

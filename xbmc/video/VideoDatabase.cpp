@@ -6180,7 +6180,7 @@ CDateTime CVideoDatabase::SetPlayCount(const CFileItem& item, int count, const C
       URIUtils::IsPlugin(item.GetProperty("original_listitem_url").asString()))
   {
     CFileItem item2(item);
-    item2.SetPath(item.GetProperty("original_listitem_url").asString());
+    item2.SetPathX(item.GetProperty("original_listitem_url").asString());
     id = AddFile(item2);
   }
   else
@@ -7764,7 +7764,7 @@ bool CVideoDatabase::GetMoviesByWhere(const std::string& strBaseDir, const Filte
         CVideoDbUrl itemUrl = videoUrl;
         std::string path = std::to_string(movie.m_iDbId);
         itemUrl.AppendPath(path);
-        pItem->SetPath(itemUrl.ToString());
+        pItem->SetPathX(itemUrl.ToString());
         pItem->SetDynPath(movie.m_strFileNameAndPath);
 
         pItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED,movie.GetPlayCount() > 0);
@@ -7874,7 +7874,7 @@ bool CVideoDatabase::GetTvShowsByWhere(const std::string& strBaseDir, const Filt
         CVideoDbUrl itemUrl = videoUrl;
         std::string path = StringUtils::Format("{}/", record->at(0).get_asInt());
         itemUrl.AppendPath(path);
-        pItem->SetPath(itemUrl.ToString());
+        pItem->SetPathX(itemUrl.ToString());
 
         pItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, (pItem->GetVideoInfoTag()->GetPlayCount() > 0) && (pItem->GetVideoInfoTag()->m_iEpisode > 0));
         items.Add(pItem);
@@ -8009,7 +8009,7 @@ bool CVideoDatabase::GetEpisodesByWhere(const std::string& strBaseDir, const Fil
         else
           path = std::to_string(idEpisode);
         itemUrl.AppendPath(path);
-        pItem->SetPath(itemUrl.ToString());
+        pItem->SetPathX(itemUrl.ToString());
         pItem->SetDynPath(episode.m_strFileNameAndPath);
 
         pItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, episode.GetPlayCount() > 0);
@@ -8902,7 +8902,7 @@ bool CVideoDatabase::GetMusicVideosByWhere(const std::string &baseDir, const Fil
         CVideoDbUrl itemUrl = videoUrl;
         std::string path = std::to_string(record->at(0).get_asInt());
         itemUrl.AppendPath(path);
-        item->SetPath(itemUrl.ToString());
+        item->SetPathX(itemUrl.ToString());
         item->SetDynPath(musicvideo.m_strFileNameAndPath);
 
         item->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, musicvideo.GetPlayCount() > 0);
@@ -10140,7 +10140,7 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
           std::string strFileName(movie.m_strTitle);
           if (movie.HasYear())
             strFileName += StringUtils::Format("_{}", movie.GetYear());
-          item.SetPath(GetSafeFile(moviesDir, strFileName) + ".avi");
+          item.SetPathX(GetSafeFile(moviesDir, strFileName) + ".avi");
         }
         for (const auto &i : artwork)
         {
@@ -10286,7 +10286,7 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
           std::string strFileName(StringUtils::Join(movie.m_artist, CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_videoItemSeparator) + "." + movie.m_strTitle);
           if (movie.HasYear())
             strFileName += StringUtils::Format("_{}", movie.GetYear());
-          item.SetPath(GetSafeFile(musicvideosDir, strFileName) + ".avi");
+          item.SetPathX(GetSafeFile(musicvideosDir, strFileName) + ".avi");
         }
         for (const auto &i : artwork)
         {
@@ -10384,7 +10384,7 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
       if (images && !bSkip)
       {
         if (singleFile)
-          item.SetPath(GetSafeFile(tvshowsDir, tvshow.m_strTitle));
+          item.SetPathX(GetSafeFile(tvshowsDir, tvshow.m_strTitle));
 
         for (const auto &i : artwork)
         {
@@ -10486,7 +10486,7 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
           {
             std::string epName =
                 StringUtils::Format("s{:02}e{:02}.avi", episode.m_iSeason, episode.m_iEpisode);
-            item.SetPath(URIUtils::AddFileToFolder(showDir, epName));
+            item.SetPathX(URIUtils::AddFileToFolder(showDir, epName));
           }
           for (const auto &i : artwork)
           {
@@ -10678,7 +10678,7 @@ void CVideoDatabase::ImportFromXML(const std::string &path)
         if (info.HasYear())
           filename += StringUtils::Format("_{}", info.GetYear());
         CFileItem artItem(item);
-        artItem.SetPath(GetSafeFile(moviesDir, filename) + ".avi");
+        artItem.SetPathX(GetSafeFile(moviesDir, filename) + ".avi");
         scanner.GetArtwork(&artItem, CONTENT_MOVIES, useFolders, true, actorsDir);
         item.SetArt(artItem.GetArt());
         if (!item.GetVideoInfoTag()->m_set.title.empty())
@@ -10712,7 +10712,7 @@ void CVideoDatabase::ImportFromXML(const std::string &path)
         if (info.HasYear())
           filename += StringUtils::Format("_{}", info.GetYear());
         CFileItem artItem(item);
-        artItem.SetPath(GetSafeFile(musicvideosDir, filename) + ".avi");
+        artItem.SetPathX(GetSafeFile(musicvideosDir, filename) + ".avi");
         scanner.GetArtwork(&artItem, CONTENT_MUSICVIDEOS, useFolders, true, actorsDir);
         item.SetArt(artItem.GetArt());
         scanner.AddVideo(&item, CONTENT_MUSICVIDEOS, useFolders, true, NULL, true);
@@ -10729,7 +10729,7 @@ void CVideoDatabase::ImportFromXML(const std::string &path)
         bool useFolders = info.m_basePath.empty() ? LookupByFolders(showItem.GetPath(), true) : false;
         CFileItem artItem(showItem);
         std::string artPath(GetSafeFile(tvshowsDir, info.m_strTitle));
-        artItem.SetPath(artPath);
+        artItem.SetPathX(artPath);
         scanner.GetArtwork(&artItem, CONTENT_TVSHOWS, useFolders, true, actorsDir);
         showItem.SetArt(artItem.GetArt());
         int showID = scanner.AddVideo(&showItem, CONTENT_TVSHOWS, useFolders, true, NULL, true);
@@ -10754,7 +10754,7 @@ void CVideoDatabase::ImportFromXML(const std::string &path)
           std::string filename =
               StringUtils::Format("s{:02}e{:02}.avi", info.m_iSeason, info.m_iEpisode);
           CFileItem artItem(item);
-          artItem.SetPath(GetSafeFile(artPath, filename));
+          artItem.SetPathX(GetSafeFile(artPath, filename));
           scanner.GetArtwork(&artItem, CONTENT_TVSHOWS, useFolders, true, actorsDir);
           item.SetArt(artItem.GetArt());
           scanner.AddVideo(&item,CONTENT_TVSHOWS, false, false, showItem.GetVideoInfoTag(), true);
@@ -11014,7 +11014,7 @@ bool CVideoDatabase::GetItemsForPath(const std::string &content, const std::stri
     GetMusicVideosByWhere("videodb://musicvideos/titles/", filter, items);
   }
   for (int i = 0; i < items.Size(); i++)
-    items[i]->SetPath(items[i]->GetVideoInfoTag()->m_basePath);
+    items[i]->SetPathX(items[i]->GetVideoInfoTag()->m_basePath);
   return items.Size() > 0;
 }
 

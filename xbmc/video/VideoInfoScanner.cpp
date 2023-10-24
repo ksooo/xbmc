@@ -349,7 +349,7 @@ namespace VIDEO
       {
         CDirectory::GetDirectory(strDirectory, items, CServiceBroker::GetFileExtensionProvider().GetVideoExtensions(),
                                  DIR_FLAG_DEFAULTS);
-        items.SetPath(strDirectory);
+        items.SetPathX(strDirectory);
         GetPathHash(items, hash);
         bSkip = true;
         if (!m_database.GetPathHash(strDirectory, dbHash) || !StringUtils::EqualsNoCase(dbHash, hash))
@@ -362,7 +362,7 @@ namespace VIDEO
         const auto item{std::make_shared<CFileItem>(strDirectory, true)};
         item->SetLabel(URIUtils::GetFileName(strDirectory));
         items.Add(item);
-        items.SetPath(URIUtils::GetParentPath(item->GetPath()));
+        items.SetPathX(URIUtils::GetParentPath(item->GetPath()));
       }
     }
 

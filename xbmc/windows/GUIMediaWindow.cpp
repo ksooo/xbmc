@@ -116,7 +116,7 @@ CGUIMediaWindow::CGUIMediaWindow(int id, const char *xmlFile)
   m_loadType = KEEP_IN_MEMORY;
   m_vecItems = new CFileItemList;
   m_unfilteredItems = new CFileItemList;
-  m_vecItems->SetPath("?");
+  m_vecItems->SetPathX("?");
   m_iLastControl = -1;
   m_canFilterAdvanced = false;
 
@@ -334,7 +334,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
     { // Message is received even if this window is inactive
       if (message.GetParam1() == GUI_MSG_WINDOW_RESET)
       {
-        m_vecItems->SetPath("?");
+        m_vecItems->SetPathX("?");
         return true;
       }
       else if ( message.GetParam1() == GUI_MSG_REFRESH_THUMBS )
@@ -360,7 +360,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
             else
             {
               m_history.ClearPathHistory();
-              m_vecItems->SetPath("");
+              m_vecItems->SetPathX("");
             }
           }
         }
@@ -421,7 +421,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
         else if (newItem)
         { // need to remove the disc cache
           CFileItemList items;
-          items.SetPath(URIUtils::GetDirectory(newItem->GetPath()));
+          items.SetPathX(URIUtils::GetDirectory(newItem->GetPath()));
           if (newItem->HasProperty("cachefilename"))
           {
             // Use stored cache file name
@@ -518,7 +518,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
   case GUI_MSG_WINDOW_INIT:
     {
       if (m_vecItems->GetPath() == "?")
-        m_vecItems->SetPath("");
+        m_vecItems->SetPathX("");
 
       std::string dir = message.GetStringParam(0);
       const std::string& ret = message.GetStringParam(1);
@@ -533,16 +533,16 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
         bool resetHistory = false;
         if (!returning || !URIUtils::PathEquals(dir, m_startDirectory, true))
         { // we're not returning to the same path, so set our directory to the requested path
-          m_vecItems->SetPath(dir);
+          m_vecItems->SetPathX(dir);
           resetHistory = true;
         }
         else if (m_vecItems->GetPath().empty() && URIUtils::PathEquals(dir, m_startDirectory, true))
-          m_vecItems->SetPath(dir);
+          m_vecItems->SetPathX(dir);
 
         // check for network up
         if (URIUtils::IsRemote(m_vecItems->GetPath()) && !WaitForNetwork())
         {
-          m_vecItems->SetPath("");
+          m_vecItems->SetPathX("");
           resetHistory = true;
         }
         if (resetHistory)
@@ -1960,7 +1960,7 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
         itemUrl.SetOption("filter", filterOption);
       else
         itemUrl.RemoveOption("filter");
-      pItem->SetPath(itemUrl.Get());
+      pItem->SetPathX(itemUrl.Get());
     }
   }
 
@@ -2106,7 +2106,7 @@ bool CGUIMediaWindow::GetAdvanceFilteredItems(CFileItemList &items)
 
   items.ClearItems();
   items.Append(filteredItems);
-  items.SetPath(resultItems.GetPath());
+  items.SetPathX(resultItems.GetPath());
   if (resultItems.HasProperty(PROPERTY_PATH_DB))
     items.SetProperty(PROPERTY_PATH_DB, resultItems.GetProperty(PROPERTY_PATH_DB));
   return true;

@@ -26,12 +26,13 @@ bool CSpecialProtocolDirectory::GetDirectory(const CURL& url, CFileItemList &ite
   std::string translatedPath = CSpecialProtocol::TranslatePath(url);
   if (CDirectory::GetDirectory(translatedPath, items, m_strFileMask, m_flags | DIR_FLAG_GET_HIDDEN))
   { // replace our paths as necessary
-    items.SetURL(url);
+    items.SetURLX(url);
     for (int i = 0; i < items.Size(); i++)
     {
       CFileItemPtr item = items[i];
       if (URIUtils::PathHasParent(item->GetPath(), translatedPath))
-        item->SetPath(URIUtils::AddFileToFolder(pathToUrl, item->GetPath().substr(translatedPath.size())));
+        item->SetPathX(
+            URIUtils::AddFileToFolder(pathToUrl, item->GetPath().substr(translatedPath.size())));
     }
     return true;
   }

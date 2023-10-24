@@ -569,7 +569,7 @@ bool CDirectoryProvider::OnClick(const CGUIListItemPtr& item)
   CFileItem fileItem{*std::static_pointer_cast<CFileItem>(item)};
 
   if (fileItem.HasProperty("node.target_url"))
-    fileItem.SetPath(fileItem.GetProperty("node.target_url").asString());
+    fileItem.SetPathX(fileItem.GetProperty("node.target_url").asString());
 
   return ExecuteAction({fileItem, GetTarget(fileItem)});
 }

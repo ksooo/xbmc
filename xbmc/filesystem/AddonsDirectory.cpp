@@ -411,7 +411,7 @@ bool CAddonsDirectory::GetSearchResults(const CURL& path, CFileItemList &items)
   CAddonsDirectory::GenerateAddonListing(path, addons, items, g_localizeStrings.Get(283));
   CURL searchPath(path);
   searchPath.SetFileName(search);
-  items.SetPath(searchPath.Get());
+  items.SetPathX(searchPath.Get());
   return true;
 }
 
@@ -514,7 +514,7 @@ static bool Browse(const CURL& path, CFileItemList &items)
   const std::string& repoId = path.GetHostName();
 
   VECADDONS addons;
-  items.SetPath(path.Get());
+  items.SetPathX(path.Get());
   if (repoId == "all")
   {
     CAddonRepos addonRepos;
@@ -656,7 +656,7 @@ bool CAddonsDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   items.ClearItems();
   items.ClearProperties();
   items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
-  items.SetPath(path.Get());
+  items.SetPathX(path.Get());
 
   if (endpoint.empty())
   {
@@ -839,7 +839,7 @@ CFileItemPtr CAddonsDirectory::FileItemFromAddon(const AddonPtr &addon,
 
   CFileItemPtr item(new CFileItem(addon));
   item->m_bIsFolder = folder;
-  item->SetPath(path);
+  item->SetPathX(path);
 
   std::string strLabel(addon->Name());
   if (CURL(path).GetHostName() == "search")

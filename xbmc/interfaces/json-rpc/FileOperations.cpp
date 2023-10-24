@@ -54,7 +54,7 @@ JSONRPC_STATUS CFileOperations::GetRootDirectory(const std::string &method, ITra
       if (items[i]->IsSmb())
       {
         CURL url(items[i]->GetPath());
-        items[i]->SetPath(url.GetWithoutUserDetails());
+        items[i]->SetPathX(url.GetWithoutUserDetails());
       }
     }
 
@@ -118,7 +118,7 @@ JSONRPC_STATUS CFileOperations::GetDirectory(const std::string &method, ITranspo
       if (items[i]->IsSmb())
       {
         CURL url(items[i]->GetPath());
-        items[i]->SetPath(url.GetWithoutUserDetails());
+        items[i]->SetPathX(url.GetWithoutUserDetails());
       }
 
       if ((media == "video" && items[i]->HasVideoInfoTag()) ||
@@ -329,7 +329,7 @@ bool CFileOperations::FillFileItem(
           return false;
 
         item->SetLabel(label);
-        item->SetPath(strFilename);
+        item->SetPathX(strFilename);
         item->m_bIsFolder = isDir;
       }
       else

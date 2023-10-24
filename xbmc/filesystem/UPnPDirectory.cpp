@@ -323,7 +323,7 @@ CUPnPDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
             id = CURL::Encode(id);
             URIUtils::AddSlashAtEnd(id);
-            pItem->SetPath(std::string((const char*) "upnp://" + uuid + "/" + id.c_str()));
+            pItem->SetPathX(std::string((const char*)"upnp://" + uuid + "/" + id.c_str()));
 
             items.Add(pItem);
 

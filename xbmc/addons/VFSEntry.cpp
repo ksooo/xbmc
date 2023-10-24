@@ -566,7 +566,7 @@ bool CVFSEntry::ContainsFiles(const CURL& url, CFileItemList& items)
   VFSDirEntriesToCFileItemList(num_entries, entries, items);
   m_ifc.vfs->toAddon->free_directory(m_ifc.vfs, entries, num_entries);
   if (strlen(rootpath))
-    items.SetPath(rootpath);
+    items.SetPathX(rootpath);
 
   return true;
 }

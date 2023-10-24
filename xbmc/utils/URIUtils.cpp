@@ -330,9 +330,9 @@ bool URIUtils::GetParentPath(const std::string& strPath, std::string& strParent)
     {
       items[i]->m_strDVDLabel = GetDirectory(items[i]->GetPath());
       if (HasParentInHostname(url2))
-        items[i]->SetPath(GetParentPath(items[i]->m_strDVDLabel));
+        items[i]->SetPathX(GetParentPath(items[i]->m_strDVDLabel));
       else
-        items[i]->SetPath(items[i]->m_strDVDLabel);
+        items[i]->SetPathX(items[i]->m_strDVDLabel);
 
       GetCommonPath(strParent,items[i]->GetPath());
     }

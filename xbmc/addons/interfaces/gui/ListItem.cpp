@@ -300,7 +300,7 @@ void Interface_GUIListItem::set_path(KODI_HANDLE kodiBase,
   }
 
   Interface_GUIGeneral::lock();
-  item->get()->SetPath(path);
+  item->get()->SetPathX(path);
   Interface_GUIGeneral::unlock();
 }
 

@@ -40,7 +40,7 @@ void CDAVDirectory::ParseResponse(const tinyxml2::XMLElement* element, CFileItem
     {
       std::string path(responseChild->FirstChild()->Value());
       URIUtils::RemoveSlashAtEnd(path);
-      item.SetPath(path);
+      item.SetPathX(path);
     }
     else if (CDAVCommon::ValueWithoutNamespace(responseChild, "propstat"))
     {
@@ -161,7 +161,7 @@ bool CDAVDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       // Add back protocol options
       if (!url2.GetProtocolOptions().empty())
         itemPath += "|" + url2.GetProtocolOptions();
-      item.SetPath(itemPath);
+      item.SetPathX(itemPath);
 
       if (!item.IsURL(url))
       {

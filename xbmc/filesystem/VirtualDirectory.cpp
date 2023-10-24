@@ -78,7 +78,7 @@ bool CVirtualDirectory::GetDirectory(const CURL& url, CFileItemList &items, bool
     items.Clear();
 
   // return the root listing
-  items.SetPath(strPath);
+  items.SetPathX(strPath);
 
   // grab our shares
   VECSOURCES shares;

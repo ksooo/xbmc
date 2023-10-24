@@ -56,7 +56,7 @@ private:
   public:
     bool DoWork() override
     {
-      m_result->m_list.SetURL(m_result->m_listDir);
+      m_result->m_list.SetURLX(m_result->m_listDir);
       m_result->m_result         = m_imp->GetDirectory(m_result->m_dir, m_result->m_list);
       m_result->m_event.Set();
       return m_result->m_result;
@@ -168,7 +168,7 @@ bool CDirectory::GetDirectory(const CURL& url,
 
     // check our cache for this path
     if (g_directoryCache.GetDirectory(realURL.Get(), items, (hints.flags & DIR_FLAG_READ_CACHE) == DIR_FLAG_READ_CACHE))
-      items.SetURL(url);
+      items.SetURLX(url);
     else
     {
       // need to clear the cache (in case the directory fetch fails)
@@ -189,7 +189,7 @@ bool CDirectory::GetDirectory(const CURL& url,
         if (CPasswordManager::GetInstance().IsURLSupported(authUrl) && authUrl.GetUserName().empty())
           CPasswordManager::GetInstance().AuthenticateURL(authUrl);
 
-        items.SetURL(url);
+        items.SetURLX(url);
         result = pDirectory->GetDirectory(authUrl, items);
 
         if (!result)
@@ -242,7 +242,7 @@ bool CDirectory::GetDirectory(const CURL& url,
             itemUrl.SetDomain("");
             itemUrl.SetUserName("");
             itemUrl.SetPassword("");
-            item->SetPath(itemUrl.Get());
+            item->SetPathX(itemUrl.Get());
           }
         }
       }
@@ -293,7 +293,7 @@ bool CDirectory::GetDirectory(const CURL& url,
       for (int i = 0; i < items.Size(); ++i)
       {
         CFileItemPtr item = items[i];
-        item->SetPath(URIUtils::SubstitutePath(item->GetPath(), true));
+        item->SetPathX(URIUtils::SubstitutePath(item->GetPath(), true));
       }
     }
 

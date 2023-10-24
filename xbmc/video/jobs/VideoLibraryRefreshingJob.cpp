@@ -276,7 +276,7 @@ bool CVideoLibraryRefreshingJob::Work(CVideoDatabase &db)
         for (const auto& tvshowPath : tvshowPaths)
         {
           CFileItemPtr tvshowItem(new CFileItem(*m_item->GetVideoInfoTag()));
-          tvshowItem->SetPath(tvshowPath);
+          tvshowItem->SetPathX(tvshowPath);
           items.Add(tvshowItem);
         }
       }
@@ -291,7 +291,8 @@ bool CVideoLibraryRefreshingJob::Work(CVideoDatabase &db)
       items.Add(std::make_shared<CFileItem>(*m_item));
 
     // set the proper path of the list of items to lookup
-    items.SetPath(m_item->m_bIsFolder ? URIUtils::GetParentPath(path) : URIUtils::GetDirectory(path));
+    items.SetPathX(m_item->m_bIsFolder ? URIUtils::GetParentPath(path)
+                                       : URIUtils::GetDirectory(path));
 
     int headingLabel = 198;
     if (scraper->Content() == CONTENT_TVSHOWS)

@@ -628,7 +628,7 @@ bool GetTimersRootDirectory(const CPVRTimersPath& path,
     {
       const auto item = std::make_shared<CFileItem>(timer);
       const CPVRTimersPath timersPath(path.GetPath(), timer->ClientID(), timer->ClientIndex());
-      item->SetPath(timersPath.GetPath());
+      item->SetPathX(timersPath.GetPath());
       results.Add(item);
     }
   }
@@ -653,7 +653,7 @@ bool GetTimersSubDirectory(const CPVRTimersPath& path,
     {
       item = std::make_shared<CFileItem>(timer);
       const CPVRTimersPath timersPath(path.GetPath(), timer->ClientID(), timer->ClientIndex());
-      item->SetPath(timersPath.GetPath());
+      item->SetPathX(timersPath.GetPath());
       results.Add(item);
     }
   }

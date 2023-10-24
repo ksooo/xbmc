@@ -115,8 +115,8 @@ CGUIWindowFileManager::CGUIWindowFileManager(void)
   m_Directory[1] = new CFileItem;
   m_vecItems[0] = new CFileItemList;
   m_vecItems[1] = new CFileItemList;
-  m_Directory[0]->SetPath("?");
-  m_Directory[1]->SetPath("?");
+  m_Directory[0]->SetPathX("?");
+  m_Directory[1]->SetPathX("?");
   m_Directory[0]->m_bIsFolder = true;
   m_Directory[1]->m_bIsFolder = true;
   bCheckShareConnectivity = true;
@@ -219,8 +219,8 @@ bool CGUIWindowFileManager::OnMessage(CGUIMessage& message)
     { // Message is received even if window is inactive
       if (message.GetParam1() == GUI_MSG_WINDOW_RESET)
       {
-        m_Directory[0]->SetPath("?");
-        m_Directory[1]->SetPath("?");
+        m_Directory[0]->SetPathX("?");
+        m_Directory[1]->SetPathX("?");
         m_Directory[0]->m_bIsFolder = true;
         m_Directory[1]->m_bIsFolder = true;
         return true;
@@ -242,7 +242,7 @@ bool CGUIWindowFileManager::OnMessage(CGUIMessage& message)
             if (IsActive())
               Update(i, "");
             else
-              m_Directory[i]->SetPath("");
+              m_Directory[i]->SetPathX("");
           }
         }
         return true;
@@ -466,13 +466,13 @@ bool CGUIWindowFileManager::Update(int iList, const std::string &strDirectory)
   }
 
   std::string strOldDirectory=m_Directory[iList]->GetPath();
-  m_Directory[iList]->SetPath(strDirectory);
+  m_Directory[iList]->SetPathX(strDirectory);
 
   CFileItemList items;
   if (!GetDirectory(iList, m_Directory[iList]->GetPath(), items))
   {
     if (strDirectory != strOldDirectory && GetDirectory(iList, strOldDirectory, items))
-      m_Directory[iList]->SetPath(strOldDirectory); // Fallback to old (previous) path)
+      m_Directory[iList]->SetPathX(strOldDirectory); // Fallback to old (previous) path)
     else
       Update(iList, ""); // Fallback to root
 
@@ -484,7 +484,7 @@ bool CGUIWindowFileManager::Update(int iList, const std::string &strDirectory)
   ClearFileItems(iList);
 
   m_vecItems[iList]->Append(items);
-  m_vecItems[iList]->SetPath(items.GetPath());
+  m_vecItems[iList]->SetPathX(items.GetPath());
 
   std::string strParentPath;
   URIUtils::GetParentPath(strDirectory, strParentPath);
@@ -1277,7 +1277,8 @@ void CGUIWindowFileManager::SetInitialPath(const std::string &path)
   // otherwise, is this the first time accessing this window?
   else if (m_Directory[0]->GetPath() == "?")
   {
-    m_Directory[0]->SetPath(strDestination = CMediaSourceSettings::GetInstance().GetDefaultSource("files"));
+    m_Directory[0]->SetPathX(strDestination =
+                                 CMediaSourceSettings::GetInstance().GetDefaultSource("files"));
     CLog::Log(LOGINFO, "Attempting to default to: {}", strDestination);
   }
   // try to open the destination path
@@ -1286,13 +1287,13 @@ void CGUIWindowFileManager::SetInitialPath(const std::string &path)
     // open root
     if (StringUtils::EqualsNoCase(strDestination, "$ROOT"))
     {
-      m_Directory[0]->SetPath("");
+      m_Directory[0]->SetPathX("");
       CLog::Log(LOGINFO, "  Success! Opening root listing.");
     }
     else
     {
       // default parameters if the jump fails
-      m_Directory[0]->SetPath("");
+      m_Directory[0]->SetPathX("");
 
       bool bIsSourceName = false;
       VECSOURCES shares;
@@ -1311,7 +1312,7 @@ void CGUIWindowFileManager::SetInitialPath(const std::string &path)
         else
           path = strDestination;
         URIUtils::RemoveSlashAtEnd(path);
-        m_Directory[0]->SetPath(path);
+        m_Directory[0]->SetPathX(path);
         CLog::Log(LOGINFO, "  Success! Opened destination path: {}", strDestination);
 
         // outside call: check the share for connectivity
@@ -1327,7 +1328,8 @@ void CGUIWindowFileManager::SetInitialPath(const std::string &path)
     }
   }
 
-  if (m_Directory[1]->GetPath() == "?") m_Directory[1]->SetPath("");
+  if (m_Directory[1]->GetPath() == "?")
+    m_Directory[1]->SetPathX("");
 }
 
 const CFileItem& CGUIWindowFileManager::CurrentDirectory(int indx) const

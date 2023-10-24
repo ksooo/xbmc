@@ -127,7 +127,7 @@ namespace XFILE
 
       // convert the entry into a CFileItem
       CFileItemPtr item = converter(entry.second, label, itemPath, isFolder);
-      item->SetPath(itemPath);
+      item->SetPathX(itemPath);
       item->m_bIsFolder = isFolder;
       if (isFolder)
         item->m_dwSize = 0;

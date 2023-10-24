@@ -179,7 +179,7 @@ void SetPathAndPlay(CFileItem& item, const std::string& player)
   if (!item.m_bIsFolder && item.IsVideoDb())
   {
     item.SetProperty("original_listitem_url", item.GetPath());
-    item.SetPath(item.GetVideoInfoTag()->m_strFileNameAndPath);
+    item.SetPathX(item.GetVideoInfoTag()->m_strFileNameAndPath);
   }
   item.SetProperty("check_resume", false);
 
@@ -206,7 +206,7 @@ std::vector<std::string> GetPlayers(const CPlayerCoreFactory& playerCoreFactory,
   {
     //! @todo CPlayerCoreFactory and classes called from there do not handle dyn path correctly.
     CFileItem item2{item};
-    item2.SetPath(item.GetDynPath());
+    item2.SetPathX(item.GetDynPath());
     playerCoreFactory.GetPlayers(item2, players);
   }
   else

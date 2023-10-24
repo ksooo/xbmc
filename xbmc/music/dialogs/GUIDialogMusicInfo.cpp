@@ -110,7 +110,7 @@ public:
           // Fall back further to browse the Artist Info Folder itself
           artistItemPath = CServiceBroker::GetSettingsComponent()->GetSettings()->GetString(CSettings::SETTING_MUSICLIBRARY_ARTISTSFOLDER);
       }
-      m_item->SetPath(artistItemPath);
+      m_item->SetPathX(artistItemPath);
 
       // Store info as CArtist as well as item properties
       dialog->SetArtist(artist, oldartistpath);
@@ -132,7 +132,7 @@ public:
       // Get album folder where local art could be found
       database.GetAlbumPath(albumId, album.strPath);
       // Set up path for *item folder when browsing for art
-      m_item->SetPath(album.strPath);
+      m_item->SetPathX(album.strPath);
       // Store info as CAlbum as well as item properties
       dialog->SetAlbum(album, album.strPath);
 
@@ -485,7 +485,7 @@ bool CGUIDialogMusicInfo::SetItem(CFileItem* item)
 void CGUIDialogMusicInfo::SetAlbum(const CAlbum& album, const std::string &path)
 {
   m_album = album;
-  m_item->SetPath(album.strPath);
+  m_item->SetPathX(album.strPath);
 
   m_startUserrating = m_album.iUserrating;
   m_fallbackartpath.clear();

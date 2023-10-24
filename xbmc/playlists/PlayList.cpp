@@ -475,7 +475,7 @@ bool CPlayList::Expand(int position)
   for (int i = 0;i<playlist->size();i++)
   {
     (*playlist)[i]->SetDynPath((*playlist)[i]->GetPath());
-    (*playlist)[i]->SetPath(item->GetPath());
+    (*playlist)[i]->SetPathX(item->GetPath());
     (*playlist)[i]->SetStartOffset(item->GetStartOffset());
   }
 
@@ -498,7 +498,7 @@ void CPlayList::UpdateItem(const CFileItem *item)
     {
       std::string temp = playlistItem->GetPath(); // save path, it may have been altered
       *playlistItem = *item;
-      playlistItem->SetPath(temp);
+      playlistItem->SetPathX(temp);
       break;
     }
   }

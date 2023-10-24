@@ -509,7 +509,7 @@ bool CGUIWindowPVRBase::InitChannelGroup()
       SetChannelGroup(std::move(group), false);
     }
     // Path might have changed since last init. Set it always, not just on group change.
-    m_vecItems->SetPath(GetDirectoryPath());
+    m_vecItems->SetPathX(GetDirectoryPath());
     return true;
   }
   return false;

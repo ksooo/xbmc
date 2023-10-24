@@ -3185,7 +3185,7 @@ void CMusicDatabase::GetFileItemFromDataset(const dbiplus::sql_record* const rec
   item->GetMusicInfoTag()->SetLoaded(true);
   // Get filename with full path
   if (!baseUrl.IsValid())
-    item->SetPath(strRealPath);
+    item->SetPathX(strRealPath);
   else
   {
     CMusicDbUrl itemUrl = baseUrl;
@@ -3193,7 +3193,7 @@ void CMusicDatabase::GetFileItemFromDataset(const dbiplus::sql_record* const rec
     std::string strExt = URIUtils::GetExtension(strFileName);
     std::string path = StringUtils::Format("{}{}", record->at(song_idSong).get_asInt(), strExt);
     itemUrl.AppendPath(path);
-    item->SetPath(itemUrl.ToString());
+    item->SetPathX(itemUrl.ToString());
     item->SetDynPath(strRealPath);
   }
 }
@@ -5640,7 +5640,7 @@ bool CMusicDatabase::GetArtistsByWhere(
         CMusicDbUrl itemUrl = musicUrl;
         std::string path = StringUtils::Format("{}/", artist.idArtist);
         itemUrl.AppendPath(path);
-        pItem->SetPath(itemUrl.ToString());
+        pItem->SetPathX(itemUrl.ToString());
 
         pItem->GetMusicInfoTag()->SetDatabaseId(artist.idArtist, MediaTypeArtist);
         // Set icon now to avoid slow per item processing in FillInDefaultIcon later

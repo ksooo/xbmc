@@ -403,7 +403,7 @@ void CGUIDialogMediaSource::OnPathBrowse(int item)
   if (CGUIDialogFileBrowser::ShowAndGetSource(path, allowNetworkShares, extraShares.size() == 0 ? NULL : &extraShares))
   {
     if (item < m_paths->Size()) // if the skin does funky things, m_paths may have been cleared
-      m_paths->Get(item)->SetPath(path);
+      m_paths->Get(item)->SetPathX(path);
     if (!m_bNameChanged || m_name.empty())
     {
       CURL url(path);
@@ -424,7 +424,7 @@ void CGUIDialogMediaSource::OnPath(int item)
     m_bNameChanged = true;
 
   CGUIKeyboardFactory::ShowAndGetInput(path, CVariant{ g_localizeStrings.Get(1021) }, false);
-  m_paths->Get(item)->SetPath(path);
+  m_paths->Get(item)->SetPathX(path);
 
   if (!m_bNameChanged || m_name.empty())
   {

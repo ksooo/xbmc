@@ -40,7 +40,7 @@ namespace XBMCAddon
       {
         // an optional listitem was passed
         // set m_strPath to the passed url
-        listitem->item->SetPath(url);
+        listitem->item->SetPathX(url);
 
         items.Add(listitem->item);
       }

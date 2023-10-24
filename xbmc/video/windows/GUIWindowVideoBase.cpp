@@ -296,7 +296,7 @@ bool CGUIWindowVideoBase::OnItemInfo(const CFileItem& fileItem)
         if (i->IsVideo() && !i->IsPlayList() &&
             !CUtil::ExcludeFileOrFolder(i->GetPath(), excludeFromScan))
         {
-          item.SetPath(i->GetPath());
+          item.SetPathX(i->GetPath());
           item.m_bIsFolder = false;
           bFoundFile = true;
           break;
@@ -429,7 +429,7 @@ bool CGUIWindowVideoBase::ShowInfo(const CFileItemPtr& item2, const ScraperPtr& 
       item = pDlgInfo->GetCurrentListItem();
 
       if (item->IsVideoDb() && item->HasVideoInfoTag())
-        item->SetPath(item->GetVideoInfoTag()->GetPath());
+        item->SetPathX(item->GetVideoInfoTag()->GetPath());
     }
   }
 
@@ -474,7 +474,7 @@ bool CGUIWindowVideoBase::ShowInfo(const CFileItemPtr& item2, const ScraperPtr& 
       item = pDlgInfo->GetCurrentListItem();
 
       if (item->IsVideoDb() && item->HasVideoInfoTag())
-        item->SetPath(item->GetVideoInfoTag()->GetPath());
+        item->SetPathX(item->GetVideoInfoTag()->GetPath());
     }
     listNeedsUpdating = true;
   } while (needsRefresh);
@@ -695,9 +695,9 @@ void CGUIWindowVideoBase::LoadVideoInfo(CFileItemList& items,
       if (stackItems)
       {
         if (match->m_bIsFolder)
-          pItem->SetPath(match->GetVideoInfoTag()->m_strPath);
+          pItem->SetPathX(match->GetVideoInfoTag()->m_strPath);
         else
-          pItem->SetPath(match->GetVideoInfoTag()->m_strFileNameAndPath);
+          pItem->SetPathX(match->GetVideoInfoTag()->m_strFileNameAndPath);
         // if we switch from a file to a folder item it means we really shouldn't be sorting files and
         // folders separately
         if (pItem->m_bIsFolder != match->m_bIsFolder)
@@ -960,7 +960,7 @@ bool CGUIWindowVideoBase::OnPlayMedia(int iItem, const std::string &player)
 
   if (pItem->IsVideoDb())
   {
-    itemCopy->SetPath(pItem->GetVideoInfoTag()->m_strFileNameAndPath);
+    itemCopy->SetPathX(pItem->GetVideoInfoTag()->m_strFileNameAndPath);
     itemCopy->SetProperty("original_listitem_url", pItem->GetPath());
   }
   CLog::Log(LOGDEBUG, "{} {}", __FUNCTION__, CURL::GetRedacted(itemCopy->GetPath()));

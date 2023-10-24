@@ -698,7 +698,7 @@ CUPnPServer::OnBrowseDirectChildren(PLT_ActionReference&          action,
         return NPT_FAILURE;
     }
 
-    items.SetPath(std::string(parent_id));
+    items.SetPathX(std::string(parent_id));
 
     // guard against loading while saving to the same cache file
     // as CArchive currently performs no locking itself
@@ -1036,7 +1036,7 @@ CUPnPServer::OnSearchContainer(PLT_ActionReference&          action,
         return NPT_SUCCESS;
       }
 
-      items.SetPath("videodb://tvshows/titles/");
+      items.SetPathX("videodb://tvshows/titles/");
       return BuildResponse(action, items, filter, starting_index, requested_count, sort_criteria, context, NULL);
     } else if (searchClass.Find("object.container.album.videoAlbum.videoBroadcastSeason") >= 0) {
       CVideoDatabase database;
@@ -1051,7 +1051,7 @@ CUPnPServer::OnSearchContainer(PLT_ActionReference&          action,
         return NPT_SUCCESS;
       }
 
-      items.SetPath("videodb://tvshows/titles/-1/");
+      items.SetPathX("videodb://tvshows/titles/-1/");
       return BuildResponse(action, items, filter, starting_index, requested_count, sort_criteria, context, NULL);
     } else if (searchClass.Find("object.item.videoItem") >= 0) {
       CFileItemList items, allItems;
@@ -1078,7 +1078,7 @@ CUPnPServer::OnSearchContainer(PLT_ActionReference&          action,
         items.Clear();
 
         if (!allVideoItems)
-          allItems.SetPath("videodb://movies/titles/");
+          allItems.SetPathX("videodb://movies/titles/");
       }
 
       if (allVideoItems || searchClass.Find("object.item.videoItem.videoBroadcast") >= 0)
@@ -1092,7 +1092,7 @@ CUPnPServer::OnSearchContainer(PLT_ActionReference&          action,
         items.Clear();
 
         if (!allVideoItems)
-          allItems.SetPath("videodb://tvshows/titles/");
+          allItems.SetPathX("videodb://tvshows/titles/");
       }
 
       if (allVideoItems || searchClass.Find("object.item.videoItem.musicVideoClip") >= 0)
@@ -1106,11 +1106,11 @@ CUPnPServer::OnSearchContainer(PLT_ActionReference&          action,
         items.Clear();
 
         if (!allVideoItems)
-          allItems.SetPath("videodb://musicvideos/titles/");
+          allItems.SetPathX("videodb://musicvideos/titles/");
       }
 
       if (allVideoItems)
-        allItems.SetPath("videodb://movies/titles/");
+        allItems.SetPathX("videodb://movies/titles/");
 
       return BuildResponse(action, allItems, filter, starting_index, requested_count, sort_criteria, context, NULL);
   } else if (searchClass.Find("object.item.imageItem") >= 0) {
@@ -1241,15 +1241,17 @@ CUPnPServer::OnUpdateObject(PLT_ActionReference&             action,
     }
 
     if (updatelisting) {
-        updated.SetPath(path);
-        if (updated.IsVideoDb())
-             CUtil::DeleteVideoDatabaseDirectoryCache();
-        else if (updated.IsMusicDb())
-             CUtil::DeleteMusicDatabaseDirectoryCache();
+      updated.SetPathX(path);
+      if (updated.IsVideoDb())
+        CUtil::DeleteVideoDatabaseDirectoryCache();
+      else if (updated.IsMusicDb())
+        CUtil::DeleteMusicDatabaseDirectoryCache();
 
-        CFileItemPtr msgItem(new CFileItem(updated));
-        CGUIMessage message(GUI_MSG_NOTIFY_ALL, CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow(), 0, GUI_MSG_UPDATE_ITEM, GUI_MSG_FLAG_UPDATE_LIST, msgItem);
-        CServiceBroker::GetGUI()->GetWindowManager().SendThreadMessage(message);
+      CFileItemPtr msgItem(new CFileItem(updated));
+      CGUIMessage message(GUI_MSG_NOTIFY_ALL,
+                          CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow(), 0,
+                          GUI_MSG_UPDATE_ITEM, GUI_MSG_FLAG_UPDATE_LIST, msgItem);
+      CServiceBroker::GetGUI()->GetWindowManager().SendThreadMessage(message);
     }
 
     NPT_CHECK_LABEL(service->PauseEventing(false), error);

@@ -79,7 +79,7 @@ void CSaveFileState::DoWork(CFileItem& item,
           CStreamDetails streams = tag->m_streamDetails;
           if (videodatabase.LoadVideoInfo(progressTrackingFile, *tag))
           {
-            item.SetPath(progressTrackingFile);
+            item.SetPathX(progressTrackingFile);
             item.ClearProperty("original_listitem_url");
             tag->m_streamDetails = streams;
           }
@@ -171,7 +171,7 @@ void CSaveFileState::DoWork(CFileItem& item,
           CUtil::DeleteVideoDatabaseDirectoryCache();
           CFileItemPtr msgItem(new CFileItem(item));
           if (item.HasProperty("original_listitem_url"))
-            msgItem->SetPath(item.GetProperty("original_listitem_url").asString());
+            msgItem->SetPathX(item.GetProperty("original_listitem_url").asString());
 
           // Could be part of an ISO stack. In this case the bookmark is saved onto the part.
           // In order to properly update the list, we need to refresh the stack's resume point

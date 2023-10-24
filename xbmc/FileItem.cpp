@@ -2364,7 +2364,7 @@ void CFileItemList::Assign(const CFileItemList& itemlist, bool append)
   if (!append)
     Clear();
   Append(itemlist);
-  SetPath(itemlist.GetPath());
+  SetPathX(itemlist.GetPath());
   SetLabel(itemlist.GetLabel());
   m_sortDetails = itemlist.m_sortDetails;
   m_sortDescription = itemlist.m_sortDescription;
@@ -2930,7 +2930,7 @@ void CFileItemList::StackFolders()
           {
             // NOTE: should this be done for the CD# folders too?
             item->m_bIsFolder = false;
-            item->SetPath(dvdPath);
+            item->SetPathX(dvdPath);
             item->SetLabel2("");
             item->SetLabelPreformatted(true);
             m_sortDescription.sortBy = SortByNone; /* sorting is now broken */
@@ -3102,7 +3102,7 @@ void CFileItemList::StackFiles()
           CStackDirectory dir;
           stackPath = dir.ConstructStackPath(*this, stack);
         }
-        item1->SetPath(stackPath);
+        item1->SetPathX(stackPath);
         // clean up list
         for (unsigned k = 1; k < stack.size(); k++)
           Remove(i+1);

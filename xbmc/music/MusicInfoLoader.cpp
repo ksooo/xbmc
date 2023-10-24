@@ -51,7 +51,7 @@ void CMusicInfoLoader::OnLoaderStart()
     LoadCache(m_strCacheFileName, *m_mapFileItems);
   else
   {
-    m_mapFileItems->SetPath(m_pVecItems->GetPath());
+    m_mapFileItems->SetPathX(m_pVecItems->GetPath());
     m_mapFileItems->Load();
     m_mapFileItems->SetFastLookup(true);
   }

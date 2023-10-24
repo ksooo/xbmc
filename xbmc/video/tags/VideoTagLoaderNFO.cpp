@@ -102,8 +102,7 @@ std::string CVideoTagLoaderNFO::FindNFO(const CFileItem& item,
       CFileItem item2(item);
       CURL url(item.GetPath());
       std::string strPath = URIUtils::GetDirectory(url.GetHostName());
-      item2.SetPath(URIUtils::AddFileToFolder(strPath,
-                                            URIUtils::GetFileName(item.GetPath())));
+      item2.SetPathX(URIUtils::AddFileToFolder(strPath, URIUtils::GetFileName(item.GetPath())));
       return FindNFO(item2, movieFolder);
     }
 
@@ -129,7 +128,7 @@ std::string CVideoTagLoaderNFO::FindNFO(const CFileItem& item,
       if (nfoFile.empty())
       {
         std::string stackedTitlePath = dir.GetStackedTitlePath(item.GetPath());
-        item2.SetPath(stackedTitlePath);
+        item2.SetPathX(stackedTitlePath);
         nfoFile = FindNFO(item2, movieFolder);
       }
     }

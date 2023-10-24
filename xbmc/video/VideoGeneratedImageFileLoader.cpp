@@ -40,7 +40,7 @@ void SetupRarOptions(CFileItem& item, const std::string& path)
   if (item.IsVideoDb() && item.HasVideoInfoTag())
     item.GetVideoInfoTag()->m_strFileNameAndPath = url.Get();
   else
-    item.SetPath(url.Get());
+    item.SetPathX(url.Get());
   g_directoryCache.ClearDirectory(url.GetWithoutFilename());
 }
 } // namespace

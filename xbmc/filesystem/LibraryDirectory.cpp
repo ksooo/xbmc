@@ -60,7 +60,7 @@ bool CLibraryDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CSmartPlaylistDirectory::GetDirectory(playlist, items))
         {
           items.SetProperty("library.filter", "true");
-          items.SetPath(items.GetProperty("path.db").asString());
+          items.SetPathX(items.GetProperty("path.db").asString());
           return true;
         }
       }

@@ -284,7 +284,7 @@ void CMultiPathDirectory::MergeItems(CFileItemList &items)
       std::string newPath = ConstructMultiPath(items, stack);
       for (unsigned int k = stack.size() - 1; k > 0; --k)
         items.Remove(stack[k]);
-      pItem1->SetPath(newPath);
+      pItem1->SetPathX(newPath);
       CLog::Log(LOGDEBUG, "  New path: {}", CURL::GetRedacted(pItem1->GetPath()));
     }
 

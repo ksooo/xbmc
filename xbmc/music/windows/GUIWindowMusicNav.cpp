@@ -70,7 +70,7 @@ using namespace KODI::MESSAGING;
 CGUIWindowMusicNav::CGUIWindowMusicNav(void)
     : CGUIWindowMusicBase(WINDOW_MUSIC_NAV, "MyMusicNav.xml")
 {
-  m_vecItems->SetPath("?");
+  m_vecItems->SetPathX("?");
   m_searchWithEdit = false;
 }
 
@@ -81,7 +81,7 @@ bool CGUIWindowMusicNav::OnMessage(CGUIMessage& message)
   switch (message.GetMessage())
   {
   case GUI_MSG_WINDOW_RESET:
-    m_vecItems->SetPath("?");
+    m_vecItems->SetPathX("?");
     break;
   case GUI_MSG_WINDOW_INIT:
     {
@@ -730,7 +730,7 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
         CArtist artist;
         m_musicdatabase.GetArtist(idArtist, artist, false);
         *item = CFileItem(artist);
-        item->SetPath(path);
+        item->SetPathX(path);
         CGUIWindowMusicBase::OnContextButton(itemNumber,button);
         Refresh();
         m_viewControl.SetSelectedItem(itemNumber);
@@ -747,7 +747,7 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
         CAlbum album;
         m_musicdatabase.GetAlbum(idAlbum, album, false);
         *item = CFileItem(path,album);
-        item->SetPath(path);
+        item->SetPathX(path);
         CGUIWindowMusicBase::OnContextButton(itemNumber,button);
         Refresh();
         m_viewControl.SetSelectedItem(itemNumber);
@@ -853,7 +853,7 @@ bool CGUIWindowMusicNav::GetSongsFromPlayList(const std::string& strPlayList, CF
     items.Add(pItem);
   }
 
-  items.SetPath(strPlayList);
+  items.SetPathX(strPlayList);
   CLog::Log(LOGDEBUG, "CGUIWindowMusicNav, opening playlist [{}]", strPlayList);
 
   std::unique_ptr<CPlayList> pPlayList (CPlayListFactory::Create(strPlayList));

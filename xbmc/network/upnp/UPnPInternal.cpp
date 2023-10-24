@@ -1407,7 +1407,7 @@ std::shared_ptr<CFileItem> GetFileItem(const NPT_String& uri, const NPT_String& 
 
   if (item)
   {
-    item->SetPath((const char*)uri);
+    item->SetPathX((const char*)uri);
     GetResource(object, *item);
   }
   else
