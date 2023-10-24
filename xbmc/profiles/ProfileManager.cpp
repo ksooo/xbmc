@@ -506,10 +506,9 @@ bool CProfileManager::DeleteProfile(unsigned int index)
     m_settings->Save();
   }
 
-  CFileItemPtr item =
-      std::make_shared<CFileItem>(URIUtils::AddFileToFolder(GetUserDataFolder(), strDirectory));
-  item->SetPath(URIUtils::AddFileToFolder(GetUserDataFolder(), strDirectory + "/"));
-  item->m_bIsFolder = true;
+  const auto item{std::make_shared<CFileItem>(
+      URIUtils::AddFileToFolder(GetUserDataFolder(), strDirectory + "/"), true)};
+  item->SetLabel(URIUtils::AddFileToFolder(GetUserDataFolder(), strDirectory));
   item->Select(true);
 
   CGUIComponent *gui = CServiceBroker::GetGUI();

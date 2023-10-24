@@ -1132,8 +1132,7 @@ CUPnPServer::OnUpdateObject(PLT_ActionReference&             action,
                             const PLT_HttpRequestContext&    context)
 {
     std::string path(CURL::Decode(object_id));
-    CFileItem updated;
-    updated.SetPath(path);
+    CFileItem updated{path, false};
     m_logger->info("OnUpdateObject: {} from {}", path,
                    (const char*)context.GetRemoteAddress().GetIpAddress().ToString());
 

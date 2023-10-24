@@ -44,7 +44,6 @@ bool CPosixDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
     std::string itemLabel(entry->d_name);
     CCharsetConverter::unknownToUTF8(itemLabel);
-    CFileItemPtr pItem(new CFileItem(itemLabel));
     std::string itemPath(URIUtils::AddFileToFolder(root, entry->d_name));
 
     bool bStat = false;
@@ -60,20 +59,18 @@ bool CPosixDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         bStat = true;
     }
 
+    bool isFolder{false};
     if (entry->d_type == DT_DIR || (bStat && S_ISDIR(buffer.st_mode)))
     {
-      pItem->m_bIsFolder = true;
+      isFolder = true;
       URIUtils::AddSlashAtEnd(itemPath);
     }
-    else
-    {
-      pItem->m_bIsFolder = false;
-    }
+
+    const auto pItem{std::make_shared<CFileItem>(itemPath, isFolder)};
+    pItem->SetLabel(itemLabel);
 
     if (StringUtils::StartsWith(entry->d_name, "."))
       pItem->SetProperty("file:hidden", true);
-
-    pItem->SetPath(itemPath);
 
     if (!(m_flags & DIR_FLAG_NO_FILE_INFO))
     {

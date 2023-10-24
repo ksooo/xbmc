@@ -156,13 +156,13 @@ bool CWin32SMBDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       continue;
     }
 
-    CFileItemPtr pItem(new CFileItem(itemName));
+    const bool isFolder{(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0};
+    std::string itemPath{pathWithSlash + itemName};
+    if (isFolder)
+      itemPath += '/';
 
-    pItem->m_bIsFolder = ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
-    if (pItem->m_bIsFolder)
-      pItem->SetPath(pathWithSlash + itemName + '/');
-    else
-      pItem->SetPath(pathWithSlash + itemName);
+    const auto pItem{std::make_shared<CFileItem>(itemPath, isFolder)};
+    pItem->SetLabel(itemName);
 
     if ((findData.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)) != 0
           || itemName.front() == '.') // mark files starting from dot as hidden
@@ -465,11 +465,11 @@ static bool localGetNetworkResources(struct _NETRESOURCEW* basePathToScanPtr, co
               std::string remoteNameUtf8;
               if (g_charsetConverter.wToUTF8(remoteName.substr(2), remoteNameUtf8, true) && !remoteNameUtf8.empty())
               {
-                CFileItemPtr pItem(new CFileItem(remoteNameUtf8));
-                pItem->SetPath(urlPrefixForItems + remoteNameUtf8 + '/');
-                pItem->m_bIsFolder = true;
+                const auto pItem{
+                    std::make_shared<CFileItem>(urlPrefixForItems + remoteNameUtf8 + '/', true)};
+                pItem->SetLabel(remoteNameUtf8);
                 items.Add(pItem);
-              }
+                }
               else
                 CLog::LogF(LOGERROR,
                            "Can't convert server wide string name \"{}\" to UTF-8 encoding",
@@ -499,14 +499,14 @@ static bool localGetNetworkResources(struct _NETRESOURCEW* basePathToScanPtr, co
                 std::string shareNameUtf8;
                 if (g_charsetConverter.wToUTF8(serverShareName.substr(slashPos + 1), shareNameUtf8, true) && !shareNameUtf8.empty())
                 {
-                  CFileItemPtr pItem(new CFileItem(shareNameUtf8));
-                  pItem->SetPath(urlPrefixForItems + shareNameUtf8 + '/');
-                  pItem->m_bIsFolder = true;
+                  const auto pItem{
+                      std::make_shared<CFileItem>(urlPrefixForItems + shareNameUtf8 + '/', true)};
+                  pItem->SetLabel(shareNameUtf8);
                   if (curResource.dwDisplayType == RESOURCEDISPLAYTYPE_SHAREADMIN)
                     pItem->SetProperty("file:hidden", true);
 
                   items.Add(pItem);
-                }
+                  }
                 else
                 {
                   CLog::LogF(
@@ -611,14 +611,14 @@ static bool localGetShares(const std::wstring& serverNameToScan, const std::stri
           if (curShare.shi1_netname && curShare.shi1_netname[0] &&
               g_charsetConverter.wToUTF8(curShare.shi1_netname, shareNameUtf8, true) && !shareNameUtf8.empty())
           {
-            CFileItemPtr pItem(new CFileItem(shareNameUtf8));
-            pItem->SetPath(urlPrefixForItems + shareNameUtf8 + '/');
-            pItem->m_bIsFolder = true;
+            const auto pItem{
+                std::make_shared<CFileItem>(urlPrefixForItems + shareNameUtf8 + '/', true)};
+            pItem->SetLabel(shareNameUtf8);
             if ((curShare.shi1_type & STYPE_SPECIAL) != 0 || shareNameUtf8.back() == '$')
               pItem->SetProperty("file:hidden", true);
 
             items.Add(pItem);
-          }
+            }
           else
             errorFlag = true;
         }
@@ -649,11 +649,11 @@ static bool localGetServers(const std::string& urlPrefixForItems, CFileItemList&
       std::string shareNameUtf8;
       if (g_charsetConverter.wToUTF8(hostname, shareNameUtf8, true) && !shareNameUtf8.empty())
       {
-        CFileItemPtr pItem = std::make_shared<CFileItem>(shareNameUtf8);
-        pItem->SetPath(urlPrefixForItems + shareNameUtf8 + '/');
-        pItem->m_bIsFolder = true;
+        const auto pItem{
+            std::make_shared<CFileItem>(urlPrefixForItems + shareNameUtf8 + '/', true)};
+        pItem->SetLabel(shareNameUtf8);
         items.Add(pItem);
-      }
+        }
     }
     return true;
   }

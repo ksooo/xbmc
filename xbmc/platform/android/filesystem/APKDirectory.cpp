@@ -68,12 +68,10 @@ bool CAPKDirectory::GetDirectory(const CURL& url, CFileItemList &items)
     if (zip_stat_index(zip_archive, zip_index, zip_flags, &sb) != -1)
     {
       g_charsetConverter.unknownToUTF8(test_name);
-      CFileItemPtr pItem(new CFileItem(test_name));
+      const auto pItem{std::make_shared<CFileItem>(host + "/" + test_name, dir_marker > 0)};
+      pItem->SetLabel(test_name.substr(path.size()));
       pItem->m_dwSize    = sb.size;
       pItem->m_dateTime  = sb.mtime;
-      pItem->m_bIsFolder = dir_marker > 0 ;
-      pItem->SetPath(host + "/" + test_name);
-      pItem->SetLabel(test_name.substr(path.size()));
       items.Add(pItem);
     }
   }

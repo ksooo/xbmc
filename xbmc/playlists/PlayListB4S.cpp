@@ -90,8 +90,8 @@ bool CPlayListB4S::LoadData(std::istream& stream)
         std::string strInfo = pNodeInfo->FirstChild()->Value();
         strFileName = URIUtils::SubstitutePath(strFileName);
         CUtil::GetQualifiedFilename(m_strBasePath, strFileName);
-        CFileItemPtr newItem(new CFileItem(strInfo));
-        newItem->SetPath(strFileName);
+        const auto newItem{std::make_shared<CFileItem>(strFileName, false)};
+        newItem->SetLabel(strInfo);
         newItem->GetMusicInfoTag()->SetDuration(lDuration);
         Add(newItem);
       }

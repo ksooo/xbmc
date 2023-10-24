@@ -60,13 +60,12 @@ bool CNFSDirectory::GetDirectoryFromExportList(const std::string& strPath, CFile
     const std::string& currentExport(it);
     URIUtils::RemoveSlashAtEnd(nonConstStrPath);
 
-    CFileItemPtr pItem(new CFileItem(currentExport));
     std::string path(nonConstStrPath + currentExport);
     URIUtils::AddSlashAtEnd(path);
-    pItem->SetPath(path);
+    const auto pItem{std::make_shared<CFileItem>(path, true)};
+    pItem->SetLabel(currentExport);
     pItem->m_dateTime = 0;
 
-    pItem->m_bIsFolder = true;
     items.Add(pItem);
   }
 
@@ -85,13 +84,12 @@ bool CNFSDirectory::GetServerList(CFileItemList &items)
   {
       std::string currentExport(srv->addr);
 
-      CFileItemPtr pItem(new CFileItem(currentExport));
       std::string path("nfs://" + currentExport);
       URIUtils::AddSlashAtEnd(path);
-      pItem->m_dateTime=0;
+      const auto pItem{std::make_shared<CFileItem>(path, true)};
+      pItem->SetLabel(currentExport);
+      pItem->m_dateTime = 0;
 
-      pItem->SetPath(path);
-      pItem->m_bIsFolder = true;
       items.Add(pItem);
       ret = true; //added at least one entry
   }
@@ -282,25 +280,18 @@ bool CNFSDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       fileTime.highDateTime = (DWORD)(ll >> 32);
       KODI::TIME::FileTimeToLocalFileTime(&fileTime, &localTime);
 
-      CFileItemPtr pItem(new CFileItem(tmpDirent.name));
-      pItem->m_dateTime=localTime;
-      pItem->m_dwSize = iSize;
-
       if (bIsDir)
-      {
         URIUtils::AddSlashAtEnd(path);
-        pItem->m_bIsFolder = true;
-      }
-      else
-      {
-        pItem->m_bIsFolder = false;
-      }
+
+      const auto pItem{std::make_shared<CFileItem>(path, bIsDir)};
+      pItem->SetLabel(tmpDirent.name);
+      pItem->m_dateTime = localTime;
+      pItem->m_dwSize = iSize;
 
       if (strName[0] == '.')
       {
         pItem->SetProperty("file:hidden", true);
       }
-      pItem->SetPath(path);
       items.Add(pItem);
     }
   }

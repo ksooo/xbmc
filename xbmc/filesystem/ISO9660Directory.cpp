@@ -49,19 +49,17 @@ bool CISO9660Directory::GetDirectory(const CURL& url, CFileItemList& items)
       {
         if (filename != "." && filename != "..")
         {
-          CFileItemPtr pItem(new CFileItem(filename));
           std::string strDir(strRoot + filename);
           URIUtils::AddSlashAtEnd(strDir);
-          pItem->SetPath(strDir);
-          pItem->m_bIsFolder = true;
+          const auto pItem{std::make_shared<CFileItem>(strDir, true)};
+          pItem->SetLabel(filename);
           items.Add(pItem);
         }
       }
       else
       {
-        CFileItemPtr pItem(new CFileItem(filename));
-        pItem->SetPath(strRoot + filename);
-        pItem->m_bIsFolder = false;
+        const auto pItem{std::make_shared<CFileItem>(strRoot + filename, false)};
+        pItem->SetLabel(filename);
         pItem->m_dwSize = file->p_stat->size;
         items.Add(pItem);
       }

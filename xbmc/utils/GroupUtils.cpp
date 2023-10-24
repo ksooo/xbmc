@@ -68,20 +68,20 @@ bool GroupUtils::Group(GroupBy groupBy, const std::string &baseDir, const CFileI
         continue;
       }
 
-      CFileItemPtr pItem(new CFileItem((*set->second.begin())->GetVideoInfoTag()->m_set.title));
-      pItem->GetVideoInfoTag()->m_iDbId = set->first;
-      pItem->GetVideoInfoTag()->m_type = MediaTypeVideoCollection;
-
       std::string basePath = StringUtils::Format("videodb://movies/sets/{}/", set->first);
+      std::string path;
       CVideoDbUrl videoUrl;
       if (!videoUrl.FromString(basePath))
-        pItem->SetPath(basePath);
+        path = basePath;
       else
       {
         videoUrl.AddOptions((*set->second.begin())->GetURL().GetOptions());
-        pItem->SetPath(videoUrl.ToString());
+        path = videoUrl.ToString();
       }
-      pItem->m_bIsFolder = true;
+      const auto pItem{std::make_shared<CFileItem>(path, true)};
+      pItem->SetLabel((*set->second.begin())->GetVideoInfoTag()->m_set.title);
+      pItem->GetVideoInfoTag()->m_iDbId = set->first;
+      pItem->GetVideoInfoTag()->m_type = MediaTypeVideoCollection;
 
       CVideoInfoTag* setInfo = pItem->GetVideoInfoTag();
       setInfo->m_strPath = pItem->GetPath();

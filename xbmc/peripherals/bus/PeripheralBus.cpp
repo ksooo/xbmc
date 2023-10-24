@@ -300,8 +300,8 @@ void CPeripheralBus::GetDirectory(const std::string& strPath, CFileItemList& ite
     if (peripheral->IsHidden())
       continue;
 
-    CFileItemPtr peripheralFile(new CFileItem(peripheral->DeviceName()));
-    peripheralFile->SetPath(peripheral->FileLocation());
+    const auto peripheralFile{std::make_shared<CFileItem>(peripheral->FileLocation(), false)};
+    peripheralFile->SetLabel(peripheral->DeviceName());
     peripheralFile->SetProperty("vendor", peripheral->VendorIdAsString());
     peripheralFile->SetProperty("product", peripheral->ProductIdAsString());
     peripheralFile->SetProperty(

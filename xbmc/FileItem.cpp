@@ -1923,7 +1923,7 @@ void CFileItem::SetFromMusicInfoTag(const MUSIC_INFO::CMusicInfoTag& music)
   const std::string path = GetPath();
   if (path.empty())
   {
-    SetPath(music.GetURL());
+    m_strPath = music.GetURL();
   }
   else
   {

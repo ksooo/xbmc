@@ -35,11 +35,12 @@ bool CMusicFileDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
   for (int i=0; i<iStreams; ++i)
   {
-    std::string strLabel =
-        StringUtils::Format("{} - {} {:02}", strFileName, g_localizeStrings.Get(554), i + 1);
-    CFileItemPtr pItem(new CFileItem(strLabel));
-    strLabel = StringUtils::Format("{}{}-{}.{}", strPath, strFileName, i + 1, m_strExt);
-    pItem->SetPath(strLabel);
+    const std::string path{
+        StringUtils::Format("{}{}-{}.{}", strPath, strFileName, i + 1, m_strExt)};
+    const auto pItem{std::make_shared<CFileItem>(path, false)};
+    const std::string label{
+        StringUtils::Format("{} - {} {:02}", strFileName, g_localizeStrings.Get(554), i + 1)};
+    pItem->SetLabel(label);
 
     /*
      * Try fist to load tag about related stream track. If them fails or not
@@ -47,7 +48,7 @@ bool CMusicFileDirectory::GetDirectory(const CURL& url, CFileItemList &items)
      * are all the same).
      */
     MUSIC_INFO::CMusicInfoTag tag;
-    if (Load(strLabel, tag, nullptr))
+    if (Load(label, tag, nullptr))
       *pItem->GetMusicInfoTag() = tag;
     else if (m_tag.Loaded())
       *pItem->GetMusicInfoTag() = m_tag;

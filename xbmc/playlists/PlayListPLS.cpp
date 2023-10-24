@@ -270,8 +270,8 @@ bool CPlayListASX::LoadAsxIniInfo(std::istream &stream)
       value += stream.get();
 
     CLog::Log(LOGINFO, "Adding element {}={}", name, value);
-    CFileItemPtr newItem(new CFileItem(value));
-    newItem->SetPath(value);
+    const auto newItem{std::make_shared<CFileItem>(value, false)};
+    newItem->SetLabel(value);
     if (newItem->IsVideo() && !newItem->HasVideoInfoTag()) // File is a video and needs a VideoInfoTag
       newItem->GetVideoInfoTag()->Reset(); // Force VideoInfoTag creation
     Add(newItem);
@@ -370,8 +370,8 @@ bool CPlayListASX::LoadData(std::istream& stream)
               title = value;
 
             CLog::Log(LOGINFO, "Adding element {}, {}", title, value);
-            CFileItemPtr newItem(new CFileItem(title));
-            newItem->SetPath(value);
+            const auto newItem{std::make_shared<CFileItem>(value, false)};
+            newItem->SetLabel(title);
             Add(newItem);
           }
           pRef = pRef->NextSiblingElement("ref");
@@ -405,8 +405,8 @@ bool CPlayListRAM::LoadData(std::istream& stream)
     strMMS += stream.get();
 
   CLog::Log(LOGINFO, "Adding element {}", strMMS);
-  CFileItemPtr newItem(new CFileItem(strMMS));
-  newItem->SetPath(strMMS);
+  const auto newItem{std::make_shared<CFileItem>(strMMS, false)};
+  newItem->SetLabel(strMMS);
   Add(newItem);
   return true;
 }

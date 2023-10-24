@@ -5040,16 +5040,15 @@ bool CMusicDatabase::GetGenresNav(const std::string& strBaseDir,
     // get data from returned rows
     while (!m_pDS->eof())
     {
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv("genre.strGenre").get_asString()));
-      pItem->GetMusicInfoTag()->SetGenre(m_pDS->fv("genre.strGenre").get_asString());
-      pItem->GetMusicInfoTag()->SetDatabaseId(m_pDS->fv("genre.idGenre").get_asInt(), "genre");
-
+      const int genreId{m_pDS->fv("genre.idGenre").get_asInt()};
       CMusicDbUrl itemUrl = musicUrl;
-      std::string strDir = StringUtils::Format("{}/", m_pDS->fv("genre.idGenre").get_asInt());
+      std::string strDir = StringUtils::Format("{}/", genreId);
       itemUrl.AppendPath(strDir);
-      pItem->SetPath(itemUrl.ToString());
-
-      pItem->m_bIsFolder = true;
+      const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+      const std::string label{m_pDS->fv("genre.strGenre").get_asString()};
+      pItem->SetLabel(label);
+      pItem->GetMusicInfoTag()->SetGenre(label);
+      pItem->GetMusicInfoTag()->SetDatabaseId(genreId, "genre");
       items.Add(pItem);
 
       m_pDS->next();
@@ -5157,17 +5156,16 @@ bool CMusicDatabase::GetSourcesNav(const std::string& strBaseDir,
     // get data from returned rows
     while (!m_pDS->eof())
     {
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv("source.strName").get_asString()));
-      pItem->GetMusicInfoTag()->SetTitle(m_pDS->fv("source.strName").get_asString());
-      pItem->GetMusicInfoTag()->SetDatabaseId(m_pDS->fv("source.idSource").get_asInt(), "source");
-
+      const int idSource{m_pDS->fv("source.idSource").get_asInt()};
       CMusicDbUrl itemUrl = musicUrl;
-      std::string strDir = StringUtils::Format("{}/", m_pDS->fv("source.idSource").get_asInt());
+      std::string strDir = StringUtils::Format("{}/", idSource);
       itemUrl.AppendPath(strDir);
-      itemUrl.AddOption("sourceid", m_pDS->fv("source.idSource").get_asInt());
-      pItem->SetPath(itemUrl.ToString());
-
-      pItem->m_bIsFolder = true;
+      itemUrl.AddOption("sourceid", idSource);
+      const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+      const std::string label{m_pDS->fv("source.strName").get_asString()};
+      pItem->SetLabel(label);
+      pItem->GetMusicInfoTag()->SetTitle(label);
+      pItem->GetMusicInfoTag()->SetDatabaseId(idSource, "source");
       items.Add(pItem);
 
       m_pDS->next();
@@ -5236,21 +5234,20 @@ bool CMusicDatabase::GetYearsNav(const std::string& strBaseDir,
     // get data from returned rows
     while (!m_pDS->eof())
     {
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(0).get_asString()));
-      pItem->GetMusicInfoTag()->SetYear(m_pDS->fv(0).get_asInt());
+      const int year{m_pDS->fv(0).get_asInt()};
+      CMusicDbUrl itemUrl = musicUrl;
+      std::string strDir = StringUtils::Format("{}/", year);
+      itemUrl.AppendPath(strDir);
+      if (useOriginalYears)
+        itemUrl.AddOption("useoriginalyear", true);
+
+      const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+      pItem->SetLabel(m_pDS->fv(0).get_asString());
+      pItem->GetMusicInfoTag()->SetYear(year);
       if (useOriginalYears)
         pItem->GetMusicInfoTag()->SetDatabaseId(-1, "originalyear");
       else
         pItem->GetMusicInfoTag()->SetDatabaseId(-1, "year");
-
-      CMusicDbUrl itemUrl = musicUrl;
-      std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      itemUrl.AppendPath(strDir);
-      if (useOriginalYears)
-        itemUrl.AddOption("useoriginalyear", true);
-      pItem->SetPath(itemUrl.ToString());
-
-      pItem->m_bIsFolder = true;
       items.Add(pItem);
 
       m_pDS->next();
@@ -5306,17 +5303,16 @@ bool CMusicDatabase::GetRolesNav(const std::string& strBaseDir,
     // get data from returned rows
     while (!m_pDS->eof())
     {
-      std::string labelValue = m_pDS->fv("role.strRole").get_asString();
-      CFileItemPtr pItem(new CFileItem(labelValue));
-      pItem->GetMusicInfoTag()->SetTitle(labelValue);
-      pItem->GetMusicInfoTag()->SetDatabaseId(m_pDS->fv("role.idRole").get_asInt(), "role");
+      const int roleId{m_pDS->fv("role.idRole").get_asInt()};
       CMusicDbUrl itemUrl = musicUrl;
-      std::string strDir = StringUtils::Format("{}/", m_pDS->fv("role.idRole").get_asInt());
+      std::string strDir = StringUtils::Format("{}/", roleId);
       itemUrl.AppendPath(strDir);
-      itemUrl.AddOption("roleid", m_pDS->fv("role.idRole").get_asInt());
-      pItem->SetPath(itemUrl.ToString());
-
-      pItem->m_bIsFolder = true;
+      itemUrl.AddOption("roleid", roleId);
+      const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+      const std::string label{m_pDS->fv("role.strRole").get_asString()};
+      pItem->SetLabel(label);
+      pItem->GetMusicInfoTag()->SetTitle(label);
+      pItem->GetMusicInfoTag()->SetDatabaseId(roleId, "role");
       items.Add(pItem);
 
       m_pDS->next();
@@ -5410,15 +5406,11 @@ bool CMusicDatabase::GetCommonNav(const std::string& strBaseDir,
     // get data from returned rows
     while (!m_pDS->eof())
     {
-      std::string labelValue = m_pDS->fv(labelField.c_str()).get_asString();
-      CFileItemPtr pItem(new CFileItem(labelValue));
-
+      const std::string label{m_pDS->fv(labelField.c_str()).get_asString()};
       CMusicDbUrl itemUrl = musicUrl;
-      std::string strDir = StringUtils::Format("{}/", labelValue);
-      itemUrl.AppendPath(strDir);
-      pItem->SetPath(itemUrl.ToString());
-
-      pItem->m_bIsFolder = true;
+      itemUrl.AppendPath(StringUtils::Format("{}/", label));
+      const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+      pItem->SetLabel(label);
       items.Add(pItem);
 
       m_pDS->next();
@@ -10379,14 +10371,13 @@ bool CMusicDatabase::GetSources(CFileItemList& items)
           sourcePaths.clear();
         }
         idSource = m_pDS->fv("source.idSource").get_asInt();
-        CFileItemPtr pItem(new CFileItem(m_pDS->fv("source.strName").get_asString()));
+
+        const std::string path{m_pDS->fv("source.strMultiPath").get_asString()};
+        const auto pItem{std::make_shared<CFileItem>(path, true)};
+        pItem->SetLabel(m_pDS->fv("source.strName").get_asString());
         pItem->GetMusicInfoTag()->SetDatabaseId(idSource, "source");
         // Set tag URL for "file" property in AudioLibary processing
-        pItem->GetMusicInfoTag()->SetURL(m_pDS->fv("source.strMultipath").get_asString());
-        // Set item path as source URL encoded multipath too
-        pItem->SetPath(m_pDS->fv("source.strMultiPath").get_asString());
-
-        pItem->m_bIsFolder = true;
+        pItem->GetMusicInfoTag()->SetURL(path);
         items.Add(pItem);
       }
       // Get path data
@@ -11106,13 +11097,13 @@ bool CMusicDatabase::GetGenresJSON(CFileItemList& items, bool bSources)
           genreSources.clear();
         }
         idGenre = m_pDS->fv("genre.idGenre").get_asInt();
-        std::string strGenre = m_pDS->fv("genre.strGenre").get_asString();
-        CFileItemPtr pItem(new CFileItem(strGenre));
-        pItem->GetMusicInfoTag()->SetTitle(strGenre);
-        pItem->GetMusicInfoTag()->SetGenre(strGenre);
+        const auto pItem{std::make_shared<CFileItem>(
+            StringUtils::Format("musicdb://genres/{}/", idGenre), true)};
+        const std::string genre{m_pDS->fv("genre.strGenre").get_asString()};
+        pItem->SetLabel(genre);
+        pItem->GetMusicInfoTag()->SetTitle(genre);
+        pItem->GetMusicInfoTag()->SetGenre(genre);
         pItem->GetMusicInfoTag()->SetDatabaseId(idGenre, "genre");
-        pItem->SetPath(StringUtils::Format("musicdb://genres/{}/", idGenre));
-        pItem->m_bIsFolder = true;
         items.Add(pItem);
       }
       // Get source data

@@ -57,50 +57,42 @@ public:
 
     CFileItemList options;
 
-    const std::shared_ptr<CFileItem> itemAll =
-        std::make_shared<CFileItem>(StringUtils::Format(g_localizeStrings.Get(593))); // All
-    itemAll->SetPath("all");
+    const auto itemAll{std::make_shared<CFileItem>("all", false)};
+    itemAll->SetLabel(g_localizeStrings.Get(593)); // All
     options.Add(itemAll);
 
     // if channels are cleared, groups, EPG data and providers must also be cleared
-    const std::shared_ptr<CFileItem> itemChannels =
-        std::make_shared<CFileItem>(StringUtils::Format("{}, {}, {}, {}",
-                                                        g_localizeStrings.Get(19019), // Channels
-                                                        g_localizeStrings.Get(19146), // Groups
-                                                        g_localizeStrings.Get(19069), // Guide
-                                                        g_localizeStrings.Get(19334))); // Providers
-    itemChannels->SetPath("channels");
+    const auto itemChannels{std::make_shared<CFileItem>("channels", false)};
+    itemChannels->SetLabel(StringUtils::Format("{}, {}, {}, {}",
+                                               g_localizeStrings.Get(19019), // Channels
+                                               g_localizeStrings.Get(19146), // Groups
+                                               g_localizeStrings.Get(19069), // Guide
+                                               g_localizeStrings.Get(19334))); // Providers
     itemChannels->Select(true); // preselect this item in dialog
     options.Add(itemChannels);
 
-    const std::shared_ptr<CFileItem> itemGroups =
-        std::make_shared<CFileItem>(g_localizeStrings.Get(19146)); // Groups
-    itemGroups->SetPath("groups");
+    const auto itemGroups{std::make_shared<CFileItem>("groups", false)};
+    itemGroups->SetLabel(g_localizeStrings.Get(19146)); // Groups
     options.Add(itemGroups);
 
-    const std::shared_ptr<CFileItem> itemGuide =
-        std::make_shared<CFileItem>(g_localizeStrings.Get(19069)); // Guide
-    itemGuide->SetPath("guide");
+    const auto itemGuide{std::make_shared<CFileItem>("guide", false)};
+    itemGuide->SetLabel(g_localizeStrings.Get(19069)); // Guide
     options.Add(itemGuide);
 
-    const std::shared_ptr<CFileItem> itemProviders =
-        std::make_shared<CFileItem>(g_localizeStrings.Get(19334)); // Providers
-    itemProviders->SetPath("providers");
+    const auto itemProviders{std::make_shared<CFileItem>("providers", false)};
+    itemProviders->SetLabel(g_localizeStrings.Get(19334)); // Providers
     options.Add(itemProviders);
 
-    const std::shared_ptr<CFileItem> itemReminders =
-        std::make_shared<CFileItem>(g_localizeStrings.Get(19215)); // Reminders
-    itemReminders->SetPath("reminders");
+    const auto itemReminders{std::make_shared<CFileItem>("reminders", false)};
+    itemReminders->SetLabel(g_localizeStrings.Get(19215)); // Reminders
     options.Add(itemReminders);
 
-    const std::shared_ptr<CFileItem> itemRecordings =
-        std::make_shared<CFileItem>(g_localizeStrings.Get(19017)); // Recordings
-    itemRecordings->SetPath("recordings");
+    const auto itemRecordings{std::make_shared<CFileItem>("recordings", false)};
+    itemRecordings->SetLabel(g_localizeStrings.Get(19017)); // Recordings
     options.Add(itemRecordings);
 
-    const std::shared_ptr<CFileItem> itemClients =
-        std::make_shared<CFileItem>(g_localizeStrings.Get(24019)); // PVR clients
-    itemClients->SetPath("clients");
+    const auto itemClients{std::make_shared<CFileItem>("clients", false)};
+    itemClients->SetLabel(g_localizeStrings.Get(24019)); // PVR clients
     options.Add(itemClients);
 
     pDlgSelect->Reset();

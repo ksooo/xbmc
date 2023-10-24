@@ -848,8 +848,8 @@ bool CGUIWindowMusicNav::GetSongsFromPlayList(const std::string& strPlayList, CF
 
   if (m_guiState.get() && !m_guiState->HideParentDirItems())
   {
-    CFileItemPtr pItem(new CFileItem(".."));
-    pItem->SetPath(strParentPath);
+    const auto pItem{std::make_shared<CFileItem>(strParentPath, true)};
+    pItem->SetLabel("..");
     items.Add(pItem);
   }
 

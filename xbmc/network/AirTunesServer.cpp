@@ -381,8 +381,7 @@ void* CAirTunesServer::AudioOutputFunctions::audio_init(void *cls, int bits, int
 
   CServiceBroker::GetAppMessenger()->SendMsg(TMSG_MEDIA_STOP);
 
-  CFileItem *item = new CFileItem();
-  item->SetPath(pipe->GetName());
+  CFileItem* item{new CFileItem(pipe->GetName(), false)};
   item->SetMimeType("audio/x-xbmc-pcm");
   m_streamStarted = true;
   m_sampleRate = samplerate;

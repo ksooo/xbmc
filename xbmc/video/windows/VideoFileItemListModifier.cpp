@@ -66,10 +66,10 @@ void CVideoFileItemListModifier::AddQueuingFolder(CFileItemList& items)
   {
   case NODE_TYPE_SEASONS:
   {
-    const std::string& strLabel = g_localizeStrings.Get(20366);
-    pItem = std::make_shared<CFileItem>(strLabel); // "All Seasons"
     videoUrl.AppendPath("-1/");
-    pItem->SetPath(videoUrl.ToString());
+    pItem = std::make_shared<CFileItem>(videoUrl.ToString(), true);
+    const std::string& strLabel = g_localizeStrings.Get(20366); // "All Seasons"
+    pItem->SetLabel(strLabel);
     // set the number of watched and unwatched items accordingly
     int watched = 0;
     int unwatched = 0;
@@ -122,9 +122,9 @@ void CVideoFileItemListModifier::AddQueuingFolder(CFileItemList& items)
   }
   break;
   case NODE_TYPE_MUSICVIDEOS_ALBUM:
-    pItem = std::make_shared<CFileItem>("* " + g_localizeStrings.Get(16100)); // "* All Videos"
     videoUrl.AppendPath("-1/");
-    pItem->SetPath(videoUrl.ToString());
+    pItem = std::make_shared<CFileItem>(videoUrl.ToString(), true);
+    pItem->SetLabel("* " + g_localizeStrings.Get(16100)); // "* All Videos"
     break;
   default:
     break;
@@ -132,7 +132,6 @@ void CVideoFileItemListModifier::AddQueuingFolder(CFileItemList& items)
 
   if (pItem)
   {
-    pItem->m_bIsFolder = true;
     pItem->SetSpecialSort(CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_bVideoLibraryAllItemsOnBottom ? SortSpecialOnBottom : SortSpecialOnTop);
     pItem->SetCanQueue(false);
     items.Add(pItem);

@@ -123,8 +123,7 @@ std::string CVideoTagLoaderNFO::FindNFO(const CFileItem& item,
       // first try .nfo file matching first file in stack
       CStackDirectory dir;
       std::string firstFile = dir.GetFirstStackedFile(item.GetPath());
-      CFileItem item2;
-      item2.SetPath(firstFile);
+      CFileItem item2{firstFile, false};
       nfoFile = FindNFO(item2, movieFolder);
       // else try .nfo file matching stacked title
       if (nfoFile.empty())
@@ -151,11 +150,11 @@ std::string CVideoTagLoaderNFO::FindNFO(const CFileItem& item,
     if (nfoFile.empty()) // final attempt - strip off any cd1 folders
     {
       URIUtils::RemoveSlashAtEnd(strPath); // need no slash for the check that follows
-      CFileItem item2;
       if (StringUtils::EndsWithNoCase(strPath, "cd1"))
       {
         strPath.erase(strPath.size() - 3);
-        item2.SetPath(URIUtils::AddFileToFolder(strPath, URIUtils::GetFileName(item.GetPath())));
+        CFileItem item2{URIUtils::AddFileToFolder(strPath, URIUtils::GetFileName(item.GetPath())),
+                        false};
         return FindNFO(item2, movieFolder);
       }
     }

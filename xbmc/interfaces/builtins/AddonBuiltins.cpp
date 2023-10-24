@@ -89,14 +89,7 @@ static int EnableAddon(const std::vector<std::string>& params)
 static int RunPlugin(const std::vector<std::string>& params)
 {
   if (params.size())
-  {
-    CFileItem item(params[0]);
-    if (!item.m_bIsFolder)
-    {
-      item.SetPath(params[0]);
-      XFILE::CPluginDirectory::RunScriptWithParams(item.GetPath(), false);
-    }
-  }
+    XFILE::CPluginDirectory::RunScriptWithParams(params[0], false);
   else
     CLog::Log(LOGERROR, "RunPlugin called with no arguments.");
 

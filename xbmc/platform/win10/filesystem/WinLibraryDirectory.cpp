@@ -110,19 +110,17 @@ bool CWinLibraryDirectory::GetDirectory(const CURL& url, CFileItemList& items)
     IStorageItem item = vectorView.GetAt(i);
     std::string itemName = FromW(item.Name().c_str());
 
-    CFileItemPtr pItem(new CFileItem(itemName));
-    pItem->m_bIsFolder =
-        (item.Attributes() & FileAttributes::Directory) == FileAttributes::Directory;
+    const bool isFolder{(item.Attributes() & FileAttributes::Directory) ==
+                        FileAttributes::Directory};
+    std::string itemPath{path + itemName};
+    if (isFolder)
+      itemPath += "/";
+    const auto pItem{std::make_shared<CFileItem>(itemPath, isFolder)};
+    pItem->SetLabel(itemName);
+
     IStorageItemProperties storageItemProperties = item.as<IStorageItemProperties>();
     if (item != nullptr)
-    {
       pItem->m_strTitle = FromW(storageItemProperties.DisplayName().c_str());
-    }
-
-    if (pItem->m_bIsFolder)
-      pItem->SetPath(path + itemName + "/");
-    else
-      pItem->SetPath(path + itemName);
 
     if (itemName.front() == '.')
       pItem->SetProperty("file:hidden", true);

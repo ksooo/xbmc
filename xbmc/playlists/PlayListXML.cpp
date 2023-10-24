@@ -116,9 +116,8 @@ bool CPlayListXML::Load( const std::string& strFileName )
        if ( !lang.empty() )
          name += " [" + lang + "]";
 
-       std::string info = name;
-       CFileItemPtr newItem( new CFileItem(info) );
-       newItem->SetPath(url);
+       const auto newItem{std::make_shared<CFileItem>(url, false)};
+       newItem->SetLabel(name);
 
        // Set language as metadata
        if ( !lang.empty() )

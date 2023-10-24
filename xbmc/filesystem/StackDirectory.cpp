@@ -35,9 +35,8 @@ namespace XFILE
 
     for (const std::string& i : files)
     {
-      CFileItemPtr item(new CFileItem(i));
-      item->SetPath(i);
-      item->m_bIsFolder = false;
+      const auto item{std::make_shared<CFileItem>(i, false)};
+      item->SetLabel(i);
       items.Add(item);
     }
     return true;

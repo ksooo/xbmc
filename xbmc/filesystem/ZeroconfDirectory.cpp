@@ -110,7 +110,6 @@ bool GetDirectoryFromTxtRecords(const CZeroconfBrowser::ZeroconfService& zerocon
     //if we got a path - add a item - else at least we maybe have set username and password to theurl
     if( !path.empty())
     {
-      CFileItemPtr item(new CFileItem("", true));
       std::string urlStr(url.Get());
       //if path has a leading slash (sure it should have one)
       if( path.at(0) == '/' )
@@ -125,7 +124,7 @@ bool GetDirectoryFromTxtRecords(const CZeroconfBrowser::ZeroconfService& zerocon
       //add slash at end of path since it has to be a folder
       URIUtils::AddSlashAtEnd(path);
       //this is the full path including remote stuff (e.x. nfs://ip/path
-      item->SetPath(urlStr + path);
+      const auto item{std::make_shared<CFileItem>(urlStr + path, true)};
       //remove the slash at the end of the path or GetFileName will not give the last dir
       URIUtils::RemoveSlashAtEnd(path);
       //set the label to the last directory in path
@@ -160,12 +159,11 @@ bool CZeroconfDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       std::string tmp;
       if (GetXBMCProtocol(it.GetType(), tmp))
       {
-        CFileItemPtr item(new CFileItem("", true));
         CURL url;
         url.SetProtocol("zeroconf");
         std::string service_path(CURL::Encode(CZeroconfBrowser::ZeroconfService::toPath(it)));
         url.SetFileName(service_path);
-        item->SetPath(url.Get());
+        const auto item{std::make_shared<CFileItem>(url.Get(), true)};
 
         //now do the formatting
         std::string protocol = GetHumanReadableProtocol(it.GetType());

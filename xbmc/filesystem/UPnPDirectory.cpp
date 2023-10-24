@@ -205,9 +205,10 @@ CUPnPDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             NPT_String name = (*device)->GetFriendlyName();
             NPT_String uuid = (*device)->GetUUID();
 
-            CFileItemPtr pItem(new CFileItem((const char*)name));
-            pItem->SetPath(std::string((const char*) "upnp://" + uuid + "/"));
-            pItem->m_bIsFolder = true;
+            const std::string path{
+                StringUtils::Format("upnp://{}/", static_cast<const char*>(uuid))};
+            const auto pItem{std::make_shared<CFileItem>(path, true)};
+            pItem->SetLabel(static_cast<const char*>(name));
             pItem->SetArt("thumb", (const char*)(*device)->GetIconUrl("image/png"));
 
             items.Add(pItem);

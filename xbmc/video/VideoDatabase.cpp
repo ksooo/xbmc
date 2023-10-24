@@ -6572,16 +6572,14 @@ bool CVideoDatabase::GetNavCommon(const std::string& strBaseDir,
 
       for (const auto &i : mapItems)
       {
-        CFileItemPtr pItem(new CFileItem(i.second.first));
-        pItem->GetVideoInfoTag()->m_iDbId = i.first;
-        pItem->GetVideoInfoTag()->m_type = type;
-
         CVideoDbUrl itemUrl = videoUrl;
         std::string path = StringUtils::Format("{}/", i.first);
         itemUrl.AppendPath(path);
-        pItem->SetPath(itemUrl.ToString());
+        const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+        pItem->SetLabel(i.second.first);
+        pItem->GetVideoInfoTag()->m_iDbId = i.first;
+        pItem->GetVideoInfoTag()->m_type = type;
 
-        pItem->m_bIsFolder = true;
         if (idContent == VideoDbContentType::MOVIES || idContent == VideoDbContentType::MUSICVIDEOS)
           pItem->GetVideoInfoTag()->SetPlayCount(i.second.second);
         if (!items.Contains(pItem->GetPath()))
@@ -6595,16 +6593,14 @@ bool CVideoDatabase::GetNavCommon(const std::string& strBaseDir,
     {
       while (!m_pDS->eof())
       {
-        CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
-        pItem->GetVideoInfoTag()->m_iDbId = m_pDS->fv(0).get_asInt();
-        pItem->GetVideoInfoTag()->m_type = type;
-
         CVideoDbUrl itemUrl = videoUrl;
         std::string path = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
         itemUrl.AppendPath(path);
-        pItem->SetPath(itemUrl.ToString());
+        const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+        pItem->SetLabel(m_pDS->fv(1).get_asString());
+        pItem->GetVideoInfoTag()->m_iDbId = m_pDS->fv(0).get_asInt();
+        pItem->GetVideoInfoTag()->m_type = type;
 
-        pItem->m_bIsFolder = true;
         pItem->SetLabelPreformatted(true);
         if (idContent == VideoDbContentType::MOVIES || idContent == VideoDbContentType::MUSICVIDEOS)
         { // fv(3) is the number of videos watched, fv(2) is the total number.  We set the playcount
@@ -6785,15 +6781,21 @@ bool CVideoDatabase::GetMusicVideoAlbumsNav(const std::string& strBaseDir, CFile
         isAlbum = false;
       }
 
-      CFileItemPtr pItem(new CFileItem(strAlbum));
-
       CVideoDbUrl itemUrl = videoUrl;
       std::string path = StringUtils::Format("{}/", idMVideo);
       if (!isAlbum)
       {
         itemUrl.AddOption("albumid", idMVideo);
         path += std::to_string(idMVideo);
+      }
 
+      itemUrl.AppendPath(path);
+      const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), isAlbum)};
+      pItem->SetLabel(strAlbum);
+      pItem->SetLabelPreformatted(true);
+
+      if (!isAlbum)
+      {
         strSQL = PrepareSQL(
             "SELECT type, url FROM art WHERE media_id = %i AND media_type = 'musicvideo'",
             idMVideo);
@@ -6805,10 +6807,6 @@ bool CVideoDatabase::GetMusicVideoAlbumsNav(const std::string& strBaseDir, CFile
         }
         m_pDS2->close();
       }
-      itemUrl.AppendPath(path);
-      pItem->SetPath(itemUrl.ToString());
-      pItem->m_bIsFolder = isAlbum;
-      pItem->SetLabelPreformatted(true);
 
       if (!items.Contains(pItem->GetPath()))
         if (g_passwordManager.IsDatabasePathUnlocked(
@@ -7115,14 +7113,11 @@ bool CVideoDatabase::GetPeopleNav(const std::string& strBaseDir,
 
       for (const auto &i : mapActors)
       {
-        CFileItemPtr pItem(new CFileItem(i.second.name));
-
         CVideoDbUrl itemUrl = videoUrl;
         std::string path = StringUtils::Format("{}/", i.first);
         itemUrl.AppendPath(path);
-        pItem->SetPath(itemUrl.ToString());
-
-        pItem->m_bIsFolder=true;
+        const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+        pItem->SetLabel(i.second.name);
         pItem->GetVideoInfoTag()->SetPlayCount(i.second.playcount);
         pItem->GetVideoInfoTag()->m_strPictureURL.ParseFromData(i.second.thumb);
         pItem->GetVideoInfoTag()->m_iDbId = i.first;
@@ -7143,14 +7138,11 @@ bool CVideoDatabase::GetPeopleNav(const std::string& strBaseDir,
       {
         try
         {
-          CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
-
           CVideoDbUrl itemUrl = videoUrl;
           std::string path = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
           itemUrl.AppendPath(path);
-          pItem->SetPath(itemUrl.ToString());
-
-          pItem->m_bIsFolder=true;
+          const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+          pItem->SetLabel(m_pDS->fv(1).get_asString());
           pItem->GetVideoInfoTag()->m_strPictureURL.ParseFromData(m_pDS->fv(2).get_asString());
           pItem->GetVideoInfoTag()->m_iDbId = m_pDS->fv(0).get_asInt();
           pItem->GetVideoInfoTag()->m_type = type;
@@ -7299,14 +7291,12 @@ bool CVideoDatabase::GetYearsNav(const std::string& strBaseDir,
       {
         if (i.first == 0)
           continue;
-        CFileItemPtr pItem(new CFileItem(i.second.first));
 
         CVideoDbUrl itemUrl = videoUrl;
         std::string path = StringUtils::Format("{}/", i.first);
         itemUrl.AppendPath(path);
-        pItem->SetPath(itemUrl.ToString());
-
-        pItem->m_bIsFolder=true;
+        const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+        pItem->SetLabel(i.second.first);
         if (idContent == VideoDbContentType::MOVIES || idContent == VideoDbContentType::MUSICVIDEOS)
           pItem->GetVideoInfoTag()->SetPlayCount(i.second.second);
         items.Add(pItem);
@@ -7335,14 +7325,12 @@ bool CVideoDatabase::GetYearsNav(const std::string& strBaseDir,
           m_pDS->next();
           continue;
         }
-        CFileItemPtr pItem(new CFileItem(strLabel));
 
         CVideoDbUrl itemUrl = videoUrl;
         std::string path = StringUtils::Format("{}/", lYear);
         itemUrl.AppendPath(path);
-        pItem->SetPath(itemUrl.ToString());
-
-        pItem->m_bIsFolder=true;
+        const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+        pItem->SetLabel(strLabel);
         if (idContent == VideoDbContentType::MOVIES || idContent == VideoDbContentType::MUSICVIDEOS)
         {
           // fv(2) is the number of videos watched, fv(1) is the total number.  We set the playcount
@@ -7468,7 +7456,6 @@ bool CVideoDatabase::GetSeasonsByWhere(const std::string& strBaseDir, const Filt
           else
             strLabel = StringUtils::Format(g_localizeStrings.Get(20358), iSeason);
         }
-        CFileItemPtr pItem(new CFileItem(strLabel));
 
         CVideoDbUrl itemUrl = videoUrl;
         std::string strDir;
@@ -7476,9 +7463,8 @@ bool CVideoDatabase::GetSeasonsByWhere(const std::string& strBaseDir, const Filt
           strDir += StringUtils::Format("{}/", showId);
         strDir += StringUtils::Format("{}/", iSeason);
         itemUrl.AppendPath(strDir);
-        pItem->SetPath(itemUrl.ToString());
-
-        pItem->m_bIsFolder = true;
+        const auto pItem{std::make_shared<CFileItem>(itemUrl.ToString(), true)};
+        pItem->SetLabel(strLabel);
         pItem->GetVideoInfoTag()->m_strTitle = strLabel;
         if (!name.empty())
           pItem->GetVideoInfoTag()->m_strSortTitle = name;
@@ -8479,10 +8465,9 @@ void CVideoDatabase::GetMovieGenresByName(const std::string& strSearch, CFileIte
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      pItem->SetPath("videodb://movies/genres/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://movies/genres/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -8521,10 +8506,9 @@ void CVideoDatabase::GetMovieCountriesByName(const std::string& strSearch, CFile
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      pItem->SetPath("videodb://movies/genres/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://movies/genres/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -8562,10 +8546,9 @@ void CVideoDatabase::GetTvShowGenresByName(const std::string& strSearch, CFileIt
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      pItem->SetPath("videodb://tvshows/genres/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://tvshows/genres/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -8603,10 +8586,9 @@ void CVideoDatabase::GetMovieActorsByName(const std::string& strSearch, CFileIte
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      pItem->SetPath("videodb://movies/actors/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://movies/actors/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -8644,10 +8626,9 @@ void CVideoDatabase::GetTvShowsActorsByName(const std::string& strSearch, CFileI
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      pItem->SetPath("videodb://tvshows/actors/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://tvshows/actors/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -8688,10 +8669,10 @@ void CVideoDatabase::GetMusicVideoArtistsByName(const std::string& strSearch, CF
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      pItem->SetPath("videodb://musicvideos/artists/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{
+          std::make_shared<CFileItem>("videodb://musicvideos/artists/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -8729,10 +8710,9 @@ void CVideoDatabase::GetMusicVideoGenresByName(const std::string& strSearch, CFi
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      pItem->SetPath("videodb://musicvideos/genres/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://musicvideos/genres/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -8786,10 +8766,10 @@ void CVideoDatabase::GetMusicVideoAlbumsByName(const std::string& strSearch, CFi
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(0).get_asString()));
       std::string strDir = std::to_string(m_pDS->fv(1).get_asInt());
-      pItem->SetPath("videodb://musicvideos/titles/"+ strDir);
-      pItem->m_bIsFolder=false;
+      const auto pItem{
+          std::make_shared<CFileItem>("videodb://musicvideos/titles/" + strDir, false)};
+      pItem->SetLabel(m_pDS->fv(0).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -8827,12 +8807,10 @@ void CVideoDatabase::GetMusicVideosByAlbum(const std::string& strSearch, CFileIt
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()+" - "+m_pDS->fv(2).get_asString()));
       std::string strDir =
           StringUtils::Format("3/2/{}", m_pDS->fv("musicvideo.idMVideo").get_asInt());
-
-      pItem->SetPath("videodb://"+ strDir);
-      pItem->m_bIsFolder=false;
+      const auto pItem{std::make_shared<CFileItem>("videodb://" + strDir, false)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString() + " - " + m_pDS->fv(2).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9065,14 +9043,13 @@ void CVideoDatabase::GetMoviesByName(const std::string& strSearch, CFileItemList
 
       int movieId = m_pDS->fv("movie.idMovie").get_asInt();
       int setId = m_pDS->fv("movie.idSet").get_asInt();
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string path;
       if (setId <= 0 || !CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_VIDEOLIBRARY_GROUPMOVIESETS))
         path = StringUtils::Format("videodb://movies/titles/{}", movieId);
       else
         path = StringUtils::Format("videodb://movies/sets/{}/{}", setId, movieId);
-      pItem->SetPath(path);
-      pItem->m_bIsFolder=false;
+      const auto pItem{std::make_shared<CFileItem>(path, false)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9110,12 +9087,11 @@ void CVideoDatabase::GetTvShowsByName(const std::string& strSearch, CFileItemLis
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir =
           StringUtils::Format("tvshows/titles/{}/", m_pDS->fv("tvshow.idShow").get_asInt());
 
-      pItem->SetPath("videodb://"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       pItem->GetVideoInfoTag()->m_iDbId = m_pDS->fv("tvshow.idShow").get_asInt();
       items.Add(pItem);
       m_pDS->next();
@@ -9154,12 +9130,11 @@ void CVideoDatabase::GetEpisodesByName(const std::string& strSearch, CFileItemLi
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()+" ("+m_pDS->fv(4).get_asString()+")"));
       std::string path = StringUtils::Format("videodb://tvshows/titles/{}/{}/{}",
                                              m_pDS->fv("episode.idShow").get_asInt(),
                                              m_pDS->fv(2).get_asInt(), m_pDS->fv(0).get_asInt());
-      pItem->SetPath(path);
-      pItem->m_bIsFolder=false;
+      const auto pItem{std::make_shared<CFileItem>(path, false)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString() + " (" + m_pDS->fv(4).get_asString() + ")");
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9201,12 +9176,10 @@ void CVideoDatabase::GetMusicVideosByName(const std::string& strSearch, CFileIte
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir =
           StringUtils::Format("3/2/{}", m_pDS->fv("musicvideo.idMVideo").get_asInt());
-
-      pItem->SetPath("videodb://"+ strDir);
-      pItem->m_bIsFolder=false;
+      const auto pItem{std::make_shared<CFileItem>("videodb://" + strDir, false)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9251,12 +9224,11 @@ void CVideoDatabase::GetEpisodesByPlot(const std::string& strSearch, CFileItemLi
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()+" ("+m_pDS->fv(4).get_asString()+")"));
       std::string path = StringUtils::Format("videodb://tvshows/titles/{}/{}/{}",
                                              m_pDS->fv("episode.idShow").get_asInt(),
                                              m_pDS->fv(2).get_asInt(), m_pDS->fv(0).get_asInt());
-      pItem->SetPath(path);
-      pItem->m_bIsFolder=false;
+      const auto pItem{std::make_shared<CFileItem>(path, false)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString() + " (" + m_pDS->fv(4).get_asString() + ")");
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9295,12 +9267,10 @@ void CVideoDatabase::GetMoviesByPlot(const std::string& strSearch, CFileItemList
           continue;
         }
 
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string path =
           StringUtils::Format("videodb://movies/titles/{}", m_pDS->fv(0).get_asInt());
-      pItem->SetPath(path);
-      pItem->m_bIsFolder=false;
-
+      const auto pItem{std::make_shared<CFileItem>(path, false)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9341,10 +9311,8 @@ void CVideoDatabase::GetMovieDirectorsByName(const std::string& strSearch, CFile
         }
 
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
-
-      pItem->SetPath("videodb://movies/directors/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://movies/directors/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9384,10 +9352,8 @@ void CVideoDatabase::GetTvShowsDirectorsByName(const std::string& strSearch, CFi
         }
 
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
-
-      pItem->SetPath("videodb://tvshows/directors/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://tvshows/directors/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9427,10 +9393,8 @@ void CVideoDatabase::GetMusicVideoDirectorsByName(const std::string& strSearch, 
         }
 
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
-      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
-
-      pItem->SetPath("videodb://musicvideos/albums/"+ strDir);
-      pItem->m_bIsFolder=true;
+      const auto pItem{std::make_shared<CFileItem>("videodb://musicvideos/albums/" + strDir, true)};
+      pItem->SetLabel(m_pDS->fv(1).get_asString());
       items.Add(pItem);
       m_pDS->next();
     }

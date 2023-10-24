@@ -127,8 +127,8 @@ bool LoadFromFile(const std::string& strPath, CFileItemList& items)
           CFavouritesURL(CExecString(favourite->FirstChild()->Value())).GetURL());
       if (!items.Contains(favURL))
       {
-        const CFileItemPtr item(std::make_shared<CFileItem>(name));
-        item->SetPath(favURL);
+        const auto item(std::make_shared<CFileItem>(favURL, false));
+        item->SetLabel(name);
         if (thumb)
           item->SetArt("thumb", thumb);
         items.Add(item);
@@ -227,12 +227,13 @@ bool CFavouritesService::AddOrRemove(const CFileItem& item, int contextWindow)
     else
     {
       // create our new favourite item
-      const auto favourite{std::make_shared<CFileItem>(item.GetLabel())};
+      const std::string favUrl{CFavouritesURL(item, contextWindow).GetURL()};
+      const auto favourite{std::make_shared<CFileItem>(favUrl, false)};
       if (item.GetLabel().empty())
         favourite->SetLabel(CUtil::GetTitleFromPath(item.GetPath(), item.m_bIsFolder));
+      else
+        favourite->SetLabel(item.GetLabel());
       favourite->SetArt("thumb", ContentUtils::GetPreferredArtImage(item));
-      const std::string favUrl{CFavouritesURL(item, contextWindow).GetURL()};
-      favourite->SetPath(favUrl);
       m_favourites.Add(favourite);
     }
     Persist();

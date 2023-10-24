@@ -499,12 +499,10 @@ static void VFSDirEntriesToCFileItemList(int num_entries,
 {
   for (int i=0;i<num_entries;++i)
   {
-    CFileItemPtr item(new CFileItem());
+    const auto item{std::make_shared<CFileItem>(entries[i].path, entries[i].folder)};
     item->SetLabel(entries[i].label);
-    item->SetPath(entries[i].path);
     item->m_dwSize = entries[i].size;
     item->m_dateTime = entries[i].date_time;
-    item->m_bIsFolder = entries[i].folder;
     if (entries[i].title)
       item->m_strTitle = entries[i].title;
     for (unsigned int j=0;j<entries[i].num_props;++j)

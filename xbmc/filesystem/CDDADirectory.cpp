@@ -56,10 +56,9 @@ bool CCDDADirectory::GetDirectory(const CURL& url, CFileItemList &items)
     // Format standard cdda item label
     std::string strLabel = StringUtils::Format("Track {:02}", i);
 
-    CFileItemPtr pItem(new CFileItem(strLabel));
-    pItem->m_bIsFolder = false;
-    std::string path = StringUtils::Format("cdda://local/{:02}.cdda", i);
-    pItem->SetPath(path);
+    const auto pItem{
+        std::make_shared<CFileItem>(StringUtils::Format("cdda://local/{:02}.cdda", i), false)};
+    pItem->SetLabel(strLabel);
 
     struct __stat64 s64;
     if (CFile::Stat(pItem->GetPath(), &s64) == 0)

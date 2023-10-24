@@ -49,8 +49,7 @@ const std::string ContentUtils::GetPreferredArtImage(const CFileItem& item)
 std::unique_ptr<CFileItem> ContentUtils::GeneratePlayableTrailerItem(const CFileItem& item,
                                                                      const std::string& label)
 {
-  std::unique_ptr<CFileItem> trailerItem = std::make_unique<CFileItem>();
-  trailerItem->SetPath(item.GetVideoInfoTag()->m_strTrailer);
+  auto trailerItem{std::make_unique<CFileItem>(item.GetVideoInfoTag()->m_strTrailer, false)};
   CVideoInfoTag* videoInfoTag = trailerItem->GetVideoInfoTag();
   *videoInfoTag = *item.GetVideoInfoTag();
   videoInfoTag->m_streamDetails.Reset();

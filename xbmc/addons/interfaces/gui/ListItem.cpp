@@ -56,13 +56,11 @@ KODI_GUI_LISTITEM_HANDLE Interface_GUIListItem::create(KODI_HANDLE kodiBase,
     return nullptr;
   }
 
-  CFileItemPtr* item = new CFileItemPtr(new CFileItem());
+  auto* item{new std::shared_ptr<CFileItem>(new CFileItem(path, false))};
   if (label)
     item->get()->SetLabel(label);
   if (label2)
     item->get()->SetLabel2(label2);
-  if (path)
-    item->get()->SetPath(path);
 
   return item;
 }

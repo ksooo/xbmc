@@ -374,9 +374,8 @@ void CGUIDialogFileBrowser::Update(const std::string &strDirectory)
     {
       if (URIUtils::GetParentPath(strDirectory, strParentPath))
       {
-        CFileItemPtr pItem(new CFileItem(".."));
-        pItem->SetPath(strParentPath);
-        pItem->m_bIsFolder = true;
+        const auto pItem{std::make_shared<CFileItem>(strParentPath, true)};
+        pItem->SetLabel("..");
         pItem->m_bIsShareOrDrive = false;
         items.AddFront(pItem, 0);
       }
@@ -385,10 +384,9 @@ void CGUIDialogFileBrowser::Update(const std::string &strDirectory)
     {
       // yes, this is the root of a share
       // add parent path to the virtual directory
-      CFileItemPtr pItem(new CFileItem(".."));
-      pItem->SetPath("");
+      const auto pItem{std::make_shared<CFileItem>("", true)};
+      pItem->SetLabel("..");
       pItem->m_bIsShareOrDrive = false;
-      pItem->m_bIsFolder = true;
       items.AddFront(pItem, 0);
       strParentPath = "";
     }
@@ -425,16 +423,14 @@ void CGUIDialogFileBrowser::Update(const std::string &strDirectory)
      (CServiceBroker::GetSettingsComponent()->GetProfileManager()->GetMasterProfile().getLockMode() == LOCK_MODE_EVERYONE ||
       CServiceBroker::GetSettingsComponent()->GetProfileManager()->IsMasterProfile() || g_passwordManager.bMasterUser))
   { // we are in the virtual directory - add the "Add Network Location" item
-    CFileItemPtr pItem(new CFileItem(g_localizeStrings.Get(1032)));
-    pItem->SetPath("net://");
-    pItem->m_bIsFolder = true;
+    const auto pItem{std::make_shared<CFileItem>("net://", true)};
+    pItem->SetLabel(g_localizeStrings.Get(1032));
     m_vecItems->Add(pItem);
   }
   if (m_Directory->GetPath().empty() && !m_addSourceType.empty())
   {
-    CFileItemPtr pItem(new CFileItem(g_localizeStrings.Get(21359)));
-    pItem->SetPath("source://");
-    pItem->m_bIsFolder = true;
+    const auto pItem{std::make_shared<CFileItem>("source://", true)};
+    pItem->SetLabel(g_localizeStrings.Get(21359));
     m_vecItems->Add(pItem);
   }
 

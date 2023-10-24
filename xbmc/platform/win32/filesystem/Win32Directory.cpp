@@ -78,14 +78,13 @@ bool CWin32Directory::GetDirectory(const CURL& url, CFileItemList &items)
       continue;
     }
 
-    CFileItemPtr pItem(new CFileItem(itemName));
+    const bool isFolder{(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0};
+    std::string itemPath{pathWithSlash + itemName};
+    if (isFolder)
+      itemPath += '\\';
 
-    pItem->m_bIsFolder = ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
-    if (pItem->m_bIsFolder)
-      pItem->SetPath(pathWithSlash + itemName + '\\');
-    else
-      pItem->SetPath(pathWithSlash + itemName);
-
+    const auto pItem{std::make_shared<CFileItem>(itemPath, isFolder)};
+    pItem->SetLabel(itemName);
     if ((findData.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)) != 0
           || itemName.front() == '.') // mark files starting from dot as hidden
       pItem->SetProperty("file:hidden", true);

@@ -136,15 +136,19 @@ void CGUIGameControllerProvider::UpdateItems()
       continue;
     }
 
-    CFileItemPtr fileItem = std::make_shared<CFileItem>();
+    std::shared_ptr<CFileItem> fileItem;
 
     // Set the item state for the current port index
     if (portIndex++ == m_portIndex && controller)
     {
+      fileItem = std::make_shared<CFileItem>(m_peripheralLocation, false);
       fileItem->SetLabel(controller->Layout().Label());
-      fileItem->SetPath(m_peripheralLocation);
       fileItem->SetProperty("Addon.ID", controller->ID());
       fileItem->SetArt("icon", controller->Layout().ImagePath());
+    }
+    else
+    {
+      fileItem = std::make_shared<CFileItem>();
     }
 
     guiItem = std::move(fileItem);

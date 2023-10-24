@@ -180,16 +180,13 @@ bool CHTTPDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       // if same, we consider it as a valid item.
       if (strLinkTemp != ".." && strLinkTemp != "" && NameMatchesLink(strNameTemp, strLinkTemp))
       {
-        CFileItemPtr pItem(new CFileItem(strNameTemp));
-        pItem->SetProperty("IsHTTPDirectory", true);
         CURL url2(url);
-
         url2.SetFileName(strBasePath + strLinkBase);
         url2.SetOptions(strLinkOptions);
-        pItem->SetURL(url2);
-
-        if(URIUtils::HasSlashAtEnd(pItem->GetPath(), true))
-          pItem->m_bIsFolder = true;
+        const std::string path{url2.Get()};
+        const auto pItem{std::make_shared<CFileItem>(path, URIUtils::HasSlashAtEnd(path, true))};
+        pItem->SetLabel(strNameTemp);
+        pItem->SetProperty("IsHTTPDirectory", true);
 
         std::string day, month, year, hour, minute;
         int monthNum = 0;

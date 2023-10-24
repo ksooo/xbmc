@@ -39,9 +39,8 @@ using namespace XFILE;
 
 bool CFileUtils::DeleteItem(const std::string &strPath)
 {
-  CFileItemPtr item(new CFileItem(strPath));
-  item->SetPath(strPath);
-  item->m_bIsFolder = URIUtils::HasSlashAtEnd(strPath);
+  const auto item{std::make_shared<CFileItem>(strPath, URIUtils::HasSlashAtEnd(strPath))};
+  item->SetLabel(strPath);
   item->Select(true);
   return DeleteItem(item);
 }

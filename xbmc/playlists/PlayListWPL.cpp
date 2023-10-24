@@ -86,8 +86,8 @@ bool CPlayListWPL::LoadData(std::istream& stream)
       std::string strFileNameClean = URIUtils::SubstitutePath(strFileName);
       CUtil::GetQualifiedFilename(m_strBasePath, strFileNameClean);
       std::string strDescription = URIUtils::GetFileName(strFileNameClean);
-      CFileItemPtr newItem(new CFileItem(strDescription));
-      newItem->SetPath(strFileNameClean);
+      const auto newItem{std::make_shared<CFileItem>(strFileNameClean, false)};
+      newItem->SetLabel(strDescription);
       Add(newItem);
     }
     pMediaElement = pMediaElement->NextSiblingElement();

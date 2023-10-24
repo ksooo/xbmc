@@ -779,9 +779,8 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
 
   if (!bHideParent)
   {
-    CFileItemPtr pItem(new CFileItem(".."));
-    pItem->SetPath(strParentPath);
-    pItem->m_bIsFolder = true;
+    const auto pItem{std::make_shared<CFileItem>(strParentPath, true)};
+    pItem->SetLabel("..");
     pItem->m_bIsShareOrDrive = false;
     items.AddFront(pItem, 0);
   }
@@ -904,13 +903,10 @@ bool CGUIMediaWindow::Update(const std::string &strDirectory, bool updateFilterP
   if (showLabel && (m_vecItems->Size() == 0 || !m_guiState->DisableAddSourceButtons()) &&
       iWindow != WINDOW_MUSIC_PLAYLIST_EDITOR)
   {
-    const std::string& strLabel = g_localizeStrings.Get(showLabel);
-    CFileItemPtr pItem(new CFileItem(strLabel));
-    pItem->SetPath("add");
+    const auto pItem{std::make_shared<CFileItem>("add", true)};
+    pItem->SetLabel(g_localizeStrings.Get(showLabel));
     pItem->SetArt("icon", "DefaultAddSource.png");
-    pItem->SetLabel(strLabel);
     pItem->SetLabelPreformatted(true);
-    pItem->m_bIsFolder = true;
     pItem->SetSpecialSort(CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_addSourceOnTop ?
                                              SortSpecialOnTop : SortSpecialOnBottom);
     m_vecItems->Add(pItem);
@@ -1991,9 +1987,8 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
   // fileitems settings.
   if (m_vecItems->IsEmpty())
   {
-    CFileItemPtr pItem(new CFileItem(".."));
-    pItem->SetPath(m_history.GetParentPath());
-    pItem->m_bIsFolder = true;
+    const auto pItem{std::make_shared<CFileItem>(m_history.GetParentPath(), true)};
+    pItem->SetLabel("..");
     pItem->m_bIsShareOrDrive = false;
     m_vecItems->AddFront(pItem, 0);
   }

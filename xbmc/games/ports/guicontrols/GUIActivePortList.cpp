@@ -181,9 +181,9 @@ void CGUIActivePortList::AddItem(const ControllerPtr& controller,
   if (controller && controller->Topology().ProvidesInput())
   {
     // Add GUI item
-    CFileItemPtr item = std::make_shared<CFileItem>(controller->Layout().Label());
+    const auto item{std::make_shared<CFileItem>(controllerAddress, false)};
+    item->SetLabel(controller->Layout().Label());
     item->SetArt("icon", controller->Layout().ImagePath());
-    item->SetPath(controllerAddress);
     m_vecItems->Add(std::move(item));
   }
 }

@@ -169,8 +169,8 @@ bool CPlayListM3U::Load(const std::string& strFileName)
 
         // Get the full path file name and add it to the the play list
         CUtil::GetQualifiedFilename(m_strBasePath, strFileName);
-        CFileItemPtr newItem(new CFileItem(strInfo));
-        newItem->SetPath(strFileName);
+        const auto newItem{std::make_shared<CFileItem>(strFileName, false)};
+        newItem->SetLabel(strInfo);
         if (iStartOffset != 0 || iEndOffset != 0)
         {
           newItem->SetStartOffset(iStartOffset);

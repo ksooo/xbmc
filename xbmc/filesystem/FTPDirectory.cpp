@@ -79,17 +79,16 @@ bool CFTPDirectory::GetDirectory(const CURL& url2, CFileItemList &items)
       else
         url.RemoveProtocolOption("utf8");
 
-      CFileItemPtr pItem(new CFileItem(name));
-
-      pItem->m_bIsFolder = parse.getFlagtrycwd() != 0;
+      const bool isFolder{parse.getFlagtrycwd() != 0};
       std::string filePath = path + name;
-      if (pItem->m_bIsFolder)
+      if (isFolder)
         URIUtils::AddSlashAtEnd(filePath);
 
       /* qualify the url with host and all */
       url.SetFileName(filePath);
-      pItem->SetPath(url.Get());
 
+      const auto pItem{std::make_shared<CFileItem>(url.Get(), isFolder)};
+      pItem->SetLabel(name);
       pItem->m_dwSize = parse.getSize();
       pItem->m_dateTime=parse.getTime();
 

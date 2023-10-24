@@ -359,9 +359,8 @@ namespace VIDEO
       }
       else
       {
-        CFileItemPtr item(new CFileItem(URIUtils::GetFileName(strDirectory)));
-        item->SetPath(strDirectory);
-        item->m_bIsFolder = true;
+        const auto item{std::make_shared<CFileItem>(strDirectory, true)};
+        item->SetLabel(URIUtils::GetFileName(strDirectory));
         items.Add(item);
         items.SetPath(URIUtils::GetParentPath(item->GetPath()));
       }
@@ -1778,7 +1777,7 @@ namespace VIDEO
         item = *file->item;
       else
       {
-        item.SetPath(file->strPath);
+        item = {file->strPath, false};
         item.GetVideoInfoTag()->m_iEpisode = file->iEpisode;
       }
 
@@ -1940,8 +1939,7 @@ namespace VIDEO
       if (bFound)
       {
         CVideoInfoDownloader imdb(scraper);
-        CFileItem item;
-        item.SetPath(file->strPath);
+        CFileItem item{file->strPath, false};
         if (!imdb.GetEpisodeDetails(guide->cScraperUrl, *item.GetVideoInfoTag(), pDlgProgress))
           return INFO_NOT_FOUND; //! @todo should we just skip to the next episode?
 

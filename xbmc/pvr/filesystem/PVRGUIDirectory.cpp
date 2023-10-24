@@ -309,8 +309,7 @@ void GetSubDirectories(const CPVRRecordingsPath& recParentPath,
     std::shared_ptr<CFileItem> item;
     if (!results.Contains(strFilePath))
     {
-      item = std::make_shared<CFileItem>(strCurrent, true);
-      item->SetPath(strFilePath);
+      item = std::make_shared<CFileItem>(strFilePath, true);
       item->SetLabel(strCurrent);
       item->SetLabelPreformatted(true);
       item->m_dateTime = recording->RecordingTimeAsLocalTime();

@@ -116,11 +116,10 @@ std::shared_ptr<CFileItem> CBlurayDirectory::GetTitle(const BLURAY_TITLE_INFO* t
 {
   std::string buf;
   std::string chap;
-  CFileItemPtr item(new CFileItem("", false));
   CURL path(m_url);
   buf = StringUtils::Format("BDMV/PLAYLIST/{:05}.mpls", title->playlist);
   path.SetFileName(buf);
-  item->SetPath(path.Get());
+  const auto item{std::make_shared<CFileItem>(path.Get(), false)};
   int duration = (int)(title->duration / 90000);
   item->GetVideoInfoTag()->SetDuration(duration);
   item->GetVideoInfoTag()->m_iTrack = title->playlist;
@@ -185,12 +184,8 @@ void CBlurayDirectory::GetRoot(CFileItemList &items)
     GetTitles(true, items);
 
     CURL path(m_url);
-    CFileItemPtr item;
-
     path.SetFileName(URIUtils::AddFileToFolder(m_url.GetFileName(), "titles"));
-    item = std::make_shared<CFileItem>();
-    item->SetPath(path.Get());
-    item->m_bIsFolder = true;
+    auto item{std::make_shared<CFileItem>(path.Get(), true)};
     item->SetLabel(g_localizeStrings.Get(25002) /* All titles */);
     item->SetArt("icon", "DefaultVideoPlaylists.png");
     items.Add(item);
@@ -203,9 +198,7 @@ void CBlurayDirectory::GetRoot(CFileItemList &items)
     }
 
     path.SetFileName("menu");
-    item = std::make_shared<CFileItem>();
-    item->SetPath(path.Get());
-    item->m_bIsFolder = false;
+    item = std::make_shared<CFileItem>(path.Get(), false);
     item->SetLabel(g_localizeStrings.Get(25003) /* Menus */);
     item->SetArt("icon", "DefaultProgram.png");
     items.Add(item);

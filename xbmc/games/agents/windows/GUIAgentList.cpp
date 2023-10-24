@@ -213,8 +213,8 @@ void CGUIAgentList::AddItem(const CGameAgent& agent)
   const ControllerPtr controller = agent.GetController();
   const std::string& path = agent.GetPeripheralLocation();
 
-  CFileItemPtr item = std::make_shared<CFileItem>(label);
-  item->SetPath(path);
+  const auto item{std::make_shared<CFileItem>(path, false)};
+  item->SetLabel(label);
   if (controller)
   {
     item->SetProperty("Addon.ID", controller->ID());

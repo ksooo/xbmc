@@ -37,10 +37,9 @@ namespace
 {
 CFileItemPtr CreateNewSaveItem()
 {
-  CFileItemPtr item = std::make_shared<CFileItem>(g_localizeStrings.Get(15314)); // "Save"
-
   // A nonexistent path ensures a gamewindow control won't render any pixels
-  item->SetPath(NO_PIXEL_DATA);
+  const auto item{std::make_shared<CFileItem>(NO_PIXEL_DATA, false)};
+  item->SetLabel(g_localizeStrings.Get(15314)); // "Save"
   item->SetArt("icon", "DefaultAddSource.png");
   item->SetProperty(SAVESTATE_CAPTION,
                     g_localizeStrings.Get(15315)); // "Save progress to a new save file"

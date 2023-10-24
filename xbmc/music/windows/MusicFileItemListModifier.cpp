@@ -75,31 +75,31 @@ void CMusicFileItemListModifier::AddQueuingFolder(CFileItemList& items)
 
   switch (nodeChildType)
   {
-  case NODE_TYPE_ARTIST:
-    pItem = std::make_shared<CFileItem>(g_localizeStrings.Get(15103)); // "All Artists"
-    musicUrl.AppendPath("-1/");
-    pItem->SetPath(musicUrl.ToString());
-    break;
+    case NODE_TYPE_ARTIST:
+      musicUrl.AppendPath("-1/");
+      pItem = std::make_shared<CFileItem>(musicUrl.ToString(), false);
+      pItem->SetLabel(g_localizeStrings.Get(15103)); // "All Artists"
+      break;
 
-  //  All album related nodes
-  case NODE_TYPE_ALBUM:
-  case NODE_TYPE_ALBUM_RECENTLY_PLAYED:
-  case NODE_TYPE_ALBUM_RECENTLY_ADDED:
-  case NODE_TYPE_ALBUM_TOP100:
-    pItem = std::make_shared<CFileItem>(g_localizeStrings.Get(15102)); // "All Albums"
-    musicUrl.AppendPath("-1/");
-    pItem->SetPath(musicUrl.ToString());
-    break;
+    //  All album related nodes
+    case NODE_TYPE_ALBUM:
+    case NODE_TYPE_ALBUM_RECENTLY_PLAYED:
+    case NODE_TYPE_ALBUM_RECENTLY_ADDED:
+    case NODE_TYPE_ALBUM_TOP100:
+      musicUrl.AppendPath("-1/");
+      pItem = std::make_shared<CFileItem>(musicUrl.ToString(), false);
+      pItem->SetLabel(g_localizeStrings.Get(15102)); // "All Albums"
+      break;
 
-  //  Disc node
-  case NODE_TYPE_DISC:
-    pItem = std::make_shared<CFileItem>(g_localizeStrings.Get(38075)); // "All Discs"
-    musicUrl.AppendPath("-1/");
-    pItem->SetPath(musicUrl.ToString());
-    break;
+    //  Disc node
+    case NODE_TYPE_DISC:
+      musicUrl.AppendPath("-1/");
+      pItem = std::make_shared<CFileItem>(musicUrl.ToString(), false);
+      pItem->SetLabel(g_localizeStrings.Get(38075)); // "All Discs"
+      break;
 
-  default:
-    break;
+    default:
+      break;
   }
 
   if (pItem)

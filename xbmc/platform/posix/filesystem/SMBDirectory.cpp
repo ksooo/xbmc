@@ -206,7 +206,6 @@ bool CSMBDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
       if (bIsDir)
       {
-        CFileItemPtr pItem(new CFileItem(strFile));
         std::string path(strRoot);
 
         // needed for network / workgroup browsing
@@ -221,8 +220,8 @@ bool CSMBDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         }
         path = URIUtils::AddFileToFolder(path,aDir.name);
         URIUtils::AddSlashAtEnd(path);
-        pItem->SetPath(path);
-        pItem->m_bIsFolder = true;
+        const auto pItem{std::make_shared<CFileItem>(path, true)};
+        pItem->SetLabel(strFile);
         pItem->m_dateTime=localTime;
         if (hidden)
           pItem->SetProperty("file:hidden", true);
@@ -230,9 +229,8 @@ bool CSMBDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       }
       else
       {
-        CFileItemPtr pItem(new CFileItem(strFile));
-        pItem->SetPath(strRoot + aDir.name);
-        pItem->m_bIsFolder = false;
+        const auto pItem{std::make_shared<CFileItem>(strRoot + aDir.name, false)};
+        pItem->SetLabel(strFile);
         pItem->m_dwSize = iSize;
         pItem->m_dateTime=localTime;
         if (hidden)

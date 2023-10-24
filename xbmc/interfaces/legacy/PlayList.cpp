@@ -57,8 +57,8 @@ namespace XBMCAddon
 
     bool PlayList::load(const char* cFileName)
     {
-      CFileItem item(cFileName);
-      item.SetPath(cFileName);
+      CFileItem item(cFileName, false);
+      item.SetLabel(cFileName);
 
       if (item.IsPlayList())
       {

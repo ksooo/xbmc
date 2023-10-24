@@ -85,8 +85,6 @@ bool CPlayListXSPF::Load(const std::string& strFileName)
     {
       std::string label = GetXMLText(pCurTrack->FirstChildElement(TITLE_TAGNAME));
 
-      CFileItemPtr newItem(new CFileItem(label));
-
       CURL uri(location);
 
       // at the time of writing CURL doesn't handle file:// URI scheme the way
@@ -106,6 +104,8 @@ bool CPlayListXSPF::Load(const std::string& strFileName)
         localpath = URIUtils::AppendSlash(m_strBasePath) + CURL::Decode(location);
       }
 
+      std::shared_ptr<CFileItem> newItem;
+
       if (!localpath.empty())
       {
         // We don't use URIUtils::CanonicalizePath because m_strBasePath may be a
@@ -115,13 +115,14 @@ bool CPlayListXSPF::Load(const std::string& strFileName)
 #endif
         localpath = URIUtils::GetRealPath(localpath);
 
-        newItem->SetPath(localpath);
+        newItem = std::make_shared<CFileItem>(localpath, false);
       }
       else
       {
-        newItem->SetURL(uri);
+        newItem = std::make_shared<CFileItem>(uri, false);
       }
 
+      newItem->SetLabel(label);
       Add(newItem);
     }
 

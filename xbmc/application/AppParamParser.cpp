@@ -111,8 +111,8 @@ void CAppParamParser::ParseArg(const std::string &arg)
     m_params->SetSettingsFile(arg.substr(11));
   else if (arg.length() != 0 && arg[0] != '-')
   {
-    const CFileItemPtr item = std::make_shared<CFileItem>(arg);
-    item->SetPath(arg);
+    const auto item{std::make_shared<CFileItem>(arg, false)};
+    item->SetLabel(arg);
     m_params->GetPlaylist().Add(item);
   }
 }

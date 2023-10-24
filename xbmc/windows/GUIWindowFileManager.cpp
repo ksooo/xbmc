@@ -490,21 +490,18 @@ bool CGUIWindowFileManager::Update(int iList, const std::string &strDirectory)
   URIUtils::GetParentPath(strDirectory, strParentPath);
   if (strDirectory.empty() && (m_vecItems[iList]->Size() == 0 || CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_FILELISTS_SHOWADDSOURCEBUTTONS)))
   { // add 'add source button'
-    const std::string& strLabel = g_localizeStrings.Get(1026);
-    CFileItemPtr pItem(new CFileItem(strLabel));
-    pItem->SetPath("add");
+    const auto pItem{std::make_shared<CFileItem>("add", true)};
+    pItem->SetLabel(g_localizeStrings.Get(1026));
     pItem->SetArt("icon", "DefaultAddSource.png");
-    pItem->SetLabel(strLabel);
     pItem->SetLabelPreformatted(true);
-    pItem->m_bIsFolder = true;
     pItem->SetSpecialSort(SortSpecialOnBottom);
     m_vecItems[iList]->Add(pItem);
   }
   else if (items.IsEmpty() || CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_FILELISTS_SHOWPARENTDIRITEMS))
   {
-    CFileItemPtr pItem(new CFileItem(".."));
-    pItem->SetPath(m_rootDir.IsSource(strDirectory) ? "" : strParentPath);
-    pItem->m_bIsFolder = true;
+    const auto pItem{
+        std::make_shared<CFileItem>(m_rootDir.IsSource(strDirectory) ? "" : strParentPath, true)};
+    pItem->SetLabel("..");
     pItem->m_bIsShareOrDrive = false;
     m_vecItems[iList]->AddFront(pItem, 0);
   }

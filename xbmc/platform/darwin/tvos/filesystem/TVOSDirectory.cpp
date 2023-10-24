@@ -77,12 +77,10 @@ bool CTVOSDirectory::GetDirectory(const CURL& url, CFileItemList& items)
   CTVOSNSUserDefaults::GetDirectoryContents(rootpath, contents);
   for (const auto& path : contents)
   {
-    CFileItemPtr pItem(new CFileItem(URIUtils::GetFileName(path)));
-    // we only save files to persistent storage
-    pItem->m_bIsFolder = false;
     // path must a full path, with no protocol
     // or they will not get intercepted in CFileFactory
-    pItem->SetPath(path);
+    const auto pItem{std::make_shared<CFileItem>(path, false)};
+    pItem->SetLabel(URIUtils::GetFileName(path));
     if (!(m_flags & DIR_FLAG_NO_FILE_INFO))
     {
       struct __stat64 buffer;

@@ -37,19 +37,12 @@ namespace XBMCAddon
                        bool offscreen) :
       m_offscreen(offscreen)
     {
-      item.reset();
-
-      // create CFileItem
-      item = std::make_shared<CFileItem>();
-      if (!item) // not sure if this is really possible
-        return;
+      item = std::make_shared<CFileItem>(path, false);
 
       if (!label.empty())
         item->SetLabel( label );
       if (!label2.empty())
-        item->SetLabel2( label2 );
-      if (!path.empty())
-        item->SetPath(path);
+        item->SetLabel2(label2);
     }
 
     ListItem::~ListItem()

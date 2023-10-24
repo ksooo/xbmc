@@ -157,11 +157,10 @@ static void GenerateTypeListing(const CURL& path,
     {
       if (addon->HasType(type))
       {
-        CFileItemPtr item(new CFileItem(CAddonInfo::TranslateType(type, true)));
         CURL itemPath = path;
         itemPath.SetFileName(CAddonInfo::TranslateType(type, false));
-        item->SetPath(itemPath.Get());
-        item->m_bIsFolder = true;
+        const auto item{std::make_shared<CFileItem>(itemPath.Get(), true)};
+        item->SetLabel(CAddonInfo::TranslateType(type, true));
         std::string thumb = CAddonInfo::TranslateIconType(type);
         if (!thumb.empty() && CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
           item->SetArt("thumb", thumb);
@@ -180,11 +179,10 @@ static void GenerateGameListing(const CURL& path, const VECADDONS& addons, CFile
   {
     if (addon->Type() == AddonType::GAME_CONTROLLER)
     {
-      CFileItemPtr item(new CFileItem(CAddonInfo::TranslateType(AddonType::GAME_CONTROLLER, true)));
       CURL itemPath = path;
       itemPath.SetFileName(CAddonInfo::TranslateType(AddonType::GAME_CONTROLLER, false));
-      item->SetPath(itemPath.Get());
-      item->m_bIsFolder = true;
+      const auto item{std::make_shared<CFileItem>(itemPath.Get(), true)};
+      item->SetLabel(CAddonInfo::TranslateType(AddonType::GAME_CONTROLLER, true));
       std::string thumb = CAddonInfo::TranslateIconType(AddonType::GAME_CONTROLLER);
       if (!thumb.empty() && CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
         item->SetArt("thumb", thumb);
@@ -197,11 +195,10 @@ static void GenerateGameListing(const CURL& path, const VECADDONS& addons, CFile
   {
     if (IsEmulator(addon))
     {
-      CFileItemPtr item(new CFileItem(g_localizeStrings.Get(35207))); // Emulators
       CURL itemPath = path;
       itemPath.SetFileName(CATEGORY_EMULATORS);
-      item->SetPath(itemPath.Get());
-      item->m_bIsFolder = true;
+      const auto item{std::make_shared<CFileItem>(itemPath.Get(), true)};
+      item->SetLabel(g_localizeStrings.Get(35207)); // Emulators
       std::string thumb = CAddonInfo::TranslateIconType(AddonType::GAMEDLL);
       if (!thumb.empty() && CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
         item->SetArt("thumb", thumb);
@@ -214,11 +211,10 @@ static void GenerateGameListing(const CURL& path, const VECADDONS& addons, CFile
   {
     if (IsStandaloneGame(addon))
     {
-      CFileItemPtr item(new CFileItem(g_localizeStrings.Get(35208))); // Standalone games
       CURL itemPath = path;
       itemPath.SetFileName(CATEGORY_STANDALONE_GAMES);
-      item->SetPath(itemPath.Get());
-      item->m_bIsFolder = true;
+      const auto item{std::make_shared<CFileItem>(itemPath.Get(), true)};
+      item->SetLabel(g_localizeStrings.Get(35208)); // Standalone games
       std::string thumb = CAddonInfo::TranslateIconType(AddonType::GAMEDLL);
       if (!thumb.empty() && CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
         item->SetArt("thumb", thumb);
@@ -231,11 +227,10 @@ static void GenerateGameListing(const CURL& path, const VECADDONS& addons, CFile
   {
     if (IsGameProvider(addon))
     {
-      CFileItemPtr item(new CFileItem(g_localizeStrings.Get(35220))); // Game providers
       CURL itemPath = path;
       itemPath.SetFileName(CATEGORY_GAME_PROVIDERS);
-      item->SetPath(itemPath.Get());
-      item->m_bIsFolder = true;
+      const auto item{std::make_shared<CFileItem>(itemPath.Get(), true)};
+      item->SetLabel(g_localizeStrings.Get(35220)); // Game providers
       std::string thumb = CAddonInfo::TranslateIconType(AddonType::GAMEDLL);
       if (!thumb.empty() && CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
         item->SetArt("thumb", thumb);
@@ -248,11 +243,10 @@ static void GenerateGameListing(const CURL& path, const VECADDONS& addons, CFile
   {
     if (IsGameResource(addon))
     {
-      CFileItemPtr item(new CFileItem(g_localizeStrings.Get(35209))); // Game resources
       CURL itemPath = path;
       itemPath.SetFileName(CATEGORY_GAME_RESOURCES);
-      item->SetPath(itemPath.Get());
-      item->m_bIsFolder = true;
+      const auto item{std::make_shared<CFileItem>(itemPath.Get(), true)};
+      item->SetLabel(g_localizeStrings.Get(35209)); // Game resources
       std::string thumb = CAddonInfo::TranslateIconType(AddonType::GAMEDLL);
       if (!thumb.empty() && CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
         item->SetArt("thumb", thumb);
@@ -265,11 +259,10 @@ static void GenerateGameListing(const CURL& path, const VECADDONS& addons, CFile
   {
     if (IsGameSupportAddon(addon))
     {
-      CFileItemPtr item(new CFileItem(g_localizeStrings.Get(35216))); // Support add-ons
       CURL itemPath = path;
       itemPath.SetFileName(CATEGORY_GAME_SUPPORT_ADDONS);
-      item->SetPath(itemPath.Get());
-      item->m_bIsFolder = true;
+      const auto item{std::make_shared<CFileItem>(itemPath.Get(), true)};
+      item->SetLabel(g_localizeStrings.Get(35216)); // Support add-ons
       std::string thumb = CAddonInfo::TranslateIconType(AddonType::GAMEDLL);
       if (!thumb.empty() && CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
         item->SetArt("thumb", thumb);
@@ -285,9 +278,9 @@ static void GenerateMainCategoryListing(const CURL& path, const VECADDONS& addon
 {
   if (std::any_of(addons.begin(), addons.end(), IsInfoProviderTypeAddon))
   {
-    CFileItemPtr item(new CFileItem(g_localizeStrings.Get(24993)));
-    item->SetPath(URIUtils::AddFileToFolder(path.Get(), CATEGORY_INFO_PROVIDERS));
-    item->m_bIsFolder = true;
+    const auto item{std::make_shared<CFileItem>(
+        URIUtils::AddFileToFolder(path.Get(), CATEGORY_INFO_PROVIDERS), true)};
+    item->SetLabel(g_localizeStrings.Get(24993));
     const std::string thumb = "DefaultAddonInfoProvider.png";
     if (CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
       item->SetArt("thumb", thumb);
@@ -295,9 +288,9 @@ static void GenerateMainCategoryListing(const CURL& path, const VECADDONS& addon
   }
   if (std::any_of(addons.begin(), addons.end(), IsLookAndFeelTypeAddon))
   {
-    CFileItemPtr item(new CFileItem(g_localizeStrings.Get(24997)));
-    item->SetPath(URIUtils::AddFileToFolder(path.Get(), CATEGORY_LOOK_AND_FEEL));
-    item->m_bIsFolder = true;
+    const auto item{std::make_shared<CFileItem>(
+        URIUtils::AddFileToFolder(path.Get(), CATEGORY_LOOK_AND_FEEL), true)};
+    item->SetLabel(g_localizeStrings.Get(24997));
     const std::string thumb = "DefaultAddonLookAndFeel.png";
     if (CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
       item->SetArt("thumb", thumb);
@@ -305,9 +298,9 @@ static void GenerateMainCategoryListing(const CURL& path, const VECADDONS& addon
   }
   if (std::any_of(addons.begin(), addons.end(), IsGameAddon))
   {
-    CFileItemPtr item(new CFileItem(CAddonInfo::TranslateType(AddonType::GAME, true)));
-    item->SetPath(URIUtils::AddFileToFolder(path.Get(), CATEGORY_GAME_ADDONS));
-    item->m_bIsFolder = true;
+    const auto item{std::make_shared<CFileItem>(
+        URIUtils::AddFileToFolder(path.Get(), CATEGORY_GAME_ADDONS), true)};
+    item->SetLabel(CAddonInfo::TranslateType(AddonType::GAME, true));
     const std::string thumb = CAddonInfo::TranslateIconType(AddonType::GAME);
     if (CServiceBroker::GetGUI()->GetTextureManager().HasTexture(thumb))
       item->SetArt("thumb", thumb);
@@ -441,11 +434,9 @@ static void UserInstalledAddons(const CURL& path, CFileItemList &items)
     GenerateMainCategoryListing(path, addons, items);
 
     //"All" node
-    CFileItemPtr item(new CFileItem());
-    item->m_bIsFolder = true;
     CURL itemPath = path;
     itemPath.SetFileName("all");
-    item->SetPath(itemPath.Get());
+    const auto item{std::make_shared<CFileItem>(itemPath.Get(), true)};
     item->SetLabel(g_localizeStrings.Get(593));
     item->SetSpecialSort(SortSpecialOnTop);
     items.Add(item);
