@@ -12,6 +12,7 @@
 #include "GUIPassword.h"
 #include "ServiceBroker.h"
 #include "Util.h"
+#include "favourites/FavouritesGUIInfo.h"
 #include "favourites/FavouritesURL.h"
 #include "input/WindowTranslator.h"
 #include "profiles/ProfileManager.h"
@@ -143,6 +144,13 @@ bool LoadFromFile(const std::string& strPath, CFileItemList& items)
 CFavouritesService::CFavouritesService(std::string userDataFolder) : m_favourites("favourites://")
 {
   ReInit(std::move(userDataFolder));
+}
+
+CFavouritesService::~CFavouritesService() = default;
+
+void CFavouritesService::InitStageThree()
+{
+  m_guiInfo = std::make_unique<CFavouritesGUIInfo>();
 }
 
 void CFavouritesService::ReInit(std::string userDataFolder)

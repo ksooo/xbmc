@@ -213,6 +213,8 @@ bool CServiceManager::InitStageThree(const std::shared_ptr<CProfileManager>& pro
   if (!m_Platform->InitStageThree())
     return false;
 
+  m_favouritesService->InitStageThree();
+
   init_level = 3;
   return true;
 }

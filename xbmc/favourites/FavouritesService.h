@@ -17,11 +17,16 @@
 #include <unordered_map>
 #include <vector>
 
+class CFavouritesGUIInfo;
+
 class CFavouritesService
 {
 public:
   explicit CFavouritesService(std::string userDataFolder);
-  virtual ~CFavouritesService() = default;
+  virtual ~CFavouritesService();
+
+  /** For GUI info */
+  void InitStageThree();
 
   /** For profiles*/
   void ReInit(std::string userDataFolder);
@@ -57,4 +62,5 @@ private:
   mutable std::unordered_map<std::string, std::shared_ptr<CFileItem>> m_targets;
   CEventSource<FavouritesUpdated> m_events;
   mutable CCriticalSection m_criticalSection;
+  std::unique_ptr<CFavouritesGUIInfo> m_guiInfo;
 };
