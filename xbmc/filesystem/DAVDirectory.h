@@ -10,9 +10,6 @@
 
 #include "IDirectory.h"
 
-class CFileItem;
-class CFileItemList;
-
 namespace tinyxml2
 {
 class XMLElement;
@@ -30,8 +27,5 @@ namespace XFILE
       bool Exists(const CURL& url) override;
       bool Remove(const CURL& url) override;
       DIR_CACHE_TYPE GetCacheType(const CURL& url) const override { return DIR_CACHE_ONCE; }
-
-    private:
-      void ParseResponse(const tinyxml2::XMLElement* element, CFileItem& item);
   };
 }

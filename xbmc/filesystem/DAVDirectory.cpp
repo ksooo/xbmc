@@ -23,6 +23,8 @@ using namespace XFILE;
 CDAVDirectory::CDAVDirectory(void) = default;
 CDAVDirectory::~CDAVDirectory(void) = default;
 
+namespace
+{
 /*
  * Parses a <response>
  *
@@ -30,17 +32,22 @@ CDAVDirectory::~CDAVDirectory(void) = default;
  * <!ELEMENT propstat (prop, status, responsedescription?) >
  *
  */
-void CDAVDirectory::ParseResponse(const tinyxml2::XMLElement* element, CFileItem& item)
+std::shared_ptr<CFileItem> ParseResponse(const CURL& url, const tinyxml2::XMLElement* element)
 {
+  std::string path;
+  int size{-1};
+  time_t datetime{-1};
+  std::string label;
+  bool isFolder{false};
+
   /* Iterate response children elements */
   for (auto* responseChild = element->FirstChildElement(); responseChild;
        responseChild = responseChild->NextSiblingElement())
   {
     if (CDAVCommon::ValueWithoutNamespace(responseChild, "href") && !responseChild->NoChildren())
     {
-      std::string path(responseChild->FirstChild()->Value());
+      path = responseChild->FirstChild()->Value();
       URIUtils::RemoveSlashAtEnd(path);
-      item.SetPathX(path);
     }
     else if (CDAVCommon::ValueWithoutNamespace(responseChild, "propstat"))
     {
@@ -59,33 +66,33 @@ void CDAVDirectory::ParseResponse(const tinyxml2::XMLElement* element, CFileItem
               if (CDAVCommon::ValueWithoutNamespace(propChild, "getcontentlength") &&
                   !propChild->NoChildren())
               {
-                item.m_dwSize = strtoll(propChild->FirstChild()->Value(), NULL, 10);
+                size = strtoll(propChild->FirstChild()->Value(), NULL, 10);
               }
               else if (CDAVCommon::ValueWithoutNamespace(propChild, "getlastmodified") &&
                        !propChild->NoChildren())
               {
                 struct tm timeDate = {};
                 strptime(propChild->FirstChild()->Value(), "%a, %d %b %Y %T", &timeDate);
-                item.m_dateTime = mktime(&timeDate);
+                datetime = mktime(&timeDate);
               }
               else if (CDAVCommon::ValueWithoutNamespace(propChild, "displayname") &&
                        !propChild->NoChildren())
               {
-                item.SetLabel(CURL::Decode(propChild->FirstChild()->Value()));
+                label = CURL::Decode(propChild->FirstChild()->Value());
               }
-              else if (!item.m_dateTime.IsValid() &&
+              else if (datetime >= 0 &&
                        CDAVCommon::ValueWithoutNamespace(propChild, "creationdate") &&
                        !propChild->NoChildren())
               {
                 struct tm timeDate = {};
                 strptime(propChild->FirstChild()->Value(), "%Y-%m-%dT%T", &timeDate);
-                item.m_dateTime = mktime(&timeDate);
+                datetime = mktime(&timeDate);
               }
               else if (CDAVCommon::ValueWithoutNamespace(propChild, "resourcetype"))
               {
                 if (CDAVCommon::ValueWithoutNamespace(propChild->FirstChild(), "collection"))
                 {
-                  item.m_bIsFolder = true;
+                  isFolder = true;
                 }
               }
             }
@@ -94,7 +101,23 @@ void CDAVDirectory::ParseResponse(const tinyxml2::XMLElement* element, CFileItem
       }
     }
   }
+
+  if (!path.empty())
+  {
+    if (!url.GetProtocolOptions().empty())
+      path += "|" + url.GetProtocolOptions();
+
+    auto item{std::make_shared<CFileItem>(path, isFolder)};
+    item->SetLabel(label);
+    item->m_dwSize = size;
+    item->m_dateTime = datetime;
+    return item;
+  }
+
+  CLog::LogF(LOGERROR, "Parse error");
+  return {};
 }
+} // unnamed namespace
 
 bool CDAVDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
@@ -141,33 +164,25 @@ bool CDAVDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   {
     if (CDAVCommon::ValueWithoutNamespace(child, "response"))
     {
-      CFileItem item;
-      ParseResponse(child->ToElement(), item);
-      const CURL& url2(url);
-      CURL url3(item.GetPath());
+      const auto item{ParseResponse(url, child->ToElement())};
+      if (!item)
+        continue;
 
-      std::string itemPath(URIUtils::AddFileToFolder(url2.GetWithoutFilename(), url3.GetFileName()));
+      const CURL url2(item->GetPath());
+      std::string itemPath(URIUtils::AddFileToFolder(url.GetWithoutFilename(), url2.GetFileName()));
 
-      if (item.GetLabel().empty())
+      if (item->GetLabel().empty())
       {
         std::string name(itemPath);
         URIUtils::RemoveSlashAtEnd(name);
-        item.SetLabel(CURL::Decode(URIUtils::GetFileName(name)));
+        item->SetLabel(CURL::Decode(URIUtils::GetFileName(name)));
       }
 
-      if (item.m_bIsFolder)
+      if (item->m_bIsFolder)
         URIUtils::AddSlashAtEnd(itemPath);
 
-      // Add back protocol options
-      if (!url2.GetProtocolOptions().empty())
-        itemPath += "|" + url2.GetProtocolOptions();
-      item.SetPathX(itemPath);
-
-      if (!item.IsURL(url))
-      {
-        CFileItemPtr pItem(new CFileItem(item));
-        items.Add(pItem);
-      }
+      if (!item->IsURL(url))
+        items.Add(item);
     }
   }
 
