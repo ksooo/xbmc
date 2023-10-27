@@ -566,11 +566,16 @@ bool CDirectoryProvider::OnClick(const CGUIListItemPtr& item)
   }
 
   // exec the execute string for the original (!) item
-  CFileItem fileItem{*std::static_pointer_cast<CFileItem>(item)};
-
-  if (fileItem.HasProperty("node.target_url"))
-    fileItem.SetPathX(fileItem.GetProperty("node.target_url").asString());
-
+  CFileItem fileItem;
+  if (item->HasProperty("node.target_url"))
+  {
+    fileItem = {item->GetProperty("node.target_url").asString(),
+                *std::static_pointer_cast<CFileItem>(item)};
+  }
+  else
+  {
+    fileItem = {*std::static_pointer_cast<CFileItem>(item)};
+  }
   return ExecuteAction({fileItem, GetTarget(fileItem)});
 }
 
