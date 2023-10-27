@@ -105,6 +105,7 @@ class CFileItem :
 {
 public:
   CFileItem(void);
+  CFileItem(const std::string& path, const CFileItem& item);
   CFileItem(const CFileItem& item);
   explicit CFileItem(const CGUIListItem& item);
   explicit CFileItem(const std::string& strLabel);

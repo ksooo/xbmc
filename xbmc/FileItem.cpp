@@ -340,6 +340,12 @@ CFileItem::CFileItem(const CFileItem& item)
   *this = item;
 }
 
+CFileItem::CFileItem(const std::string& path, const CFileItem& item) : CFileItem(item)
+{
+  // copy item and set a new path afterwards
+  m_strPath = path;
+}
+
 CFileItem::CFileItem(const CGUIListItem& item)
 {
   Initialize();
