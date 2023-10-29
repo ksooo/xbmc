@@ -900,7 +900,7 @@ bool IsItemPlayable(const CFileItem& item)
     if (StringUtils::StartsWith(item.GetPath(), StringUtils::Format("{}/music/", path)))
       return true;
 
-    if (!item.m_bIsFolder)
+    if (!item.m_bIsFolder && !item.HasMusicInfoTag())
     {
       // Unknown location. Type cannot be determined for non-folder items.
       return false;
