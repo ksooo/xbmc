@@ -271,7 +271,8 @@ std::string CDatabase::PrepareSQL(std::string strStmt, ...) const
   return strResult;
 }
 
-std::string CDatabase::GetSingleValue(const std::string& query, std::unique_ptr<Dataset>& ds)
+std::string CDatabase::GetSingleValue(const std::string& query,
+                                      const std::unique_ptr<Dataset>& ds) const
 {
   std::string ret;
   try
@@ -294,7 +295,7 @@ std::string CDatabase::GetSingleValue(const std::string& query, std::unique_ptr<
 std::string CDatabase::GetSingleValue(const std::string& strTable,
                                       const std::string& strColumn,
                                       const std::string& strWhereClause /* = std::string() */,
-                                      const std::string& strOrderBy /* = std::string() */)
+                                      const std::string& strOrderBy /* = std::string() */) const
 {
   std::string query = PrepareSQL("SELECT %s FROM %s", strColumn.c_str(), strTable.c_str());
   if (!strWhereClause.empty())
@@ -305,7 +306,7 @@ std::string CDatabase::GetSingleValue(const std::string& strTable,
   return GetSingleValue(query, m_pDS);
 }
 
-std::string CDatabase::GetSingleValue(const std::string& query)
+std::string CDatabase::GetSingleValue(const std::string& query) const
 {
   return GetSingleValue(query, m_pDS);
 }
@@ -814,7 +815,9 @@ void CDatabase::UpdateVersionNumber()
   m_pDS->exec(strSQL);
 }
 
-bool CDatabase::BuildSQL(const std::string& strQuery, const Filter& filter, std::string& strSQL)
+bool CDatabase::BuildSQL(const std::string& strQuery,
+                         const Filter& filter,
+                         std::string& strSQL) const
 {
   strSQL = strQuery;
 
