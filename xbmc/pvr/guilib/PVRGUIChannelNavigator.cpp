@@ -182,7 +182,7 @@ std::shared_ptr<CPVRChannelGroupMember> CPVRGUIChannelNavigator::GetNextOrPrevCh
 
   if (bPlayingTV || bPlayingRadio)
   {
-    const std::shared_ptr<CPVRChannelGroup> group =
+    const std::shared_ptr<const CPVRChannelGroup> group =
         CServiceBroker::GetPVRManager().PlaybackState()->GetActiveChannelGroup(bPlayingRadio);
     if (group)
     {
