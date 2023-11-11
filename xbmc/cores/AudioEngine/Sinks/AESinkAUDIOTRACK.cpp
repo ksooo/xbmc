@@ -29,7 +29,7 @@
 // This is an alternative to the linear weighted delay smoothing
 // advantages: only one history value needs to be stored
 // in tests the linear weighted average smoother yield better results
-//#define AT_USE_EXPONENTIAL_AVERAGING 1
+#define AT_USE_EXPONENTIAL_AVERAGING 1
 
 using namespace jni;
 
@@ -39,7 +39,7 @@ using namespace std::chrono_literals;
 // is the max TrueHD package
 const unsigned int MAX_RAW_AUDIO_BUFFER_HD = 61440;
 const unsigned int MAX_RAW_AUDIO_BUFFER = 16384;
-const unsigned int MOVING_AVERAGE_MAX_MEMBERS = 3;
+const unsigned int MOVING_AVERAGE_MAX_MEMBERS = 7;
 const uint64_t UINT64_LOWER_BYTES = 0x00000000FFFFFFFF;
 const uint64_t UINT64_UPPER_BYTES = 0xFFFFFFFF00000000;
 
