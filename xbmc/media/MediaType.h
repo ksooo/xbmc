@@ -26,6 +26,13 @@ using MediaType = std::string;
 #define MediaTypeSeason           "season"
 #define MediaTypeEpisode          "episode"
 
+constexpr const char* MediaTypeVideoCollections = "sets";
+constexpr const char* MediaTypeMusicVideos = "musicvideos";
+constexpr const char* MediaTypeMovies = "movies";
+constexpr const char* MediaTypeTvShows = "tvshows";
+constexpr const char* MediaTypeSeasons = "seasons";
+constexpr const char* MediaTypeEpisodes = "episodes";
+
 class CMediaTypes
 {
 public:
