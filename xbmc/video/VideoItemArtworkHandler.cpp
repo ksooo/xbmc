@@ -134,8 +134,21 @@ void CVideoItemArtworkHandler::PersistArt(const std::string& art)
     return;
   }
 
-  videodb.SetArtForItem(m_item->GetVideoInfoTag()->m_iDbId, m_item->GetVideoInfoTag()->m_type,
-                        m_artType, art);
+  bool allPersisted{false};
+  if (m_item->HasVideoVersions())
+  {
+    // write video version artwork data to database
+    const auto* tag = m_item->GetVideoInfoTag();
+    videodb.SetArtForItem(tag->m_iFileId, MediaTypeVideoVersion, m_artType, art);
+
+    // additionally, write default version artwork data to database, for compatibility reasons
+    allPersisted = !tag->IsDefaultVideoVersion();
+  }
+  if (!allPersisted)
+  {
+    videodb.SetArtForItem(m_item->GetVideoInfoTag()->m_iDbId, m_item->GetVideoInfoTag()->m_type,
+                          m_artType, art);
+  }
 }
 
 void CVideoItemArtworkHandler::AddItemPathStringToFileBrowserSources(

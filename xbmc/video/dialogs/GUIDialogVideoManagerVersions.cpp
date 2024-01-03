@@ -170,6 +170,9 @@ void CGUIDialogVideoManagerVersions::SetDefaultVideoVersion(const CFileItem& ver
   // set the specified video version as default
   m_database.SetDefaultVideoVersion(itemType, dbId, version.GetVideoInfoTag()->m_iDbId);
 
+  // update default artwork
+  m_database.SetArtForItem(dbId, m_videoAsset->GetVideoInfoTag()->m_type, version.GetArt());
+
   // update the video item
   m_videoAsset->SetPath(version.GetPath());
   m_videoAsset->SetDynPath(version.GetPath());
