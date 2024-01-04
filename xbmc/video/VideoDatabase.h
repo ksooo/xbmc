@@ -1068,7 +1068,6 @@ public:
   void GetSameVideoItems(CFileItem& item, CFileItemList& items);
   int GetFileIdByMovie(int idMovie);
   std::string GetFileBasePathById(int idFile);
-  std::string GetFilenameAndPathById(int idFile);
 
 protected:
   int AddNewMovie(CVideoInfoTag& details);
