@@ -28,7 +28,7 @@ namespace KODI::VIDEO
 
 bool CVideoGeneratedImageFileLoader::CanLoad(const std::string& specialType) const
 {
-  return specialType == "video";
+  return specialType == "video" || specialType == "pvrrecording";
 }
 
 namespace
