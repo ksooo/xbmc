@@ -310,7 +310,7 @@ bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
 
     // flag extraction mostly for non-library items - should end up somewhere else,
     // like a VideoInfoLoader if it existed
-    if (settings->GetBool(CSettings::SETTING_MYVIDEOS_EXTRACTFLAGS) &&
+    if (!pItem->IsPVR() && settings->GetBool(CSettings::SETTING_MYVIDEOS_EXTRACTFLAGS) &&
         CDVDFileInfo::CanExtract(*pItem) &&
         (!pItem->HasVideoInfoTag() || !pItem->GetVideoInfoTag()->HasStreamDetails()))
     {
