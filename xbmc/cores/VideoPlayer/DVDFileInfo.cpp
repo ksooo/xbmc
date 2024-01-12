@@ -259,9 +259,6 @@ bool CDVDFileInfo::CanExtract(const CFileItem& fileItem)
     return false;
 
   if (fileItem.IsLiveTV() ||
-      // Due to a pvr addon api design flaw (no support for multiple concurrent streams
-      // per addon instance), pvr recording thumbnail extraction does not work (reliably).
-      URIUtils::IsPVRRecording(fileItem.GetDynPath()) ||
       // plugin path not fully resolved
       URIUtils::IsPlugin(fileItem.GetDynPath()) || URIUtils::IsUPnP(fileItem.GetPath()) ||
       NETWORK::IsInternetStream(fileItem) || VIDEO::IsDiscStub(fileItem) ||
