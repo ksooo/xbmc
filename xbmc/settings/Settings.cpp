@@ -228,6 +228,7 @@ constexpr const char* CSettings::SETTING_PVRPLAYBACK_CONFIRMCHANNELSWITCH;
 constexpr const char* CSettings::SETTING_PVRPLAYBACK_CHANNELENTRYTIMEOUT;
 constexpr const char* CSettings::SETTING_PVRPLAYBACK_DELAYMARKLASTWATCHED;
 constexpr const char* CSettings::SETTING_PVRPLAYBACK_FPS;
+constexpr const char* CSettings::SETTING_PVRPLAYBACK_AUTOPLAYNEXTPROGRAMME;
 constexpr const char* CSettings::SETTING_PVRRECORD_INSTANTRECORDACTION;
 constexpr const char* CSettings::SETTING_PVRRECORD_INSTANTRECORDTIME;
 constexpr const char* CSettings::SETTING_PVRRECORD_MARGINSTART;
