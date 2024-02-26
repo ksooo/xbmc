@@ -1047,6 +1047,8 @@ bool CDVDVideoCodecFFmpeg::GetPictureCommon(VideoPicture* pVideoPicture)
   pVideoPicture->qstride = 0;
   pVideoPicture->qscale_type = 0;
 
+  pVideoPicture->hdrType = m_hints.hdrType;
+
   AVFrameSideData* sd;
   sd = av_frame_get_side_data(m_pFrame, AV_FRAME_DATA_QP_TABLE_PROPERTIES);
   if (sd)

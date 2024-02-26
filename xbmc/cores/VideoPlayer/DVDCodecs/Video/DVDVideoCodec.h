@@ -63,6 +63,8 @@ public:
   int qscale_type;
   int pict_type;
 
+  StreamHdrType hdrType;
+
   bool hasDisplayMetadata = false;
   AVMasteringDisplayMetadata displayMetadata;
   bool hasLightMetadata = false;
