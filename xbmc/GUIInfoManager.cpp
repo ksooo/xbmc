@@ -1347,6 +1347,15 @@ const infomap weather[] =        {{ "isfetched",        WEATHER_IS_FETCHED },
 ///     @skinning_v17 **[New Boolean Condition]** \link System_HasPVRAddon
 ///     `System.HasPVRAddon`\endlink <p>
 ///   }
+///   \table_row3{   <b>`System.PVRCount`</b>,
+///                  \anchor System_PVRCount
+///                  _integer_,
+///     @return Number of PVR clients enabled.
+///     @note If a PVR is enabled but unreachable\, it is still counted.
+///     <p><hr>
+///     @skinning_v22 **[New Integer Value]** \link System_PVRCount `System.PVRCount`\endlink
+///     <p>
+///   }
 ///   \table_row3{   <b>`System.HasCMS`</b>,
 ///                  \anchor System_HasCMS
 ///                  _boolean_,
@@ -1987,6 +1996,7 @@ const infomap system_labels[] = {
     {"hascms", SYSTEM_HAS_CMS},
     {"privacypolicy", SYSTEM_PRIVACY_POLICY},
     {"haspvraddon", SYSTEM_HAS_PVR_ADDON},
+    {"pvrcount", SYSTEM_PVR_COUNT},
     {"addonupdatecount", SYSTEM_ADDON_UPDATE_COUNT},
     {"supportscpuusage", SYSTEM_SUPPORTS_CPU_USAGE},
     {"supportedhdrtypes", SYSTEM_SUPPORTED_HDR_TYPES},
@@ -6931,6 +6941,14 @@ const infomap container_str[]  = {{ "property",         CONTAINER_PROPERTY },
 ///     <p><hr>
 ///     @skinning_v21 **[New Infolabel]** \link ListItem_SongVideoURL `ListItem.SongVideoURL`\endlink
 ///   }
+///   \table_row3{   <b>`ListItem.BackendInstanceName`</b>,
+///                  \anchor ListItem_BackendInstanceName
+///                  _string_,
+///     @return The name used by the PVR client addon instance for the selected item.
+///     <p><hr>
+///     @skinning_v22 **[New Infolabel]** \link ListItem_BackendInstanceName `ListItem.BackendInstanceName`\endlink
+///     <p>
+///   }
 ///   \table_row3{   <b>`ListItem.VideoWidth`</b>,
 ///                  \anchor ListItem_VideoWidth
 ///                  _string_,
@@ -7194,6 +7212,7 @@ const infomap listitem_labels[]= {{ "thumb",            LISTITEM_THUMB },
                                   { "isvideoextra",     LISTITEM_ISVIDEOEXTRA },
                                   { "videoversionname", LISTITEM_VIDEOVERSION_NAME },
                                   { "hasvideoextras",   LISTITEM_HASVIDEOEXTRAS },
+                                  { "backendinstancename", LISTITEM_BACKEND_INSTANCE_NAME },
 };
 // clang-format on
 
@@ -8206,6 +8225,7 @@ const infomap playlist[] =       {{ "length",           PLAYLIST_LENGTH },
 ///     <p>
 ///   }
 ///
+// clang-format off
 const infomap pvr[] =            {{ "isrecording",              PVR_IS_RECORDING },
                                   { "hastimer",                 PVR_HAS_TIMER },
                                   { "hastvchannels",            PVR_HAS_TV_CHANNELS },
@@ -8285,6 +8305,7 @@ const infomap pvr[] =            {{ "isrecording",              PVR_IS_RECORDING
                                   { "timeshiftprogressbufferstart", PVR_TIMESHIFT_PROGRESS_BUFFER_START },
                                   { "timeshiftprogressbufferend", PVR_TIMESHIFT_PROGRESS_BUFFER_END },
                                   { "epgeventicon",               PVR_EPG_EVENT_ICON }};
+// clang-format on
 
 /// \page modules__infolabels_boolean_conditions
 ///   \table_row3{   <b>`PVR.EpgEventDuration`</b>,
