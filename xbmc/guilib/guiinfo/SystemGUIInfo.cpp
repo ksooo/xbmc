@@ -25,6 +25,8 @@
 #include "guilib/guiinfo/GUIInfoLabels.h"
 #include "powermanagement/PowerManager.h"
 #include "profiles/ProfileManager.h"
+#include "pvr/PVRManager.h"
+#include "pvr/addons/PVRClients.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/MediaSettings.h"
 #include "settings/SettingUtils.h"
@@ -353,6 +355,12 @@ bool CSystemGUIInfo::GetLabel(std::string& value, const CFileItem *item, int con
       value = g_langInfo.GetRegionLocale();
       return true;
     }
+
+    case SYSTEM_PVR_COUNT:
+    {
+      value = std::to_string(CServiceBroker::GetPVRManager().Clients()->EnabledClientAmount());
+      return true;
+    }
   }
   return false;
 }
@@ -388,6 +396,11 @@ bool CSystemGUIInfo::GetInt(int& value, const CGUIListItem *gitem, int contextWi
     case SYSTEM_BATTERY_LEVEL:
       value = CServiceBroker::GetPowerManager().BatteryLevel();
       return true;
+    case SYSTEM_PVR_COUNT:
+    {
+      value = CServiceBroker::GetPVRManager().Clients()->EnabledClientAmount();
+      return true;
+    }
   }
 
   return false;
