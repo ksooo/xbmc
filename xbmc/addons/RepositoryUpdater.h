@@ -40,6 +40,16 @@ public:
   void Start();
 
   /**
+   * Called when system is going to sleep (power management).
+   */
+  void OnSleep();
+
+  /**
+   * Called when system is awakened from sleep (power management).
+   */
+  void OnWake();
+
+  /**
    * Check a single repository for updates.
    */
   void CheckForUpdates(const ADDON::RepositoryPtr& repo, bool showProgress=false);
@@ -96,6 +106,7 @@ private:
   CDateTime ClosestNextCheck() const;
 
   CCriticalSection m_criticalSection;
+  bool m_systemIsSleeping{false};
   CTimer m_timer;
   CEvent m_doneEvent;
   std::vector<CRepositoryUpdateJob*> m_jobs;
