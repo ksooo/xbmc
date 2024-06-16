@@ -886,6 +886,11 @@ void CPVRChannelGroup::Delete()
   }
 }
 
+void CPVRChannelGroup::DeleteGroupMember(const std::shared_ptr<CPVRChannelGroupMember>& member)
+{
+  DeleteGroupMembersFromDb({member});
+}
+
 bool CPVRChannelGroup::Renumber(RenumberMode mode /* = NORMAL */)
 {
   bool bReturn(false);
@@ -1022,7 +1027,7 @@ std::string CPVRChannelGroup::GroupName() const
   return m_path.GetGroupName();
 }
 
-void CPVRChannelGroup::SetGroupName(const std::string& strGroupName,
+bool CPVRChannelGroup::SetGroupName(const std::string& strGroupName,
                                     bool isUserSetName /* = false */)
 {
   std::unique_lock<CCriticalSection> lock(m_critSection);
@@ -1038,11 +1043,10 @@ void CPVRChannelGroup::SetGroupName(const std::string& strGroupName,
     }
 
     if (m_bLoaded)
-    {
       m_bChanged = true;
-      Persist(); //! @todo why must we persist immediately?
-    }
   }
+
+  return m_bChanged;
 }
 
 std::string CPVRChannelGroup::ClientGroupName() const
@@ -1157,7 +1161,7 @@ int CPVRChannelGroup::GetPosition() const
   return m_iPosition;
 }
 
-void CPVRChannelGroup::SetPosition(int iPosition)
+bool CPVRChannelGroup::SetPosition(int iPosition)
 {
   std::unique_lock<CCriticalSection> lock(m_critSection);
 
@@ -1167,6 +1171,8 @@ void CPVRChannelGroup::SetPosition(int iPosition)
     if (m_bLoaded)
       m_bChanged = true;
   }
+
+  return m_bChanged;
 }
 
 int CPVRChannelGroup::GetClientPosition() const
