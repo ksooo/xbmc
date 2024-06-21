@@ -25,6 +25,7 @@
 #include "pvr/PVRPlaybackState.h"
 #include "pvr/addons/PVRClient.h"
 #include "pvr/channels/PVRChannel.h"
+#include "pvr/channels/PVRChannelGroup.h"
 #include "pvr/channels/PVRChannelGroupMember.h"
 #include "pvr/channels/PVRChannelGroups.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
@@ -158,7 +159,7 @@ bool CGUIDialogPVRGroupManager::ActionButtonNewGroup(const CGUIMessage& message)
       if (!strGroupName.empty())
       {
         // add the group if it doesn't already exist
-        auto groups = CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio);
+        CPVRChannelGroups* groups{CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)};
         const auto group = groups->AddGroup(strGroupName);
         if (group)
         {
@@ -196,7 +197,7 @@ bool CGUIDialogPVRGroupManager::ActionButtonDeleteGroup(const CGUIMessage& messa
 
     if (pDialog->IsConfirmed())
     {
-      ClearSelectedGroupsThumbnail();
+      ClearGroupThumbnails(*m_channelGroups->Get(m_iSelectedChannelGroup));
       if (CServiceBroker::GetPVRManager()
               .ChannelGroups()
               ->Get(m_bIsRadio)
@@ -233,7 +234,7 @@ bool CGUIDialogPVRGroupManager::ActionButtonRenameGroup(const CGUIMessage& messa
 
       if (!strGroupName.empty())
       {
-        ClearSelectedGroupsThumbnail();
+        ClearGroupThumbnails(*m_channelGroups->Get(m_iSelectedChannelGroup));
         if (CServiceBroker::GetPVRManager()
                 .ChannelGroups()
                 ->Get(m_bIsRadio)
@@ -278,7 +279,7 @@ bool CGUIDialogPVRGroupManager::ActionButtonUngroupedChannels(const CGUIMessage&
                   ->Get(m_bIsRadio)
                   ->AppendToGroup(m_selectedGroup, itemChannel->GetPVRChannelGroupMemberInfoTag()))
           {
-            ClearSelectedGroupsThumbnail();
+            ClearGroupThumbnails(*itemChannel);
             m_iSelectedChannelGroup = -1; // recalc index in Update()
             Update();
           }
@@ -308,7 +309,7 @@ bool CGUIDialogPVRGroupManager::ActionButtonGroupMembers(const CGUIMessage& mess
         if (m_selectedGroup && m_groupMembers->GetFileCount() > 0)
         {
           const auto itemChannel = m_groupMembers->Get(m_iSelectedGroupMember);
-          ClearSelectedGroupsThumbnail();
+          ClearGroupThumbnails(*itemChannel);
           if (CServiceBroker::GetPVRManager()
                   .ChannelGroups()
                   ->Get(m_bIsRadio)
@@ -649,7 +650,7 @@ void CGUIDialogPVRGroupManager::Update()
       m_groupMembers->Add(std::make_shared<CFileItem>(groupMember));
     }
 
-    const auto groups = CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio);
+    CPVRChannelGroups* groups{CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)};
     const auto availableMembers = groups->GetMembersAvailableForGroup(m_selectedGroup);
 
     for (const auto& groupMember : availableMembers)
@@ -679,7 +680,42 @@ void CGUIDialogPVRGroupManager::Clear()
   m_channelGroups->Clear();
 }
 
-void CGUIDialogPVRGroupManager::ClearSelectedGroupsThumbnail()
+void CGUIDialogPVRGroupManager::ClearGroupThumbnails(const CFileItem& changedItem)
 {
-  m_thumbLoader.ClearCachedImage(*m_channelGroups->Get(m_iSelectedChannelGroup));
+  const CPVRChannelGroups* groups{CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)};
+
+  const std::shared_ptr<const CPVRChannel> changedChannel{changedItem.GetPVRChannelInfoTag()};
+  if (changedChannel)
+  {
+    // item represents a channel
+    for (const auto& groupItem : *m_channelGroups)
+    {
+      const std::shared_ptr<const CPVRChannelGroup> group{
+          groups->GetGroupByPath(groupItem->GetPath())};
+      if (group && group->GetByUniqueID(changedChannel->UniqueID(), changedChannel->ClientID()))
+        m_thumbLoader.ClearCachedImage(*groupItem);
+    }
+  }
+  else
+  {
+    // item represents a group
+    const std::shared_ptr<const CPVRChannelGroup> changedGroup{
+        groups->GetGroupByPath(changedItem.GetPath())};
+    for (const auto& groupItem : *m_channelGroups)
+    {
+      const std::shared_ptr<const CPVRChannelGroup> group{
+          groups->GetGroupByPath(groupItem->GetPath())};
+      if (!group)
+        continue;
+
+      for (const auto& member : group->GetMembers())
+      {
+        if (changedGroup->GetByUniqueID(member->ChannelUID(), member->ChannelClientID()))
+        {
+          m_thumbLoader.ClearCachedImage(*groupItem);
+          break;
+        }
+      }
+    }
+  }
 }
