@@ -143,6 +143,15 @@ public:
   GroupMemberPair GetLastAndPreviousToLastPlayedChannelGroupMember() const;
 
   /*!
+   * @brief Set the last time the given group member has been watched.
+   * @param member The member.
+   * @param lastWatched The new last watched time value.
+   * @return True on success, false otherwise.
+   */
+  bool SetGroupMemberLastWatched(const std::shared_ptr<CPVRChannelGroupMember>& member,
+                                 time_t lastWatched);
+
+  /*!
    * @return The last opened group.
    */
   std::shared_ptr<CPVRChannelGroup> GetLastOpenedGroup() const;

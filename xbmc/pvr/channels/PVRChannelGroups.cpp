@@ -538,6 +538,23 @@ GroupMemberPair CPVRChannelGroups::GetLastAndPreviousToLastPlayedChannelGroupMem
   return {last, previousToLast};
 }
 
+bool CPVRChannelGroups::SetGroupMemberLastWatched(
+    const std::shared_ptr<CPVRChannelGroupMember>& member, time_t lastWatched)
+{
+  // update channel last watched
+  member->Channel()->SetLastWatched(lastWatched, member->GroupID());
+
+  const std::shared_ptr<CPVRChannelGroup> group{GetById(member->GroupID())};
+  if (group)
+  {
+    // update group last watched
+    group->SetLastWatched(lastWatched);
+    GroupStateChanged(group);
+    return true;
+  }
+  return false;
+}
+
 std::shared_ptr<CPVRChannelGroup> CPVRChannelGroups::GetLastOpenedGroup() const
 {
   std::unique_lock<CCriticalSection> lock(m_critSection);
