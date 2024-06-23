@@ -21,7 +21,6 @@ using namespace PVR;
 const std::string CPVRChannelsPath::PATH_TV_CHANNELS = "pvr://channels/tv/";
 const std::string CPVRChannelsPath::PATH_RADIO_CHANNELS = "pvr://channels/radio/";
 
-
 CPVRChannelsPath::CPVRChannelsPath(const std::string& strPath)
 {
   std::string strVarPath = TrimSlashes(strPath);
@@ -114,7 +113,8 @@ CPVRChannelsPath::CPVRChannelsPath(const std::string& strPath)
           if (tokens.size() == 2 && tokens[1] == "pvr")
           {
             std::string channelUID = tokens[0];
-            if (!channelUID.empty() && channelUID.find_first_not_of("0123456789") == std::string::npos)
+            if (!channelUID.empty() &&
+                channelUID.find_first_not_of("0123456789") == std::string::npos)
               m_iChannelUID = std::atoi(channelUID.c_str());
           }
         }
