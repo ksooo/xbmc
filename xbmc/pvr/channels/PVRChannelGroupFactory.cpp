@@ -13,6 +13,7 @@
 #include "pvr/channels/PVRChannelGroupFromClient.h"
 #include "pvr/channels/PVRChannelGroupFromUser.h"
 #include "pvr/channels/PVRChannelGroupMergedByName.h"
+#include "pvr/channels/PVRChannelGroupPlayedChannels.h"
 #include "pvr/channels/PVRChannelsPath.h"
 #include "utils/log.h"
 
@@ -53,6 +54,8 @@ std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupFactory::CreateGroup(
       return std::make_shared<CPVRChannelGroupFromUser>(groupPath, allChannels);
     case PVR_GROUP_TYPE_SYSTEM_ALL_CHANNELS_SINGLE_CLIENT:
       return std::make_shared<CPVRChannelGroupAllChannelsSingleClient>(groupPath, allChannels);
+    case PVR_GROUP_TYPE_SYSTEM_PLAYED_CHANNELS:
+      return std::make_shared<CPVRChannelGroupPlayedChannels>(groupPath, allChannels);
     case PVR_GROUP_TYPE_SYSTEM_MERGED_BY_NAME:
       return std::make_shared<CPVRChannelGroupMergedByName>(groupPath, allChannels);
     case PVR_GROUP_TYPE_CLIENT:
@@ -74,8 +77,10 @@ int CPVRChannelGroupFactory::GetGroupTypePriority(
       return 0; // highest
     case PVR_GROUP_TYPE_SYSTEM_ALL_CHANNELS_SINGLE_CLIENT:
       return 1;
-    case PVR_GROUP_TYPE_SYSTEM_MERGED_BY_NAME:
+    case PVR_GROUP_TYPE_SYSTEM_PLAYED_CHANNELS:
       return 2;
+    case PVR_GROUP_TYPE_SYSTEM_MERGED_BY_NAME:
+      return 3;
 
     // User groups, created and managed by the user
     case PVR_GROUP_TYPE_USER:
@@ -102,6 +107,11 @@ std::vector<std::shared_ptr<CPVRChannelGroup>> CPVRChannelGroupFactory::CreateMi
 
   std::vector<std::shared_ptr<CPVRChannelGroup>> newGroupsTmp{
       CPVRChannelGroupMergedByName::CreateMissingGroups(allChannelsGroup, allChannelGroups)};
+  if (!newGroupsTmp.empty())
+    newGroups.insert(newGroups.end(), newGroupsTmp.cbegin(), newGroupsTmp.cend());
+
+  newGroupsTmp =
+      CPVRChannelGroupPlayedChannels::CreateMissingGroups(allChannelsGroup, allChannelGroups);
   if (!newGroupsTmp.empty())
     newGroups.insert(newGroups.end(), newGroupsTmp.cbegin(), newGroupsTmp.cend());
 

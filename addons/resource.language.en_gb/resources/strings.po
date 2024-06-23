@@ -3929,7 +3929,7 @@ msgctxt "#854"
 msgid "Any channel from any client"
 msgstr ""
 
-#. Label for Estuary 'Recently added channels' 'home screen widget
+#. Label for Estuary 'Recently added channels' home screen widget
 #: addons/skin.estuary/xml/Home.xml
 msgctxt "#855"
 msgid "Recently added channels"
@@ -3941,7 +3941,19 @@ msgctxt "#856"
 msgid "{0:s} [All channels]"
 msgstr ""
 
-#empty strings from id 857 to 996
+#. Label for 'Watched channels' TV channel group name
+#: xbmc/pvr/channels/PVRChannelGroupLastPlayedChannels.cpp
+msgctxt "#857"
+msgid "Watched"
+msgstr ""
+
+#. Label for 'Listened channels' radio channel group name
+#: xbmc/pvr/channels/PVRChannelGroupLastPlayedChannels.cpp
+msgctxt "#858"
+msgid "Listened"
+msgstr ""
+
+#empty strings from id 859 to 996
 
 #: xbmc/windows/GUIMediaWindow.cpp
 msgctxt "#997"
