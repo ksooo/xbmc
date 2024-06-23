@@ -10,6 +10,7 @@
 
 #include "FileItem.h"
 #include "ServiceBroker.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/PVRPlaybackState.h"
 #include "pvr/addons/PVRClients.h"
@@ -64,7 +65,9 @@ JSONRPC_STATUS CPVROperations::GetChannelGroups(const std::string &method, ITran
   if (!channelGroupContainer)
     return FailedToExecute;
 
-  CPVRChannelGroups *channelGroups = channelGroupContainer->Get(parameterObject["channeltype"].asString().compare("radio") == 0);
+  CPVRChannelGroups* channelGroups = channelGroupContainer->Get(
+      (parameterObject["channeltype"].asString().compare("radio") == 0) ? ChannelType::RADIO
+                                                                        : ChannelType::TV);
   if (channelGroups == NULL)
     return FailedToExecute;
 
@@ -92,7 +95,8 @@ JSONRPC_STATUS CPVROperations::GetChannelGroupDetails(const std::string &method,
   if (id.isInteger())
     channelGroup = channelGroupContainer->GetByIdFromAll((int)id.asInteger());
   else if (id.isString())
-    channelGroup = channelGroupContainer->GetGroupAll(id.asString() == "allradio");
+    channelGroup = channelGroupContainer->GetGroupAll(
+        (id.asString() == "allradio") ? ChannelType::RADIO : ChannelType::TV);
 
   if (channelGroup == NULL)
     return InvalidParams;
@@ -116,7 +120,8 @@ JSONRPC_STATUS CPVROperations::GetChannels(const std::string &method, ITransport
   if (id.isInteger())
     channelGroup = channelGroupContainer->GetByIdFromAll((int)id.asInteger());
   else if (id.isString())
-    channelGroup = channelGroupContainer->GetGroupAll(id.asString() == "allradio");
+    channelGroup = channelGroupContainer->GetGroupAll(
+        (id.asString() == "allradio") ? ChannelType::RADIO : ChannelType::TV);
 
   if (channelGroup == NULL)
     return InvalidParams;

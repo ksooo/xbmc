@@ -16,6 +16,8 @@
 
 namespace PVR
 {
+enum class ChannelType;
+
 class CPVRChannel;
 class CPVRChannelGroup;
 class CPVRChannelGroupMember;
@@ -113,12 +115,12 @@ public:
 
   /*!
    * @brief Get channels from the database.
-   * @param bRadio Whether to fetch radio or TV channels.
+   * @param type Whether to fetch radio or TV channels.
    * @param clients The PVR clients the channels should be loaded for. Leave empty for all clients.
    * @param results The container for the channels.
    * @return The number of channels loaded.
    */
-  int Get(bool bRadio,
+  int Get(ChannelType type,
           const std::vector<std::shared_ptr<CPVRClient>>& clients,
           std::map<std::pair<int, int>, std::shared_ptr<CPVRChannel>>& results) const;
 

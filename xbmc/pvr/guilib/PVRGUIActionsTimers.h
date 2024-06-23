@@ -17,6 +17,8 @@ class CFileItem;
 
 namespace PVR
 {
+enum class ChannelType;
+
 class CPVRChannel;
 class CPVRTimerInfoTag;
 
@@ -28,10 +30,10 @@ public:
 
   /*!
    * @brief Open the timer settings dialog to create a new tv or radio timer.
-   * @param bRadio indicates whether a radio or tv timer shall be created.
+   * @param type RADIO, to create a radio timer. tv timer otherwise.
    * @return true on success, false otherwise.
    */
-  bool AddTimer(bool bRadio) const;
+  bool AddTimer(ChannelType type) const;
 
   /*!
    * @brief Create a new timer, either interactive or non-interactive.

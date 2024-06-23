@@ -17,6 +17,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "input/actions/Action.h"
 #include "input/actions/ActionIDs.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/guilib/PVRGUIActionsPlayback.h"
 #include "pvr/guilib/PVRGUIActionsRecordings.h"
@@ -40,11 +41,10 @@
 using namespace PVR;
 using namespace VIDEO::GUILIB;
 
-CGUIWindowPVRRecordingsBase::CGUIWindowPVRRecordingsBase(bool bRadio,
+CGUIWindowPVRRecordingsBase::CGUIWindowPVRRecordingsBase(ChannelType type,
                                                          int id,
                                                          const std::string& xmlFile)
-  : CGUIWindowPVRBase(bRadio, id, xmlFile),
-    m_settings({CSettings::SETTING_PVRRECORD_GROUPRECORDINGS})
+  : CGUIWindowPVRBase(type, id, xmlFile), m_settings({CSettings::SETTING_PVRRECORD_GROUPRECORDINGS})
 {
 }
 
@@ -57,7 +57,7 @@ void CGUIWindowPVRRecordingsBase::OnWindowLoaded()
 
 std::string CGUIWindowPVRRecordingsBase::GetDirectoryPath()
 {
-  const std::string basePath = CPVRRecordingsPath(m_bShowDeletedRecordings, m_bRadio);
+  const std::string basePath = CPVRRecordingsPath(m_bShowDeletedRecordings, GetChannelType());
   return URIUtils::PathHasParent(m_vecItems->GetPath(), basePath) ? m_vecItems->GetPath()
                                                                   : basePath;
 }
@@ -207,8 +207,9 @@ void CGUIWindowPVRRecordingsBase::UpdateButtons()
   if (btnShowDeleted)
   {
     btnShowDeleted->SetVisible(
-        m_bRadio ? CServiceBroker::GetPVRManager().Recordings()->HasDeletedRadioRecordings()
-                 : CServiceBroker::GetPVRManager().Recordings()->HasDeletedTVRecordings());
+        GetChannelType() == ChannelType::RADIO
+            ? CServiceBroker::GetPVRManager().Recordings()->HasDeletedRadioRecordings()
+            : CServiceBroker::GetPVRManager().Recordings()->HasDeletedTVRecordings());
     btnShowDeleted->SetSelected(m_bShowDeletedRecordings);
   }
 
@@ -511,10 +512,10 @@ bool CGUIWindowPVRRecordingsBase::GetFilteredItems(const std::string& filter, CF
 
 std::string CGUIWindowPVRTVRecordings::GetRootPath() const
 {
-  return CPVRRecordingsPath(m_bShowDeletedRecordings, false);
+  return CPVRRecordingsPath(m_bShowDeletedRecordings, ChannelType::TV);
 }
 
 std::string CGUIWindowPVRRadioRecordings::GetRootPath() const
 {
-  return CPVRRecordingsPath(m_bShowDeletedRecordings, true);
+  return CPVRRecordingsPath(m_bShowDeletedRecordings, ChannelType::RADIO);
 }

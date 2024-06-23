@@ -10,6 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "dbwrappers/dataset.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/addons/PVRClient.h"
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/channels/PVRChannelGroupFactory.h"
@@ -560,7 +561,7 @@ int CPVRDatabase::GetMaxProviderId() const
 
 /********** Channel methods **********/
 
-int CPVRDatabase::Get(bool bRadio,
+int CPVRDatabase::Get(ChannelType type,
                       const std::vector<std::shared_ptr<CPVRClient>>& clients,
                       std::map<std::pair<int, int>, std::shared_ptr<CPVRChannel>>& results) const
 {
@@ -572,7 +573,7 @@ int CPVRDatabase::Get(bool bRadio,
     strQuery += "AND " + clientIds;
 
   std::unique_lock<CCriticalSection> lock(m_critSection);
-  strQuery = PrepareSQL(strQuery, bRadio);
+  strQuery = PrepareSQL(strQuery, type == ChannelType::RADIO);
   if (ResultQuery(strQuery))
   {
     try
@@ -580,7 +581,8 @@ int CPVRDatabase::Get(bool bRadio,
       while (!m_pDS->eof())
       {
         const std::shared_ptr<CPVRChannel> channel(new CPVRChannel(
-            m_pDS->fv("bIsRadio").get_asBool(), m_pDS->fv("sIconPath").get_asString()));
+            m_pDS->fv("bIsRadio").get_asBool() ? ChannelType::RADIO : ChannelType::TV,
+            m_pDS->fv("sIconPath").get_asString()));
 
         channel->m_iChannelId = m_pDS->fv("idChannel").get_asInt();
         channel->m_iUniqueId = m_pDS->fv("iUniqueId").get_asInt();
@@ -722,8 +724,9 @@ int CPVRDatabase::GetGroups(CPVRChannelGroups& results, const std::string& query
       {
         const std::shared_ptr<CPVRChannelGroup> group = results.GetGroupFactory()->CreateGroup(
             m_pDS->fv("iGroupType").get_asInt(),
-            CPVRChannelsPath(m_pDS->fv("bIsRadio").get_asBool(), m_pDS->fv("sName").get_asString(),
-                             m_pDS->fv("iClientId").get_asInt()),
+            CPVRChannelsPath(m_pDS->fv("bIsRadio").get_asBool() ? ChannelType::RADIO
+                                                                : ChannelType::TV,
+                             m_pDS->fv("sName").get_asString(), m_pDS->fv("iClientId").get_asInt()),
             results.GetGroupAll());
 
         group->m_iGroupId = m_pDS->fv("idGroup").get_asInt();
@@ -820,7 +823,8 @@ std::vector<std::shared_ptr<CPVRChannelGroupMember>> CPVRDatabase::Get(
         newMember->m_iChannelUID = m_pDS->fv("iUniqueId").get_asInt();
         newMember->m_iGroupID = group.GroupID();
         newMember->m_iGroupClientID = group.GetClientID();
-        newMember->m_bIsRadio = m_pDS->fv("bIsRadio").get_asBool();
+        newMember->m_channelType =
+            m_pDS->fv("bIsRadio").get_asBool() ? ChannelType::RADIO : ChannelType::TV;
         newMember->m_channelNumber = {
             static_cast<unsigned int>(m_pDS->fv("iChannelNumber").get_asInt()),
             static_cast<unsigned int>(m_pDS->fv("iSubChannelNumber").get_asInt())};
@@ -1142,7 +1146,7 @@ std::vector<std::shared_ptr<CPVRTimerInfoTag>> CPVRDatabase::GetTimers(
     {
       while (!m_pDS->eof())
       {
-        std::shared_ptr<CPVRTimerInfoTag> newTag(new CPVRTimerInfoTag());
+        const auto newTag{std::make_shared<CPVRTimerInfoTag>(ChannelType::TV)};
 
         newTag->m_iClientIndex = -m_pDS->fv("iClientIndex").get_asInt();
         newTag->m_iParentClientIndex = m_pDS->fv("iParentClientIndex").get_asInt();

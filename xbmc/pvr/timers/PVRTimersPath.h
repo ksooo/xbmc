@@ -12,6 +12,8 @@
 
 namespace PVR
 {
+enum class ChannelType;
+
 class CPVRTimersPath
 {
 public:
@@ -24,7 +26,7 @@ public:
 
   explicit CPVRTimersPath(const std::string& strPath);
   CPVRTimersPath(const std::string& strPath, int iClientId, int iParentId);
-  CPVRTimersPath(bool bRadio, bool bTimerRules);
+  CPVRTimersPath(ChannelType type, bool bTimerRules);
 
   bool IsValid() const { return m_bValid; }
 

@@ -16,6 +16,7 @@
 #include "input/actions/Action.h"
 #include "input/actions/ActionIDs.h"
 #include "messaging/ApplicationMessenger.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/PVRPlaybackState.h"
 #include "pvr/channels/PVRChannel.h"
@@ -94,7 +95,7 @@ void CGUIDialogPVRChannelsOSD::OnDeinitWindow(int nextWindowID)
   if (m_group)
   {
     CServiceBroker::GetPVRManager().Get<PVR::GUI::Channels>().SetSelectedChannelPath(
-        m_group->IsRadio(), m_viewControl.GetSelectedItemPath());
+        m_group->GetChannelType(), m_viewControl.GetSelectedItemPath());
 
     // next OnInitWindow will set the group which is then selected
     m_group.reset();
@@ -133,7 +134,7 @@ bool CGUIDialogPVRChannelsOSD::OnAction(const CAction& action)
 
       // switch to next or previous group
       const CPVRChannelGroups* groups =
-          CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_group->IsRadio());
+          CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_group->GetChannelType());
       const std::shared_ptr<CPVRChannelGroup> nextGroup = action.GetID() == ACTION_NEXT_CHANNELGROUP
                                                               ? groups->GetNextGroup(*m_group)
                                                               : groups->GetPreviousGroup(*m_group);
@@ -180,8 +181,8 @@ void CGUIDialogPVRChannelsOSD::Update()
   const std::shared_ptr<const CPVRChannel> channel = pvrMgr.PlaybackState()->GetPlayingChannel();
   if (channel)
   {
-    const std::shared_ptr<CPVRChannelGroup> group =
-        pvrMgr.PlaybackState()->GetActiveChannelGroup(channel->IsRadio());
+    const std::shared_ptr<CPVRChannelGroup> group{
+        pvrMgr.PlaybackState()->GetActiveChannelGroup(channel->GetChannelType())};
     if (group)
     {
       const std::vector<std::shared_ptr<CPVRChannelGroupMember>> groupMembers =
@@ -197,7 +198,7 @@ void CGUIDialogPVRChannelsOSD::Update()
       {
         m_group = group;
         m_viewControl.SetSelectedItem(
-            pvrMgr.Get<PVR::GUI::Channels>().GetSelectedChannelPath(channel->IsRadio()));
+            pvrMgr.Get<PVR::GUI::Channels>().GetSelectedChannelPath(channel->GetChannelType()));
         SaveSelectedItemPath(group->GroupID());
       }
     }

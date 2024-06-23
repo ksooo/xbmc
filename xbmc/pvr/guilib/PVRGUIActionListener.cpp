@@ -20,6 +20,7 @@
 #include "input/actions/Action.h"
 #include "input/actions/ActionIDs.h"
 #include "messaging/ApplicationMessenger.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/PVRPlaybackState.h"
 #include "pvr/addons/PVRClients.h"
@@ -286,7 +287,8 @@ bool CPVRGUIActionListener::OnAction(const CAction& action)
       const std::shared_ptr<const CPVRPlaybackState> playbackState =
           CServiceBroker::GetPVRManager().PlaybackState();
       const std::shared_ptr<const CPVRChannelGroup> activeGroup =
-          playbackState->GetActiveChannelGroup(playbackState->IsPlayingRadio());
+          playbackState->GetActiveChannelGroup(playbackState->IsPlayingRadio() ? ChannelType::RADIO
+                                                                               : ChannelType::TV);
       const std::shared_ptr<CPVRChannelGroupMember> groupMember =
           activeGroup->GetByChannelNumber(CPVRChannelNumber(iChannelNumber, iSubChannelNumber));
 

@@ -10,6 +10,7 @@
 
 #include "dialogs/GUIDialogContextMenu.h"
 #include "guilib/GUIDialog.h"
+#include "pvr/PVRChannelType.h"
 #include "view/GUIViewControl.h"
 
 #include <memory>
@@ -37,7 +38,7 @@ namespace PVR
     CFileItemPtr GetCurrentListItem(int offset = 0) override;
 
     void Open(const std::shared_ptr<CFileItem>& initialSelection);
-    void SetRadio(bool bIsRadio);
+    void SetChannelType(ChannelType type);
 
   protected:
     void OnInitWindow() override;
@@ -80,7 +81,7 @@ namespace PVR
     bool HasChangedItems() const;
     void SetItemChanged(const CFileItemPtr& pItem);
 
-    bool m_bIsRadio = false;
+    ChannelType m_channelType{ChannelType::TV};
     bool m_bMovingMode = false;
     bool m_bAllowNewChannel = false;
     bool m_bAllowRenumber = false;

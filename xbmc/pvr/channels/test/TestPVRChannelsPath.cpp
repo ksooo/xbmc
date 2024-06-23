@@ -6,6 +6,7 @@
  *  See LICENSES/README.md for more information.
  */
 
+#include "pvr/PVRChannelType.h"
 #include "pvr/channels/PVRChannelsPath.h"
 
 #include <gtest/gtest.h>
@@ -327,7 +328,7 @@ TEST(TestPVRChannelsPath, Parse_Invalid_TV_Channel_9)
 
 TEST(TestPVRChannelsPath, TV_Channelgroup)
 {
-  PVR::CPVRChannelsPath path(false, "Group1", 11);
+  PVR::CPVRChannelsPath path(PVR::ChannelType::TV, "Group1", 11);
 
   EXPECT_EQ(static_cast<std::string>(path), "pvr://channels/tv/Group1@11/");
   EXPECT_TRUE(path.IsValid());
@@ -345,7 +346,7 @@ TEST(TestPVRChannelsPath, TV_Channelgroup)
 
 TEST(TestPVRChannelsPath, Radio_Channelgroup)
 {
-  PVR::CPVRChannelsPath path(true, "Group1", 11);
+  PVR::CPVRChannelsPath path(PVR::ChannelType::RADIO, "Group1", 11);
 
   EXPECT_EQ(static_cast<std::string>(path), "pvr://channels/radio/Group1@11/");
   EXPECT_TRUE(path.IsValid());
@@ -363,7 +364,7 @@ TEST(TestPVRChannelsPath, Radio_Channelgroup)
 
 TEST(TestPVRChannelsPath, Hidden_TV_Channelgroup)
 {
-  PVR::CPVRChannelsPath path(false, true, "Group1", 11);
+  PVR::CPVRChannelsPath path(PVR::ChannelType::TV, true, "Group1", 11);
 
   EXPECT_EQ(static_cast<std::string>(path), "pvr://channels/tv/.hidden@11/");
   EXPECT_TRUE(path.IsValid());
@@ -381,7 +382,7 @@ TEST(TestPVRChannelsPath, Hidden_TV_Channelgroup)
 
 TEST(TestPVRChannelsPath, Hidden_Radio_Channelgroup)
 {
-  PVR::CPVRChannelsPath path(true, true, "Group1", 11);
+  PVR::CPVRChannelsPath path(PVR::ChannelType::RADIO, true, "Group1", 11);
 
   EXPECT_EQ(static_cast<std::string>(path), "pvr://channels/radio/.hidden@11/");
   EXPECT_TRUE(path.IsValid());
@@ -399,8 +400,8 @@ TEST(TestPVRChannelsPath, Hidden_Radio_Channelgroup)
 
 TEST(TestPVRChannelsPath, TV_Channel)
 {
-  PVR::CPVRChannelsPath path(false, "Group1", 11, "pvr.demo", ADDON::ADDON_SINGLETON_INSTANCE_ID,
-                             4711);
+  PVR::CPVRChannelsPath path(PVR::ChannelType::TV, "Group1", 11, "pvr.demo",
+                             ADDON::ADDON_SINGLETON_INSTANCE_ID, 4711);
 
   EXPECT_EQ(static_cast<std::string>(path), "pvr://channels/tv/Group1@11/0@pvr.demo_4711.pvr");
   EXPECT_TRUE(path.IsValid());
@@ -418,8 +419,8 @@ TEST(TestPVRChannelsPath, TV_Channel)
 
 TEST(TestPVRChannelsPath, Radio_Channel)
 {
-  PVR::CPVRChannelsPath path(true, "Group1", 11, "pvr.demo", ADDON::ADDON_SINGLETON_INSTANCE_ID,
-                             4711);
+  PVR::CPVRChannelsPath path(PVR::ChannelType::RADIO, "Group1", 11, "pvr.demo",
+                             ADDON::ADDON_SINGLETON_INSTANCE_ID, 4711);
 
   EXPECT_EQ(static_cast<std::string>(path), "pvr://channels/radio/Group1@11/0@pvr.demo_4711.pvr");
   EXPECT_TRUE(path.IsValid());
@@ -437,7 +438,7 @@ TEST(TestPVRChannelsPath, Radio_Channel)
 
 TEST(TestPVRChannelsPath, Operator_Equals)
 {
-  PVR::CPVRChannelsPath path2(true, "Group1", 11);
+  PVR::CPVRChannelsPath path2(PVR::ChannelType::RADIO, "Group1", 11);
   PVR::CPVRChannelsPath path(static_cast<std::string>(path2));
 
   EXPECT_EQ(path, path2);

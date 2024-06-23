@@ -20,9 +20,10 @@ public:
 
   /*!
    * @brief Create a new all channels channel group.
+   * @brief type Whether this is the TV or radio all channels group.
    * @param bRadio True if this group holds radio channels.
    */
-  explicit CPVRChannelGroupAllChannels(bool bRadio);
+  explicit CPVRChannelGroupAllChannels(ChannelType type);
 
   /*!
    * @brief Create a new all channels channel group.

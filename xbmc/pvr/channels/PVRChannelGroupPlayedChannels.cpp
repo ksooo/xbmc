@@ -29,7 +29,8 @@ std::vector<std::shared_ptr<CPVRChannelGroup>> CPVRChannelGroupPlayedChannels::C
   if (it == allChannelGroups.cend())
   {
     const std::string groupName{g_localizeStrings.Get(allChannelsGroup->IsRadio() ? 858 : 857)};
-    const CPVRChannelsPath path{allChannelsGroup->IsRadio(), groupName, PVR_GROUP_CLIENT_ID_LOCAL};
+    const CPVRChannelsPath path{allChannelsGroup->GetChannelType(), groupName,
+                                PVR_GROUP_CLIENT_ID_LOCAL};
     const std::shared_ptr<CPVRChannelGroup> newGroup{
         std::make_shared<CPVRChannelGroupPlayedChannels>(path, allChannelsGroup)};
     newGroup->SetHidden(true); // Hide group by default

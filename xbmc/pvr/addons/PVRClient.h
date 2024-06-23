@@ -42,6 +42,8 @@ class CPVRTimerInfoTag;
 class CPVRTimerType;
 class CPVRTimersContainer;
 
+enum class ChannelType;
+
 static constexpr int PVR_ANY_CLIENT_ID = -1;
 static constexpr int PVR_INVALID_CLIENT_ID = -2;
 
@@ -341,11 +343,12 @@ public:
 
   /*!
    * @brief Request the list of all channels from the backend.
-   * @param bRadio True to get the radio channels, false to get the TV channels.
+   * @param type TV or RADIO.
    * @param channels The container for the channels.
    * @return PVR_ERROR_NO_ERROR if the list has been fetched successfully.
    */
-  PVR_ERROR GetChannels(bool bRadio, std::vector<std::shared_ptr<CPVRChannel>>& channels) const;
+  PVR_ERROR GetChannels(ChannelType type,
+                        std::vector<std::shared_ptr<CPVRChannel>>& channels) const;
 
   /*!
    * @brief Get the total amount of providers from the backend.

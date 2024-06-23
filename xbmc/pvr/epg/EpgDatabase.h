@@ -18,6 +18,8 @@ class CDateTime;
 
 namespace PVR
 {
+enum class ChannelType;
+
 class CPVREpg;
 class CPVREpgInfoTag;
 class CPVREpgSearchFilter;
@@ -308,18 +310,18 @@ public:
 
   /*!
    * @brief Get all saved searches from the database.
-   * @param bRadio Whether to fetch saved searches for radio or TV.
+   * @param type Whether to fetch saved searches for radio or TV.
    * @return The searches.
    */
-  std::vector<std::shared_ptr<CPVREpgSearchFilter>> GetSavedSearches(bool bRadio) const;
+  std::vector<std::shared_ptr<CPVREpgSearchFilter>> GetSavedSearches(ChannelType type) const;
 
   /*!
    * @brief Get the saved search matching the given id.
-   * @param bRadio Whether to fetch a TV or radio saved search.
+   * @param type Whether to fetch a TV or radio saved search.
    * @param iId The id.
    * @return The saved search or nullptr if not found.
    */
-  std::shared_ptr<CPVREpgSearchFilter> GetSavedSearchById(bool bRadio, int iId) const;
+  std::shared_ptr<CPVREpgSearchFilter> GetSavedSearchById(ChannelType type, int iId) const;
 
   /*!
    * @brief Persist a search.
@@ -372,7 +374,7 @@ private:
   std::shared_ptr<CPVREpgInfoTag> CreateEpgTag(const std::unique_ptr<dbiplus::Dataset>& pDS) const;
 
   std::shared_ptr<CPVREpgSearchFilter> CreateEpgSearchFilter(
-      bool bRadio, const std::unique_ptr<dbiplus::Dataset>& pDS) const;
+      ChannelType type, const std::unique_ptr<dbiplus::Dataset>& pDS) const;
 
   mutable CCriticalSection m_critSection;
 };
