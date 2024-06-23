@@ -42,19 +42,19 @@
 using namespace KODI::MESSAGING;
 using namespace PVR;
 
-#define CONTROL_LIST_CHANNELS_LEFT    11
-#define CONTROL_LIST_CHANNELS_RIGHT   12
-#define CONTROL_LIST_CHANNEL_GROUPS   13
-#define CONTROL_CURRENT_GROUP_LABEL   20
-#define CONTROL_UNGROUPED_LABEL       21
-#define CONTROL_IN_GROUP_LABEL        22
-#define BUTTON_HIDE_GROUP             25
-#define BUTTON_NEWGROUP               26
-#define BUTTON_RENAMEGROUP            27
-#define BUTTON_DELGROUP               28
-#define BUTTON_OK                     29
-#define BUTTON_TOGGLE_RADIO_TV        34
-#define BUTTON_RECREATE_GROUP_THUMB   35
+#define CONTROL_LIST_CHANNELS_LEFT 11
+#define CONTROL_LIST_CHANNELS_RIGHT 12
+#define CONTROL_LIST_CHANNEL_GROUPS 13
+#define CONTROL_CURRENT_GROUP_LABEL 20
+#define CONTROL_UNGROUPED_LABEL 21
+#define CONTROL_IN_GROUP_LABEL 22
+#define BUTTON_HIDE_GROUP 25
+#define BUTTON_NEWGROUP 26
+#define BUTTON_RENAMEGROUP 27
+#define BUTTON_DELGROUP 28
+#define BUTTON_OK 29
+#define BUTTON_TOGGLE_RADIO_TV 34
+#define BUTTON_RECREATE_GROUP_THUMB 35
 
 namespace
 {
@@ -62,8 +62,8 @@ constexpr const char* PROPERTY_CLIENT_NAME = "ClientName";
 
 } // namespace
 
-CGUIDialogPVRGroupManager::CGUIDialogPVRGroupManager() :
-    CGUIDialog(WINDOW_DIALOG_PVR_GROUP_MANAGER, "DialogPVRGroupManager.xml")
+CGUIDialogPVRGroupManager::CGUIDialogPVRGroupManager()
+  : CGUIDialog(WINDOW_DIALOG_PVR_GROUP_MANAGER, "DialogPVRGroupManager.xml")
 {
   m_ungroupedChannels = new CFileItemList;
   m_groupMembers = new CFileItemList;
@@ -154,7 +154,8 @@ bool CGUIDialogPVRGroupManager::ActionButtonNewGroup(const CGUIMessage& message)
   if (iControl == BUTTON_NEWGROUP)
   {
     std::string strGroupName;
-    if (CGUIKeyboardFactory::ShowAndGetInput(strGroupName, CVariant{g_localizeStrings.Get(19139)}, false))
+    if (CGUIKeyboardFactory::ShowAndGetInput(strGroupName, CVariant{g_localizeStrings.Get(19139)},
+                                             false))
     {
       if (!strGroupName.empty())
       {
@@ -185,7 +186,9 @@ bool CGUIDialogPVRGroupManager::ActionButtonDeleteGroup(const CGUIMessage& messa
     if (!m_selectedGroup)
       return bReturn;
 
-    CGUIDialogYesNo* pDialog = CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogYesNo>(WINDOW_DIALOG_YES_NO);
+    CGUIDialogYesNo* pDialog =
+        CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogYesNo>(
+            WINDOW_DIALOG_YES_NO);
     if (!pDialog)
       return bReturn;
 
@@ -389,7 +392,8 @@ bool CGUIDialogPVRGroupManager::ActionButtonHideGroup(const CGUIMessage& message
 
   if (message.GetSenderId() == BUTTON_HIDE_GROUP && m_selectedGroup)
   {
-    CGUIRadioButtonControl* button = static_cast<CGUIRadioButtonControl*>(GetControl(message.GetSenderId()));
+    CGUIRadioButtonControl* button =
+        static_cast<CGUIRadioButtonControl*>(GetControl(message.GetSenderId()));
     if (button)
     {
       if (CServiceBroker::GetPVRManager()
@@ -437,16 +441,11 @@ bool CGUIDialogPVRGroupManager::ActionButtonRecreateThumbnail(const CGUIMessage&
 
 bool CGUIDialogPVRGroupManager::OnMessageClick(const CGUIMessage& message)
 {
-  return ActionButtonOk(message) ||
-      ActionButtonNewGroup(message) ||
-      ActionButtonDeleteGroup(message) ||
-      ActionButtonRenameGroup(message) ||
-      ActionButtonUngroupedChannels(message) ||
-      ActionButtonGroupMembers(message) ||
-      ActionButtonChannelGroups(message) ||
-      ActionButtonHideGroup(message) ||
-      ActionButtonToggleRadioTV(message) ||
-      ActionButtonRecreateThumbnail(message);
+  return ActionButtonOk(message) || ActionButtonNewGroup(message) ||
+         ActionButtonDeleteGroup(message) || ActionButtonRenameGroup(message) ||
+         ActionButtonUngroupedChannels(message) || ActionButtonGroupMembers(message) ||
+         ActionButtonChannelGroups(message) || ActionButtonHideGroup(message) ||
+         ActionButtonToggleRadioTV(message) || ActionButtonRecreateThumbnail(message);
 }
 
 bool CGUIDialogPVRGroupManager::OnMessage(CGUIMessage& message)
@@ -538,8 +537,7 @@ bool CGUIDialogPVRGroupManager::OnActionMove(const CAction& action)
 
 bool CGUIDialogPVRGroupManager::OnAction(const CAction& action)
 {
-  return OnActionMove(action) ||
-         CGUIDialog::OnAction(action);
+  return OnActionMove(action) || CGUIDialog::OnAction(action);
 }
 
 void CGUIDialogPVRGroupManager::OnInitWindow()
