@@ -576,10 +576,8 @@ bool CGUIDialogPVRChannelManager::OnClickButtonNewChannel()
       HELPERS::ShowOKDialogText(
           CVariant{19033}, CVariant{19038}); // "Information", "Not supported by the PVR backend."
     else
-      HELPERS::ShowOKDialogText(
-          CVariant{2103},
-          CVariant{
-              16029}); // "Add-on error", "Check the log for more information about this message."
+      HELPERS::ShowOKDialogText(CVariant{2103},
+                                CVariant{19111}); // "Add-on error", "PVR backend error."
   }
   return true;
 }
@@ -748,10 +746,8 @@ bool CGUIDialogPVRChannelManager::OnContextButton(int itemNumber, CONTEXT_BUTTON
       HELPERS::ShowOKDialogText(
           CVariant{19033}, CVariant{19038}); // "Information", "Not supported by the PVR backend."
     else
-      HELPERS::ShowOKDialogText(
-          CVariant{2103},
-          CVariant{
-              16029}); // "Add-on error", "Check the log for more information about this message."
+      HELPERS::ShowOKDialogText(CVariant{2103},
+                                CVariant{19111}); // "Add-on error", "PVR backend error."
   }
   else if (button == CONTEXT_BUTTON_DELETE)
   {
@@ -787,10 +783,8 @@ bool CGUIDialogPVRChannelManager::OnContextButton(int itemNumber, CONTEXT_BUTTON
               CVariant{19033},
               CVariant{19038}); // "Information", "Not supported by the PVR backend."
         else
-          HELPERS::ShowOKDialogText(
-              CVariant{2103},
-              CVariant{
-                  16029}); // "Add-on error", "Check the log for more information about this message."
+          HELPERS::ShowOKDialogText(CVariant{2103},
+                                    CVariant{19111}); // "Add-on error", "PVR backend error."
       }
     }
   }
@@ -957,7 +951,7 @@ void CGUIDialogPVRChannelManager::RenameChannel(const CFileItemPtr& pItem)
     const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(*pItem);
     if (!client || (client->RenameChannel(channel) != PVR_ERROR_NO_ERROR))
       HELPERS::ShowOKDialogText(CVariant{2103},
-                                CVariant{16029}); // Add-on error;Check the log file for details.
+                                CVariant{19111}); // "Add-on error", "PVR backend error."
   }
 }
 
