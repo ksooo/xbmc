@@ -770,8 +770,8 @@ bool CGUIDialogPVRChannelManager::OnContextButton(int itemNumber, CONTEXT_BUTTON
         PVR_ERROR ret = client->DeleteChannel(channel);
         if (ret == PVR_ERROR_NO_ERROR)
         {
-          CPVRChannelGroups* groups =
-              CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio);
+          const std::shared_ptr<CPVRChannelGroups> groups{
+              CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)};
           if (groups)
           {
             groups->UpdateFromClients({});
@@ -1080,7 +1080,8 @@ void CGUIDialogPVRChannelManager::SaveList()
 
   group->SortAndRenumber();
 
-  auto channelGroups = CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio);
+  const std::shared_ptr<CPVRChannelGroups> channelGroups{
+      CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)};
   channelGroups->UpdateChannelNumbersFromAllChannelsGroup();
   channelGroups->PersistAll();
   pDlgProgress->Close();
