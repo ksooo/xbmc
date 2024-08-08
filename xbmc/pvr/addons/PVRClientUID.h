@@ -30,12 +30,6 @@ public:
    */
   int GetUID() const;
 
-  /*!
-   * @brief Return the numeric legacy UID (compatibility/migration purposes only).
-   * @return The numeric legacy UID.
-   */
-  int GetLegacyUID() const;
-
 private:
   CPVRClientUID() = delete;
 
