@@ -118,7 +118,8 @@ std::vector<std::shared_ptr<CPVRChannelGroup>> CPVRChannelGroupMergedByName::Cre
   for (const auto& name : names)
   {
     const std::string groupName{StringUtils::Format(g_localizeStrings.Get(859), name)};
-    const CPVRChannelsPath path{allChannelsGroup->IsRadio(), groupName, PVR_GROUP_CLIENT_ID_LOCAL};
+    const CPVRChannelsPath path{allChannelsGroup->GetChannelType(), groupName,
+                                PVR_GROUP_CLIENT_ID_LOCAL};
     const std::shared_ptr<CPVRChannelGroup> mergedByNameGroup{
         std::make_shared<CPVRChannelGroupMergedByName>(path, allChannelsGroup)};
     mergedByNameGroup->SetClientGroupName(name);

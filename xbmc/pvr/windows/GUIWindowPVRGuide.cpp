@@ -55,8 +55,8 @@ using namespace KODI::MESSAGING;
 using namespace PVR;
 using namespace std::chrono_literals;
 
-CGUIWindowPVRGuideBase::CGUIWindowPVRGuideBase(bool bRadio, int id, const std::string& xmlFile)
-  : CGUIWindowPVRBase(bRadio, id, xmlFile)
+CGUIWindowPVRGuideBase::CGUIWindowPVRGuideBase(ChannelType type, int id, const std::string& xmlFile)
+  : CGUIWindowPVRBase(type, id, xmlFile)
 {
   CServiceBroker::GetPVRManager().Get<PVR::GUI::Channels>().RegisterChannelNumberInputHandler(this);
 }
@@ -84,7 +84,7 @@ void CGUIWindowPVRGuideBase::InitEpgGridControl()
     CPVRManager& mgr = CServiceBroker::GetPVRManager();
 
     const std::shared_ptr<CPVRChannel> channel = mgr.ChannelGroups()->GetByPath(
-        mgr.Get<PVR::GUI::Channels>().GetSelectedChannelPath(m_bRadio));
+        mgr.Get<PVR::GUI::Channels>().GetSelectedChannelPath(GetChannelType()));
 
     if (channel)
     {
@@ -202,7 +202,7 @@ void CGUIWindowPVRGuideBase::UpdateSelectedItemPath()
         epgGridContainer->GetSelectedChannelGroupMember();
     if (groupMember)
       CServiceBroker::GetPVRManager().Get<PVR::GUI::Channels>().SetSelectedChannelPath(
-          m_bRadio, groupMember->Path());
+          GetChannelType(), groupMember->Path());
   }
 }
 
@@ -234,7 +234,7 @@ bool CGUIWindowPVRGuideBase::Update(const std::string& strDirectory,
     if (epgGridContainer)
       m_bChannelSelectionRestored = epgGridContainer->SetChannel(
           CServiceBroker::GetPVRManager().Get<PVR::GUI::Channels>().GetSelectedChannelPath(
-              m_bRadio));
+              GetChannelType()));
   }
 
   return bReturn;

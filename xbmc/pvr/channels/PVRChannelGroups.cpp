@@ -10,6 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "pvr/PVRCachedImages.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRDatabase.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClient.h"
@@ -38,8 +39,8 @@
 
 using namespace PVR;
 
-CPVRChannelGroups::CPVRChannelGroups(bool bRadio)
-  : m_bRadio(bRadio),
+CPVRChannelGroups::CPVRChannelGroups(ChannelType type)
+  : m_channelType(type),
     m_settings({CSettings::SETTING_PVRMANAGER_BACKENDCHANNELGROUPSORDER}),
     m_channelGroupFactory(new CPVRChannelGroupFactory)
 {
@@ -430,19 +431,19 @@ bool CPVRChannelGroups::LoadFromDatabase(const std::vector<std::shared_ptr<CPVRC
   // created before loading contents from database.
   if (m_groups.empty())
   {
-    const auto internalGroup = GetGroupFactory()->CreateAllChannelsGroup(IsRadio());
+    const auto internalGroup{GetGroupFactory()->CreateAllChannelsGroup(GetChannelType())};
     m_groups.emplace_back(internalGroup);
     m_allChannelsGroup = internalGroup;
   }
 
   CLog::LogFC(LOGDEBUG, LOGPVR, "Loading all {} channel groups and members",
-              m_bRadio ? "radio" : "TV");
+              IsRadio() ? "radio" : "TV");
 
   // load all channels from the database
   std::map<std::pair<int, int>, std::shared_ptr<CPVRChannel>> channels;
-  database->Get(m_bRadio, clients, channels);
+  database->Get(GetChannelType(), clients, channels);
   CLog::LogFC(LOGDEBUG, LOGPVR, "Fetched {} {} channels from the database", channels.size(),
-              m_bRadio ? "radio" : "TV");
+              IsRadio() ? "radio" : "TV");
 
   // load local groups from the database
   int iLoaded = database->GetLocalGroups(*this);
@@ -450,7 +451,7 @@ bool CPVRChannelGroups::LoadFromDatabase(const std::vector<std::shared_ptr<CPVRC
   // load backend-supplied groups from the database
   iLoaded += database->Get(*this, clients);
   CLog::LogFC(LOGDEBUG, LOGPVR, "Fetched {} {} groups from the database", iLoaded,
-              m_bRadio ? "radio" : "TV");
+              IsRadio() ? "radio" : "TV");
 
   // load all group members from the database
   for (const auto& group : m_groups)
@@ -459,7 +460,7 @@ bool CPVRChannelGroups::LoadFromDatabase(const std::vector<std::shared_ptr<CPVRC
     {
       CLog::LogFC(LOGERROR, LOGPVR,
                   "Failed to load members of {} channel group '{}' from the database",
-                  m_bRadio ? "radio" : "TV", group->GroupName());
+                  IsRadio() ? "radio" : "TV", group->GroupName());
     }
   }
 
@@ -660,7 +661,7 @@ std::shared_ptr<CPVRChannelGroup> CPVRChannelGroups::AddGroup(const std::string&
     if (!group || group->GetOrigin() != CPVRChannelGroup::Origin::USER)
     {
       // create a new local group
-      group = GetGroupFactory()->CreateUserGroup(IsRadio(), strName, GetGroupAll());
+      group = GetGroupFactory()->CreateUserGroup(GetChannelType(), strName, GetGroupAll());
 
       m_groups.emplace_back(group);
       changed = true;

@@ -23,7 +23,7 @@ namespace PVR
 class CGUIWindowPVRRecordingsBase : public CGUIWindowPVRBase
 {
 public:
-  CGUIWindowPVRRecordingsBase(bool bRadio, int id, const std::string& xmlFile);
+  CGUIWindowPVRRecordingsBase(ChannelType type, int id, const std::string& xmlFile);
   ~CGUIWindowPVRRecordingsBase() override;
 
   void OnWindowLoaded() override;
@@ -54,7 +54,7 @@ class CGUIWindowPVRTVRecordings : public CGUIWindowPVRRecordingsBase
 {
 public:
   CGUIWindowPVRTVRecordings()
-    : CGUIWindowPVRRecordingsBase(false, WINDOW_TV_RECORDINGS, "MyPVRRecordings.xml")
+    : CGUIWindowPVRRecordingsBase(ChannelType::TV, WINDOW_TV_RECORDINGS, "MyPVRRecordings.xml")
   {
   }
   std::string GetRootPath() const override;
@@ -64,7 +64,8 @@ class CGUIWindowPVRRadioRecordings : public CGUIWindowPVRRecordingsBase
 {
 public:
   CGUIWindowPVRRadioRecordings()
-    : CGUIWindowPVRRecordingsBase(true, WINDOW_RADIO_RECORDINGS, "MyPVRRecordings.xml")
+    : CGUIWindowPVRRecordingsBase(
+          ChannelType::RADIO, WINDOW_RADIO_RECORDINGS, "MyPVRRecordings.xml")
   {
   }
   std::string GetRootPath() const override;

@@ -20,6 +20,7 @@
 #include "input/actions/Action.h"
 #include "input/actions/ActionIDs.h"
 #include "messaging/helpers/DialogOKHelper.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRItem.h"
 #include "pvr/PVRManager.h"
 #include "pvr/dialogs/GUIDialogPVRGuideSearch.h"
@@ -82,8 +83,10 @@ void AsyncSearchAction::Run()
 }
 } // unnamed namespace
 
-CGUIWindowPVRSearchBase::CGUIWindowPVRSearchBase(bool bRadio, int id, const std::string& xmlFile)
-  : CGUIWindowPVRBase(bRadio, id, xmlFile)
+CGUIWindowPVRSearchBase::CGUIWindowPVRSearchBase(ChannelType type,
+                                                 int id,
+                                                 const std::string& xmlFile)
+  : CGUIWindowPVRBase(type, id, xmlFile)
 {
 }
 
@@ -122,12 +125,12 @@ void CGUIWindowPVRSearchBase::SetItemToSearch(const CFileItem& item)
   }
   else if (item.IsUsablePVRRecording())
   {
-    SetSearchFilter(std::make_shared<CPVREpgSearchFilter>(m_bRadio));
+    SetSearchFilter(std::make_shared<CPVREpgSearchFilter>(GetChannelType()));
     m_searchfilter->SetSearchPhrase(item.GetPVRRecordingInfoTag()->m_strTitle);
   }
   else
   {
-    SetSearchFilter(std::make_shared<CPVREpgSearchFilter>(m_bRadio));
+    SetSearchFilter(std::make_shared<CPVREpgSearchFilter>(GetChannelType()));
 
     const std::shared_ptr<const CPVREpgInfoTag> epgTag(CPVRItem(item).GetEpgInfoTag());
     if (epgTag && !CServiceBroker::GetPVRManager().IsParentalLocked(epgTag))
@@ -154,8 +157,9 @@ void CGUIWindowPVRSearchBase::OnPrepareFileItems(CFileItemList& items)
     item->SetArt("icon", "DefaultPVRSearch.png");
     items.Add(item);
 
-    item = std::make_shared<CFileItem>(m_bRadio ? CPVREpgSearchPath::PATH_RADIO_SAVEDSEARCHES
-                                                : CPVREpgSearchPath::PATH_TV_SAVEDSEARCHES,
+    item = std::make_shared<CFileItem>(m_channelType == ChannelType::RADIO
+                                           ? CPVREpgSearchPath::PATH_RADIO_SAVEDSEARCHES
+                                           : CPVREpgSearchPath::PATH_TV_SAVEDSEARCHES,
                                        true);
     item->SetLabel(g_localizeStrings.Get(19337)); // "Saved searches"
     item->SetLabelPreformatted(true);
@@ -303,9 +307,9 @@ bool CGUIWindowPVRSearchBase::OnMessage(CGUIMessage& message)
     const CPVREpgSearchPath path(message.GetStringParam(0));
     if (path.IsValid() && path.IsSavedSearch())
     {
-      const std::shared_ptr<CPVREpgSearchFilter> filter =
-          CServiceBroker::GetPVRManager().EpgContainer().GetSavedSearchById(path.IsRadio(),
-                                                                            path.GetId());
+      const std::shared_ptr<CPVREpgSearchFilter> filter{
+          CServiceBroker::GetPVRManager().EpgContainer().GetSavedSearchById(path.GetChannelType(),
+                                                                            path.GetId())};
       if (filter)
       {
         SetSearchFilter(filter);
@@ -410,7 +414,7 @@ CGUIDialogPVRGuideSearch::Result CGUIWindowPVRSearchBase::OpenDialogSearch(
 
   const std::shared_ptr<CPVREpgSearchFilter> tmpSearchFilter =
       searchFilter != nullptr ? std::make_shared<CPVREpgSearchFilter>(*searchFilter)
-                              : std::make_shared<CPVREpgSearchFilter>(m_bRadio);
+                              : std::make_shared<CPVREpgSearchFilter>(GetChannelType());
 
   dlgSearch->SetFilterData(tmpSearchFilter);
 

@@ -9,6 +9,7 @@
 #include "PVRChannelsPath.h"
 
 #include "URL.h"
+#include "pvr/PVRChannelType.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
@@ -49,7 +50,7 @@ CPVRChannelsPath::CPVRChannelsPath(const std::string& strPath)
         if (segment == "tv" || segment == "radio")
         {
           m_kind = Kind::ROOT; // pvr://channels/(tv|radio)
-          m_bRadio = (segment == "radio");
+          m_channelType = (segment == "radio") ? ChannelType::RADIO : ChannelType::TV;
         }
         else
         {
@@ -150,50 +151,52 @@ CPVRChannelsPath::CPVRChannelsPath(const std::string& strPath)
   m_path = strVarPath;
 }
 
-CPVRChannelsPath::CPVRChannelsPath(bool bRadio,
+CPVRChannelsPath::CPVRChannelsPath(ChannelType type,
                                    bool bHidden,
                                    const std::string& strGroupName,
                                    int iGroupClientID)
-  : m_bRadio(bRadio), m_groupName(bHidden ? ".hidden" : strGroupName)
+  : m_channelType(type), m_groupName(bHidden ? ".hidden" : strGroupName)
 {
   if (m_groupName.empty())
   {
     m_kind = Kind::EMPTY;
-    m_path = StringUtils::Format("pvr://channels/{}", bRadio ? "radio" : "tv");
+    m_path = StringUtils::Format("pvr://channels/{}", IsRadio() ? "radio" : "tv");
   }
   else
   {
     m_kind = Kind::GROUP;
     m_groupClientID = iGroupClientID;
-    m_path = StringUtils::Format("pvr://channels/{}/{}@{}/", bRadio ? "radio" : "tv",
+    m_path = StringUtils::Format("pvr://channels/{}/{}@{}/", IsRadio() ? "radio" : "tv",
                                  CURL::Encode(m_groupName), m_groupClientID);
   }
 }
 
-CPVRChannelsPath::CPVRChannelsPath(bool bRadio, const std::string& strGroupName, int iGroupClientID)
-  : m_bRadio(bRadio), m_groupName(strGroupName)
+CPVRChannelsPath::CPVRChannelsPath(ChannelType type,
+                                   const std::string& strGroupName,
+                                   int iGroupClientID)
+  : m_channelType(type), m_groupName(strGroupName)
 {
   if (m_groupName.empty())
   {
     m_kind = Kind::EMPTY;
-    m_path = StringUtils::Format("pvr://channels/{}", bRadio ? "radio" : "tv");
+    m_path = StringUtils::Format("pvr://channels/{}", IsRadio() ? "radio" : "tv");
   }
   else
   {
     m_kind = Kind::GROUP;
     m_groupClientID = iGroupClientID;
-    m_path = StringUtils::Format("pvr://channels/{}/{}@{}/", bRadio ? "radio" : "tv",
+    m_path = StringUtils::Format("pvr://channels/{}/{}@{}/", IsRadio() ? "radio" : "tv",
                                  CURL::Encode(m_groupName), m_groupClientID);
   }
 }
 
-CPVRChannelsPath::CPVRChannelsPath(bool bRadio,
+CPVRChannelsPath::CPVRChannelsPath(ChannelType type,
                                    const std::string& strGroupName,
                                    int iGroupClientID,
                                    const std::string& strAddonID,
                                    ADDON::AddonInstanceId instanceID,
                                    int iChannelUID)
-  : m_bRadio(bRadio)
+  : m_channelType(type)
 {
   if (!strGroupName.empty() && iGroupClientID >= -1 && !strAddonID.empty() && iChannelUID >= 0)
   {
@@ -203,7 +206,7 @@ CPVRChannelsPath::CPVRChannelsPath(bool bRadio,
     m_addonID = strAddonID;
     m_instanceID = instanceID;
     m_iChannelUID = iChannelUID;
-    m_path = StringUtils::Format("pvr://channels/{}/{}@{}/{}@{}_{}.pvr", bRadio ? "radio" : "tv",
+    m_path = StringUtils::Format("pvr://channels/{}/{}@{}/{}@{}_{}.pvr", IsRadio() ? "radio" : "tv",
                                  CURL::Encode(m_groupName), m_groupClientID, m_instanceID,
                                  m_addonID, m_iChannelUID);
   }

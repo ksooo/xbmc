@@ -12,6 +12,7 @@
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_recordings.h"
 #include "cores/EdlEdit.h"
 #include "guilib/LocalizeStrings.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClient.h"
 #include "pvr/channels/PVRChannel.h"
@@ -484,9 +485,10 @@ void CPVRRecording::Update(const CPVRRecording& tag, const CPVRClient& client)
 
 void CPVRRecording::UpdatePath()
 {
-  m_strFileNameAndPath = CPVRRecordingsPath(m_bIsDeleted, m_bRadio, m_strDirectory, m_strTitle,
-                                            m_iSeason, m_iEpisode, GetYear(), m_strShowTitle,
-                                            m_strChannelName, m_recordingTime, m_strRecordingId);
+  m_strFileNameAndPath =
+      CPVRRecordingsPath(m_bIsDeleted, m_bRadio ? ChannelType::RADIO : ChannelType::TV,
+                         m_strDirectory, m_strTitle, m_iSeason, m_iEpisode, GetYear(),
+                         m_strShowTitle, m_strChannelName, m_recordingTime, m_strRecordingId);
 }
 
 const CDateTime& CPVRRecording::RecordingTimeAsLocalTime() const

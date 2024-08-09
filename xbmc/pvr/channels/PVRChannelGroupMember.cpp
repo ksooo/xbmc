@@ -9,6 +9,7 @@
 #include "PVRChannelGroupMember.h"
 
 #include "ServiceBroker.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClient.h"
 #include "pvr/channels/PVRChannel.h"
@@ -58,7 +59,7 @@ void CPVRChannelGroupMember::SetChannel(const std::shared_ptr<CPVRChannel>& chan
   m_iChannelClientID = channel->ClientID();
   m_iChannelUID = channel->UniqueID();
   m_iChannelDatabaseID = channel->ChannelID();
-  m_bIsRadio = channel->IsRadio();
+  m_channelType = channel->GetChannelType();
 }
 
 void CPVRChannelGroupMember::ToSortable(SortItem& sortable, Field field) const
@@ -90,7 +91,7 @@ void CPVRChannelGroupMember::SetGroupName(const std::string& groupName)
   const std::shared_ptr<const CPVRClient> client =
       CServiceBroker::GetPVRManager().GetClient(m_iChannelClientID);
   if (client)
-    m_path = CPVRChannelsPath(m_bIsRadio, groupName, m_iGroupClientID, client->ID(),
+    m_path = CPVRChannelsPath(GetChannelType(), groupName, m_iGroupClientID, client->ID(),
                               client->InstanceId(), m_iChannelUID);
   else
     CLog::LogF(LOGERROR, "Unable to obtain instance for client id: {}", m_iChannelClientID);

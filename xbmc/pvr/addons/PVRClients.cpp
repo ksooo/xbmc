@@ -15,6 +15,7 @@
 #include "addons/addoninfo/AddonType.h"
 #include "guilib/LocalizeStrings.h"
 #include "messaging/ApplicationMessenger.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVREventLogJob.h"
 #include "pvr/PVRManager.h"
 #include "pvr/PVRPlaybackState.h"
@@ -678,16 +679,13 @@ PVR_ERROR CPVRClients::SetEPGMaxFutureDays(int iFutureDays)
 }
 
 PVR_ERROR CPVRClients::GetChannels(const std::vector<std::shared_ptr<CPVRClient>>& clients,
-                                   bool bRadio,
+                                   ChannelType type,
                                    std::vector<std::shared_ptr<CPVRChannel>>& channels,
                                    std::vector<int>& failedClients) const
 {
   return ForClients(
-      __FUNCTION__, clients,
-      [bRadio, &channels](const std::shared_ptr<const CPVRClient>& client) {
-        return client->GetChannels(bRadio, channels);
-      },
-      failedClients);
+      __FUNCTION__, clients, [type, &channels](const std::shared_ptr<const CPVRClient>& client)
+      { return client->GetChannels(type, channels); }, failedClients);
 }
 
 PVR_ERROR CPVRClients::GetProviders(const std::vector<std::shared_ptr<CPVRClient>>& clients,
@@ -744,8 +742,10 @@ std::vector<std::shared_ptr<CPVRClient>> CPVRClients::GetClientsSupportingChanne
   return possibleScanClients;
 }
 
-std::vector<std::shared_ptr<CPVRClient>> CPVRClients::GetClientsSupportingChannelSettings(bool bRadio) const
+std::vector<std::shared_ptr<CPVRClient>> CPVRClients::GetClientsSupportingChannelSettings(
+    ChannelType type) const
 {
+  const bool radio{type == ChannelType::RADIO};
   std::vector<std::shared_ptr<CPVRClient>> possibleSettingsClients;
 
   std::unique_lock<CCriticalSection> lock(m_critSection);
@@ -756,7 +756,7 @@ std::vector<std::shared_ptr<CPVRClient>> CPVRClients::GetClientsSupportingChanne
     {
       const CPVRClientCapabilities& caps = client->GetClientCapabilities();
       if (caps.SupportsChannelSettings() &&
-          ((bRadio && caps.SupportsRadio()) || (!bRadio && caps.SupportsTV())))
+          ((radio && caps.SupportsRadio()) || (!radio && caps.SupportsTV())))
         possibleSettingsClients.emplace_back(client);
     }
   }

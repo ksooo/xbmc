@@ -9,6 +9,7 @@
 #pragma once
 
 #include "XBDateTime.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/timers/PVRTimerType.h"
 #include "threads/CriticalSection.h"
 #include "utils/ISerializable.h"
@@ -37,7 +38,7 @@ class CPVRTimerInfoTag final : public ISerializable
   friend class CPVRDatabase;
 
 public:
-  explicit CPVRTimerInfoTag(bool bRadio = false);
+  explicit CPVRTimerInfoTag(ChannelType type);
   CPVRTimerInfoTag(const PVR_TIMER& timer,
                    const std::shared_ptr<CPVRChannel>& channel,
                    unsigned int iClientId);
@@ -241,7 +242,7 @@ public:
    * @brief Whether this timer is for Radio or TV.
    * @return True if Radio, false otherwise.
    */
-  bool IsRadio() const { return m_bIsRadio; }
+  bool IsRadio() const { return m_channelType == ChannelType::RADIO; }
 
   /*!
    * @brief The path that identifies this timer.
@@ -582,7 +583,7 @@ public:
    * human readable form.
    * @return The status string.
    */
-  std::string GetStatus(bool bRadio) const;
+  std::string GetStatus(ChannelType type) const;
 
   /*!
    * @brief GUI support: Get the timer string in a human readable form.
@@ -642,7 +643,7 @@ private:
   unsigned int m_iRecordingGroup =
       0; /*!< @brief (optional) if set, the addon/backend stores the recording to a group (sub-folder) */
   std::string m_strFileNameAndPath; /*!< @brief file name is only for reference */
-  bool m_bIsRadio; /*!< @brief is radio channel if set */
+  ChannelType m_channelType{ChannelType::TV}; /*!< @brief RADIO or TV */
   unsigned int m_iTimerId = 0; /*!< @brief id that won't change as long as Kodi is running */
   unsigned int
       m_iMarginStart; /*!< @brief (optional) if set, the backend starts the recording iMarginStart minutes before startTime. */

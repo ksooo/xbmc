@@ -13,6 +13,7 @@
 #include "guilib/GUIMessage.h"
 #include "guilib/LocalizeStrings.h"
 #include "messaging/helpers/DialogOKHelper.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClient.h"
 #include "pvr/addons/PVRClients.h"
@@ -102,7 +103,7 @@ void CGUIDialogPVRTimerSettings::SetTimer(const std::shared_ptr<CPVRTimerInfoTag
 
   // Copy data we need from tag. Do not modify the tag itself until Save()!
   m_timerType = m_timerInfoTag->GetTimerType();
-  m_bIsRadio = m_timerInfoTag->m_bIsRadio;
+  m_channelType = m_timerInfoTag->m_channelType;
   m_bIsNewTimer = m_timerInfoTag->m_iClientIndex == PVR_TIMER_NO_CLIENT_INDEX;
   m_bTimerActive = m_bIsNewTimer || !m_timerType->SupportsEnableDisable() ||
                    !(m_timerInfoTag->m_state == PVR_TIMER_STATE_DISABLED);
@@ -651,7 +652,7 @@ bool CGUIDialogPVRTimerSettings::Save()
   // Channel
   m_timerInfoTag->m_iClientChannelUid = m_channel.channelUid;
   m_timerInfoTag->m_iClientId = m_channel.clientId;
-  m_timerInfoTag->m_bIsRadio = m_bIsRadio;
+  m_timerInfoTag->m_channelType = m_channelType;
   m_timerInfoTag->UpdateChannel();
 
   if (!m_timerType->SupportsStartAnyTime() ||
@@ -906,8 +907,8 @@ void CGUIDialogPVRTimerSettings::InitializeChannelsList()
   }
 
   // Add regular channels
-  const std::shared_ptr<const CPVRChannelGroup> allGroup =
-      CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(m_bIsRadio);
+  const std::shared_ptr<const CPVRChannelGroup> allGroup{
+      CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(m_channelType)};
   const std::vector<std::shared_ptr<CPVRChannelGroupMember>> groupMembers =
       allGroup->GetMembers(CPVRChannelGroup::Include::ONLY_VISIBLE);
   for (const auto& groupMember : groupMembers)

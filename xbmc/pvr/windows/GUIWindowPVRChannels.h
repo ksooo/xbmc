@@ -19,7 +19,7 @@ namespace PVR
 class CGUIWindowPVRChannelsBase : public CGUIWindowPVRBase, public CPVRChannelNumberInputHandler
 {
 public:
-  CGUIWindowPVRChannelsBase(bool bRadio, int id, const std::string& xmlFile);
+  CGUIWindowPVRChannelsBase(ChannelType type, int id, const std::string& xmlFile);
   ~CGUIWindowPVRChannelsBase() override;
 
   std::string GetRootPath() const override;

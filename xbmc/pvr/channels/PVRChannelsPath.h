@@ -9,6 +9,7 @@
 #pragma once
 
 #include "addons/IAddon.h"
+#include "pvr/PVRChannelType.h"
 
 class CDateTime;
 
@@ -21,12 +22,12 @@ namespace PVR
     static const std::string PATH_RADIO_CHANNELS;
 
     explicit CPVRChannelsPath(const std::string& strPath);
-    CPVRChannelsPath(bool bRadio, const std::string& strGroupName, int iGroupClientID);
-    CPVRChannelsPath(bool bRadio,
+    CPVRChannelsPath(ChannelType type, const std::string& strGroupName, int iGroupClientID);
+    CPVRChannelsPath(ChannelType type,
                      bool bHidden,
                      const std::string& strGroupName,
                      int iGroupClientID);
-    CPVRChannelsPath(bool bRadio,
+    CPVRChannelsPath(ChannelType type,
                      const std::string& strGroupName,
                      int iGroupClientID,
                      const std::string& strAddonID,
@@ -46,7 +47,8 @@ namespace PVR
 
     bool IsHiddenChannelGroup() const;
 
-    bool IsRadio() const { return m_bRadio; }
+    bool IsRadio() const { return m_channelType == ChannelType::RADIO; }
+    ChannelType GetChannelType() const { return m_channelType; }
 
     const std::string& GetGroupName() const { return m_groupName; }
     int GetGroupClientID() const { return m_groupClientID; }
@@ -68,7 +70,7 @@ namespace PVR
     };
 
     Kind m_kind = Kind::INVALID;
-    bool m_bRadio = false;;
+    ChannelType m_channelType{ChannelType::TV};
     std::string m_path;
     std::string m_groupName;
     int m_groupClientID{-1};

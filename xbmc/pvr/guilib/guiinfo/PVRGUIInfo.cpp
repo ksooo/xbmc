@@ -19,6 +19,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "guilib/guiinfo/GUIInfo.h"
 #include "guilib/guiinfo/GUIInfoLabels.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRItem.h"
 #include "pvr/PVRManager.h"
 #include "pvr/PVRPlaybackState.h"
@@ -298,9 +299,10 @@ void CPVRGUIInfo::UpdateMisc()
   const bool bIsRecordingPlayingChannel = bStarted && state->IsRecordingOnPlayingChannel();
   const bool bIsPlayingActiveRecording = bStarted && state->IsPlayingActiveRecording();
   const std::string strPlayingTVGroup =
-      (bStarted && bIsPlayingTV) ? state->GetActiveChannelGroup(false)->GroupName() : "";
+      (bStarted && bIsPlayingTV) ? state->GetActiveChannelGroup(ChannelType::TV)->GroupName() : "";
   const std::string strPlayingRadioGroup =
-      (bStarted && bIsPlayingRadio) ? state->GetActiveChannelGroup(true)->GroupName() : "";
+      (bStarted && bIsPlayingRadio) ? state->GetActiveChannelGroup(ChannelType::RADIO)->GroupName()
+                                    : "";
 
   std::unique_lock<CCriticalSection> lock(m_critSection);
   m_strPlayingClientName = strPlayingClientName;
@@ -397,8 +399,10 @@ bool CPVRGUIInfo::GetListItemAndPlayerLabel(const CFileItem* item,
         return true;
       case LISTITEM_COMMENT:
         strValue =
-            timer->GetStatus(CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow() ==
-                             WINDOW_RADIO_TIMER_RULES);
+            timer->GetStatus((CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow() ==
+                              WINDOW_RADIO_TIMER_RULES)
+                                 ? ChannelType::RADIO
+                                 : ChannelType::TV);
         return true;
       case LISTITEM_TIMERTYPE:
         strValue = timer->GetTypeAsString();

@@ -18,9 +18,9 @@
 
 using namespace PVR;
 
-std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupFactory::CreateAllChannelsGroup(bool isRadio)
+std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupFactory::CreateAllChannelsGroup(ChannelType type)
 {
-  return std::make_shared<CPVRChannelGroupAllChannels>(isRadio);
+  return std::make_shared<CPVRChannelGroupAllChannels>(type);
 }
 
 std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupFactory::CreateClientGroup(
@@ -32,12 +32,12 @@ std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupFactory::CreateClientGroup(
 }
 
 std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupFactory::CreateUserGroup(
-    bool isRadio,
+    ChannelType type,
     const std::string& name,
     const std::shared_ptr<const CPVRChannelGroup>& allChannels)
 {
   return std::make_shared<CPVRChannelGroupFromUser>(
-      CPVRChannelsPath{isRadio, name, PVR_GROUP_CLIENT_ID_LOCAL}, allChannels);
+      CPVRChannelsPath{type, name, PVR_GROUP_CLIENT_ID_LOCAL}, allChannels);
 }
 
 std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupFactory::CreateGroup(

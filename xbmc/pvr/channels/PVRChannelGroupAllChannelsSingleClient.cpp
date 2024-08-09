@@ -65,7 +65,7 @@ std::vector<std::shared_ptr<CPVRChannelGroup>> CPVRChannelGroupAllChannelsSingle
     {
       const std::string name{
           StringUtils::Format(g_localizeStrings.Get(859), client->GetFullClientName())};
-      const CPVRChannelsPath path{allChannelsGroup->IsRadio(), name, client->GetID()};
+      const CPVRChannelsPath path{allChannelsGroup->GetChannelType(), name, client->GetID()};
       addedGroups.emplace_back(
           std::make_shared<CPVRChannelGroupAllChannelsSingleClient>(path, allChannelsGroup));
     }

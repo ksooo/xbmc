@@ -30,8 +30,10 @@
 
 using namespace PVR;
 
-CGUIWindowPVRTimersBase::CGUIWindowPVRTimersBase(bool bRadio, int id, const std::string& xmlFile)
-  : CGUIWindowPVRBase(bRadio, id, xmlFile)
+CGUIWindowPVRTimersBase::CGUIWindowPVRTimersBase(ChannelType type,
+                                                 int id,
+                                                 const std::string& xmlFile)
+  : CGUIWindowPVRBase(type, id, xmlFile)
 {
 }
 
@@ -197,7 +199,7 @@ bool CGUIWindowPVRTimersBase::ActionShowTimer(const CFileItem& item)
      create a new timer and open settings dialog, otherwise
      open settings for selected timer entry */
   if (URIUtils::PathEquals(item.GetPath(), CPVRTimersPath::PATH_ADDTIMER))
-    bReturn = CServiceBroker::GetPVRManager().Get<PVR::GUI::Timers>().AddTimer(m_bRadio);
+    bReturn = CServiceBroker::GetPVRManager().Get<PVR::GUI::Timers>().AddTimer(GetChannelType());
   else
     bReturn = CServiceBroker::GetPVRManager().Get<PVR::GUI::Timers>().EditTimer(item);
 

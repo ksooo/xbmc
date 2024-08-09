@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "pvr/PVRChannelType.h"
 #include "threads/CriticalSection.h"
 
 #include <memory>
@@ -60,39 +61,42 @@ public:
    * @brief Get the TV channel groups.
    * @return The TV channel groups.
    */
-  std::shared_ptr<CPVRChannelGroups> GetTV() const { return Get(false); }
+  std::shared_ptr<CPVRChannelGroups> GetTV() const { return Get(ChannelType::TV); }
 
   /*!
    * @brief Get the radio channel groups.
    * @return The radio channel groups.
    */
-  std::shared_ptr<CPVRChannelGroups> GetRadio() const { return Get(true); }
+  std::shared_ptr<CPVRChannelGroups> GetRadio() const { return Get(ChannelType::RADIO); }
 
   /*!
    * @brief Get the radio or TV channel groups.
-   * @param bRadio If true, get the radio channel groups. Get the TV channel groups otherwise.
+   * @param type RADIO, to get the radio channel groups. Get the TV channel groups otherwise.
    * @return The requested groups.
    */
-  std::shared_ptr<CPVRChannelGroups> Get(bool bRadio) const;
+  std::shared_ptr<CPVRChannelGroups> Get(ChannelType type) const;
 
   /*!
    * @brief Get the group containing all TV channels.
    * @return The group containing all TV channels.
    */
-  std::shared_ptr<CPVRChannelGroup> GetGroupAllTV() const { return GetGroupAll(false); }
+  std::shared_ptr<CPVRChannelGroup> GetGroupAllTV() const { return GetGroupAll(ChannelType::TV); }
 
   /*!
    * @brief Get the group containing all radio channels.
    * @return The group containing all radio channels.
    */
-  std::shared_ptr<CPVRChannelGroup> GetGroupAllRadio() const { return GetGroupAll(true); }
+  std::shared_ptr<CPVRChannelGroup> GetGroupAllRadio() const
+  {
+    return GetGroupAll(ChannelType::RADIO);
+  }
 
   /*!
    * @brief Get the group containing all TV or radio channels.
-   * @param bRadio If true, get the group containing all radio channels. Get the group containing all TV channels otherwise.
+   * @param type RADIO, to get the group containing all radio channels. Get the group containing all TV channels otherwise.
    * @return The requested group.
    */
-  std::shared_ptr<CPVRChannelGroup> GetGroupAll(bool bRadio) const;
+  std::shared_ptr<CPVRChannelGroup> GetGroupAll(ChannelType type) const;
 
   /*!
    * @brief Get a group given its path.

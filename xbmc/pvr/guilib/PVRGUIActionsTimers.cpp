@@ -20,6 +20,7 @@
 #include "guilib/WindowIDs.h"
 #include "messaging/helpers/DialogHelper.h"
 #include "messaging/helpers/DialogOKHelper.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVREventLogJob.h"
 #include "pvr/PVRItem.h"
 #include "pvr/PVRManager.h"
@@ -169,9 +170,9 @@ bool CPVRGUIActionsTimers::AddReminder(const CFileItem& item) const
   return AddTimer(newTimer);
 }
 
-bool CPVRGUIActionsTimers::AddTimer(bool bRadio) const
+bool CPVRGUIActionsTimers::AddTimer(ChannelType type) const
 {
-  const std::shared_ptr<CPVRTimerInfoTag> newTimer(new CPVRTimerInfoTag(bRadio));
+  const std::shared_ptr<CPVRTimerInfoTag> newTimer(new CPVRTimerInfoTag(type));
   if (ShowTimerSettings(newTimer))
   {
     return AddTimer(newTimer);
@@ -632,7 +633,7 @@ bool CPVRGUIActionsTimers::EditTimer(const CFileItem& item) const
   }
 
   // clone the timer.
-  const std::shared_ptr<CPVRTimerInfoTag> newTimer(new CPVRTimerInfoTag);
+  const auto newTimer{std::make_shared<CPVRTimerInfoTag>(ChannelType::TV)};
   newTimer->UpdateEntry(timer);
 
   if (ShowTimerSettings(newTimer) &&

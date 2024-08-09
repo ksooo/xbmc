@@ -11,6 +11,7 @@
 #include "ServiceBroker.h"
 #include "XBDateTime.h"
 #include "guilib/LocalizeStrings.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRDatabase.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClient.h"
@@ -33,7 +34,7 @@ const std::string CPVRChannel::IMAGE_OWNER_PATTERN = "pvrchannel_{}";
 
 bool CPVRChannel::operator==(const CPVRChannel& right) const
 {
-  return (m_bIsRadio == right.m_bIsRadio && m_iUniqueId == right.m_iUniqueId &&
+  return (m_channelType == right.m_channelType && m_iUniqueId == right.m_iUniqueId &&
           m_iClientId == right.m_iClientId);
 }
 
@@ -42,22 +43,22 @@ bool CPVRChannel::operator!=(const CPVRChannel& right) const
   return !(*this == right);
 }
 
-CPVRChannel::CPVRChannel(bool bRadio)
-  : m_bIsRadio(bRadio),
-    m_iconPath("", StringUtils::Format(IMAGE_OWNER_PATTERN, bRadio ? "radio" : "tv"))
+CPVRChannel::CPVRChannel(ChannelType type)
+  : m_channelType(type),
+    m_iconPath("", StringUtils::Format(IMAGE_OWNER_PATTERN, IsRadio() ? "radio" : "tv"))
 {
   UpdateEncryptionName();
 }
 
-CPVRChannel::CPVRChannel(bool bRadio, const std::string& iconPath)
-  : m_bIsRadio(bRadio),
-    m_iconPath(iconPath, StringUtils::Format(IMAGE_OWNER_PATTERN, bRadio ? "radio" : "tv"))
+CPVRChannel::CPVRChannel(ChannelType type, const std::string& iconPath)
+  : m_channelType(type),
+    m_iconPath(iconPath, StringUtils::Format(IMAGE_OWNER_PATTERN, IsRadio() ? "radio" : "tv"))
 {
   UpdateEncryptionName();
 }
 
 CPVRChannel::CPVRChannel(const PVR_CHANNEL& channel, unsigned int iClientId)
-  : m_bIsRadio(channel.bIsRadio),
+  : m_channelType(channel.bIsRadio ? ChannelType::RADIO : ChannelType::TV),
     m_bIsHidden(channel.bIsHidden),
     m_iconPath(channel.strIconPath ? channel.strIconPath : "",
                StringUtils::Format(IMAGE_OWNER_PATTERN, channel.bIsRadio ? "radio" : "tv")),
@@ -87,7 +88,7 @@ CPVRChannel::~CPVRChannel()
 void CPVRChannel::Serialize(CVariant& value) const
 {
   value["channelid"] = m_iChannelId;
-  value["channeltype"] = m_bIsRadio ? "radio" : "tv";
+  value["channeltype"] = IsRadio() ? "radio" : "tv";
   value["hidden"] = m_bIsHidden;
   value["locked"] = m_bIsLocked;
   value["icon"] = ClientIconPath();

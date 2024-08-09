@@ -10,6 +10,7 @@
 
 #include "URL.h"
 #include "XBDateTime.h"
+#include "pvr/PVRChannelType.h"
 #include "utils/RegExp.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
@@ -67,18 +68,18 @@ CPVRRecordingsPath::CPVRRecordingsPath(const std::string& strPath)
   }
 }
 
-CPVRRecordingsPath::CPVRRecordingsPath(bool bDeleted, bool bRadio)
+CPVRRecordingsPath::CPVRRecordingsPath(bool bDeleted, ChannelType type)
   : m_bValid(true),
     m_bRoot(true),
     m_bActive(!bDeleted),
-    m_bRadio(bRadio),
+    m_bRadio(type == ChannelType::RADIO),
     m_path(StringUtils::Format(
-        "pvr://recordings/{}/{}/", bRadio ? "radio" : "tv", bDeleted ? "deleted" : "active"))
+        "pvr://recordings/{}/{}/", m_bRadio ? "radio" : "tv", bDeleted ? "deleted" : "active"))
 {
 }
 
 CPVRRecordingsPath::CPVRRecordingsPath(bool bDeleted,
-                                       bool bRadio,
+                                       ChannelType type,
                                        const std::string& strDirectory,
                                        const std::string& strTitle,
                                        int iSeason,
@@ -88,7 +89,7 @@ CPVRRecordingsPath::CPVRRecordingsPath(bool bDeleted,
                                        const std::string& strChannelName,
                                        const CDateTime& recordingTime,
                                        const std::string& strId)
-  : m_bValid(true), m_bRoot(false), m_bActive(!bDeleted), m_bRadio(bRadio)
+  : m_bValid(true), m_bRoot(false), m_bActive(!bDeleted), m_bRadio(type == ChannelType::RADIO)
 {
   std::string strDirectoryN(TrimSlashes(strDirectory));
   if (!strDirectoryN.empty())
@@ -123,7 +124,7 @@ CPVRRecordingsPath::CPVRRecordingsPath(bool bDeleted,
                                         strYearN, strSubtitleN);
   m_params = StringUtils::Format(", TV{}, {}, {}.pvr", strChannelNameN,
                                  recordingTime.GetAsSaveString(), strId);
-  m_path = StringUtils::Format("pvr://recordings/{}/{}/{}{}", bRadio ? "radio" : "tv",
+  m_path = StringUtils::Format("pvr://recordings/{}/{}/{}{}", m_bRadio ? "radio" : "tv",
                                bDeleted ? "deleted" : "active", m_directoryPath, m_params);
 }
 

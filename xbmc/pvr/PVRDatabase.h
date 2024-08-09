@@ -16,6 +16,8 @@
 
 namespace PVR
 {
+enum class ChannelType;
+
 class CPVRChannel;
 class CPVRChannelGroup;
 class CPVRChannelGroupMember;
@@ -34,8 +36,8 @@ class CPVRDatabase : public CDatabase
 {
 public:
   /*!
-   * @brief Create a new instance of the PVR database.
-   */
+     * @brief Create a new instance of the PVR database.
+     */
   CPVRDatabase() = default;
   ~CPVRDatabase() override = default;
 

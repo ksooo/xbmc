@@ -954,7 +954,7 @@ int CPVREpgContainer::CleanupCachedImages()
 }
 
 std::vector<std::shared_ptr<CPVREpgSearchFilter>> CPVREpgContainer::GetSavedSearches(
-    bool bRadio) const
+    ChannelType type) const
 {
   const std::shared_ptr<const CPVREpgDatabase> database = GetEpgDatabase();
   if (!database)
@@ -963,10 +963,10 @@ std::vector<std::shared_ptr<CPVREpgSearchFilter>> CPVREpgContainer::GetSavedSear
     return {};
   }
 
-  return database->GetSavedSearches(bRadio);
+  return database->GetSavedSearches(type);
 }
 
-std::shared_ptr<CPVREpgSearchFilter> CPVREpgContainer::GetSavedSearchById(bool bRadio,
+std::shared_ptr<CPVREpgSearchFilter> CPVREpgContainer::GetSavedSearchById(ChannelType type,
                                                                           int iId) const
 {
   const std::shared_ptr<const CPVREpgDatabase> database = GetEpgDatabase();
@@ -976,7 +976,7 @@ std::shared_ptr<CPVREpgSearchFilter> CPVREpgContainer::GetSavedSearchById(bool b
     return {};
   }
 
-  return database->GetSavedSearchById(bRadio, iId);
+  return database->GetSavedSearchById(type, iId);
 }
 
 bool CPVREpgContainer::PersistSavedSearch(CPVREpgSearchFilter& search)

@@ -28,9 +28,9 @@
 
 using namespace PVR;
 
-CPVRChannelGroupAllChannels::CPVRChannelGroupAllChannels(bool bRadio)
+CPVRChannelGroupAllChannels::CPVRChannelGroupAllChannels(ChannelType type)
   : CPVRChannelGroup(
-        CPVRChannelsPath(bRadio, g_localizeStrings.Get(19287), PVR_GROUP_CLIENT_ID_LOCAL), nullptr)
+        CPVRChannelsPath(type, g_localizeStrings.Get(19287), PVR_GROUP_CLIENT_ID_LOCAL), nullptr)
 {
 }
 
@@ -60,7 +60,7 @@ bool CPVRChannelGroupAllChannels::UpdateFromClients(
 {
   // get the channels from the given clients
   std::vector<std::shared_ptr<CPVRChannel>> channels;
-  CServiceBroker::GetPVRManager().Clients()->GetChannels(clients, IsRadio(), channels,
+  CServiceBroker::GetPVRManager().Clients()->GetChannels(clients, GetChannelType(), channels,
                                                          m_failedClients);
 
   // create group members for the channels

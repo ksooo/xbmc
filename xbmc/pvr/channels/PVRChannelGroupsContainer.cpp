@@ -8,6 +8,7 @@
 
 #include "PVRChannelGroupsContainer.h"
 
+#include "pvr/PVRChannelType.h"
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/channels/PVRChannelGroupMember.h"
 #include "pvr/channels/PVRChannelGroups.h"
@@ -20,7 +21,8 @@
 using namespace PVR;
 
 CPVRChannelGroupsContainer::CPVRChannelGroupsContainer()
-  : m_groupsRadio(new CPVRChannelGroups(true)), m_groupsTV(new CPVRChannelGroups(false))
+  : m_groupsRadio(new CPVRChannelGroups(ChannelType::RADIO)),
+    m_groupsTV(new CPVRChannelGroups(ChannelType::TV))
 {
 }
 
@@ -66,14 +68,14 @@ void CPVRChannelGroupsContainer::Unload()
   m_groupsTV->Unload();
 }
 
-std::shared_ptr<CPVRChannelGroups> CPVRChannelGroupsContainer::Get(bool bRadio) const
+std::shared_ptr<CPVRChannelGroups> CPVRChannelGroupsContainer::Get(ChannelType type) const
 {
-  return bRadio ? m_groupsRadio : m_groupsTV;
+  return (type == ChannelType::RADIO) ? m_groupsRadio : m_groupsTV;
 }
 
-std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupsContainer::GetGroupAll(bool bRadio) const
+std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupsContainer::GetGroupAll(ChannelType type) const
 {
-  return Get(bRadio)->GetGroupAll();
+  return Get(type)->GetGroupAll();
 }
 
 std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupsContainer::GetGroupByPath(
@@ -81,7 +83,7 @@ std::shared_ptr<CPVRChannelGroup> CPVRChannelGroupsContainer::GetGroupByPath(
 {
   const CPVRChannelsPath channelsPath{path};
   if (channelsPath.IsValid() && channelsPath.IsChannelGroup())
-    return Get(channelsPath.IsRadio())->GetGroupByPath(path);
+    return Get(channelsPath.GetChannelType())->GetGroupByPath(path);
   else
     CLog::LogFC(LOGERROR, LOGPVR, "Invalid path '{}'", path);
 
@@ -112,7 +114,7 @@ std::shared_ptr<CPVRChannel> CPVRChannelGroupsContainer::GetChannelForEpgTag(
   if (!epgTag)
     return {};
 
-  return Get(epgTag->IsRadio())
+  return Get(epgTag->GetChannelType())
       ->GetGroupAll()
       ->GetByUniqueID(epgTag->UniqueChannelID(), epgTag->ClientID());
 }
@@ -122,7 +124,7 @@ std::shared_ptr<CPVRChannelGroupMember> CPVRChannelGroupsContainer::GetChannelGr
 {
   const CPVRChannelsPath path(strPath);
   if (path.IsValid())
-    return Get(path.IsRadio())->GetChannelGroupMemberByPath(path);
+    return Get(path.GetChannelType())->GetChannelGroupMemberByPath(path);
 
   return {};
 }

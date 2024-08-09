@@ -19,7 +19,7 @@ namespace PVR
 class CGUIWindowPVRTimersBase : public CGUIWindowPVRBase
 {
 public:
-  CGUIWindowPVRTimersBase(bool bRadio, int id, const std::string& xmlFile);
+  CGUIWindowPVRTimersBase(ChannelType type, int id, const std::string& xmlFile);
   ~CGUIWindowPVRTimersBase() override;
 
   bool OnMessage(CGUIMessage& message) override;

@@ -24,7 +24,7 @@ class CPVREpgSearchFilter;
 class CGUIWindowPVRSearchBase : public CGUIWindowPVRBase
 {
 public:
-  CGUIWindowPVRSearchBase(bool bRadio, int id, const std::string& xmlFile);
+  CGUIWindowPVRSearchBase(ChannelType type, int id, const std::string& xmlFile);
   ~CGUIWindowPVRSearchBase() override;
 
   bool OnAction(const CAction& action) override;
@@ -67,7 +67,10 @@ private:
 class CGUIWindowPVRTVSearch : public CGUIWindowPVRSearchBase
 {
 public:
-  CGUIWindowPVRTVSearch() : CGUIWindowPVRSearchBase(false, WINDOW_TV_SEARCH, "MyPVRSearch.xml") {}
+  CGUIWindowPVRTVSearch()
+    : CGUIWindowPVRSearchBase(ChannelType::TV, WINDOW_TV_SEARCH, "MyPVRSearch.xml")
+  {
+  }
 
 protected:
   std::string GetRootPath() const override;
@@ -78,7 +81,8 @@ protected:
 class CGUIWindowPVRRadioSearch : public CGUIWindowPVRSearchBase
 {
 public:
-  CGUIWindowPVRRadioSearch() : CGUIWindowPVRSearchBase(true, WINDOW_RADIO_SEARCH, "MyPVRSearch.xml")
+  CGUIWindowPVRRadioSearch()
+    : CGUIWindowPVRSearchBase(ChannelType::RADIO, WINDOW_RADIO_SEARCH, "MyPVRSearch.xml")
   {
   }
 

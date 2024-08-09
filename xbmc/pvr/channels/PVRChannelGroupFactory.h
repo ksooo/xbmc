@@ -19,6 +19,8 @@ namespace PVR
 class CPVRChannelGroup;
 class CPVRChannelsPath;
 
+enum class ChannelType;
+
 class CPVRChannelGroupFactory
 {
 public:
@@ -27,10 +29,10 @@ public:
 
   /*!
    * @brief Create an all channels group instance.
-   * @param isRadio Whether Radio or TV.
+   * @param type Whether to create a TV or radio all channels group.
    * @return The new group.
    */
-  std::shared_ptr<CPVRChannelGroup> CreateAllChannelsGroup(bool isRadio);
+  std::shared_ptr<CPVRChannelGroup> CreateAllChannelsGroup(ChannelType type);
 
   /*!
    * @brief Create an instance for a group provided by a PVR client add-on.
@@ -46,13 +48,13 @@ public:
 
   /*!
    * @brief Create an instance for a group created by the user.
-   * @param isRadio Whether Radio or TV.
+   * @param type Whether to create a TV or radio group.
    * @param name The name for the group.
    * @param allChannels The all channels group.
    * @return The new group.
    */
   std::shared_ptr<CPVRChannelGroup> CreateUserGroup(
-      bool isRadio,
+      ChannelType type,
       const std::string& name,
       const std::shared_ptr<const CPVRChannelGroup>& allChannels);
 

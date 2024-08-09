@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "pvr/PVRChannelType.h"
 #include "pvr/channels/PVRChannelGroupSettings.h"
 #include "pvr/channels/PVRChannelNumber.h"
 #include "pvr/channels/PVRChannelsPath.h"
@@ -177,6 +178,12 @@ public:
    * @return True if this group holds radio channels, false if it holds TV channels.
    */
   bool IsRadio() const;
+
+  /*!
+   * @brief Whether this is a TV or radio group.
+   * @return RADIO if this is a radio group, TV otherwise.
+   */
+  ChannelType GetChannelType() const;
 
   /*!
    * @brief The database ID of this group.
