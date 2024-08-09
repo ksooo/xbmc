@@ -9,6 +9,7 @@
 #include "EpgSearchFilter.h"
 
 #include "ServiceBroker.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
 #include "pvr/channels/PVRChannel.h"
@@ -28,8 +29,7 @@
 
 using namespace PVR;
 
-CPVREpgSearchFilter::CPVREpgSearchFilter(bool bRadio)
-: m_bIsRadio(bRadio)
+CPVREpgSearchFilter::CPVREpgSearchFilter(ChannelType type) : m_channelType(type)
 {
   Reset();
 }
@@ -353,7 +353,7 @@ void CPVREpgSearchFilter::RemoveDuplicates(std::vector<std::shared_ptr<CPVREpgIn
 
 bool CPVREpgSearchFilter::MatchChannel(const std::shared_ptr<const CPVREpgInfoTag>& tag) const
 {
-  return tag && (tag->IsRadio() == m_bIsRadio) &&
+  return tag && (tag->GetChannelType() == m_channelType) &&
          (m_iClientID == -1 || tag->ClientID() == m_iClientID) &&
          (m_iChannelUID == -1 || tag->UniqueChannelID() == m_iChannelUID) &&
          CServiceBroker::GetPVRManager().Clients()->IsCreatedClient(tag->ClientID());
@@ -367,7 +367,7 @@ bool CPVREpgSearchFilter::MatchChannelGroup(const std::shared_ptr<const CPVREpgI
     {
       const std::shared_ptr<const CPVRChannelGroup> group = CServiceBroker::GetPVRManager()
                                                                 .ChannelGroups()
-                                                                ->Get(m_bIsRadio)
+                                                                ->Get(GetChannelType())
                                                                 ->GetById(m_iChannelGroupID);
       m_groupIdMatches =
           group && (group->GetByUniqueID({tag->ClientID(), tag->UniqueChannelID()}) != nullptr);

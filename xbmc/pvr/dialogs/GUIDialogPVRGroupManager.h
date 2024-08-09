@@ -9,6 +9,7 @@
 #pragma once
 
 #include "guilib/GUIDialog.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRThumbLoader.h"
 #include "view/GUIViewControl.h"
 
@@ -31,7 +32,7 @@ public:
   void OnWindowLoaded() override;
   void OnWindowUnload() override;
 
-  void SetRadio(bool bIsRadio);
+  void SetChannelType(ChannelType type);
 
 protected:
   void OnInitWindow() override;
@@ -57,7 +58,7 @@ private:
   bool OnActionMove(const CAction& action);
 
   std::shared_ptr<CPVRChannelGroup> m_selectedGroup;
-  bool m_bIsRadio;
+  ChannelType m_channelType{ChannelType::TV};
   bool m_movingItem{false};
   bool m_allowReorder{false};
 

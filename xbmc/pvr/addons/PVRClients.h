@@ -39,6 +39,8 @@ class CPVRRecordings;
 class CPVRTimerType;
 class CPVRTimersContainer;
 
+enum class ChannelType;
+
 typedef std::map<int, std::shared_ptr<CPVRClient>> CPVRClientMap;
 
 /**
@@ -292,13 +294,13 @@ struct SBackend
     /*!
      * @brief Get all channels from the given clients.
      * @param clients The clients to fetch data from. Leave empty to fetch data from all created clients.
-     * @param bRadio Whether to fetch radio or TV channels.
+     * @param type TV or RADIO.
      * @param channels The container to store the channels.
      * @param failedClients in case of errors will contain the ids of the clients for which the channels could not be obtained.
      * @return PVR_ERROR_NO_ERROR if the channels were fetched successfully, last error otherwise.
      */
     PVR_ERROR GetChannels(const std::vector<std::shared_ptr<CPVRClient>>& clients,
-                          bool bRadio,
+                          ChannelType type,
                           std::vector<std::shared_ptr<CPVRChannel>>& channels,
                           std::vector<int>& failedClients) const;
 
@@ -346,9 +348,11 @@ struct SBackend
 
     /*!
      * @brief Get a list of clients providing a channel settings dialog.
+     * @param type TV or RADIO.
      * @return All clients supporting channel settings.
      */
-    std::vector<std::shared_ptr<CPVRClient>> GetClientsSupportingChannelSettings(bool bRadio) const;
+    std::vector<std::shared_ptr<CPVRClient>> GetClientsSupportingChannelSettings(
+        ChannelType type) const;
 
     /*!
      * @brief Get whether or not any client supports recording size.

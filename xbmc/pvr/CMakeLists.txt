@@ -18,6 +18,7 @@ set(HEADERS IPVRComponent.h
             PVRCachedImages.h
             PVRChannelGroupImageFileLoader.h
             PVRChannelNumberInputHandler.h
+            PVRChannelType.h
             PVRComponentRegistration.h
             PVRContextMenus.h
             PVRDatabase.h

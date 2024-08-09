@@ -31,7 +31,7 @@ class CPVRRefreshTimelineItemsThread;
 class CGUIWindowPVRGuideBase : public CGUIWindowPVRBase, public CPVRChannelNumberInputHandler
 {
 public:
-  CGUIWindowPVRGuideBase(bool bRadio, int id, const std::string& xmlFile);
+  CGUIWindowPVRGuideBase(ChannelType type, int id, const std::string& xmlFile);
   ~CGUIWindowPVRGuideBase() override;
 
   void OnInitWindow() override;
@@ -99,14 +99,20 @@ private:
 class CGUIWindowPVRTVGuide : public CGUIWindowPVRGuideBase
 {
 public:
-  CGUIWindowPVRTVGuide() : CGUIWindowPVRGuideBase(false, WINDOW_TV_GUIDE, "MyPVRGuide.xml") {}
+  CGUIWindowPVRTVGuide()
+    : CGUIWindowPVRGuideBase(ChannelType::TV, WINDOW_TV_GUIDE, "MyPVRGuide.xml")
+  {
+  }
   std::string GetRootPath() const override;
 };
 
 class CGUIWindowPVRRadioGuide : public CGUIWindowPVRGuideBase
 {
 public:
-  CGUIWindowPVRRadioGuide() : CGUIWindowPVRGuideBase(true, WINDOW_RADIO_GUIDE, "MyPVRGuide.xml") {}
+  CGUIWindowPVRRadioGuide()
+    : CGUIWindowPVRGuideBase(ChannelType::RADIO, WINDOW_RADIO_GUIDE, "MyPVRGuide.xml")
+  {
+  }
   std::string GetRootPath() const override;
 };
 

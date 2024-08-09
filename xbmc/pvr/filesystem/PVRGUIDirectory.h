@@ -16,6 +16,7 @@ class CFileItemList;
 
 namespace PVR
 {
+enum class ChannelType;
 
 class CPVRGUIDirectory
 {
@@ -82,12 +83,14 @@ public:
 
   /*!
    * @brief Get the list of channel groups.
-   * @param bRadio If true, obtain radio groups, tv groups otherwise.
+   * @param type RADIO, to obtain radio groups, tv groups otherwise.
    * @param bExcludeHidden If true exclude hidden groups, include hidden groups otherwise.
    * @param results The file list to store the results in.
    * @return True on success, false otherwise..
    */
-  static bool GetChannelGroupsDirectory(bool bRadio, bool bExcludeHidden, CFileItemList& results);
+  static bool GetChannelGroupsDirectory(ChannelType type,
+                                        bool bExcludeHidden,
+                                        CFileItemList& results);
 
   /*!
    * @brief Get the list of channels.
@@ -99,8 +102,8 @@ public:
 private:
   bool GetTimersDirectory(CFileItemList& results) const;
   bool GetRecordingsDirectory(CFileItemList& results) const;
-  bool GetSavedSearchesDirectory(bool bRadio, CFileItemList& results) const;
-  bool GetSavedSearchResults(bool isRadio, int id, CFileItemList& results) const;
+  bool GetSavedSearchesDirectory(ChannelType type, CFileItemList& results) const;
+  bool GetSavedSearchResults(ChannelType type, int id, CFileItemList& results) const;
 
   const CURL m_url;
 };

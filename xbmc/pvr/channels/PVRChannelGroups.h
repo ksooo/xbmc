@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "pvr/PVRChannelType.h"
 #include "pvr/channels/PVRChannelGroup.h"
 #include "pvr/settings/PVRSettings.h"
 #include "settings/lib/ISettingCallback.h"
@@ -33,9 +34,9 @@ class CPVRChannelGroups : public ISettingCallback
 public:
   /*!
    * @brief Create a new group container.
-   * @param bRadio True if this is a container for radio channels, false if it is for tv channels.
+   * @param type RADIO if this is a container for radio channels, TV if it is for tv channels.
    */
-  explicit CPVRChannelGroups(bool bRadio);
+  explicit CPVRChannelGroups(ChannelType type);
   virtual ~CPVRChannelGroups();
 
   // ISettingCallback implementation
@@ -236,7 +237,13 @@ public:
   /*!
    * @return True when this container contains radio groups, false otherwise
    */
-  bool IsRadio() const { return m_bRadio; }
+  bool IsRadio() const { return m_channelType == ChannelType::RADIO; }
+
+  /*!
+   * @brief Whether this is TV or radio groups.
+   * @return RADIO if this is radio groups, TV otherwise.
+   */
+  ChannelType GetChannelType() const { return m_channelType; }
 
   /*!
    * @brief Update data with groups and channels from the given clients, sync with local data.
@@ -296,7 +303,7 @@ private:
 
   void UpdateSystemChannelGroups();
 
-  bool m_bRadio{false};
+  ChannelType m_channelType{ChannelType::TV};
   std::vector<std::shared_ptr<CPVRChannelGroup>> m_groups;
   mutable CCriticalSection m_critSection;
   std::vector<int> m_failedClientsForChannelGroups;

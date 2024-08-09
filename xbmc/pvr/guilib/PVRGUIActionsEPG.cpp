@@ -16,6 +16,7 @@
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"
 #include "guilib/WindowIDs.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRItem.h"
 #include "pvr/PVRManager.h"
 #include "pvr/dialogs/GUIDialogPVRChannelGuide.h"
@@ -37,20 +38,21 @@ using namespace PVR;
 
 namespace
 {
-PVR::CGUIWindowPVRSearchBase* GetSearchWindow(bool bRadio)
+PVR::CGUIWindowPVRSearchBase* GetSearchWindow(ChannelType type)
 {
-  const int windowSearchId = bRadio ? WINDOW_RADIO_SEARCH : WINDOW_TV_SEARCH;
+  const bool radio{type == ChannelType::RADIO};
+  const int windowSearchId{radio ? WINDOW_RADIO_SEARCH : WINDOW_TV_SEARCH};
 
   PVR::CGUIWindowPVRSearchBase* windowSearch;
 
   CGUIWindowManager& windowMgr = CServiceBroker::GetGUI()->GetWindowManager();
-  if (bRadio)
+  if (radio)
     windowSearch = windowMgr.GetWindow<PVR::CGUIWindowPVRRadioSearch>(windowSearchId);
   else
     windowSearch = windowMgr.GetWindow<PVR::CGUIWindowPVRTVSearch>(windowSearchId);
 
   if (!windowSearch)
-    CLog::LogF(LOGERROR, "Unable to get {}!", bRadio ? "WINDOW_RADIO_SEARCH" : "WINDOW_TV_SEARCH");
+    CLog::LogF(LOGERROR, "Unable to get {}!", radio ? "WINDOW_RADIO_SEARCH" : "WINDOW_TV_SEARCH");
 
   return windowSearch;
 }
@@ -106,7 +108,8 @@ bool CPVRGUIActionsEPG::ShowChannelEPG(const CFileItem& item) const
 
 bool CPVRGUIActionsEPG::FindSimilar(const CFileItem& item) const
 {
-  CGUIWindowPVRSearchBase* windowSearch = GetSearchWindow(CPVRItem(item).IsRadio());
+  CGUIWindowPVRSearchBase* windowSearch =
+      GetSearchWindow(CPVRItem(item).IsRadio() ? ChannelType::RADIO : ChannelType::TV);
   if (!windowSearch)
     return false;
 
@@ -149,7 +152,7 @@ bool CPVRGUIActionsEPG::ExecuteSavedSearch(const CFileItem& item)
     return false;
   }
 
-  CGUIWindowPVRSearchBase* windowSearch = GetSearchWindow(searchFilter->IsRadio());
+  CGUIWindowPVRSearchBase* windowSearch = GetSearchWindow(searchFilter->GetChannelType());
   if (!windowSearch)
     return false;
 
@@ -168,7 +171,7 @@ bool CPVRGUIActionsEPG::EditSavedSearch(const CFileItem& item)
     return false;
   }
 
-  CGUIWindowPVRSearchBase* windowSearch = GetSearchWindow(searchFilter->IsRadio());
+  CGUIWindowPVRSearchBase* windowSearch = GetSearchWindow(searchFilter->GetChannelType());
   if (!windowSearch)
     return false;
 

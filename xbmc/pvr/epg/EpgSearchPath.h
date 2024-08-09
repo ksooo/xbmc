@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "pvr/PVRChannelType.h"
+
 #include <string>
 
 namespace PVR
@@ -30,7 +32,8 @@ public:
 
   const std::string& GetPath() const { return m_path; }
   bool IsSearchRoot() const { return m_bRoot; }
-  bool IsRadio() const { return m_bRadio; }
+  bool IsRadio() const { return m_channelType == ChannelType::RADIO; }
+  ChannelType GetChannelType() const { return m_channelType; }
   bool IsSavedSearchesRoot() const { return m_bSavedSearchesRoot; }
   bool IsSavedSearch() const { return m_bSavedSearch; }
   int GetId() const { return m_iId; }
@@ -41,7 +44,7 @@ private:
   std::string m_path;
   bool m_bValid = false;
   bool m_bRoot = false;
-  bool m_bRadio = false;
+  ChannelType m_channelType{ChannelType::TV};
   bool m_bSavedSearchesRoot = false;
   bool m_bSavedSearch = false;
   int m_iId = -1;

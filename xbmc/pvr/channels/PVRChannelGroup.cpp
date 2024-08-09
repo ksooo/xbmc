@@ -140,7 +140,7 @@ void CPVRChannelGroup::SetClientID(int clientID)
   std::unique_lock<CCriticalSection> lock(m_critSection);
   if (m_path.GetGroupClientID() != clientID)
   {
-    m_path = CPVRChannelsPath(m_path.IsRadio(), m_path.GetGroupName(), clientID);
+    m_path = CPVRChannelsPath(GetChannelType(), m_path.GetGroupName(), clientID);
     if (m_bLoaded)
     {
       m_bChanged = true;
@@ -1024,7 +1024,7 @@ bool CPVRChannelGroup::SetGroupName(const std::string& strGroupName,
   if (m_path.GetGroupName() != strGroupName)
   {
     m_isUserSetName = isUserSetName;
-    m_path = CPVRChannelsPath(m_path.IsRadio(), strGroupName, m_path.GetGroupClientID());
+    m_path = CPVRChannelsPath(GetChannelType(), strGroupName, m_path.GetGroupClientID());
 
     // Update group members, for which group name is part of their path
     for (auto& member : m_sortedMembers)
@@ -1064,6 +1064,12 @@ bool CPVRChannelGroup::IsRadio() const
 {
   std::unique_lock<CCriticalSection> lock(m_critSection);
   return m_path.IsRadio();
+}
+
+ChannelType CPVRChannelGroup::GetChannelType() const
+{
+  std::unique_lock<CCriticalSection> lock(m_critSection);
+  return m_path.GetChannelType();
 }
 
 time_t CPVRChannelGroup::LastWatched() const

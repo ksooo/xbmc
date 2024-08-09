@@ -10,6 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "dbwrappers/dataset.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/epg/Epg.h"
 #include "pvr/epg/EpgInfoTag.h"
 #include "pvr/epg/EpgSearchData.h"
@@ -1283,11 +1284,11 @@ int CPVREpgDatabase::GetLastEPGId() const
 /********** Saved searches methods **********/
 
 std::shared_ptr<CPVREpgSearchFilter> CPVREpgDatabase::CreateEpgSearchFilter(
-    bool bRadio, const std::unique_ptr<dbiplus::Dataset>& pDS) const
+    ChannelType type, const std::unique_ptr<dbiplus::Dataset>& pDS) const
 {
   if (!pDS->eof())
   {
-    auto newSearch = std::make_shared<CPVREpgSearchFilter>(bRadio);
+    auto newSearch = std::make_shared<CPVREpgSearchFilter>(type);
 
     newSearch->SetDatabaseId(m_pDS->fv("idSearch").get_asInt());
     newSearch->SetTitle(m_pDS->fv("sTitle").get_asString());
@@ -1330,20 +1331,20 @@ std::shared_ptr<CPVREpgSearchFilter> CPVREpgDatabase::CreateEpgSearchFilter(
 }
 
 std::vector<std::shared_ptr<CPVREpgSearchFilter>> CPVREpgDatabase::GetSavedSearches(
-    bool bRadio) const
+    ChannelType type) const
 {
   std::vector<std::shared_ptr<CPVREpgSearchFilter>> result;
 
   std::unique_lock<CCriticalSection> lock(m_critSection);
   const std::string strQuery =
-      PrepareSQL("SELECT * FROM savedsearches WHERE bIsRadio = %u", bRadio);
+      PrepareSQL("SELECT * FROM savedsearches WHERE bIsRadio = %u", type == ChannelType::RADIO);
   if (ResultQuery(strQuery))
   {
     try
     {
       while (!m_pDS->eof())
       {
-        result.emplace_back(CreateEpgSearchFilter(bRadio, m_pDS));
+        result.emplace_back(CreateEpgSearchFilter(type, m_pDS));
         m_pDS->next();
       }
       m_pDS->close();
@@ -1356,17 +1357,19 @@ std::vector<std::shared_ptr<CPVREpgSearchFilter>> CPVREpgDatabase::GetSavedSearc
   return result;
 }
 
-std::shared_ptr<CPVREpgSearchFilter> CPVREpgDatabase::GetSavedSearchById(bool bRadio, int iId) const
+std::shared_ptr<CPVREpgSearchFilter> CPVREpgDatabase::GetSavedSearchById(ChannelType type,
+                                                                         int iId) const
 {
   std::unique_lock<CCriticalSection> lock(m_critSection);
   const std::string strQuery =
-      PrepareSQL("SELECT * FROM savedsearches WHERE bIsRadio = %u AND idSearch = %u;", bRadio, iId);
+      PrepareSQL("SELECT * FROM savedsearches WHERE bIsRadio = %u AND idSearch = %u;",
+                 type == ChannelType::RADIO, iId);
 
   if (ResultQuery(strQuery))
   {
     try
     {
-      std::shared_ptr<CPVREpgSearchFilter> filter = CreateEpgSearchFilter(bRadio, m_pDS);
+      std::shared_ptr<CPVREpgSearchFilter> filter = CreateEpgSearchFilter(type, m_pDS);
       m_pDS->close();
       return filter;
     }

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "pvr/PVRChannelType.h"
 #include "pvr/channels/PVRChannelNumber.h"
 #include "utils/ISerializable.h"
 #include "utils/ISortable.h"
@@ -75,7 +76,13 @@ public:
 
   int ChannelDatabaseID() const { return m_iChannelDatabaseID; }
 
-  bool IsRadio() const { return m_bIsRadio; }
+  bool IsRadio() const { return m_channelType == ChannelType::RADIO; }
+
+  /*!
+   * @brief Whether this is a TV or radio group member.
+   * @return RADIO if this is a radio group member, TV otherwise.
+   */
+  ChannelType GetChannelType() const { return m_channelType; }
 
 private:
   int m_iGroupID = -1;
@@ -83,7 +90,7 @@ private:
   int m_iChannelClientID = -1;
   int m_iChannelUID = -1;
   int m_iChannelDatabaseID = -1;
-  bool m_bIsRadio = false;
+  ChannelType m_channelType{ChannelType::TV};
   std::shared_ptr<CPVRChannel> m_channel;
   std::string m_path;
   CPVRChannelNumber m_channelNumber; // the channel number this channel has in the group

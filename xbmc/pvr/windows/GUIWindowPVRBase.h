@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "pvr/PVRChannelType.h"
 #include "threads/CriticalSection.h"
 #include "threads/SystemClock.h"
 #include "windows/GUIMediaWindow.h"
@@ -85,7 +86,7 @@ namespace PVR
     bool OpenChannelGroupSelectionDialog();
 
   protected:
-    CGUIWindowPVRBase(bool bRadio, int id, const std::string& xmlFile);
+    CGUIWindowPVRBase(ChannelType type, int id, const std::string& xmlFile);
 
     virtual std::string GetDirectoryPath() = 0;
 
@@ -112,10 +113,12 @@ namespace PVR
 
     virtual void UpdateSelectedItemPath();
 
+    ChannelType GetChannelType() const { return m_channelType; }
+
     CCriticalSection m_critSection;
     std::string m_channelGroupPath;
-    bool m_bRadio;
-    std::atomic_bool m_bUpdating = {false};
+    ChannelType m_channelType{ChannelType::TV};
+    std::atomic_bool m_bUpdating{false};
 
   private:
     /*!

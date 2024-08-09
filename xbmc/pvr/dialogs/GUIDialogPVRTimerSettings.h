@@ -10,6 +10,7 @@
 
 #include "XBDateTime.h"
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_channels.h" // PVR_CHANNEL_INVALID_UID
+#include "pvr/PVRChannelType.h"
 #include "settings/SettingConditions.h"
 #include "settings/dialogs/GUIDialogSettingsManualBase.h"
 #include "settings/lib/SettingDependency.h"
@@ -171,7 +172,7 @@ private:
   std::string m_timerEndTimeStr;
 
   std::shared_ptr<CPVRTimerType> m_timerType;
-  bool m_bIsRadio = false;
+  ChannelType m_channelType{ChannelType::TV};
   bool m_bIsNewTimer = true;
   bool m_bTimerActive = false;
   std::string m_strTitle;

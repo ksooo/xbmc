@@ -12,6 +12,7 @@
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_channels.h"
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_providers.h"
 #include "pvr/PVRCachedImage.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/channels/PVRChannelNumber.h"
 #include "threads/CriticalSection.h"
 #include "utils/ISerializable.h"
@@ -40,8 +41,8 @@ class CPVRChannel : public ISerializable, public ISortable
 public:
   static const std::string IMAGE_OWNER_PATTERN;
 
-  explicit CPVRChannel(bool bRadio);
-  CPVRChannel(bool bRadio, const std::string& iconPath);
+  explicit CPVRChannel(ChannelType type);
+  CPVRChannel(ChannelType type, const std::string& iconPath);
   CPVRChannel(const PVR_CHANNEL& channel, unsigned int iClientId);
 
   virtual ~CPVRChannel();
@@ -94,7 +95,13 @@ public:
   /*!
    * @return True if this channel is a radio channel, false if not.
    */
-  bool IsRadio() const { return m_bIsRadio; }
+  bool IsRadio() const { return m_channelType == ChannelType::RADIO; }
+
+  /*!
+   * @brief Whether this is a TV or radio channel.
+   * @return RADIO if this is a radio channel, TV otherwise.
+   */
+  ChannelType GetChannelType() const { return m_channelType; }
 
   /*!
    * @return True if this channel is hidden. False if not.
@@ -514,7 +521,7 @@ private:
    */
   //@{
   int m_iChannelId = -1; /*!< the identifier given to this channel by the TV database */
-  bool m_bIsRadio = false; /*!< true if this channel is a radio channel, false if not */
+  ChannelType m_channelType{ChannelType::TV}; /*!< RADIO or TV channel */
   bool m_bIsHidden = false; /*!< true if this channel is hidden, false if not */
   bool m_bIsUserSetName = false; /*!< true if user set the channel name via GUI, false if not */
   bool m_bIsUserSetIcon = false; /*!< true if user set the icon via GUI, false if not */

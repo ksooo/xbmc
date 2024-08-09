@@ -18,6 +18,7 @@
 #include "events/NotificationEvent.h"
 #include "filesystem/SpecialProtocol.h"
 #include "guilib/LocalizeStrings.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRDatabase.h"
 #include "pvr/PVRDescrambleInfo.h"
 #include "pvr/PVRManager.h"
@@ -963,12 +964,12 @@ PVR_ERROR CPVRClient::GetChannelGroups(CPVRChannelGroups* groups) const
   const bool radio{groups->IsRadio()};
   return DoAddonCall(
       __func__,
-      [this, groups](const AddonInstance* addon)
+      [this, groups, radio](const AddonInstance* addon)
       {
         PVR_HANDLE_STRUCT handle = {};
         handle.callerAddress = this;
         handle.dataAddress = groups;
-        return addon->toAddon->GetChannelGroups(addon, &handle, groups->IsRadio());
+        return addon->toAddon->GetChannelGroups(addon, &handle, radio);
       },
       m_clientCapabilities.SupportsChannelGroups() &&
           ((radio && m_clientCapabilities.SupportsRadio()) ||
@@ -1024,9 +1025,10 @@ PVR_ERROR CPVRClient::GetChannelsAmount(int& iChannels) const
   });
 }
 
-PVR_ERROR CPVRClient::GetChannels(bool radio,
+PVR_ERROR CPVRClient::GetChannels(ChannelType type,
                                   std::vector<std::shared_ptr<CPVRChannel>>& channels) const
 {
+  const bool radio{type == ChannelType::RADIO};
   return DoAddonCall(__func__,
                      [this, radio, &channels](const AddonInstance* addon) {
                        PVR_HANDLE_STRUCT handle = {};

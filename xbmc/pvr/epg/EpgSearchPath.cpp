@@ -34,7 +34,7 @@ CPVREpgSearchPath::CPVREpgSearchPath(const CPVREpgSearchFilter& search)
                                search.IsRadio() ? "radio" : "tv",
                                search.GetDatabaseId())),
     m_bValid(true),
-    m_bRadio(search.IsRadio())
+    m_channelType(search.GetChannelType())
 {
 }
 
@@ -51,7 +51,7 @@ bool CPVREpgSearchPath::Init(const std::string& strPath)
        ((segments.at(2) == "radio") || (segments.at(2) == "tv") || (segments.at(2) == "search")) &&
        ((segments.size() == 3) || (segments.at(3) == "savedsearches")));
   m_bRoot = (m_bValid && (segments.size() == 3) && (segments.at(2) != "search"));
-  m_bRadio = (m_bValid && (segments.at(2) == "radio"));
+  m_channelType = (m_bValid && (segments.at(2) == "radio")) ? ChannelType::RADIO : ChannelType::TV;
   m_bSavedSearchesRoot =
       (m_bValid && (segments.size() == 4) && (segments.at(3) == "savedsearches"));
   m_bSavedSearch = (m_bValid && (segments.size() == 5));

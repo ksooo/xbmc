@@ -13,6 +13,7 @@
 #include "guilib/GUIKeyboardFactory.h"
 #include "guilib/GUIMessage.h"
 #include "guilib/LocalizeStrings.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannel.h"
 #include "pvr/channels/PVRChannelGroupMember.h"
@@ -78,7 +79,8 @@ void CGUIDialogPVRGuideSearch::UpdateChannelSpin()
     group = CServiceBroker::GetPVRManager().ChannelGroups()->GetByIdFromAll(iChannelGroup);
 
   if (!group)
-    group = CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(m_searchFilter->IsRadio());
+    group = CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(
+        m_searchFilter->GetChannelType());
 
   m_channelsMap.clear();
   const std::vector<std::shared_ptr<CPVRChannelGroupMember>> groupMembers =
@@ -105,7 +107,10 @@ void CGUIDialogPVRGuideSearch::UpdateGroupsSpin()
 {
   std::vector<std::pair<std::string, int>> labels;
   const std::vector<std::shared_ptr<CPVRChannelGroup>> groups =
-      CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_searchFilter->IsRadio())->GetMembers();
+      CServiceBroker::GetPVRManager()
+          .ChannelGroups()
+          ->Get(m_searchFilter->GetChannelType())
+          ->GetMembers();
   int selectedGroup = EPG_SEARCH_UNSET;
   for (const auto& group : groups)
   {

@@ -8,6 +8,7 @@
 
 #include "PVRTimersPath.h"
 
+#include "pvr/PVRChannelType.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 
@@ -42,12 +43,13 @@ CPVRTimersPath::CPVRTimersPath(const std::string& strPath, int iClientId, int iP
   }
 }
 
-CPVRTimersPath::CPVRTimersPath(bool bRadio, bool bTimerRules)
-  : m_path(StringUtils::Format(
-        "pvr://timers/{}/{}", bRadio ? "radio" : "tv", bTimerRules ? "rules" : "timers")),
+CPVRTimersPath::CPVRTimersPath(ChannelType type, bool bTimerRules)
+  : m_path(StringUtils::Format("pvr://timers/{}/{}",
+                               type == ChannelType::RADIO ? "radio" : "tv",
+                               bTimerRules ? "rules" : "timers")),
     m_bValid(true),
     m_bRoot(true),
-    m_bRadio(bRadio),
+    m_bRadio(type == ChannelType::RADIO),
     m_bTimerRules(bTimerRules)
 {
 }

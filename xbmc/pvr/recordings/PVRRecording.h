@@ -11,6 +11,7 @@
 #include "XBDateTime.h"
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_providers.h"
 #include "pvr/PVRCachedImage.h"
+#include "pvr/PVRChannelType.h"
 #include "threads/CriticalSection.h"
 #include "threads/SystemClock.h"
 #include "video/Bookmark.h"
@@ -235,7 +236,13 @@ public:
    * @brief Check whether this is a tv or radio recording
    * @return true if this is a radio recording, false if this is a tv recording
    */
-  bool IsRadio() const { return m_bRadio; }
+  bool IsRadio() const { return m_channelType == ChannelType::RADIO; }
+
+  /*!
+   * @brief Whether this is a TV or radio recording.
+   * @return RADIO if this is a radio recording, TV otherwise.
+   */
+  ChannelType GetChannelType() const { return m_channelType; }
 
   /*!
    * @return Broadcast id of the EPG event associated with this recording or EPG_TAG_INVALID_UID
@@ -522,7 +529,7 @@ private:
   mutable bool m_bInProgress; /*!< set if recording might be in progress */
   unsigned int m_iEpgEventId; /*!< epg broadcast id associated with this recording */
   int m_iChannelUid; /*!< channel uid associated with this recording */
-  bool m_bRadio; /*!< radio or tv recording */
+  ChannelType m_channelType; /*!< radio or tv recording */
   int m_iGenreType = 0; /*!< genre type */
   int m_iGenreSubType = 0; /*!< genre subtype */
   mutable XbmcThreads::EndTime<> m_resumePointRefetchTimeout;

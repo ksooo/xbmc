@@ -26,9 +26,10 @@ CPVRChannelGroupFromClient::CPVRChannelGroupFromClient(
     const PVR_CHANNEL_GROUP& group,
     int clientID,
     const std::shared_ptr<const CPVRChannelGroup>& allChannelsGroup)
-  : CPVRChannelGroup(
-        CPVRChannelsPath(group.bIsRadio, group.strGroupName ? group.strGroupName : "", clientID),
-        allChannelsGroup)
+  : CPVRChannelGroup(CPVRChannelsPath(group.bIsRadio ? ChannelType::RADIO : ChannelType::TV,
+                                      group.strGroupName ? group.strGroupName : "",
+                                      clientID),
+                     allChannelsGroup)
 {
   if (group.strGroupName)
     SetClientGroupName(group.strGroupName);

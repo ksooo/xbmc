@@ -22,6 +22,8 @@ class CFileItem;
 
 namespace PVR
 {
+enum class ChannelType;
+
 class CPVRChannel;
 class CPVRChannelGroupMember;
 
@@ -145,18 +147,18 @@ public:
   /*!
    * @brief Get the currently selected channel item path; used across several windows/dialogs to
    * share item selection.
-   * @param bRadio True to query the selected path for PVR radio, false for Live TV.
+   * @param type RADIO, to query the selected path for PVR radio, TV for Live TV.
    * @return the path.
    */
-  std::string GetSelectedChannelPath(bool bRadio) const;
+  std::string GetSelectedChannelPath(ChannelType type) const;
 
   /*!
    * @brief Set the currently selected channel item path; used across several windows/dialogs to
    * share item selection.
-   * @param bRadio True to set the selected path for PVR radio, false for Live TV.
+   * @param type RADIO, to set the selected path for PVR radio, TV for Live TV.
    * @param path The new path to set.
    */
-  void SetSelectedChannelPath(bool bRadio, const std::string& path);
+  void SetSelectedChannelPath(ChannelType type, const std::string& path);
 
 private:
   CPVRGUIActionsChannels(const CPVRGUIActionsChannels&) = delete;

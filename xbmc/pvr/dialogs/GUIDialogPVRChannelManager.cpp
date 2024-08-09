@@ -92,7 +92,7 @@ CGUIDialogPVRChannelManager::CGUIDialogPVRChannelManager()
   : CGUIDialog(WINDOW_DIALOG_PVR_CHANNEL_MANAGER, "DialogPVRChannelManager.xml"),
     m_channelItems(new CFileItemList)
 {
-  SetRadio(false);
+  SetChannelType(ChannelType::TV);
 }
 
 CGUIDialogPVRChannelManager::~CGUIDialogPVRChannelManager()
@@ -231,10 +231,10 @@ void CGUIDialogPVRChannelManager::OnDeinitWindow(int nextWindowID)
   CGUIDialog::OnDeinitWindow(nextWindowID);
 }
 
-void CGUIDialogPVRChannelManager::SetRadio(bool bIsRadio)
+void CGUIDialogPVRChannelManager::SetChannelType(ChannelType type)
 {
-  m_bIsRadio = bIsRadio;
-  SetProperty("IsRadio", m_bIsRadio ? "true" : "");
+  m_channelType = type;
+  SetProperty("IsRadio", (m_channelType == ChannelType::RADIO) ? "true" : "");
 }
 
 void CGUIDialogPVRChannelManager::Open(const std::shared_ptr<CFileItem>& initialSelection)
@@ -305,8 +305,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonRadioTV()
   m_iSelected = 0;
   m_bMovingMode = false;
   m_bAllowNewChannel = false;
-  m_bIsRadio = !m_bIsRadio;
-  SetProperty("IsRadio", m_bIsRadio ? "true" : "");
+  SetChannelType((m_channelType == ChannelType::TV) ? ChannelType::RADIO : ChannelType::TV);
   Update();
   return true;
 }
@@ -508,7 +507,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonGroupManager()
   if (!pDlgInfo)
     return false;
 
-  pDlgInfo->SetRadio(m_bIsRadio);
+  pDlgInfo->SetChannelType(m_channelType);
 
   /* Open dialog window */
   pDlgInfo->Open();
@@ -543,7 +542,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonNewChannel()
   {
     int iClientID = m_clientsWithSettingsList[iSelection]->GetID();
 
-    std::shared_ptr<CPVRChannel> channel(new CPVRChannel(m_bIsRadio));
+    const auto channel{std::make_shared<CPVRChannel>(m_channelType)};
     channel->SetChannelName(g_localizeStrings.Get(19204)); // New channel
     channel->SetClientID(iClientID);
 
@@ -772,7 +771,7 @@ bool CGUIDialogPVRChannelManager::OnContextButton(int itemNumber, CONTEXT_BUTTON
         if (ret == PVR_ERROR_NO_ERROR)
         {
           const std::shared_ptr<CPVRChannelGroups> groups{
-              CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_bIsRadio)};
+              CServiceBroker::GetPVRManager().ChannelGroups()->Get(m_channelType)};
           if (groups)
           {
             groups->UpdateFromClients({});
@@ -827,7 +826,7 @@ void CGUIDialogPVRChannelManager::Update()
   Clear();
 
   std::shared_ptr<CPVRChannelGroup> channels =
-      CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(m_bIsRadio);
+      CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(m_channelType);
 
   // No channels available, nothing to do.
   if (!channels)
@@ -876,7 +875,7 @@ void CGUIDialogPVRChannelManager::Update()
   }
 
   m_clientsWithSettingsList =
-      CServiceBroker::GetPVRManager().Clients()->GetClientsSupportingChannelSettings(m_bIsRadio);
+      CServiceBroker::GetPVRManager().Clients()->GetClientsSupportingChannelSettings(m_channelType);
   if (!m_clientsWithSettingsList.empty())
     m_bAllowNewChannel = true;
 
@@ -975,7 +974,7 @@ bool CGUIDialogPVRChannelManager::UpdateChannelData(const std::shared_ptr<CFileI
     // make sure the channel is part of the group
     CServiceBroker::GetPVRManager()
         .ChannelGroups()
-        ->Get(m_bIsRadio)
+        ->Get(m_channelType)
         ->AppendToGroup(group, groupMember);
   }
   else
@@ -983,7 +982,7 @@ bool CGUIDialogPVRChannelManager::UpdateChannelData(const std::shared_ptr<CFileI
     // remove the hidden channel from the group
     CServiceBroker::GetPVRManager()
         .ChannelGroups()
-        ->Get(m_bIsRadio)
+        ->Get(m_channelType)
         ->RemoveFromGroup(group, groupMember);
   }
 
@@ -1048,7 +1047,7 @@ void CGUIDialogPVRChannelManager::SaveList()
   /* persist all channels */
   const std::shared_ptr<const CPVRChannelGroupsContainer> groupsContainer{
       CServiceBroker::GetPVRManager().ChannelGroups()};
-  const std::shared_ptr<CPVRChannelGroup> group{groupsContainer->GetGroupAll(m_bIsRadio)};
+  const std::shared_ptr<CPVRChannelGroup> group{groupsContainer->GetGroupAll(m_channelType)};
 
   for (int iListPtr = 0; iListPtr < m_channelItems->Size(); ++iListPtr)
   {
@@ -1079,7 +1078,7 @@ void CGUIDialogPVRChannelManager::SaveList()
   }
 
   group->SortAndRenumber();
-  groupsContainer->Get(m_bIsRadio)->PersistAll();
+  groupsContainer->Get(m_channelType)->PersistAll();
   pDlgProgress->Close();
 
   CONTROL_DISABLE(BUTTON_APPLY);

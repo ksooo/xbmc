@@ -10,6 +10,7 @@
 
 #include "XBDateTime.h"
 #include "pvr/PVRCachedImage.h"
+#include "pvr/PVRChannelType.h"
 #include "threads/CriticalSection.h"
 #include "utils/ISerializable.h"
 
@@ -408,6 +409,12 @@ public:
    * @return True if this tag is associated with a radio channel, false otherwise.
    */
   bool IsRadio() const;
+
+  /*!
+   * @brief Whether this is a TV or radio tag.
+   * @return RADIO if this is a radio tag, TV otherwise.
+   */
+  ChannelType GetChannelType() const { return IsRadio() ? ChannelType::RADIO : ChannelType::TV; }
 
   /*!
    * @brief Check whether this event is parental locked.

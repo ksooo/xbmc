@@ -20,6 +20,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "guilib/WindowIDs.h"
 #include "messaging/ApplicationMessenger.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRItem.h"
 #include "pvr/PVRManager.h"
 #include "pvr/PVRPlaybackState.h"
@@ -334,7 +335,7 @@ bool CPVRGUIActionsPlayback::SwitchToChannel(const CFileItem& item, bool bCheckR
 bool CPVRGUIActionsPlayback::SwitchToChannel(PlaybackType type) const
 {
   std::shared_ptr<CPVRChannelGroupMember> groupMember;
-  bool bIsRadio(false);
+  ChannelType channelType{ChannelType::TV};
 
   // check if the desired PlaybackType is already playing,
   // and if not, try to grab the last played channel of this type
@@ -350,7 +351,7 @@ bool CPVRGUIActionsPlayback::SwitchToChannel(PlaybackType type) const
       if (allGroup)
         groupMember = allGroup->GetLastPlayedChannelGroupMember();
 
-      bIsRadio = true;
+      channelType = ChannelType::RADIO;
       break;
     }
     case PlaybackTypeTV:
@@ -383,7 +384,7 @@ bool CPVRGUIActionsPlayback::SwitchToChannel(PlaybackType type) const
   {
     // if we don't, find the active channel group of the demanded type and play it's first channel
     const std::shared_ptr<const CPVRChannelGroup> channelGroup =
-        CServiceBroker::GetPVRManager().PlaybackState()->GetActiveChannelGroup(bIsRadio);
+        CServiceBroker::GetPVRManager().PlaybackState()->GetActiveChannelGroup(channelType);
     if (channelGroup)
     {
       // try to start playback of first channel in this group
@@ -399,14 +400,15 @@ bool CPVRGUIActionsPlayback::SwitchToChannel(PlaybackType type) const
   CLog::LogF(LOGERROR,
              "Could not determine {} channel to playback. No last played channel found, and "
              "first channel of active group could also not be determined.",
-             bIsRadio ? "Radio" : "TV");
+             (channelType == ChannelType::RADIO) ? "Radio" : "TV");
 
   CGUIDialogKaiToast::QueueNotification(
       CGUIDialogKaiToast::Error,
       g_localizeStrings.Get(19166), // PVR information
-      StringUtils::Format(
-          g_localizeStrings.Get(19035),
-          g_localizeStrings.Get(bIsRadio ? 19021 : 19020))); // Radio/TV could not be played.
+      StringUtils::Format(g_localizeStrings.Get(19035),
+                          g_localizeStrings.Get((channelType == ChannelType::RADIO)
+                                                    ? 19021
+                                                    : 19020))); // Radio/TV could not be played.
   return false;
 }
 
@@ -416,16 +418,17 @@ bool CPVRGUIActionsPlayback::PlayChannelOnStartup() const
   if (iAction != STARTUP_ACTION_PLAY_TV && iAction != STARTUP_ACTION_PLAY_RADIO)
     return false;
 
-  bool playRadio = (iAction == STARTUP_ACTION_PLAY_RADIO);
+  const ChannelType type{(iAction == STARTUP_ACTION_PLAY_RADIO) ? ChannelType::RADIO
+                                                                : ChannelType::TV};
 
   // get the last played channel or fallback to first channel of all channels group
   std::shared_ptr<CPVRChannelGroupMember> groupMember =
-      CServiceBroker::GetPVRManager().PlaybackState()->GetLastPlayedChannelGroupMember(playRadio);
+      CServiceBroker::GetPVRManager().PlaybackState()->GetLastPlayedChannelGroupMember(type);
 
   if (!groupMember)
   {
     const std::shared_ptr<const CPVRChannelGroup> group =
-        CServiceBroker::GetPVRManager().ChannelGroups()->Get(playRadio)->GetGroupAll();
+        CServiceBroker::GetPVRManager().ChannelGroups()->Get(type)->GetGroupAll();
     auto channels = group->GetMembers();
     if (channels.empty())
       return false;

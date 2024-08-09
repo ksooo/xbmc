@@ -12,6 +12,7 @@
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_recordings.h"
 #include "cores/EdlEdit.h"
 #include "guilib/LocalizeStrings.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClient.h"
 #include "pvr/channels/PVRChannel.h"
@@ -131,14 +132,15 @@ CPVRRecording::CPVRRecording(const PVR_RECORDING& recording, unsigned int iClien
   //  available today prefer addon-supplied channel type (tv/radio) over channel attribute.
   if (recording.channelType != PVR_RECORDING_CHANNEL_TYPE_UNKNOWN)
   {
-    m_bRadio = recording.channelType == PVR_RECORDING_CHANNEL_TYPE_RADIO;
+    m_channelType = (recording.channelType == PVR_RECORDING_CHANNEL_TYPE_RADIO) ? ChannelType::RADIO
+                                                                                : ChannelType::TV;
   }
   else
   {
     const std::shared_ptr<const CPVRChannel> channel(Channel());
     if (channel)
     {
-      m_bRadio = channel->IsRadio();
+      m_channelType = channel->GetChannelType();
     }
     else
     {
@@ -148,11 +150,11 @@ CPVRRecording::CPVRRecording(const PVR_RECORDING& recording, unsigned int iClien
       if (bSupportsRadio && client && client->GetClientCapabilities().SupportsTV())
       {
         CLog::Log(LOGWARNING, "Unable to determine channel type. Defaulting to TV.");
-        m_bRadio = false; // Assume TV.
+        m_channelType = ChannelType::TV; // Assume TV.
       }
       else
       {
-        m_bRadio = bSupportsRadio;
+        m_channelType = bSupportsRadio ? ChannelType::RADIO : ChannelType::TV;
       }
     }
   }
@@ -175,7 +177,7 @@ bool CPVRRecording::operator==(const CPVRRecording& right) const
           m_iconPath == right.m_iconPath && m_thumbnailPath == right.m_thumbnailPath &&
           m_fanartPath == right.m_fanartPath && m_iRecordingId == right.m_iRecordingId &&
           m_bIsDeleted == right.m_bIsDeleted && m_iEpgEventId == right.m_iEpgEventId &&
-          m_iChannelUid == right.m_iChannelUid && m_bRadio == right.m_bRadio &&
+          m_iChannelUid == right.m_iChannelUid && m_channelType == right.m_channelType &&
           m_genre == right.m_genre && m_iGenreType == right.m_iGenreType &&
           m_iGenreSubType == right.m_iGenreSubType && m_firstAired == right.m_firstAired &&
           m_iFlags == right.m_iFlags && m_sizeInBytes == right.m_sizeInBytes &&
@@ -202,7 +204,7 @@ void CPVRRecording::Serialize(CVariant& value) const
   value["isdeleted"] = m_bIsDeleted;
   value["epgeventid"] = m_iEpgEventId;
   value["channeluid"] = m_iChannelUid;
-  value["radio"] = m_bRadio;
+  value["radio"] = m_channelType == ChannelType::RADIO;
   value["genre"] = m_genre;
 
   if (!value.isMember("art"))
@@ -243,7 +245,7 @@ void CPVRRecording::Reset()
   m_iSeason = -1;
   m_iEpisode = -1;
   m_iChannelUid = PVR_CHANNEL_INVALID_UID;
-  m_bRadio = false;
+  m_channelType = ChannelType::TV;
   m_iFlags = PVR_RECORDING_FLAG_UNDEFINED;
   {
     std::unique_lock<CCriticalSection> lock(m_critSection);
@@ -431,7 +433,7 @@ void CPVRRecording::Update(const CPVRRecording& tag, const CPVRClient& client)
   m_bIsDeleted = tag.m_bIsDeleted;
   m_iEpgEventId = tag.m_iEpgEventId;
   m_iChannelUid = tag.m_iChannelUid;
-  m_bRadio = tag.m_bRadio;
+  m_channelType = tag.m_channelType;
   m_firstAired = tag.m_firstAired;
   m_iFlags = tag.m_iFlags;
   {
@@ -484,7 +486,7 @@ void CPVRRecording::Update(const CPVRRecording& tag, const CPVRClient& client)
 
 void CPVRRecording::UpdatePath()
 {
-  m_strFileNameAndPath = CPVRRecordingsPath(m_bIsDeleted, m_bRadio, m_strDirectory, m_strTitle,
+  m_strFileNameAndPath = CPVRRecordingsPath(m_bIsDeleted, m_channelType, m_strDirectory, m_strTitle,
                                             m_iSeason, m_iEpisode, GetYear(), m_strShowTitle,
                                             m_strChannelName, m_recordingTime, m_strRecordingId);
 }

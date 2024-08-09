@@ -19,6 +19,8 @@ class CFileItem;
 
 namespace PVR
 {
+enum class ChannelType;
+
 class CPVRChannel;
 class CPVRChannelGroup;
 class CPVRChannelGroupMember;
@@ -217,25 +219,25 @@ public:
 
   /*!
    * @brief Get the active channel group.
-   * @param bRadio True to get the active radio group, false to get the active TV group.
+   * @param type RADIO, to get the active radio group, TV to get the active TV group.
    * @return The current group or the group containing all channels if it's not set.
    */
-  std::shared_ptr<CPVRChannelGroup> GetActiveChannelGroup(bool bRadio) const;
+  std::shared_ptr<CPVRChannelGroup> GetActiveChannelGroup(ChannelType type) const;
 
   /*!
    * @brief Get the last played channel group member.
-   * @param bRadio True to get the radio group member, false to get the TV group member.
+   * @param type RADIO, to get the radio group member, TV to get the TV group member.
    * @return The last played group member or nullptr if it's not available.
    */
-  std::shared_ptr<CPVRChannelGroupMember> GetLastPlayedChannelGroupMember(bool bRadio) const;
+  std::shared_ptr<CPVRChannelGroupMember> GetLastPlayedChannelGroupMember(ChannelType type) const;
 
   /*!
    * @brief Get the channel group member that was played before the last played member.
-   * @param bRadio True to get the radio group member, false to get the TV group member.
+   * @param type RADIO, to get the radio group member, TV to get the TV group member.
    * @return The previous played group member or nullptr if it's not available.
    */
   std::shared_ptr<CPVRChannelGroupMember> GetPreviousToLastPlayedChannelGroupMember(
-      bool bRadio) const;
+      ChannelType type) const;
 
   /*!
    * @brief Get current playback time for the given channel, taking timeshifting and playing

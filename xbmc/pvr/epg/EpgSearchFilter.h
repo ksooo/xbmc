@@ -9,6 +9,7 @@
 #pragma once
 
 #include "XBDateTime.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/epg/EpgSearchData.h"
 
 #include <memory>
@@ -27,9 +28,9 @@ namespace PVR
 
     /*!
      * @brief ctor.
-     * @param bRadio the type of channels to search - if true, 'radio'. 'tv', otherwise.
+     * @param type The type of channels to search, RADIO or TV.
      */
-    explicit CPVREpgSearchFilter(bool bRadio);
+    explicit CPVREpgSearchFilter(ChannelType type);
 
     /*!
      * @brief Clear this filter.
@@ -59,7 +60,13 @@ namespace PVR
      * @brief Get the type of channels to search.
      * @return true, if 'radio'. false, otherwise.
      */
-    bool IsRadio() const { return m_bIsRadio; }
+    bool IsRadio() const { return m_channelType == ChannelType::RADIO; }
+
+    /*!
+     * @brief Whether to search TV or radio channels.
+     * @return RADIO if to search in radio channels, TV otherwise.
+     */
+    ChannelType GetChannelType() const { return m_channelType; }
 
     const std::string& GetSearchTerm() const { return m_searchData.m_strSearchTerm; }
     void SetSearchTerm(const std::string& strSearchTerm);
@@ -154,7 +161,7 @@ namespace PVR
     bool m_bRemoveDuplicates; /*!< True to remove duplicate events, false if not */
 
     // PVR specific filters
-    bool m_bIsRadio; /*!< True to filter radio channels only, false to tv only */
+    ChannelType m_channelType{ChannelType::TV}; /*!< To filter radio channels, otherwise tv */
     int m_iClientID = -1; /*!< The client id */
     int m_iChannelGroupID{-1}; /*! The channel group id */
     int m_iChannelUID = -1; /*!< The channel uid */

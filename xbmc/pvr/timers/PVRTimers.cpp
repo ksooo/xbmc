@@ -9,6 +9,7 @@
 #include "PVRTimers.h"
 
 #include "ServiceBroker.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRDatabase.h"
 #include "pvr/PVREventLogJob.h"
 #include "pvr/PVRManager.h"
@@ -265,7 +266,8 @@ bool CPVRTimers::UpdateEntries(const CPVRTimersContainer& timers,
       else
       {
         /* new timer */
-        std::shared_ptr<CPVRTimerInfoTag> newTimer = std::make_shared<CPVRTimerInfoTag>();
+        std::shared_ptr<CPVRTimerInfoTag> newTimer =
+            std::make_shared<CPVRTimerInfoTag>(ChannelType::TV);
         newTimer->UpdateEntry(timersEntry);
         newTimer->SetTimerID(++m_iLastId);
         InsertEntry(newTimer);
@@ -952,7 +954,7 @@ std::shared_ptr<CPVRTimerInfoTag> CPVRTimers::UpdateEntry(
   }
   else
   {
-    tag = std::make_shared<CPVRTimerInfoTag>();
+    tag = std::make_shared<CPVRTimerInfoTag>(ChannelType::TV);
     if (tag->UpdateEntry(timer))
     {
       tag->SetTimerID(++m_iLastId);

@@ -14,6 +14,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "guilib/WindowIDs.h"
 #include "input/WindowTranslator.h"
+#include "pvr/PVRChannelType.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClient.h" // PVR_ANY_CLIENT_ID
 #include "pvr/addons/PVRClients.h"
@@ -65,43 +66,44 @@ bool CPVRGUIDirectory::SupportsWriteFileOperations() const
 namespace
 {
 
-bool GetRootDirectory(bool bRadio, CFileItemList& results)
+bool GetRootDirectory(ChannelType type, CFileItemList& results)
 {
   std::shared_ptr<CFileItem> item;
 
   const std::shared_ptr<const CPVRClients> clients = CServiceBroker::GetPVRManager().Clients();
+  const bool radio{type == ChannelType::RADIO};
 
   // EPG
   const bool bAnyClientSupportingEPG = clients->AnyClientSupportingEPG();
   if (bAnyClientSupportingEPG)
   {
     item = std::make_shared<CFileItem>(
-        StringUtils::Format("pvr://guide/{}/", bRadio ? "radio" : "tv"), true);
+        StringUtils::Format("pvr://guide/{}/", radio ? "radio" : "tv"), true);
     item->SetLabel(g_localizeStrings.Get(19069)); // Guide
-    item->SetProperty("node.target", CWindowTranslator::TranslateWindow(bRadio ? WINDOW_RADIO_GUIDE
-                                                                               : WINDOW_TV_GUIDE));
+    item->SetProperty("node.target", CWindowTranslator::TranslateWindow(radio ? WINDOW_RADIO_GUIDE
+                                                                              : WINDOW_TV_GUIDE));
     item->SetArt("icon", "DefaultPVRGuide.png");
     results.Add(item);
   }
 
   // Channels
   item = std::make_shared<CFileItem>(
-      bRadio ? CPVRChannelsPath::PATH_RADIO_CHANNELS : CPVRChannelsPath::PATH_TV_CHANNELS, true);
+      radio ? CPVRChannelsPath::PATH_RADIO_CHANNELS : CPVRChannelsPath::PATH_TV_CHANNELS, true);
   item->SetLabel(g_localizeStrings.Get(19019)); // Channels
-  item->SetProperty("node.target", CWindowTranslator::TranslateWindow(bRadio ? WINDOW_RADIO_CHANNELS
-                                                                             : WINDOW_TV_CHANNELS));
+  item->SetProperty("node.target", CWindowTranslator::TranslateWindow(radio ? WINDOW_RADIO_CHANNELS
+                                                                            : WINDOW_TV_CHANNELS));
   item->SetArt("icon", "DefaultPVRChannels.png");
   results.Add(item);
 
   // Recordings
   if (clients->AnyClientSupportingRecordings())
   {
-    item = std::make_shared<CFileItem>(bRadio ? CPVRRecordingsPath::PATH_ACTIVE_RADIO_RECORDINGS
-                                              : CPVRRecordingsPath::PATH_ACTIVE_TV_RECORDINGS,
+    item = std::make_shared<CFileItem>(radio ? CPVRRecordingsPath::PATH_ACTIVE_RADIO_RECORDINGS
+                                             : CPVRRecordingsPath::PATH_ACTIVE_TV_RECORDINGS,
                                        true);
     item->SetLabel(g_localizeStrings.Get(19017)); // Recordings
     item->SetProperty("node.target", CWindowTranslator::TranslateWindow(
-                                         bRadio ? WINDOW_RADIO_RECORDINGS : WINDOW_TV_RECORDINGS));
+                                         radio ? WINDOW_RADIO_RECORDINGS : WINDOW_TV_RECORDINGS));
     item->SetArt("icon", "DefaultPVRRecordings.png");
     results.Add(item);
   }
@@ -109,18 +111,18 @@ bool GetRootDirectory(bool bRadio, CFileItemList& results)
   // Timers/Timer rules
   // - always present, because Reminders are always available, no client support needed for this
   item = std::make_shared<CFileItem>(
-      bRadio ? CPVRTimersPath::PATH_RADIO_TIMERS : CPVRTimersPath::PATH_TV_TIMERS, true);
+      radio ? CPVRTimersPath::PATH_RADIO_TIMERS : CPVRTimersPath::PATH_TV_TIMERS, true);
   item->SetLabel(g_localizeStrings.Get(19040)); // Timers
-  item->SetProperty("node.target", CWindowTranslator::TranslateWindow(bRadio ? WINDOW_RADIO_TIMERS
-                                                                             : WINDOW_TV_TIMERS));
+  item->SetProperty("node.target", CWindowTranslator::TranslateWindow(radio ? WINDOW_RADIO_TIMERS
+                                                                            : WINDOW_TV_TIMERS));
   item->SetArt("icon", "DefaultPVRTimers.png");
   results.Add(item);
 
   item = std::make_shared<CFileItem>(
-      bRadio ? CPVRTimersPath::PATH_RADIO_TIMER_RULES : CPVRTimersPath::PATH_TV_TIMER_RULES, true);
+      radio ? CPVRTimersPath::PATH_RADIO_TIMER_RULES : CPVRTimersPath::PATH_TV_TIMER_RULES, true);
   item->SetLabel(g_localizeStrings.Get(19138)); // Timer rules
   item->SetProperty("node.target", CWindowTranslator::TranslateWindow(
-                                       bRadio ? WINDOW_RADIO_TIMER_RULES : WINDOW_TV_TIMER_RULES));
+                                       radio ? WINDOW_RADIO_TIMER_RULES : WINDOW_TV_TIMER_RULES));
   item->SetArt("icon", "DefaultPVRTimerRules.png");
   results.Add(item);
 
@@ -128,10 +130,10 @@ bool GetRootDirectory(bool bRadio, CFileItemList& results)
   if (bAnyClientSupportingEPG)
   {
     item = std::make_shared<CFileItem>(
-        bRadio ? CPVREpgSearchPath::PATH_RADIO_SEARCH : CPVREpgSearchPath::PATH_TV_SEARCH, true);
+        radio ? CPVREpgSearchPath::PATH_RADIO_SEARCH : CPVREpgSearchPath::PATH_TV_SEARCH, true);
     item->SetLabel(g_localizeStrings.Get(137)); // Search
-    item->SetProperty("node.target", CWindowTranslator::TranslateWindow(bRadio ? WINDOW_RADIO_SEARCH
-                                                                               : WINDOW_TV_SEARCH));
+    item->SetProperty("node.target", CWindowTranslator::TranslateWindow(radio ? WINDOW_RADIO_SEARCH
+                                                                              : WINDOW_TV_SEARCH));
     item->SetArt("icon", "DefaultPVRSearch.png");
     results.Add(item);
   }
@@ -181,7 +183,7 @@ bool CPVRGUIDirectory::GetDirectory(CFileItemList& results) const
   {
     if (CServiceBroker::GetPVRManager().IsStarted())
     {
-      return GetRootDirectory(false, results);
+      return GetRootDirectory(ChannelType::TV, results);
     }
     return true;
   }
@@ -189,7 +191,7 @@ bool CPVRGUIDirectory::GetDirectory(CFileItemList& results) const
   {
     if (CServiceBroker::GetPVRManager().IsStarted())
     {
-      return GetRootDirectory(true, results);
+      return GetRootDirectory(ChannelType::RADIO, results);
     }
     return true;
   }
@@ -224,9 +226,9 @@ bool CPVRGUIDirectory::GetDirectory(CFileItemList& results) const
     if (CServiceBroker::GetPVRManager().IsStarted())
     {
       if (path.IsSavedSearchesRoot())
-        return GetSavedSearchesDirectory(path.IsRadio(), results);
+        return GetSavedSearchesDirectory(path.GetChannelType(), results);
       else if (path.IsSavedSearch())
-        return GetSavedSearchResults(path.IsRadio(), path.GetId(), results);
+        return GetSavedSearchResults(path.GetChannelType(), path.GetId(), results);
     }
     return true;
   }
@@ -426,10 +428,10 @@ bool CPVRGUIDirectory::GetRecordingsDirectory(CFileItemList& results) const
   return recPath.IsValid();
 }
 
-bool CPVRGUIDirectory::GetSavedSearchesDirectory(bool bRadio, CFileItemList& results) const
+bool CPVRGUIDirectory::GetSavedSearchesDirectory(ChannelType type, CFileItemList& results) const
 {
   const std::vector<std::shared_ptr<CPVREpgSearchFilter>> searches =
-      CServiceBroker::GetPVRManager().EpgContainer().GetSavedSearches(bRadio);
+      CServiceBroker::GetPVRManager().EpgContainer().GetSavedSearches(type);
 
   for (const auto& search : searches)
   {
@@ -438,10 +440,10 @@ bool CPVRGUIDirectory::GetSavedSearchesDirectory(bool bRadio, CFileItemList& res
   return true;
 }
 
-bool CPVRGUIDirectory::GetSavedSearchResults(bool isRadio, int id, CFileItemList& results) const
+bool CPVRGUIDirectory::GetSavedSearchResults(ChannelType type, int id, CFileItemList& results) const
 {
   auto& epgContainer{CServiceBroker::GetPVRManager().EpgContainer()};
-  const std::shared_ptr<CPVREpgSearchFilter> filter{epgContainer.GetSavedSearchById(isRadio, id)};
+  const std::shared_ptr<CPVREpgSearchFilter> filter{epgContainer.GetSavedSearchById(type, id)};
   if (filter)
   {
     CPVREpgSearch search(*filter);
@@ -456,12 +458,12 @@ bool CPVRGUIDirectory::GetSavedSearchResults(bool isRadio, int id, CFileItemList
   return false;
 }
 
-bool CPVRGUIDirectory::GetChannelGroupsDirectory(bool bRadio,
+bool CPVRGUIDirectory::GetChannelGroupsDirectory(ChannelType type,
                                                  bool bExcludeHidden,
                                                  CFileItemList& results)
 {
   const std::shared_ptr<const CPVRChannelGroups> channelGroups{
-      CServiceBroker::GetPVRManager().ChannelGroups()->Get(bRadio)};
+      CServiceBroker::GetPVRManager().ChannelGroups()->Get(type)};
   if (channelGroups)
   {
     std::shared_ptr<CFileItem> item;
@@ -499,7 +501,7 @@ std::shared_ptr<CPVRChannelGroupMember> GetFirstMatchingGroupMember(
     const std::shared_ptr<CPVRChannel>& channel)
 {
   const std::shared_ptr<const CPVRChannelGroups> groups{
-      CServiceBroker::GetPVRManager().ChannelGroups()->Get(channel->IsRadio())};
+      CServiceBroker::GetPVRManager().ChannelGroups()->Get(channel->GetChannelType())};
   if (groups)
   {
     const std::vector<std::shared_ptr<CPVRChannelGroup>> channelGroups{
@@ -527,11 +529,11 @@ std::vector<std::shared_ptr<CPVRChannelGroupMember>> GetChannelGroupMembers(
   std::shared_ptr<CPVRChannelGroup> group;
   if (path.IsHiddenChannelGroup()) // hidden channels from the 'all channels' group
   {
-    group = CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(path.IsRadio());
+    group = CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(path.GetChannelType());
   }
   else if (groupName == "*") // all channels across all groups
   {
-    group = CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(path.IsRadio());
+    group = CServiceBroker::GetPVRManager().ChannelGroups()->GetGroupAll(path.GetChannelType());
     if (group)
     {
       std::vector<std::shared_ptr<CPVRChannelGroupMember>> result;
@@ -570,7 +572,7 @@ std::vector<std::shared_ptr<CPVRChannelGroupMember>> GetChannelGroupMembers(
   {
     group = CServiceBroker::GetPVRManager()
                 .ChannelGroups()
-                ->Get(path.IsRadio())
+                ->Get(path.GetChannelType())
                 ->GetByName(groupName, path.GetGroupClientID());
   }
 
@@ -607,7 +609,7 @@ bool CPVRGUIDirectory::GetChannelsDirectory(CFileItemList& results) const
     }
     else if (path.IsChannelsRoot())
     {
-      return GetChannelGroupsDirectory(path.IsRadio(), true, results);
+      return GetChannelGroupsDirectory(path.GetChannelType(), true, results);
     }
     else if (path.IsChannelGroup())
     {
