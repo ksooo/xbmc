@@ -13,6 +13,7 @@
 #include "pvr_defines.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 //¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 // "C" Definitions group 1 - General PVR
@@ -130,6 +131,38 @@ extern "C"
     /// @brief __1__ : From EPG, but playing back as live
     PVR_SOURCE_EPG_AS_LIVE = 1,
   } PVR_SOURCE;
+  ///@}
+  //----------------------------------------------------------------------------
+
+  //============================================================================
+  /// @defgroup cpp_kodi_addon_pvr_Defs_General_PVR_SETTING_READONLY_CONDITION enum PVR_SETTING_READONLY_CONDITION
+  /// @ingroup cpp_kodi_addon_pvr_Defs_General
+  /// @brief **Read-only conditions for settings**\n
+  /// To define read-only conditions for settings.
+  ///
+  ///@{
+  typedef enum PVR_SETTING_READONLY_CONDITION
+  {
+    /// @brief __0000 0000 0000 0000 0000 0000 0000 0000__ :\n Empty value.
+    PVR_SETTING_READONLY_CONDITION_NONE = 0,
+
+    /// @brief __0000 0000 0000 0000 0000 0000 0000 0001__ :\n Readonly, if associated timer is
+    /// disabled (PVR_TIMER_STATE_DISABLED. Applicable to timer settings only).
+    PVR_SETTING_READONLY_CONDITION_TIMER_DISABLED = (1 << 0),
+
+    /// @brief __0000 0000 0000 0000 0000 0000 0000 0010__ :\n Readonly, if associated timer is
+    /// scheduled (PVR_TIMER_STATE_SCHEDULED. Applicable to timer settings only).
+    PVR_SETTING_READONLY_CONDITION_TIMER_SCHEDULED = (1 << 1),
+
+    /// @brief __0000 0000 0000 0000 0000 0000 0000 0100__ :\n Readonly, if associated timer is
+    /// currently recording (PVR_TIMER_STATE_RECORDING. Applicable to timer settings only).
+    PVR_SETTING_READONLY_CONDITION_TIMER_RECORDING = (1 << 2),
+
+    /// @brief __0000 0000 0000 0000 0000 0000 0000 1000__ :\n Readonly, if associated timer is
+    /// currently recording (PVR_TIMER_STATE_COMPLETED. Applicable to timer settings only).
+    PVR_SETTING_READONLY_CONDITION_TIMER_COMPLETED = (1 << 3),
+
+  } PVR_SETTING_READONLY_CONDITION;
   ///@}
   //----------------------------------------------------------------------------
 
@@ -323,6 +356,41 @@ extern "C"
     unsigned int iRecordingsLifetimesSize;
     struct PVR_ATTRIBUTE_INT_VALUE* recordingsLifetimeValues;
   } PVR_ADDON_CAPABILITIES;
+
+  /*!
+   * @brief "C" Representation of an integer setting definition.
+   *
+   * Structure used to interface in "C" between Kodi and Addon.
+   *
+   * See @ref cpp_kodi_addon_pvr_Defs_PVRIntSettingDefinition "kodi::addon::PVRIntSettingDefinition"
+   * for description of values.
+   */
+  typedef struct PVR_INT_SETTING_DEFINITION
+  {
+    unsigned int iId;
+    const char* strName;
+    unsigned int iValuesSize;
+    struct PVR_ATTRIBUTE_INT_VALUE* values;
+    int iDefaultValue;
+    int iMinValue;
+    int iStep;
+    int iMaxValue;
+    uint64_t iReadonlyConditions;
+  } PVR_INT_SETTING_DEFINITION;
+
+  /*!
+   * @brief "C" Representation of a {unsigned int, int} key-value pair.
+   *
+   * Structure used to interface in "C" between Kodi and Addon.
+   *
+   * See @ref cpp_kodi_addon_pvr_Defs_PVRTypeIntValue "kodi::addon::PVRTypeIntValue" for description
+   * of values.
+   */
+  typedef struct PVR_INT_KEY_VALUE_PAIR
+  {
+    unsigned int iKey;
+    int iValue;
+  } PVR_INT_KEY_VALUE_PAIR;
 
 #ifdef __cplusplus
 }

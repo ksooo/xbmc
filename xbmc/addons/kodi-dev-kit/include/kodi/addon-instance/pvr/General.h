@@ -148,6 +148,308 @@ private:
 //------------------------------------------------------------------------------
 
 //==============================================================================
+/// @defgroup cpp_kodi_addon_pvr_Defs_PVRIntSettingDefinition class PVRIntSettingDefinition
+/// @ingroup cpp_kodi_addon_pvr_Defs_General
+/// @brief **PVR add-on integer setting definition**\n
+/// Representation of an integer setting definition.
+///
+/// ----------------------------------------------------------------------------
+///
+/// @copydetails cpp_kodi_addon_pvr_Defs_PVRIntSettingDefinition_Help
+///
+///@{
+class PVRIntSettingDefinition
+  : public DynamicCStructHdl<PVRIntSettingDefinition, PVR_INT_SETTING_DEFINITION>
+{
+  friend class CInstancePVRClient;
+
+public:
+  /*! \cond PRIVATE */
+  PVRIntSettingDefinition() { m_cStructure->iStep = 1; }
+  PVRIntSettingDefinition(const PVRIntSettingDefinition& type) : DynamicCStructHdl(type) {}
+  /*! \endcond */
+
+  /// @defgroup cpp_kodi_addon_pvr_Defs_General_PVRIntSettingDefinition_Help Value Help
+  /// @ingroup cpp_kodi_addon_pvr_Defs_General_PVRIntSettingDefinition
+  /// ----------------------------------------------------------------------------
+  ///
+  /// <b>The following table contains values that can be set with @ref cpp_kodi_addon_pvr_Defs_General_PVRIntSettingDefinition :</b>
+  /// | Name | Type | Set call | Get call | Usage
+  /// |------|------|----------|----------|-----------
+  /// | **Identifier** | `unsigned int` | @ref PVRIntSettingDefinition::SetId "SetId" | @ref PVRIntSettingDefinition::GetId "GetId" | *required to set*
+  /// | **Name** | `std::string` | @ref PVRIntSettingDefinition::SetName "SetName" | @ref PVRIntSettingDefinition::GetName "GetName" | *required to set*
+  /// | | | | | |
+  /// | **Values** | @ref cpp_kodi_addon_pvr_Defs_PVRTypeIntValue "PVRTypeIntValue" | @ref PVRIntSettingDefinition::SetValues "SetValues" | @ref PVRIntSettingDefinition:GetGetValues "GetValues" | *optional*
+  /// | **Default value** | `int`| @ref PVRIntSettingDefinition::SetDefaultValue "SetDefaultValue" | @ref PVRIntSettingDefinition::GetDefaultValue "GetDefaultValue" | *optional*
+  /// | **Min value** | `int`| @ref PVRIntSettingDefinition::SetMinValue "SetMinValue" | @ref PVRIntSettingDefinition::GetMinValue "GetMinValue" | *optional*
+  /// | **Step** | `int`| @ref PVRIntSettingDefinition::SetStep "SetStep" | @ref PVRIntSettingDefinition::GetStep "GetStep" | *optional*
+  /// | **Max value** | `int`| @ref PVRIntSettingDefinition::SetMaxValue "SetMaxValue" | @ref PVRIntSettingDefinition::GetMaxValue "GetMaxValue" | *optional*
+  /// | **Read-only conditions** | `unit64_t`| @ref PVRIntSettingDefinition::SetReadonlyConditions "SetReadonlyConditions" | @ref PVRIntSettingDefinition::GetReadonlyConditions "GetReadonlyConditions" | *optional*
+  ///
+
+  /// @addtogroup cpp_kodi_addon_pvr_Defs_PVRIntSettingDefinition
+  ///@{
+
+  /// @brief Class constructor with integrated values.
+  ///
+  /// @param[in] settingDefId Setting definition identification value
+  /// @param[in] settingDefName Setting definition name
+  /// @param[in] settingValues possible setting values
+  /// @param[in] defaultValue default setting value
+  /// @param[in] minValue minimim setting value
+  /// @param[in] step amount to change values from min to max
+  /// @param[in] maxValue maximum setting value
+  /// @param[in] readonlyConditions readonly conditions value
+  PVRIntSettingDefinition(unsigned int settingDefId,
+                          const std::string& settingDefName,
+                          const std::vector<PVRTypeIntValue>& settingValues,
+                          int defaultValue,
+                          int minValue,
+                          int step,
+                          int maxValue,
+                          uint64_t readonlyConditions)
+  {
+    SetId(settingDefId);
+    SetName(settingDefName);
+    SetValues(settingValues);
+    SetDefaultValue(defaultValue);
+    SetMinValue(minValue);
+    SetStep(step);
+    SetMaxValue(maxValue);
+    SetReadonlyConditions(readonlyConditions);
+  }
+
+  /// @brief **required**\n
+  /// This setting definition's identifier.
+  void SetId(unsigned int defId) { m_cStructure->iId = defId; }
+
+  /// @brief To get with @ref SetId changed values.
+  unsigned int GetId() const { return m_cStructure->iId; }
+
+  /// @brief **required**\n
+  /// A short localized string with the name of the setting.
+  void SetName(const std::string& name)
+  {
+    ReallocAndCopyString(&m_cStructure->strName, name.c_str());
+  }
+
+  /// @brief To get with @ref SetName changed values.
+  std::string GetName() const { return m_cStructure->strName ? m_cStructure->strName : ""; }
+
+  //----------------------------------------------------------------------------
+
+  /// @brief **optional**\n
+  /// value definitions.
+  ///
+  /// Array containing the possible settings values. If left blank, any int value is accepted.
+  ///
+  /// @param[in] values List of possible values
+  /// @param[in] defaultValue [opt] The default value in list, can also be
+  ///                               set by @ref SetDefaultValue()
+  ///
+  /// --------------------------------------------------------------------------
+  ///
+  /// @copydetails cpp_kodi_addon_pvr_Defs_PVRTypeIntValue_Help
+  void SetValues(const std::vector<PVRTypeIntValue>& values, int defaultValue = -1)
+  {
+    PVRTypeIntValue::ReallocAndCopyData(&m_cStructure->values, &m_cStructure->iValuesSize, values);
+    if (defaultValue != -1)
+      m_cStructure->iDefaultValue = defaultValue;
+  }
+
+  /// @brief To get with @ref SetValues changed values.
+  std::vector<PVRTypeIntValue> GetValues() const
+  {
+    std::vector<PVRTypeIntValue> ret;
+    for (unsigned int i = 0; i < m_cStructure->iValuesSize; ++i)
+      ret.emplace_back(m_cStructure->values[i].iValue, m_cStructure->values[i].strDescription);
+    return ret;
+  }
+
+  /// @brief **optional**\n
+  /// The default value for this setting.
+  void SetDefaultValue(int defaultValue) { m_cStructure->iDefaultValue = defaultValue; }
+
+  /// @brief To get with @ref SetDefaultValue changed values.
+  int GetDefaultValue() const { return m_cStructure->iDefaultValue; }
+
+  /// @brief **optional**\n
+  /// The minimum value for this setting.
+  void SetMinValue(int minValue) { m_cStructure->iMinValue = minValue; }
+
+  /// @brief To get with @ref SetMinValue changed values.
+  int GetMinValue() const { return m_cStructure->iMinValue; }
+
+  /// @brief **optional**\n
+  /// The amount for increasing the values for this setting from min to max.
+  void SetStep(int step) { m_cStructure->iStep = step; }
+
+  /// @brief To get with @ref SetSteps changed values.
+  int GetStep() const { return m_cStructure->iStep; }
+
+  /// @brief **optional**\n
+  /// The maximum value for this setting.
+  void SetMaxValue(int maxValue) { m_cStructure->iMaxValue = maxValue; }
+
+  /// @brief To get with @ref SetMaxValue changed values.
+  int GetMaxValue() const { return m_cStructure->iMaxValue; }
+
+  /// @brief **optional**\n
+  /// The read-only conditions value for this setting.
+  /// @ref cpp_kodi_addon_pvr_Defs_General_PVR_SETTING_READONLY_CONDITION "PVR_SETTING_READONLY_CONDITION_*" enum values
+  void SetReadonlyConditions(int conditions) { m_cStructure->iReadonlyConditions = conditions; }
+
+  /// @brief To get with @ref SetReadonlyConditions changed values.
+  uint64_t GetReadonlyConditions() const { return m_cStructure->iReadonlyConditions; }
+  ///@}
+
+  static PVR_INT_SETTING_DEFINITION** AllocAndCopyData(
+      const std::vector<PVRIntSettingDefinition>& source)
+  {
+    PVR_INT_SETTING_DEFINITION** settings = new PVR_INT_SETTING_DEFINITION* [source.size()] {};
+    for (unsigned int i = 0; i < source.size(); ++i)
+    {
+      settings[i] = new PVR_INT_SETTING_DEFINITION{};
+      settings[i]->iId = source[i].GetCStructure()->iId;
+      AllocResources(source[i].GetCStructure(),
+                     settings[i]); // handles strName, iValuesSize, values
+      settings[i]->iDefaultValue = source[i].GetCStructure()->iDefaultValue;
+      settings[i]->iMinValue = source[i].GetCStructure()->iMinValue;
+      settings[i]->iMaxValue = source[i].GetCStructure()->iMaxValue;
+      settings[i]->iReadonlyConditions = source[i].GetCStructure()->iReadonlyConditions;
+    }
+    return settings;
+  }
+
+  static PVR_INT_SETTING_DEFINITION** AllocAndCopyData(PVR_INT_SETTING_DEFINITION** source,
+                                                       unsigned int size)
+  {
+    PVR_INT_SETTING_DEFINITION** settings = new PVR_INT_SETTING_DEFINITION* [size] {};
+    for (unsigned int i = 0; i < size; ++i)
+    {
+      settings[i] = new PVR_INT_SETTING_DEFINITION{};
+      settings[i]->iId = source[i]->iId;
+      AllocResources(source[i], settings[i]); // handles strName, values, iValuesSize
+      settings[i]->iDefaultValue = source[i]->iDefaultValue;
+      settings[i]->iMinValue = source[i]->iMinValue;
+      settings[i]->iMaxValue = source[i]->iMaxValue;
+      settings[i]->iReadonlyConditions = source[i]->iReadonlyConditions;
+    }
+    return settings;
+  }
+
+  static void AllocResources(const PVR_INT_SETTING_DEFINITION* source,
+                             PVR_INT_SETTING_DEFINITION* target)
+  {
+    target->strName = AllocAndCopyString(source->strName);
+    target->values = PVRTypeIntValue::AllocAndCopyData(source->values, source->iValuesSize);
+    target->iValuesSize = source->iValuesSize;
+  }
+
+  static void FreeResources(PVR_INT_SETTING_DEFINITION* target)
+  {
+    FreeString(target->strName);
+    target->strName = nullptr;
+
+    PVRTypeIntValue::FreeResources(target->values, target->iValuesSize);
+    target->values = nullptr;
+    target->iValuesSize = 0;
+  }
+
+  static void FreeResources(PVR_INT_SETTING_DEFINITION** settings, unsigned int size)
+  {
+    for (unsigned int i = 0; i < size; ++i)
+    {
+      FreeResources(settings[i]);
+      delete settings[i];
+    }
+    delete[] settings;
+  }
+
+  static void ReallocAndCopyData(PVR_INT_SETTING_DEFINITION*** source,
+                                 unsigned int* size,
+                                 const std::vector<PVRIntSettingDefinition>& settings)
+  {
+    FreeResources(*source, *size);
+    *source = nullptr;
+    *size = settings.size();
+    if (*size)
+      *source = AllocAndCopyData(settings);
+  }
+
+private:
+  PVRIntSettingDefinition(const PVR_INT_SETTING_DEFINITION* type) : DynamicCStructHdl(type) {}
+  PVRIntSettingDefinition(PVR_INT_SETTING_DEFINITION* type) : DynamicCStructHdl(type) {}
+};
+///@}
+//------------------------------------------------------------------------------
+
+//==============================================================================
+/// @defgroup cpp_kodi_addon_pvr_Defs_General_PVRIntKeyValuePair class PVRIntKeyValuePair
+/// @ingroup cpp_kodi_addon_pvr_Defs_General
+/// @brief **Key-value pair of two ints**\n
+/// To hold a pair of two ints.
+///
+/// ----------------------------------------------------------------------------
+///
+/// @copydetails cpp_kodi_addon_pvr_Defs_General_PVRIntKeyValuePair_Help
+///
+///@{
+class PVRIntKeyValuePair : public CStructHdl<PVRIntKeyValuePair, PVR_INT_KEY_VALUE_PAIR>
+{
+  friend class CInstancePVRClient;
+
+public:
+  /*! \cond PRIVATE */
+  PVRIntKeyValuePair(const PVRIntKeyValuePair& pair) : CStructHdl(pair) {}
+  /*! \endcond */
+
+  /// @defgroup cpp_kodi_addon_pvr_Defs_General_PVRIntKeyValuePair_Help Value Help
+  /// @ingroup cpp_kodi_addon_pvr_Defs_General_PVRIntKeyValuePair
+  ///
+  /// <b>The following table contains values that can be set with @ref cpp_kodi_addon_pvr_Defs_General_PVRIntKeyValuePair :</b>
+  /// | Name | Type | Set call | Get call
+  /// |------|------|----------|----------
+  /// | **Key** | `unsigned int` | @ref PVRIntKeyValuePair::SetKey "SetKey" | @ref PVRIntKeyValuePair::GetKey "GetKey"
+  /// | **Value** | `int` | @ref PVRIntKeyValuePair::SetValue "SetValue" | @ref PVRIntKeyValuePair::GetValue "GetValue"
+
+  /// @addtogroup cpp_kodi_addon_pvr_Defs_General_PVRIntKeyValuePair
+  ///@{
+
+  /// @brief Default class constructor.
+  PVRIntKeyValuePair() = default;
+
+  /// @brief Class constructor with integrated value set.
+  ///
+  /// @param[in] key The key
+  /// @param[in] value The value
+  PVRIntKeyValuePair(unsigned int key, int value)
+  {
+    m_cStructure->iKey = key;
+    m_cStructure->iValue = value;
+  }
+
+  /// @brief To set with the key.
+  void SetKey(unsigned int key) { m_cStructure->iKey = key; }
+
+  /// @brief To get with the key.
+  unsigned GetKey() const { return m_cStructure->iKey; }
+
+  /// @brief To set with the value.
+  void SetValue(int value) { m_cStructure->iValue = value; }
+
+  /// @brief To get with the value.
+  int GetValue() const { return m_cStructure->iValue; }
+  ///@}
+
+private:
+  PVRIntKeyValuePair(const PVR_INT_KEY_VALUE_PAIR* pair) : CStructHdl(pair) {}
+  PVRIntKeyValuePair(PVR_INT_KEY_VALUE_PAIR* pair) : CStructHdl(pair) {}
+};
+///@}
+//------------------------------------------------------------------------------
+
+//==============================================================================
 /// @defgroup cpp_kodi_addon_pvr_Defs_PVRCapabilities class PVRCapabilities
 /// @ingroup cpp_kodi_addon_pvr_Defs_General
 /// @brief **PVR add-on capabilities**\n
