@@ -9,6 +9,7 @@
 #include "PVRTimerInfoTag.h"
 
 #include "ServiceBroker.h"
+#include "addons/AddonVersion.h"
 #include "guilib/LocalizeStrings.h"
 #include "pvr/PVRDatabase.h"
 #include "pvr/PVRManager.h"
@@ -89,7 +90,8 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(bool bRadio /* = false */)
 
 CPVRTimerInfoTag::CPVRTimerInfoTag(const PVR_TIMER& timer,
                                    const std::shared_ptr<CPVRChannel>& channel,
-                                   unsigned int iClientId)
+                                   unsigned int iClientId,
+                                   const ADDON::CAddonVersion& addonApiVersion)
   : m_strTitle(timer.strTitle ? timer.strTitle : ""),
     m_strEpgSearchString(timer.strEpgSearchString ? timer.strEpgSearchString : ""),
     m_bFullTextEpgSearch(timer.bFullTextEpgSearch),
@@ -132,6 +134,16 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(const PVR_TIMER& timer,
 
   if (m_iClientIndex == PVR_TIMER_NO_CLIENT_INDEX)
     CLog::LogF(LOGERROR, "Invalid client index supplied by client {} (must be > 0)!", m_iClientId);
+
+  //! @todo version check can be removed with next incompatible API bump
+  static const ADDON::CAddonVersion customIntSettingsMinApiVersion{"9.1.0"};
+  if (addonApiVersion >= customIntSettingsMinApiVersion)
+  {
+    for (unsigned int i = 0; i < timer.iCustomIntPropsSize; ++i)
+    {
+      m_customIntProps.insert({timer.customIntProps[i].iKey, timer.customIntProps[i].iValue});
+    }
+  }
 
   const std::shared_ptr<const CPVRClient> client =
       CServiceBroker::GetPVRManager().GetClient(m_iClientId);
@@ -221,7 +233,8 @@ bool CPVRTimerInfoTag::operator==(const CPVRTimerInfoTag& right) const
           m_iRadioChildTimersActive == right.m_iRadioChildTimersActive &&
           m_iRadioChildTimersConflictNOK == right.m_iRadioChildTimersConflictNOK &&
           m_iRadioChildTimersRecording == right.m_iRadioChildTimersRecording &&
-          m_iRadioChildTimersErrors == right.m_iRadioChildTimersErrors);
+          m_iRadioChildTimersErrors == right.m_iRadioChildTimersErrors &&
+          m_customIntProps == right.m_customIntProps);
 }
 
 bool CPVRTimerInfoTag::operator!=(const CPVRTimerInfoTag& right) const
@@ -605,6 +618,7 @@ bool CPVRTimerInfoTag::UpdateEntry(const std::shared_ptr<const CPVRTimerInfoTag>
   m_strSummary = tag->m_strSummary;
   m_channel = tag->m_channel;
   m_bProbedEpgTag = tag->m_bProbedEpgTag;
+  m_customIntProps = tag->m_customIntProps;
 
   m_iTVChildTimersActive = tag->m_iTVChildTimersActive;
   m_iTVChildTimersConflictNOK = tag->m_iTVChildTimersConflictNOK;

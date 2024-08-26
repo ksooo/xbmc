@@ -11,6 +11,7 @@
 #include "XBDateTime.h"
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_channels.h" // PVR_CHANNEL_INVALID_UID
 #include "pvr/PVRConstants.h" // PVR_CLIENT_INVALID_UID
+#include "pvr/timers/PVRTimerInfoTag.h"
 #include "settings/SettingConditions.h"
 #include "settings/dialogs/GUIDialogSettingsManualBase.h"
 #include "settings/lib/SettingDependency.h"
@@ -26,8 +27,8 @@ struct IntegerSettingOption;
 
 namespace PVR
 {
-class CPVRTimerInfoTag;
 class CPVRTimerType;
+class CPVRTimerIntSettingDefinition;
 
 class CGUIDialogPVRTimerSettings : public CGUIDialogSettingsManualBase
 {
@@ -46,6 +47,7 @@ protected:
 
   // specialization of CGUIDialogSettingsBase
   bool AllowResettingSettings() const override { return false; }
+  std::string GetSettingsLabel(const std::shared_ptr<ISetting>& setting) override;
   bool Save() override;
   void SetupView() override;
 
@@ -55,6 +57,7 @@ protected:
 private:
   bool Validate();
   void InitializeTypesList();
+  void InitializeCustomIntSettingDefinitionsList();
   void InitializeChannelsList();
   void SetButtonLabels();
 
@@ -104,6 +107,10 @@ private:
                                std::vector<IntegerSettingOption>& list,
                                int& current,
                                void* data);
+  static void CustomIntSettingDefinitionsFiller(const std::shared_ptr<const CSetting>& setting,
+                                                std::vector<IntegerSettingOption>& list,
+                                                int& current,
+                                                void* data);
 
   static std::string WeekdaysValueFormatter(const std::shared_ptr<const CSetting>& setting);
 
@@ -171,6 +178,10 @@ private:
   std::string m_timerStartTimeStr;
   std::string m_timerEndTimeStr;
 
+  using CustomIntSettingDefinitionsMap =
+      std::map<std::string, CPVRTimerIntSettingDefinition>; // setting id, setting def
+  CustomIntSettingDefinitionsMap m_customIntSettingDefs;
+
   std::shared_ptr<CPVRTimerType> m_timerType;
   bool m_bIsRadio = false;
   bool m_bIsNewTimer = true;
@@ -193,5 +204,6 @@ private:
   int m_iMaxRecordings = 0;
   std::string m_strDirectory;
   unsigned int m_iRecordingGroup = 0;
+  CPVRTimerInfoTag::CustomPropsMap m_customIntProps;
 };
 } // namespace PVR

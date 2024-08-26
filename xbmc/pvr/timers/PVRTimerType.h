@@ -11,6 +11,7 @@
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_timers.h"
 #include "pvr/PVRConstants.h" // PVR_CLIENT_INVALID_UID
 #include "pvr/settings/PVRIntSettingValues.h"
+#include "pvr/settings/PVRTimerIntSettingDefinition.h"
 
 #include <memory>
 #include <string>
@@ -461,6 +462,15 @@ public:
    */
   int GetRecordingGroupDefault() const { return m_recordingGroupValues.GetDefaultValue(); }
 
+  /*!
+   * @brief Get custom integer setting definitions for this type.
+   * @return The list of settings or an empty list if none present.
+   */
+  const std::vector<CPVRTimerIntSettingDefinition>& GetCustomIntSettingDefinitions() const
+  {
+    return m_customIntSettingDefs;
+  }
+
 private:
   void InitDescription();
   void InitAttributeValues(const PVR_TIMER_TYPE& type);
@@ -469,6 +479,7 @@ private:
   void InitMaxRecordingsValues(const PVR_TIMER_TYPE& type);
   void InitPreventDuplicateEpisodesValues(const PVR_TIMER_TYPE& type);
   void InitRecordingGroupValues(const PVR_TIMER_TYPE& type);
+  void InitCustomIntSettingDefinitions(const PVR_TIMER_TYPE& type);
 
   int m_iClientId = PVR_CLIENT_INVALID_UID;
   unsigned int m_iTypeId;
@@ -479,5 +490,6 @@ private:
   CPVRIntSettingValues m_maxRecordingsValues{0};
   CPVRIntSettingValues m_preventDupEpisodesValues{DEFAULT_RECORDING_DUPLICATEHANDLING};
   CPVRIntSettingValues m_recordingGroupValues{0};
+  std::vector<CPVRTimerIntSettingDefinition> m_customIntSettingDefs;
 };
 } // namespace PVR

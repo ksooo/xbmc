@@ -66,6 +66,8 @@ using namespace KODI::MESSAGING;
 #define SETTING_TMR_DIR "timer.directory"
 #define SETTING_TMR_REC_GROUP "timer.recgroup"
 
+#define SETTING_TMR_CUSTOM_INT "timer.customint"
+
 #define TYPE_DEP_VISIBI_COND_ID_POSTFIX "visibi.typedep"
 #define TYPE_DEP_ENABLE_COND_ID_POSTFIX "enable.typedep"
 #define CHANNEL_DEP_VISIBI_COND_ID_POSTFIX "visibi.channeldep"
@@ -145,8 +147,11 @@ void CGUIDialogPVRTimerSettings::SetTimer(const std::shared_ptr<CPVRTimerInfoTag
 
   m_iRecordingGroup = m_timerInfoTag->m_iRecordingGroup;
 
+  m_customIntProps = m_timerInfoTag->m_customIntProps;
+
   InitializeChannelsList();
   InitializeTypesList();
+  InitializeCustomIntSettingDefinitionsList();
 
   // Channel
   m_channel = ChannelDescriptor();
@@ -400,6 +405,34 @@ void CGUIDialogPVRTimerSettings::InitializeSettings()
                     RecordingGroupFiller, 811);
   AddTypeDependentVisibilityCondition(setting, SETTING_TMR_REC_GROUP);
   AddTypeDependentEnableCondition(setting, SETTING_TMR_REC_GROUP);
+
+  // Add-on supplied custom int settings
+  for (const auto& settingDef : m_customIntSettingDefs)
+  {
+    setting.reset();
+
+    const auto& def{settingDef.second};
+    const auto it{m_customIntProps.find(def.GetId())};
+    int intValue{0};
+    if (it != m_customIntProps.cend())
+      intValue = (*it).second.asInteger32();
+
+    const std::string settingName{settingDef.first};
+    if (!def.GetValues().empty())
+    {
+      // List
+      setting = AddList(group, settingName, 16028, SettingLevel::Basic, intValue,
+                        CustomIntSettingDefinitionsFiller, 16028);
+    }
+    else
+    {
+      // Edit
+      setting = AddEdit(group, settingName, 16028, SettingLevel::Basic, intValue, def.GetMinValue(),
+                        def.GetStepValue(), def.GetMaxValue());
+    }
+    AddTypeDependentVisibilityCondition(setting, settingName);
+    AddTypeDependentEnableCondition(setting, settingName);
+  }
 }
 
 int CGUIDialogPVRTimerSettings::GetWeekdaysFromSetting(const SettingConstPtr& setting)
@@ -559,6 +592,21 @@ void CGUIDialogPVRTimerSettings::OnSettingChanged(const std::shared_ptr<const CS
   {
     m_iRecordingGroup = std::static_pointer_cast<const CSettingInt>(setting)->GetValue();
   }
+  else if (settingId.starts_with(SETTING_TMR_CUSTOM_INT))
+  {
+    const auto it{m_customIntSettingDefs.find(settingId)};
+    if (it != m_customIntSettingDefs.cend())
+    {
+      const unsigned int intSettingId{(*it).second.GetId()};
+      CVariant& intProp{m_customIntProps[intSettingId]};
+      const int newValue{std::static_pointer_cast<const CSettingInt>(setting)->GetValue()};
+      intProp = newValue;
+    }
+    else
+    {
+      CLog::LogF(LOGERROR, "Custom int setting not found");
+    }
+  }
 }
 
 void CGUIDialogPVRTimerSettings::OnSettingAction(const std::shared_ptr<const CSetting>& setting)
@@ -627,6 +675,16 @@ bool CGUIDialogPVRTimerSettings::Validate()
   }
 
   return true;
+}
+
+std::string CGUIDialogPVRTimerSettings::GetSettingsLabel(const std::shared_ptr<ISetting>& setting)
+{
+  // Special handling for add-on supplied custom integer settings.
+  const auto it = m_customIntSettingDefs.find(setting->GetId());
+  if (it != m_customIntSettingDefs.cend())
+    return (*it).second.GetName();
+
+  return CGUIDialogSettingsManualBase::GetSettingsLabel(setting);
 }
 
 bool CGUIDialogPVRTimerSettings::Save()
@@ -739,6 +797,9 @@ bool CGUIDialogPVRTimerSettings::Save()
 
   // Recording group
   m_timerInfoTag->m_iRecordingGroup = m_iRecordingGroup;
+
+  // Custom int properties
+  m_timerInfoTag->m_customIntProps = m_customIntProps;
 
   // Set the timer's title to the channel name if it's empty or 'New Timer'
   if (m_strTitle.empty() || m_strTitle == g_localizeStrings.Get(19056))
@@ -877,6 +938,24 @@ void CGUIDialogPVRTimerSettings::InitializeTypesList()
 
   if (!bFoundThisType)
     m_typeEntries.insert(std::make_pair(idx++, m_timerType));
+}
+
+void CGUIDialogPVRTimerSettings::InitializeCustomIntSettingDefinitionsList()
+{
+  m_customIntSettingDefs.clear();
+
+  unsigned int idx{0};
+  for (const auto& type : m_typeEntries)
+  {
+    const std::vector<CPVRTimerIntSettingDefinition>& intSettingDefs{
+        type.second->GetCustomIntSettingDefinitions()};
+    for (const auto& intSettingDef : intSettingDefs)
+    {
+      const std::string settingId{StringUtils::Format("{}-{}", SETTING_TMR_CUSTOM_INT, idx)};
+      m_customIntSettingDefs.insert({settingId, intSettingDef});
+      ++idx;
+    }
+  }
 }
 
 void CGUIDialogPVRTimerSettings::InitializeChannelsList()
@@ -1303,6 +1382,38 @@ void CGUIDialogPVRTimerSettings::MarginTimeFiller(const SettingConstPtr& setting
     CLog::LogF(LOGERROR, "No dialog");
 }
 
+void CGUIDialogPVRTimerSettings::CustomIntSettingDefinitionsFiller(
+    const std::shared_ptr<const CSetting>& setting,
+    std::vector<IntegerSettingOption>& list,
+    int& current,
+    void* data)
+{
+  CGUIDialogPVRTimerSettings* pThis = static_cast<CGUIDialogPVRTimerSettings*>(data);
+  if (pThis)
+  {
+    list.clear();
+
+    const auto it = pThis->m_customIntSettingDefs.find(setting->GetId());
+    if (it != pThis->m_customIntSettingDefs.cend())
+    {
+      const std::vector<SettingIntValue>& values{(*it).second.GetValues()};
+      std::transform(values.cbegin(), values.cend(), std::back_inserter(list), [](const auto& value)
+                     { return IntegerSettingOption(value.first, value.second); });
+
+      const unsigned int intSettingId{(*it).second.GetId()};
+      const auto it2{pThis->m_customIntProps.find(intSettingId)};
+      if (it2 != pThis->m_customIntProps.cend())
+        current = (*it2).second.asInteger32();
+      else
+        current = (*it).second.GetDefaultValue();
+    }
+    else
+      CLog::LogF(LOGERROR, "No setting");
+  }
+  else
+    CLog::LogF(LOGERROR, "No dialog");
+}
+
 std::string CGUIDialogPVRTimerSettings::WeekdaysValueFormatter(const SettingConstPtr& setting)
 {
   return CPVRTimerInfoTag::GetWeekdaysString(GetWeekdaysFromSetting(setting), true, true);
@@ -1368,6 +1479,16 @@ bool CGUIDialogPVRTimerSettings::TypeReadOnlyCondition(const std::string& condit
         cond == SETTING_TMR_START_DAY || cond == SETTING_TMR_BEGIN || SETTING_TMR_PRIORITY ||
         cond == SETTING_TMR_DIR)
       return false;
+  }
+
+  /* Handle add-on supplied custom integer settings. */
+  if (cond.starts_with(SETTING_TMR_CUSTOM_INT))
+  {
+    const auto it{pThis->m_customIntSettingDefs.find(cond)};
+    if (it != pThis->m_customIntSettingDefs.cend())
+      return !(*it).second.IsReadonlyForTimerState(pThis->m_timerInfoTag->State());
+    else
+      CLog::LogF(LOGERROR, "Unknown custom int setting");
   }
 
   // Let the PVR client decide...
@@ -1456,6 +1577,19 @@ bool CGUIDialogPVRTimerSettings::TypeSupportsCondition(const std::string& condit
       return entry->second->SupportsRecordingFolders();
     else if (cond == SETTING_TMR_REC_GROUP)
       return entry->second->SupportsRecordingGroup();
+    else if (cond.starts_with(SETTING_TMR_CUSTOM_INT))
+    {
+      const auto it{pThis->m_customIntSettingDefs.find(cond)};
+      if (it != pThis->m_customIntSettingDefs.cend())
+      {
+        const int clientId{(*it).second.GetClientId()};
+        const unsigned int timerTypeId{(*it).second.GetTimerTypeId()};
+        return entry->second->GetClientId() == clientId &&
+               entry->second->GetTypeId() == timerTypeId;
+      }
+      else
+        CLog::LogF(LOGERROR, "Unknown custom int setting");
+    }
     else
       CLog::LogF(LOGERROR, "Unknown condition");
   }

@@ -162,6 +162,7 @@ CPVRTimerType::CPVRTimerType(const PVR_TIMER_TYPE& type, int iClientId)
 {
   InitDescription();
   InitAttributeValues(type);
+  InitCustomIntSettingDefinitions(type);
 }
 
 CPVRTimerType::CPVRTimerType(unsigned int iTypeId,
@@ -182,7 +183,8 @@ bool CPVRTimerType::operator==(const CPVRTimerType& right) const
           m_lifetimeValues == right.m_lifetimeValues &&
           m_maxRecordingsValues == right.m_maxRecordingsValues &&
           m_preventDupEpisodesValues == right.m_preventDupEpisodesValues &&
-          m_recordingGroupValues == right.m_recordingGroupValues);
+          m_recordingGroupValues == right.m_recordingGroupValues &&
+          m_customIntSettingDefs == right.m_customIntSettingDefs);
 }
 
 bool CPVRTimerType::operator!=(const CPVRTimerType& right) const
@@ -201,6 +203,7 @@ void CPVRTimerType::Update(const CPVRTimerType& type)
   m_maxRecordingsValues = type.m_maxRecordingsValues;
   m_preventDupEpisodesValues = type.m_preventDupEpisodesValues;
   m_recordingGroupValues = type.m_recordingGroupValues;
+  m_customIntSettingDefs = type.m_customIntSettingDefs;
 }
 
 void CPVRTimerType::InitDescription()
@@ -315,4 +318,10 @@ void CPVRTimerType::InitRecordingGroupValues(const PVR_TIMER_TYPE& type)
 {
   m_recordingGroupValues = {type.recordingGroup, type.iRecordingGroupSize,
                             type.iRecordingGroupDefault, 811 /* Recording group */};
+}
+
+void CPVRTimerType::InitCustomIntSettingDefinitions(const PVR_TIMER_TYPE& type)
+{
+  m_customIntSettingDefs = CPVRTimerIntSettingDefinition::CreateSettingDefinitionsList(
+      m_iClientId, m_iTypeId, type.customIntSettingDefs, type.iCustomIntSettingDefsSize);
 }

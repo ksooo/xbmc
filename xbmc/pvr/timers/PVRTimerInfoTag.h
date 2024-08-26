@@ -15,8 +15,16 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
+
+class CVariant;
 
 struct PVR_TIMER;
+
+namespace ADDON
+{
+class CAddonVersion;
+}
 
 namespace PVR
 {
@@ -40,7 +48,8 @@ public:
   explicit CPVRTimerInfoTag(bool bRadio = false);
   CPVRTimerInfoTag(const PVR_TIMER& timer,
                    const std::shared_ptr<CPVRChannel>& channel,
-                   unsigned int iClientId);
+                   unsigned int iClientId,
+                   const ADDON::CAddonVersion& addonApiVersion);
 
   bool operator==(const CPVRTimerInfoTag& right) const;
   bool operator!=(const CPVRTimerInfoTag& right) const;
@@ -514,6 +523,14 @@ public:
    */
   int RecordingGroup() const { return m_iRecordingGroup; }
 
+  using CustomPropsMap = std::unordered_map<unsigned int, CVariant>; // prop id, value
+
+  /*!
+   * @brief Get custom integer properties for this tag.
+   * @return The list of properties or an empty list if none present.
+   */
+  const CustomPropsMap& GetCustomIntProperties() const { return m_customIntProps; }
+
   /*!
    * @brief Get the UID of the epg event associated with this timer tag, if any.
    * @return The UID or EPG_TAG_INVALID_UID.
@@ -651,6 +668,8 @@ private:
   mutable unsigned int
       m_iEpgUid; /*!< id of epg event associated with this timer, EPG_TAG_INVALID_UID if none. */
   std::string m_strSeriesLink; /*!< series link */
+  CustomPropsMap
+      m_customIntProps; /*!< the map with custom int properties supplied by the client. */
 
   CDateTime m_StartTime; /*!< start time */
   CDateTime m_StopTime; /*!< stop time */

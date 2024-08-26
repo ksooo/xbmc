@@ -10,6 +10,7 @@
 
 #include "ServiceBroker.h"
 #include "addons/AddonManager.h"
+#include "addons/AddonVersion.h"
 #include "addons/binary-addons/AddonDll.h"
 #include "cores/EdlEdit.h"
 #include "cores/VideoPlayer/DVDDemuxers/DVDDemuxUtils.h"
@@ -254,6 +255,21 @@ public:
     iGenreType = epgTag ? epgTag->GenreType() : 0;
     iGenreSubType = epgTag ? epgTag->GenreSubType() : 0;
     strSeriesLink = m_seriesLink.c_str();
+
+    const auto& intProps{timer.GetCustomIntProperties()};
+    iCustomIntPropsSize = static_cast<unsigned int>(intProps.size());
+    if (iCustomIntPropsSize)
+    {
+      m_customIntProps = std::make_unique<PVR_INT_KEY_VALUE_PAIR[]>(iCustomIntPropsSize);
+      int idx{0};
+      for (const auto& entry : intProps)
+      {
+        m_customIntProps[idx].iKey = entry.first;
+        m_customIntProps[idx].iValue = entry.second.asInteger32();
+        ++idx;
+      }
+      customIntProps = m_customIntProps.get();
+    }
   }
   virtual ~CAddonTimer() = default;
 
@@ -263,6 +279,7 @@ private:
   const std::string m_directory;
   const std::string m_summary;
   const std::string m_seriesLink;
+  std::unique_ptr<PVR_INT_KEY_VALUE_PAIR[]> m_customIntProps;
 };
 
 class CAddonEpgTag : public EPG_TAG
@@ -2259,7 +2276,9 @@ void CPVRClient::cb_transfer_timer_entry(void* kodiInstance,
 
                         // transfer this entry to the timers container
                         const std::shared_ptr<CPVRTimerInfoTag> transferTimer =
-                            std::make_shared<CPVRTimerInfoTag>(*timer, channel, client->GetID());
+                            std::make_shared<CPVRTimerInfoTag>(
+                                *timer, channel, client->GetID(),
+                                client->Addon()->GetTypeVersionDll(ADDON_INSTANCE_PVR));
                         CPVRTimersContainer* timers =
                             static_cast<CPVRTimersContainer*>(handle->dataAddress);
                         timers->UpdateFromClient(transferTimer);
