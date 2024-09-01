@@ -88,6 +88,7 @@ public:
   /// | **Genre type** | `int` | @ref PVRTimer::SetGenreType "SetGenreType" | @ref PVRTimer::GetGenreType "GetGenreType" | *optional*
   /// | **Genre sub type** | `int` | @ref PVRTimer::SetGenreSubType "SetGenreSubType" | @ref PVRTimer::GetGenreSubType "GetGenreSubType" | *optional*
   /// | **Series link** | `std::string` | @ref PVRTimer::SetSeriesLink "SetSeriesLink" | @ref PVRTimer::GetSeriesLink "GetSeriesLink" | *optional*
+  /// | **Custom properties** | @ref cpp_kodi_addon_pvr_Defs_PVRSettingKeyValuePair "PVRSettingKeyValuePair" | @ref PVRTimer::SetCustomProperties "SetCustomProperties" | @ref PVRTimer::GetCustomProperties "GetCustomProperties" | *optional*
 
   /// @addtogroup cpp_kodi_addon_pvr_Defs_Timer_PVRTimer
   ///@{
@@ -465,39 +466,31 @@ public:
   //----------------------------------------------------------------------------
 
   /// @brief **optional**\n
-  /// Array containing the custom integer properties.
+  /// Array containing the custom properties.
   ///
-  /// @param[in] intProperties List of integer properties.
+  /// @param[in] properties List of properties.
   ///
   /// --------------------------------------------------------------------------
   ///
-  /// @copydetails cpp_kodi_addon_pvr_Defs_General_PVRIntKeyValuePair_Help
-  void SetCustomIntProperties(const std::vector<PVRIntKeyValuePair>& intProperties)
+  /// @copydetails cpp_kodi_addon_pvr_Defs_General_PVRSettingKeyValuePair_Help
+  void SetCustomProperties(const std::vector<PVRSettingKeyValuePair>& properties)
   {
-    if (m_cStructure->iCustomIntPropsSize)
-    {
-      delete[] m_cStructure->customIntProps;
-    }
-    m_cStructure->customIntProps = new PVR_INT_KEY_VALUE_PAIR[intProperties.size()]{};
-    m_cStructure->iCustomIntPropsSize = intProperties.size();
-    for (unsigned int i = 0; i < intProperties.size(); ++i)
-    {
-      m_cStructure->customIntProps[i].iKey = intProperties[i].GetCStructure()->iKey;
-      m_cStructure->customIntProps[i].iValue = intProperties[i].GetCStructure()->iValue;
-    }
+    PVRSettingKeyValuePair::ReallocAndCopyData(&m_cStructure->customProps,
+                                               &m_cStructure->iCustomPropsSize, properties);
   }
 
-  /// @brief To get with @ref SetCustomIntProperties changed values
-  std::vector<PVRIntKeyValuePair> GetCustomIntProperties() const
+  /// @brief To get with @ref SetCustomProperties changed values
+  std::vector<PVRSettingKeyValuePair> GetCustomProperties() const
   {
-    std::vector<PVRIntKeyValuePair> ret;
-    if (m_cStructure->iCustomIntPropsSize)
+    std::vector<PVRSettingKeyValuePair> ret;
+    if (m_cStructure->iCustomPropsSize)
     {
-      ret.reserve(m_cStructure->iCustomIntPropsSize);
-      for (unsigned int i = 0; i < m_cStructure->iCustomIntPropsSize; ++i)
+      ret.reserve(m_cStructure->iCustomPropsSize);
+      for (unsigned int i = 0; i < m_cStructure->iCustomPropsSize; ++i)
       {
-        ret.emplace_back(m_cStructure->customIntProps[i].iKey,
-                         m_cStructure->customIntProps[i].iValue);
+        ret.emplace_back(m_cStructure->customProps[i].iKey, m_cStructure->customProps[i].eType,
+                         m_cStructure->customProps[i].iValue,
+                         m_cStructure->customProps[i].strValue);
       }
     }
     return ret;
@@ -512,13 +505,9 @@ public:
     target->strSummary = AllocAndCopyString(source->strSummary);
     target->strSeriesLink = AllocAndCopyString(source->strSeriesLink);
 
-    target->customIntProps = new PVR_INT_KEY_VALUE_PAIR[source->iCustomIntPropsSize]{};
-    target->iCustomIntPropsSize = source->iCustomIntPropsSize;
-    for (unsigned int i = 0; i < source->iCustomIntPropsSize; ++i)
-    {
-      target->customIntProps[i].iKey = source->customIntProps[i].iKey;
-      target->customIntProps[i].iValue = source->customIntProps[i].iValue;
-    }
+    target->customProps =
+        PVRSettingKeyValuePair::AllocAndCopyData(source->customProps, source->iCustomPropsSize);
+    target->iCustomPropsSize = source->iCustomPropsSize;
   }
 
   static void FreeResources(PVR_TIMER* target)
@@ -529,9 +518,9 @@ public:
     FreeString(target->strSummary);
     FreeString(target->strSeriesLink);
 
-    delete[] target->customIntProps;
-    target->customIntProps = nullptr;
-    target->iCustomIntPropsSize = 0;
+    PVRSettingKeyValuePair::FreeResources(target->customProps, target->iCustomPropsSize);
+    target->customProps = nullptr;
+    target->iCustomPropsSize = 0;
   }
 
 private:
@@ -637,7 +626,7 @@ public:
   /// | **Max recordings selection** | @ref cpp_kodi_addon_pvr_Defs_PVRTypeIntValue "PVRTypeIntValue" | @ref PVRTimerType::SetMaxRecordings "SetMaxRecordings" | @ref PVRTimerType::GetMaxRecordings "GetMaxRecordings" | *optional*
   /// | **Max recordings default** | `int`| @ref PVRTimerType::SetMaxRecordingsDefault "SetMaxRecordingsDefault" | @ref PVRTimerType::GetMaxRecordingsDefault "GetMaxRecordingsDefault" | *optional*
   /// | | | | | |
-  /// | **Custom integer setting definitions**|  @ref cpp_kodi_addon_pvr_Defs_PVRIntSettingDefinition "PVRIntSettingDefinition" | @ref PVRTimerType::SetCustomIntSettingDefinitions "SetCustomIntSettingDefinitions" | @ref PVRTimerType::GetCustomIntSettingDefinitions "GetCustomIntSettingDefinitions" | *optional*
+  /// | **Custom setting definitions**|  @ref cpp_kodi_addon_pvr_Defs_PVRSettingDefinition "PVRSettingDefinition" | @ref PVRTimerType::SetCustomSettingDefinitions "SetCustomSettingDefinitions" | @ref PVRTimerType::GetCustomSettingDefinitions "GetCustomSettingDefinitions" | *optional*
   ///
 
   /// @addtogroup cpp_kodi_addon_pvr_Defs_Timer_PVRTimerType
@@ -925,37 +914,62 @@ public:
   /// --------------------------------------------------------------------------
   ///
   /// @copydetails cpp_kodi_addon_pvr_Defs_General_PVRIntSettingDefinition_Help
-  void SetCustomIntSettingDefinitions(const std::vector<PVRIntSettingDefinition>& defs)
+  void SetCustomSettingDefinitions(const std::vector<PVRSettingDefinition>& defs)
   {
-    PVRIntSettingDefinition::ReallocAndCopyData(&m_cStructure->customIntSettingDefs,
-                                                &m_cStructure->iCustomIntSettingDefsSize, defs);
+    PVRSettingDefinition::ReallocAndCopyData(&m_cStructure->customSettingDefs,
+                                             &m_cStructure->iCustomSettingDefsSize, defs);
   }
 
-  /// @brief To get with @ref SetCustomIntSettingDefinitions changed values
-  std::vector<PVRIntSettingDefinition> GetCustomIntSettingDefinitions() const
+  /// @brief To get with @ref SetCustomSettingDefinitions changed values
+  std::vector<PVRSettingDefinition> GetCustomSettingDefinitions() const
   {
-    std::vector<PVRIntSettingDefinition> ret;
-    if (m_cStructure->iCustomIntSettingDefsSize)
+    std::vector<PVRSettingDefinition> ret;
+    if (m_cStructure->iCustomSettingDefsSize)
     {
-      ret.reserve(m_cStructure->iCustomIntSettingDefsSize);
-      for (unsigned int i = 0; i < m_cStructure->iCustomIntSettingDefsSize; ++i)
+      ret.reserve(m_cStructure->iCustomSettingDefsSize);
+      for (unsigned int i = 0; i < m_cStructure->iCustomSettingDefsSize; ++i)
       {
-        const PVR_INT_SETTING_DEFINITION* settingDef{m_cStructure->customIntSettingDefs[i]};
+        const PVR_SETTING_DEFINITION* def{m_cStructure->customSettingDefs[i]};
 
-        std::vector<PVRTypeIntValue> intValues;
-        if (settingDef->iValuesSize)
+        PVRIntSettingDefinition intDef;
+        if (def->intSettingDefinition)
         {
-          intValues.reserve(settingDef->iValuesSize);
-          for (unsigned int j = 0; j < settingDef->iValuesSize; ++j)
+          const PVR_INT_SETTING_DEFINITION* intSettingDef{def->intSettingDefinition};
+
+          std::vector<PVRTypeIntValue> intValues;
+          if (intSettingDef->iValuesSize)
           {
-            intValues.emplace_back(settingDef->values[j].iValue,
-                                   settingDef->values[j].strDescription);
+            intValues.reserve(intSettingDef->iValuesSize);
+            for (unsigned int j = 0; j < intSettingDef->iValuesSize; ++j)
+            {
+              intValues.emplace_back(intSettingDef->values[j].iValue,
+                                     intSettingDef->values[j].strDescription);
+            }
           }
+          intDef = {intValues, intSettingDef->iDefaultValue, intSettingDef->iMinValue,
+                    intSettingDef->iStep, intSettingDef->iMaxValue};
         }
 
-        ret.emplace_back(settingDef->iId, settingDef->strName ? settingDef->strName : "", intValues,
-                         settingDef->iDefaultValue, settingDef->iMinValue, settingDef->iStep,
-                         settingDef->iMaxValue, settingDef->iReadonlyConditions);
+        PVRStringSettingDefinition stringDef;
+        if (def->stringSettingDefinition)
+        {
+          const PVR_STRING_SETTING_DEFINITION* stringSettingDef{def->stringSettingDefinition};
+
+          std::vector<PVRTypeStringValue> stringValues;
+          if (stringSettingDef->iValuesSize)
+          {
+            stringValues.reserve(stringSettingDef->iValuesSize);
+            for (unsigned int j = 0; j < stringSettingDef->iValuesSize; ++j)
+            {
+              stringValues.emplace_back(stringSettingDef->values[j].strValue,
+                                        stringSettingDef->values[j].strDescription);
+            }
+          }
+          stringDef = {stringValues, stringSettingDef->strDefaultValue};
+        }
+
+        ret.emplace_back(def->iId, def->strName, def->eType, def->iReadonlyConditions, intDef,
+                         stringDef);
       }
     }
     return ret;
@@ -996,10 +1010,10 @@ public:
           PVRTypeIntValue::AllocAndCopyData(source->maxRecordings, source->iMaxRecordingsSize);
     }
 
-    if (target->iCustomIntSettingDefsSize)
+    if (target->iCustomSettingDefsSize)
     {
-      target->customIntSettingDefs = PVRIntSettingDefinition::AllocAndCopyData(
-          source->customIntSettingDefs, source->iCustomIntSettingDefsSize);
+      target->customSettingDefs = PVRSettingDefinition::AllocAndCopyData(
+          source->customSettingDefs, source->iCustomSettingDefsSize);
     }
   }
 
@@ -1029,10 +1043,9 @@ public:
     target->maxRecordings = nullptr;
     target->iMaxRecordingsSize = 0;
 
-    PVRIntSettingDefinition::FreeResources(target->customIntSettingDefs,
-                                           target->iCustomIntSettingDefsSize);
-    target->customIntSettingDefs = nullptr;
-    target->iCustomIntSettingDefsSize = 0;
+    PVRSettingDefinition::FreeResources(target->customSettingDefs, target->iCustomSettingDefsSize);
+    target->customSettingDefs = nullptr;
+    target->iCustomSettingDefsSize = 0;
   }
 
 private:

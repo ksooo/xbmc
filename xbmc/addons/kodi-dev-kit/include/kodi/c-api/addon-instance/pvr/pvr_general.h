@@ -167,6 +167,24 @@ extern "C"
   //----------------------------------------------------------------------------
 
   //============================================================================
+  /// @defgroup cpp_kodi_addon_pvr_Defs_General_PVR_SETTING_TYPE enum PVR_SETTING_TYPE
+  /// @ingroup cpp_kodi_addon_pvr_Defs_General
+  /// @brief **PVR setting type**\n
+  ///
+  ///@{
+  typedef enum PVR_SETTING_TYPE
+  {
+    /// @brief __0__ : Integer
+    INT = 0,
+
+    /// @brief __1__ : String
+    STRING = 1,
+
+  } PVR_SETTING_TYPE;
+  ///@}
+  //----------------------------------------------------------------------------
+
+  //============================================================================
   /// @defgroup cpp_kodi_addon_pvr_Defs_General_PVR_STREAM_PROPERTY definition PVR_STREAM_PROPERTY
   /// @ingroup cpp_kodi_addon_pvr_Defs_General_Inputstream
   /// @brief **PVR related stream property values**\n
@@ -367,30 +385,63 @@ extern "C"
    */
   typedef struct PVR_INT_SETTING_DEFINITION
   {
-    unsigned int iId;
-    const char* strName;
     unsigned int iValuesSize;
     struct PVR_ATTRIBUTE_INT_VALUE* values;
     int iDefaultValue;
     int iMinValue;
     int iStep;
     int iMaxValue;
-    uint64_t iReadonlyConditions;
   } PVR_INT_SETTING_DEFINITION;
 
   /*!
-   * @brief "C" Representation of a {unsigned int, int} key-value pair.
+ * @brief "C" Representation of a string setting definition.
+ *
+ * Structure used to interface in "C" between Kodi and Addon.
+ *
+ * See @ref cpp_kodi_addon_pvr_Defs_PVRStringSettingDefinition "kodi::addon::PVRStringSettingDefinition"
+ * for description of values.
+ */
+  typedef struct PVR_STRING_SETTING_DEFINITION
+  {
+    unsigned int iValuesSize;
+    struct PVR_ATTRIBUTE_STRING_VALUE* values;
+    const char* strDefaultValue;
+  } PVR_STRING_SETTING_DEFINITION;
+
+  /*!
+ * @brief "C" Representation of a setting definition.
+ *
+ * Structure used to interface in "C" between Kodi and Addon.
+ *
+ * See @ref cpp_kodi_addon_pvr_Defs_PVRSettingDefinition "kodi::addon::PVRSettingDefinition"
+ * for description of values.
+ */
+  typedef struct PVR_SETTING_DEFINITION
+  {
+    unsigned int iId;
+    const char* strName;
+    enum PVR_SETTING_TYPE eType;
+    uint64_t iReadonlyConditions;
+    struct PVR_INT_SETTING_DEFINITION* intSettingDefinition;
+    struct PVR_STRING_SETTING_DEFINITION* stringSettingDefinition;
+  } PVR_SETTING_DEFINITION;
+
+  /*!
+   * @brief "C" Representation of a key-value pair, either {int,int} or {int,string}, depending on
+   * the type set.
    *
    * Structure used to interface in "C" between Kodi and Addon.
    *
-   * See @ref cpp_kodi_addon_pvr_Defs_PVRTypeIntValue "kodi::addon::PVRTypeIntValue" for description
+   * See @ref cpp_kodi_addon_pvr_Defs_PVRSettingKeyValuePair "kodi::addon::PVRSettingKeyValuePair" for description
    * of values.
    */
-  typedef struct PVR_INT_KEY_VALUE_PAIR
+  typedef struct PVR_SETTING_KEY_VALUE_PAIR
   {
     unsigned int iKey;
+    enum PVR_SETTING_TYPE eType;
     int iValue;
-  } PVR_INT_KEY_VALUE_PAIR;
+    const char* strValue;
+  } PVR_SETTING_KEY_VALUE_PAIR;
 
 #ifdef __cplusplus
 }

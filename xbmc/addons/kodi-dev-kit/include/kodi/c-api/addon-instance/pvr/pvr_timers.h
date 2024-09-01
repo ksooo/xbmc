@@ -363,8 +363,8 @@ extern "C"
     int iGenreType;
     int iGenreSubType;
     const char* strSeriesLink;
-    unsigned int iCustomIntPropsSize;
-    struct PVR_INT_KEY_VALUE_PAIR* customIntProps;
+    unsigned int iCustomPropsSize;
+    struct PVR_SETTING_KEY_VALUE_PAIR* customProps;
   } PVR_TIMER;
 
   /*!
@@ -401,8 +401,8 @@ extern "C"
     struct PVR_ATTRIBUTE_INT_VALUE* maxRecordings;
     int iMaxRecordingsDefault;
 
-    unsigned int iCustomIntSettingDefsSize;
-    struct PVR_INT_SETTING_DEFINITION** customIntSettingDefs;
+    unsigned int iCustomSettingDefsSize;
+    struct PVR_SETTING_DEFINITION** customSettingDefs;
   } PVR_TIMER_TYPE;
 
 #ifdef __cplusplus
