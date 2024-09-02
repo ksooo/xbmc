@@ -6,61 +6,66 @@
  *  See LICENSES/README.md for more information.
  */
 
-#include "PVRTimerIntSettingDefinition.h"
+#include "PVRTimerSettingDefinition.h"
 
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_general.h"
 #include "utils/log.h"
 
 namespace PVR
 {
-std::vector<CPVRTimerIntSettingDefinition> CPVRTimerIntSettingDefinition::
+std::vector<std::shared_ptr<const CPVRTimerSettingDefinition>> CPVRTimerSettingDefinition::
     CreateSettingDefinitionsList(int clientId,
                                  unsigned int timerTypeId,
-                                 struct PVR_INT_SETTING_DEFINITION** defs,
+                                 struct PVR_SETTING_DEFINITION** defs,
                                  unsigned int settingDefsSize)
 {
-  std::vector<CPVRTimerIntSettingDefinition> defsList;
+  std::vector<std::shared_ptr<const CPVRTimerSettingDefinition>> defsList;
   if (defs && settingDefsSize > 0)
   {
     defsList.reserve(settingDefsSize);
     for (unsigned int i = 0; i < settingDefsSize; ++i)
     {
-      const PVR_INT_SETTING_DEFINITION* def{defs[i]};
+      const PVR_SETTING_DEFINITION* def{defs[i]};
       if (def)
-        defsList.emplace_back(clientId, timerTypeId, *def);
+      {
+        defsList.emplace_back(
+            std::make_shared<const CPVRTimerSettingDefinition>(clientId, timerTypeId, *def));
+      }
     }
   }
   return defsList;
 }
 
-CPVRTimerIntSettingDefinition::CPVRTimerIntSettingDefinition(int clientId,
-                                                             unsigned int timerTypeId,
-                                                             const PVR_INT_SETTING_DEFINITION& def)
+CPVRTimerSettingDefinition::CPVRTimerSettingDefinition(int clientId,
+                                                       unsigned int timerTypeId,
+                                                       const PVR_SETTING_DEFINITION& def)
   : m_clientId(clientId),
     m_timerTypeId(timerTypeId),
     m_id(def.iId),
     m_name(def.strName ? def.strName : ""),
-    m_values(def.values, def.iValuesSize, def.iDefaultValue),
-    m_minValue(def.iMinValue),
-    m_step(def.iStep),
-    m_maxValue(def.iMaxValue),
+    m_type(def.eType),
     m_readonlyConditions(def.iReadonlyConditions)
 {
+  if (def.intSettingDefinition)
+    m_intDefinition = CPVRIntSettingDefinition{*def.intSettingDefinition};
+  if (def.stringSettingDefinition)
+    m_stringDefinition = CPVRStringSettingDefinition{*def.stringSettingDefinition};
 }
 
-bool CPVRTimerIntSettingDefinition::operator==(const CPVRTimerIntSettingDefinition& right) const
+bool CPVRTimerSettingDefinition::operator==(const CPVRTimerSettingDefinition& right) const
 {
-  return (m_id == right.m_id && m_name == right.m_name && m_values == right.m_values &&
-          m_minValue == right.m_minValue && m_step == right.m_step &&
-          m_maxValue == right.m_maxValue && m_readonlyConditions == right.m_readonlyConditions);
+  return (m_id == right.m_id && m_name == right.m_name && m_type == right.m_type &&
+          m_readonlyConditions == right.m_readonlyConditions &&
+          m_intDefinition == right.m_intDefinition &&
+          m_stringDefinition == right.m_stringDefinition);
 }
 
-bool CPVRTimerIntSettingDefinition::operator!=(const CPVRTimerIntSettingDefinition& right) const
+bool CPVRTimerSettingDefinition::operator!=(const CPVRTimerSettingDefinition& right) const
 {
   return !(*this == right);
 }
 
-bool CPVRTimerIntSettingDefinition::IsReadonlyForTimerState(PVR_TIMER_STATE timerState) const
+bool CPVRTimerSettingDefinition::IsReadonlyForTimerState(PVR_TIMER_STATE timerState) const
 {
   switch (timerState)
   {

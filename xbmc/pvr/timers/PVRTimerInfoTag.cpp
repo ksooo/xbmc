@@ -139,9 +139,15 @@ CPVRTimerInfoTag::CPVRTimerInfoTag(const PVR_TIMER& timer,
   static const ADDON::CAddonVersion customIntSettingsMinApiVersion{"9.1.0"};
   if (addonApiVersion >= customIntSettingsMinApiVersion)
   {
-    for (unsigned int i = 0; i < timer.iCustomIntPropsSize; ++i)
+    for (unsigned int i = 0; i < timer.iCustomPropsSize; ++i)
     {
-      m_customIntProps.insert({timer.customIntProps[i].iKey, timer.customIntProps[i].iValue});
+      const PVR_SETTING_KEY_VALUE_PAIR& prop{timer.customProps[i]};
+      if (prop.eType == PVR_SETTING_TYPE::INT)
+        m_customProps.insert({prop.iKey, {PVR_SETTING_TYPE::INT, CVariant{prop.iValue}}});
+      else if (prop.eType == PVR_SETTING_TYPE::STRING)
+        m_customProps.insert({prop.iKey, {PVR_SETTING_TYPE::STRING, CVariant{prop.strValue}}});
+      else
+        CLog::LogF(LOGERROR, "Unknown setting type for custom property");
     }
   }
 
@@ -234,7 +240,7 @@ bool CPVRTimerInfoTag::operator==(const CPVRTimerInfoTag& right) const
           m_iRadioChildTimersConflictNOK == right.m_iRadioChildTimersConflictNOK &&
           m_iRadioChildTimersRecording == right.m_iRadioChildTimersRecording &&
           m_iRadioChildTimersErrors == right.m_iRadioChildTimersErrors &&
-          m_customIntProps == right.m_customIntProps);
+          m_customProps == right.m_customProps);
 }
 
 bool CPVRTimerInfoTag::operator!=(const CPVRTimerInfoTag& right) const
@@ -618,7 +624,7 @@ bool CPVRTimerInfoTag::UpdateEntry(const std::shared_ptr<const CPVRTimerInfoTag>
   m_strSummary = tag->m_strSummary;
   m_channel = tag->m_channel;
   m_bProbedEpgTag = tag->m_bProbedEpgTag;
-  m_customIntProps = tag->m_customIntProps;
+  m_customProps = tag->m_customProps;
 
   m_iTVChildTimersActive = tag->m_iTVChildTimersActive;
   m_iTVChildTimersConflictNOK = tag->m_iTVChildTimersConflictNOK;

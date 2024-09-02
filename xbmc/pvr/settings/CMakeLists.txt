@@ -1,9 +1,15 @@
-set(SOURCES PVRIntSettingValues.cpp
+set(SOURCES PVRIntSettingDefinition.cpp
+            PVRIntSettingValues.cpp
             PVRSettings.cpp
-            PVRTimerIntSettingDefinition.cpp)
+            PVRStringSettingDefinition.cpp
+            PVRStringSettingValues.cpp
+            PVRTimerSettingDefinition.cpp)
 
-set(HEADERS PVRIntSettingValues.h
+set(HEADERS PVRIntSettingDefinition.h
+            PVRIntSettingValues.h
             PVRSettings.h
-            PVRTimerIntSettingDefinition.h)
+            PVRStringSettingDefinition.h
+            PVRStringSettingValues.h
+            PVRTimerSettingDefinition.h)
 
 core_add_library(pvr_settings)

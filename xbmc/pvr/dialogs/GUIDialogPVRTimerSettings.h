@@ -27,8 +27,8 @@ struct IntegerSettingOption;
 
 namespace PVR
 {
+class CPVRTimerSettingDefinition;
 class CPVRTimerType;
-class CPVRTimerIntSettingDefinition;
 
 class CGUIDialogPVRTimerSettings : public CGUIDialogSettingsManualBase
 {
@@ -57,7 +57,7 @@ protected:
 private:
   bool Validate();
   void InitializeTypesList();
-  void InitializeCustomIntSettingDefinitionsList();
+  void InitializeCustomSettingDefinitionList();
   void InitializeChannelsList();
   void SetButtonLabels();
 
@@ -111,6 +111,10 @@ private:
                                                 std::vector<IntegerSettingOption>& list,
                                                 int& current,
                                                 void* data);
+  static void CustomStringSettingDefinitionsFiller(const std::shared_ptr<const CSetting>& setting,
+                                                   std::vector<StringSettingOption>& list,
+                                                   std::string& current,
+                                                   void* data);
 
   static std::string WeekdaysValueFormatter(const std::shared_ptr<const CSetting>& setting);
 
@@ -178,9 +182,10 @@ private:
   std::string m_timerStartTimeStr;
   std::string m_timerEndTimeStr;
 
-  using CustomIntSettingDefinitionsMap =
-      std::map<std::string, CPVRTimerIntSettingDefinition>; // setting id, setting def
-  CustomIntSettingDefinitionsMap m_customIntSettingDefs;
+  using CustomSettingDefinitionsMap =
+      std::map<std::string,
+               std::shared_ptr<const CPVRTimerSettingDefinition>>; // setting id, setting def
+  CustomSettingDefinitionsMap m_customSettingDefs;
 
   std::shared_ptr<CPVRTimerType> m_timerType;
   bool m_bIsRadio = false;
@@ -204,6 +209,6 @@ private:
   int m_iMaxRecordings = 0;
   std::string m_strDirectory;
   unsigned int m_iRecordingGroup = 0;
-  CPVRTimerInfoTag::CustomPropsMap m_customIntProps;
+  CPVRTimerInfoTag::CustomPropsMap m_customProps;
 };
 } // namespace PVR

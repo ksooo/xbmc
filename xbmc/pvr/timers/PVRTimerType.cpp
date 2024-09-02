@@ -162,7 +162,7 @@ CPVRTimerType::CPVRTimerType(const PVR_TIMER_TYPE& type, int iClientId)
 {
   InitDescription();
   InitAttributeValues(type);
-  InitCustomIntSettingDefinitions(type);
+  InitCustomSettingDefinitions(type);
 }
 
 CPVRTimerType::CPVRTimerType(unsigned int iTypeId,
@@ -184,7 +184,7 @@ bool CPVRTimerType::operator==(const CPVRTimerType& right) const
           m_maxRecordingsValues == right.m_maxRecordingsValues &&
           m_preventDupEpisodesValues == right.m_preventDupEpisodesValues &&
           m_recordingGroupValues == right.m_recordingGroupValues &&
-          m_customIntSettingDefs == right.m_customIntSettingDefs);
+          m_customSettingDefs == right.m_customSettingDefs);
 }
 
 bool CPVRTimerType::operator!=(const CPVRTimerType& right) const
@@ -203,7 +203,7 @@ void CPVRTimerType::Update(const CPVRTimerType& type)
   m_maxRecordingsValues = type.m_maxRecordingsValues;
   m_preventDupEpisodesValues = type.m_preventDupEpisodesValues;
   m_recordingGroupValues = type.m_recordingGroupValues;
-  m_customIntSettingDefs = type.m_customIntSettingDefs;
+  m_customSettingDefs = type.m_customSettingDefs;
 }
 
 void CPVRTimerType::InitDescription()
@@ -259,7 +259,7 @@ void CPVRTimerType::InitPriorityValues(const PVR_TIMER_TYPE& type)
   else
   {
     // No priority supported.
-    m_priorityValues = {DEFAULT_RECORDING_PRIORITY};
+    m_priorityValues = CPVRIntSettingValues{DEFAULT_RECORDING_PRIORITY};
   }
 }
 
@@ -283,7 +283,7 @@ void CPVRTimerType::InitLifetimeValues(const PVR_TIMER_TYPE& type)
   else
   {
     // No lifetime supported.
-    m_lifetimeValues = {DEFAULT_RECORDING_LIFETIME};
+    m_lifetimeValues = CPVRIntSettingValues{DEFAULT_RECORDING_LIFETIME};
   }
 }
 
@@ -310,7 +310,7 @@ void CPVRTimerType::InitPreventDuplicateEpisodesValues(const PVR_TIMER_TYPE& typ
   else
   {
     // No prevent duplicate episodes supported.
-    m_preventDupEpisodesValues = {DEFAULT_RECORDING_DUPLICATEHANDLING};
+    m_preventDupEpisodesValues = CPVRIntSettingValues{DEFAULT_RECORDING_DUPLICATEHANDLING};
   }
 }
 
@@ -320,8 +320,8 @@ void CPVRTimerType::InitRecordingGroupValues(const PVR_TIMER_TYPE& type)
                             type.iRecordingGroupDefault, 811 /* Recording group */};
 }
 
-void CPVRTimerType::InitCustomIntSettingDefinitions(const PVR_TIMER_TYPE& type)
+void CPVRTimerType::InitCustomSettingDefinitions(const PVR_TIMER_TYPE& type)
 {
-  m_customIntSettingDefs = CPVRTimerIntSettingDefinition::CreateSettingDefinitionsList(
-      m_iClientId, m_iTypeId, type.customIntSettingDefs, type.iCustomIntSettingDefsSize);
+  m_customSettingDefs = CPVRTimerSettingDefinition::CreateSettingDefinitionsList(
+      m_iClientId, m_iTypeId, type.customSettingDefs, type.iCustomSettingDefsSize);
 }

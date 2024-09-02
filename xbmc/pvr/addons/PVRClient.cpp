@@ -256,19 +256,22 @@ public:
     iGenreSubType = epgTag ? epgTag->GenreSubType() : 0;
     strSeriesLink = m_seriesLink.c_str();
 
-    const auto& intProps{timer.GetCustomIntProperties()};
-    iCustomIntPropsSize = static_cast<unsigned int>(intProps.size());
-    if (iCustomIntPropsSize)
+    const auto& props{timer.GetCustomProperties()};
+    iCustomPropsSize = static_cast<unsigned int>(props.size());
+    if (iCustomPropsSize)
     {
-      m_customIntProps = std::make_unique<PVR_INT_KEY_VALUE_PAIR[]>(iCustomIntPropsSize);
+      m_customProps = std::make_unique<PVR_SETTING_KEY_VALUE_PAIR[]>(iCustomPropsSize);
       int idx{0};
-      for (const auto& entry : intProps)
+      for (const auto& entry : props)
       {
-        m_customIntProps[idx].iKey = entry.first;
-        m_customIntProps[idx].iValue = entry.second.asInteger32();
+        PVR_SETTING_KEY_VALUE_PAIR& prop{m_customProps[idx]};
+        prop.iKey = entry.first;
+        prop.eType = entry.second.first;
+        prop.iValue = entry.second.second.asInteger32();
+        prop.strValue = entry.second.second.asString().c_str();
         ++idx;
       }
-      customIntProps = m_customIntProps.get();
+      customProps = m_customProps.get();
     }
   }
   virtual ~CAddonTimer() = default;
@@ -279,7 +282,7 @@ private:
   const std::string m_directory;
   const std::string m_summary;
   const std::string m_seriesLink;
-  std::unique_ptr<PVR_INT_KEY_VALUE_PAIR[]> m_customIntProps;
+  std::unique_ptr<PVR_SETTING_KEY_VALUE_PAIR[]> m_customProps;
 };
 
 class CAddonEpgTag : public EPG_TAG
