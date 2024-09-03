@@ -9,6 +9,7 @@
 #include "PVRTimers.h"
 
 #include "ServiceBroker.h"
+#include "guilib/LocalizeStrings.h"
 #include "pvr/PVRConstants.h" // PVR_CLIENT_INVALID_UID
 #include "pvr/PVRDatabase.h"
 #include "pvr/PVREventLogJob.h"
@@ -22,6 +23,8 @@
 #include "pvr/timers/PVRTimerInfoTag.h"
 #include "pvr/timers/PVRTimerRuleMatcher.h"
 #include "settings/Settings.h"
+#include "utils/StringUtils.h"
+#include "utils/SystemInfo.h"
 #include "utils/log.h"
 
 #include <algorithm>
@@ -230,12 +233,46 @@ bool CPVRTimers::CheckAndAppendTimerNotification(
   return false;
 }
 
+void CPVRTimers::NotifyTimerChanges(const std::vector<std::pair<int, std::string>>& notifications,
+                                    const std::string& msg,
+                                    CPVREventLogJob& job)
+{
+  if (notifications.empty())
+    return;
+
+  static constexpr int MAX_CHANGED_TIMERS{1};
+
+  const bool timerToast{m_settings.GetBoolValue(CSettings::SETTING_PVRRECORD_TIMERNOTIFICATIONS)};
+
+  // If less than MAX_CHANGED_TIMERS changed timers, one toast / log entry per changed timer.
+  for (const auto& entry : notifications)
+  {
+    const std::shared_ptr<const CPVRClient> client{
+        CServiceBroker::GetPVRManager().GetClient(entry.first)};
+    if (client)
+    {
+      job.AddEvent((notifications.size() <= MAX_CHANGED_TIMERS) && timerToast,
+                   EventLevel::Information, client->GetFullClientName(), entry.second,
+                   client->Icon());
+    }
+  }
+
+  // If more than MAX_CHANGED_TIMERS changed timers, one toast / log entry for total number of changed timers.
+  if (notifications.size() > MAX_CHANGED_TIMERS)
+  {
+    job.AddEvent(timerToast, EventLevel::Information, g_sysinfo.GetAppName(), msg,
+                 "special://xbmc/media/icon256x256.png"); // Kodi app icon
+  }
+}
+
 bool CPVRTimers::UpdateEntries(const CPVRTimersContainer& timers,
                                const std::vector<int>& failedClients)
 {
   bool bChanged(false);
   bool bAddedOrDeleted(false);
-  std::vector<std::pair<int, std::string>> timerNotifications;
+  std::vector<std::pair<int, std::string>> timerAddNotifications;
+  std::vector<std::pair<int, std::string>> timerUpdateNotifications;
+  std::vector<std::pair<int, std::string>> timerDeleteNotifications;
 
   std::unique_lock<CCriticalSection> lock(m_critSection);
 
@@ -257,7 +294,7 @@ bool CPVRTimers::UpdateEntries(const CPVRTimersContainer& timers,
           existingTimer->ResetChildState();
 
           if (bStateChanged)
-            CheckAndAppendTimerNotification(timerNotifications, existingTimer, false);
+            CheckAndAppendTimerNotification(timerUpdateNotifications, existingTimer, false);
 
           CLog::LogFC(LOGDEBUG, LOGPVR, "Updated timer {} on client {}", timersEntry->ClientIndex(),
                       timersEntry->ClientID());
@@ -274,7 +311,7 @@ bool CPVRTimers::UpdateEntries(const CPVRTimersContainer& timers,
         bChanged = true;
         bAddedOrDeleted = true;
 
-        CheckAndAppendTimerNotification(timerNotifications, newTimer, false);
+        CheckAndAppendTimerNotification(timerAddNotifications, newTimer, false);
 
         CLog::LogFC(LOGDEBUG, LOGPVR, "Added timer {} on client {}", timersEntry->ClientIndex(),
                     timersEntry->ClientID());
@@ -311,7 +348,7 @@ bool CPVRTimers::UpdateEntries(const CPVRTimersContainer& timers,
         CLog::LogFC(LOGDEBUG, LOGPVR, "Deleted timer {} on client {}", timer->ClientIndex(),
                     timer->ClientID());
 
-        CheckAndAppendTimerNotification(timerNotifications, timer, true);
+        CheckAndAppendTimerNotification(timerDeleteNotifications, timer, true);
 
         it2 = it->second.erase(it2);
 
@@ -379,22 +416,23 @@ bool CPVRTimers::UpdateEntries(const CPVRTimersContainer& timers,
 
     NotifyTimersEvent(bAddedOrDeleted);
 
-    if (!timerNotifications.empty())
+    if (!timerAddNotifications.empty() || !timerUpdateNotifications.empty() ||
+        !timerDeleteNotifications.empty())
     {
       CPVREventLogJob* job = new CPVREventLogJob;
 
-      /* queue notifications / fill eventlog */
-      for (const auto& entry : timerNotifications)
-      {
-        const std::shared_ptr<const CPVRClient> client =
-            CServiceBroker::GetPVRManager().GetClient(entry.first);
-        if (client)
-        {
-          job->AddEvent(m_settings.GetBoolValue(CSettings::SETTING_PVRRECORD_TIMERNOTIFICATIONS),
-                        EventLevel::Information, // info, no error
-                        client->GetFullClientName(), entry.second, client->Icon());
-        }
-      }
+      NotifyTimerChanges(timerAddNotifications,
+                         StringUtils::Format(g_localizeStrings.Get(867), // x timers added
+                                             timerAddNotifications.size()),
+                         *job);
+      NotifyTimerChanges(timerUpdateNotifications,
+                         StringUtils::Format(g_localizeStrings.Get(868), // x timers updated
+                                             timerUpdateNotifications.size()),
+                         *job);
+      NotifyTimerChanges(timerDeleteNotifications,
+                         StringUtils::Format(g_localizeStrings.Get(869), // x timers deleted
+                                             timerDeleteNotifications.size()),
+                         *job);
 
       CServiceBroker::GetJobManager()->AddJob(job, nullptr);
     }
