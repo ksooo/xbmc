@@ -108,15 +108,24 @@ public:
     if (!results.empty())
     {
       CGUIMessage msg(GUI_MSG_SET_TEXT, m_dialogId, CTL_EDIT);
-      msg.SetLabel(results.front());
+      if (m_isPhrase)
+        msg.SetLabel("\"" + results.front() + "\"");
+      else
+        msg.SetLabel(results.front());
 
       // dispatch to GUI thread
       CServiceBroker::GetAppMessenger()->SendGUIMessage(msg, m_dialogId);
     }
   }
 
+  void SetCurrentText(const std::string& text)
+  {
+    m_isPhrase = (text.starts_with("\"") && text.ends_with("\""));
+  }
+
 private:
   const int m_dialogId{0};
+  bool m_isPhrase{false};
 };
 
 CGUIDialogKeyboardGeneric::CGUIDialogKeyboardGeneric()
@@ -654,6 +663,7 @@ void CGUIDialogKeyboardGeneric::OnVoiceRecognition()
     if (!m_speechRecognitionListener)
       m_speechRecognitionListener = std::make_shared<CSpeechRecognitionListener>(GetID());
 
+    m_speechRecognitionListener->SetCurrentText(m_text);
     speechRecognition->StartSpeechRecognition(m_speechRecognitionListener);
   }
   else
