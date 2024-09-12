@@ -414,6 +414,9 @@ CGUIDialogPVRGuideSearch::Result CGUIWindowPVRSearchBase::OpenDialogSearch(
       searchFilter != nullptr ? std::make_shared<CPVREpgSearchFilter>(*searchFilter)
                               : std::make_shared<CPVREpgSearchFilter>(IsRadio());
 
+  if (tmpSearchFilter->GetSearchTerm().empty())
+    tmpSearchFilter->SetSearchPhrase(""); // Default new searches to search for a "phrase"
+
   dlgSearch->SetFilterData(tmpSearchFilter);
 
   /* Open dialog window */
