@@ -673,8 +673,8 @@ bool CPVRTimers::UpdateEntries(int iMaxNotificationDelay)
               {
                 const CDateTimeSpan duration = timer->EndAsUTC() - timer->StartAsUTC();
                 const std::shared_ptr<CPVRTimerInfoTag> childTimer =
-                    CPVRTimerInfoTag::CreateReminderFromDate(
-                        nextStart, duration.GetSecondsTotal() / 60, timer);
+                    CPVRTimerInfoTag::CreateReminderFromDate(nextStart, duration.GetSecondsTotal(),
+                                                             timer);
                 if (childTimer)
                 {
                   bChanged = true;
@@ -1100,7 +1100,7 @@ bool CPVRTimers::AddLocalTimer(const std::shared_ptr<CPVRTimerInfoTag>& tag, boo
       {
         const CDateTimeSpan duration = persistedTimer->EndAsUTC() - persistedTimer->StartAsUTC();
         const std::shared_ptr<CPVRTimerInfoTag> childTimer =
-            CPVRTimerInfoTag::CreateReminderFromDate(nextStart, duration.GetSecondsTotal() / 60,
+            CPVRTimerInfoTag::CreateReminderFromDate(nextStart, duration.GetSecondsTotal(),
                                                      persistedTimer);
         if (childTimer)
         {
