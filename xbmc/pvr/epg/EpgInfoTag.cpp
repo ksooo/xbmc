@@ -111,7 +111,10 @@ CPVREpgInfoTag::CPVREpgInfoTag(const EPG_TAG& data,
   if (data.strTitle)
     m_strTitle = data.strTitle;
   if (data.strTitleExtraInfo)
-    m_titleExtraInfo = data.strTitleExtraInfo;
+  {
+    if (m_strTitle != data.strTitleExtraInfo)
+      m_titleExtraInfo = data.strTitleExtraInfo;
+  }
   if (data.strGenreDescription)
     m_strGenreDescription = data.strGenreDescription;
   if (data.strPlotOutline)
@@ -129,7 +132,10 @@ CPVREpgInfoTag::CPVREpgInfoTag(const EPG_TAG& data,
   if (data.strIMDBNumber)
     m_strIMDBNumber = data.strIMDBNumber;
   if (data.strEpisodeName)
-    m_strEpisodeName = data.strEpisodeName;
+  {
+    if (m_strTitle != data.strEpisodeName)
+      m_strEpisodeName = data.strEpisodeName;
+  }
   if (data.strSeriesLink)
     m_strSeriesLink = data.strSeriesLink;
   if (data.strParentalRatingCode)
