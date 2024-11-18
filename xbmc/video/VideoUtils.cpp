@@ -324,7 +324,12 @@ bool IsAutoPlayNextItem(const std::string& content)
 
 ResumeInformation GetItemResumeInformation(const CFileItem& item)
 {
-  ResumeInformation info = GetNonFolderItemResumeInformation(item);
+  ResumeInformation info;
+
+  if (!VIDEO::IsVideo(item) && !URIUtils::IsPVRRecordingFileOrFolder(item.GetPath()))
+    return info;
+
+  info = GetNonFolderItemResumeInformation(item);
   if (info.isResumable)
     return info;
 
