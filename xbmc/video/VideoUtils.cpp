@@ -162,7 +162,6 @@ KODI::VIDEO::UTILS::ResumeInformation GetNonFolderItemResumeInformation(const CF
         else
         {
           CLog::LogF(LOGERROR, "Cannot obtain video content type");
-          db.Close();
           return {};
         }
 
@@ -172,20 +171,21 @@ KODI::VIDEO::UTILS::ResumeInformation GetNonFolderItemResumeInformation(const CF
       {
         // DVD
         CLog::LogF(LOGERROR, "Cannot obtain bookmark for DVD");
-        db.Close();
         return {};
       }
     }
 
-    CBookmark bookmark;
-    db.GetResumeBookMark(path, bookmark);
-    db.Close();
-
-    if (bookmark.IsSet())
+    if (!path.empty())
     {
-      resumeInfo.isResumable = bookmark.IsPartWay();
-      resumeInfo.startOffset = CUtil::ConvertSecsToMilliSecs(bookmark.timeInSeconds);
-      resumeInfo.partNumber = static_cast<int>(bookmark.partNumber);
+      CBookmark bookmark;
+      db.GetResumeBookMark(path, bookmark);
+
+      if (bookmark.IsSet())
+      {
+        resumeInfo.isResumable = bookmark.IsPartWay();
+        resumeInfo.startOffset = CUtil::ConvertSecsToMilliSecs(bookmark.timeInSeconds);
+        resumeInfo.partNumber = static_cast<int>(bookmark.partNumber);
+      }
     }
   }
   return resumeInfo;
