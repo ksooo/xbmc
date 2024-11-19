@@ -195,6 +195,12 @@ public:
   virtual bool IsPlayCountSet() const;
 
   /*!
+   * @brief Check if a resume bookmark is set
+   * @return True if resume bookmark data are set, false if bookmark data is default (e.g. not yet loaded from datbase)
+   */
+  bool IsResumePointSet() const { return m_resumePointSet; }
+
+  /*!
    * @brief Get this videos's resume point.
    * @return the resume point.
    */
@@ -431,9 +437,10 @@ private:
   std::string Trim(std::string &&value);
   std::vector<std::string> Trim(std::vector<std::string> &&items);
 
+  static constexpr int PLAYCOUNT_NOT_SET{-1};
   int m_playCount;
+  bool m_resumePointSet{false};
   CBookmark m_resumePoint;
-  static const int PLAYCOUNT_NOT_SET = -1;
 
   CAssetInfo m_assetInfo;
   bool m_hasVideoVersions{false};

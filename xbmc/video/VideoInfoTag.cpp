@@ -91,6 +91,7 @@ void CVideoInfoTag::Reset()
   m_parentPathID = -1;
   m_resumePoint.Reset();
   m_resumePoint.type = CBookmark::RESUME;
+  m_resumePointSet = false;
   m_iIdShow = -1;
   m_iIdSeason = -1;
   m_dateAdded.Reset();
@@ -1811,6 +1812,8 @@ CBookmark CVideoInfoTag::GetResumePoint() const
 bool CVideoInfoTag::SetResumePoint(const CBookmark &resumePoint)
 {
   m_resumePoint = resumePoint;
+  m_resumePoint.type = CBookmark::RESUME;
+  m_resumePointSet = (resumePoint.type == CBookmark::RESUME);
   return true;
 }
 
@@ -1823,6 +1826,7 @@ bool CVideoInfoTag::SetResumePoint(double timeInSeconds, double totalTimeInSecon
   resumePoint.type = CBookmark::RESUME;
 
   m_resumePoint = resumePoint;
+  m_resumePointSet = true;
   return true;
 }
 

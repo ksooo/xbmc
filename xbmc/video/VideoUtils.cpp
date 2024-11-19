@@ -129,6 +129,9 @@ KODI::VIDEO::UTILS::ResumeInformation GetNonFolderItemResumeInformation(const CF
   }
   else
   {
+    if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->IsResumePointSet())
+      return {}; // At this point we know that there is an empty resume bookmark for this item set.
+
     // Obtain the resume bookmark from video db...
 
     CVideoDatabase db;
