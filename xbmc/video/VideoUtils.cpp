@@ -56,15 +56,15 @@ KODI::VIDEO::UTILS::ResumeInformation GetFolderItemResumeInformation(const CFile
     }
     else
     {
-      CVideoDatabase db;
-      if (db.Open())
-      {
-        XFILE::VIDEODATABASEDIRECTORY::CQueryParams params;
-        XFILE::VIDEODATABASEDIRECTORY::CDirectoryNode::GetDatabaseInfo(item.GetPath(), params);
+      XFILE::VIDEODATABASEDIRECTORY::CQueryParams params;
+      XFILE::VIDEODATABASEDIRECTORY::CDirectoryNode::GetDatabaseInfo(item.GetPath(), params);
 
-        if (params.GetTvShowId() >= 0)
+      if (params.GetTvShowId() >= 0)
+      {
+        if (params.GetSeason() >= 0)
         {
-          if (params.GetSeason() >= 0)
+          CVideoDatabase db;
+          if (db.Open())
           {
             const int idSeason = db.GetSeasonId(static_cast<int>(params.GetTvShowId()),
                                                 static_cast<int>(params.GetSeason()));
@@ -74,14 +74,22 @@ KODI::VIDEO::UTILS::ResumeInformation GetFolderItemResumeInformation(const CFile
               db.GetSeasonInfo(idSeason, details, &folderItem);
             }
           }
-          else
+        }
+        else
+        {
+          CVideoDatabase db;
+          if (db.Open())
           {
             CVideoInfoTag details;
             db.GetTvShowInfo(item.GetPath(), details, static_cast<int>(params.GetTvShowId()),
                              &folderItem);
           }
         }
-        else if (params.GetSetId() >= 0)
+      }
+      else if (params.GetSetId() >= 0)
+      {
+        CVideoDatabase db;
+        if (db.Open())
         {
           CVideoInfoTag details;
           db.GetSetInfo(static_cast<int>(params.GetSetId()), details, &folderItem);
@@ -135,12 +143,6 @@ KODI::VIDEO::UTILS::ResumeInformation GetNonFolderItemResumeInformation(const CF
     // Obtain the resume bookmark from video db...
 
     CVideoDatabase db;
-    if (!db.Open())
-    {
-      CLog::LogF(LOGERROR, "Cannot open VideoDatabase");
-      return {};
-    }
-
     std::string path = item.GetPath();
     if (VIDEO::IsVideoDb(item) || item.IsDVD())
     {
@@ -168,7 +170,8 @@ KODI::VIDEO::UTILS::ResumeInformation GetNonFolderItemResumeInformation(const CF
           return {};
         }
 
-        db.GetFilePathById(static_cast<int>(id), path, content_type);
+        if (db.Open())
+          db.GetFilePathById(static_cast<int>(id), path, content_type);
       }
       else
       {
@@ -181,7 +184,11 @@ KODI::VIDEO::UTILS::ResumeInformation GetNonFolderItemResumeInformation(const CF
     if (!path.empty())
     {
       CBookmark bookmark;
-      db.GetResumeBookMark(path, bookmark);
+      if (db.Open())
+      {
+        db.GetResumeBookMark(path, bookmark);
+        db.Close();
+      }
 
       if (bookmark.IsSet())
       {
