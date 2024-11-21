@@ -102,6 +102,9 @@ KODI::VIDEO::UTILS::ResumeInformation GetFolderItemResumeInformation(const CFile
 
 KODI::VIDEO::UTILS::ResumeInformation GetNonFolderItemResumeInformation(const CFileItem& item)
 {
+  if (item.m_bIsFolder)
+    return {};
+
   // do not resume nfo files
   if (item.IsNFO())
     return {};
