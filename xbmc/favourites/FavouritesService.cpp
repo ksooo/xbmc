@@ -171,6 +171,18 @@ void CFavouritesService::ReInit(std::string userDataFolder)
     CLog::Log(LOGDEBUG, "CFavourites::Load - no userdata favourites found, skipping");
 }
 
+void CFavouritesService::OnPlaybackStopped(const CFileItem& item)
+{
+  // Clear cache. Resume info etc. of a cached favourite's target might need refresh.
+  std::unique_lock<CCriticalSection> lock(m_criticalSection);
+  m_targets.clear();
+}
+
+void CFavouritesService::OnPlaybackEnded(const CFileItem& item)
+{
+  OnPlaybackStopped(item);
+}
+
 bool CFavouritesService::Persist()
 {
   CXBMCTinyXML2 doc;
