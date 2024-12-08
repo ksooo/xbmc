@@ -146,6 +146,7 @@ set(HEADERS ActorProtocol.h
             MemUtils.h
             Mime.h
             MovingSpeed.h
+            Narrow.h
             Observer.h
             params_check_macros.h
             POUtils.h
