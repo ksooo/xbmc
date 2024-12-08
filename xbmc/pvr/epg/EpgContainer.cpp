@@ -22,6 +22,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "threads/SystemClock.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 #include <algorithm>
@@ -32,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+using namespace KODI;
 using namespace std::chrono_literals;
 
 namespace PVR
@@ -759,7 +761,7 @@ bool CPVREpgContainer::UpdateEPG(bool bOnlyPending /* = false */)
 
     if (progressHandler)
       progressHandler->UpdateProgress(epg->GetChannelData()->ChannelName(), ++iCounter,
-                                      static_cast<unsigned int>(epgsToUpdate.size()));
+                                      UTILS::Narrow<unsigned int>(epgsToUpdate.size()));
 
     if ((!bOnlyPending || epg->UpdatePending()) &&
         epg->Update(start,

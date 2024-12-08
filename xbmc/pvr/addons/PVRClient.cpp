@@ -44,6 +44,7 @@
 #include "pvr/timers/PVRTimers.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -60,6 +61,7 @@ extern "C"
 }
 
 using namespace ADDON;
+using namespace KODI;
 using namespace PVR;
 
 namespace
@@ -170,7 +172,7 @@ public:
     iGenreSubType = recording.GenreSubType();
     iPlayCount = recording.GetLocalPlayCount();
     iLastPlayedPosition =
-        static_cast<int>(std::lrint(recording.GetLocalResumePoint().timeInSeconds));
+        UTILS::Narrow<int>(std::lrint(recording.GetLocalResumePoint().timeInSeconds));
     bIsDeleted = recording.IsDeleted();
     iEpgEventId = recording.BroadcastUid();
     iChannelUid = recording.ChannelUid();
@@ -260,7 +262,7 @@ public:
     strSeriesLink = m_seriesLink.c_str();
 
     const auto& props{timer.GetCustomProperties()};
-    iCustomPropsSize = static_cast<unsigned int>(props.size());
+    iCustomPropsSize = UTILS::Narrow<unsigned int>(props.size());
     if (iCustomPropsSize)
     {
       m_customProps = std::make_unique<PVR_SETTING_KEY_VALUE_PAIR[]>(iCustomPropsSize);
@@ -1494,8 +1496,9 @@ PVR_ERROR CPVRClient::ReadLiveStream(void* lpBuf, int64_t uiBufSize, int& iRead)
   return DoAddonCall(__func__,
                      [&lpBuf, uiBufSize, &iRead](const AddonInstance* addon)
                      {
-                       iRead = addon->toAddon->ReadLiveStream(
-                           addon, static_cast<unsigned char*>(lpBuf), static_cast<int>(uiBufSize));
+                       iRead =
+                           addon->toAddon->ReadLiveStream(addon, static_cast<unsigned char*>(lpBuf),
+                                                          UTILS::Narrow<int>(uiBufSize));
                        return (iRead == -1) ? PVR_ERROR_NOT_IMPLEMENTED : PVR_ERROR_NO_ERROR;
                      });
 }
@@ -1511,7 +1514,7 @@ PVR_ERROR CPVRClient::ReadRecordedStream(int64_t streamId,
                      {
                        iRead = addon->toAddon->ReadRecordedStream(
                            addon, streamId, static_cast<unsigned char*>(lpBuf),
-                           static_cast<int>(uiBufSize));
+                           UTILS::Narrow<int>(uiBufSize));
                        return (iRead == -1) ? PVR_ERROR_NOT_IMPLEMENTED : PVR_ERROR_NO_ERROR;
                      });
 }

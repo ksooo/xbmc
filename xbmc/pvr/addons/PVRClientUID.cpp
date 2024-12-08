@@ -10,12 +10,14 @@
 
 #include "pvr/PVRConstants.h" // PVR_CLIENT_INVALID_UID
 #include "pvr/PVRDatabase.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 #include <functional>
 #include <map>
 #include <utility>
 
+using namespace KODI;
 using namespace PVR;
 
 namespace
@@ -68,7 +70,7 @@ int CPVRClientUID::GetLegacyUID() const
     prefix = std::to_string(m_instanceID) + "@";
 
   std::hash<std::string> hasher;
-  int uid{static_cast<int>(hasher(prefix + m_addonID))};
+  int uid{UTILS::Narrow<int>(hasher(prefix + m_addonID))};
   if (uid < 0)
     uid = -uid;
 

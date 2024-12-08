@@ -15,6 +15,7 @@
 #include "guilib/GUIWindowManager.h"
 #include "utils/Archive.h"
 #include "utils/CharsetConverter.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 
@@ -23,6 +24,7 @@
 #include <string>
 #include <utility>
 
+using namespace KODI;
 using namespace PVR;
 
 CPVRRadioRDSInfoTag::CPVRRadioRDSInfoTag()
@@ -643,14 +645,14 @@ void CPVRRadioRDSInfoTag::SetProgramServiceText(const std::string& strPSText)
   for (size_t i = m_strProgramServiceText.MaxSize() / 2 + 1; i < m_strProgramServiceText.MaxSize();
        ++i)
   {
-    m_strProgramServiceLine0 += m_strProgramServiceText.GetLine(static_cast<unsigned int>(i));
+    m_strProgramServiceLine0 += m_strProgramServiceText.GetLine(UTILS::Narrow<unsigned int>(i));
     m_strProgramServiceLine0 += ' ';
   }
 
   m_strProgramServiceLine1.erase();
   for (size_t i = 0; i < m_strProgramServiceText.MaxSize() / 2; ++i)
   {
-    m_strProgramServiceLine1 += m_strProgramServiceText.GetLine(static_cast<unsigned int>(i));
+    m_strProgramServiceLine1 += m_strProgramServiceText.GetLine(UTILS::Narrow<unsigned int>(i));
     m_strProgramServiceLine1 += ' ';
   }
 }
