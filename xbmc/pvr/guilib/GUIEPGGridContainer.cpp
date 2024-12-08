@@ -25,6 +25,7 @@
 #include "pvr/epg/EpgInfoTag.h"
 #include "pvr/guilib/GUIEPGGridContainerModel.h"
 #include "utils/MathUtils.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 
@@ -1102,7 +1103,8 @@ bool CGUIEPGGridContainer::SetChannel(const std::shared_ptr<CPVRChannel>& channe
 {
   for (int iIndex = 0; iIndex < m_gridModel->ChannelItemsSize(); iIndex++)
   {
-    int iChannelId = static_cast<int>(m_gridModel->GetChannelItem(iIndex)->GetProperty("channelid").asInteger(-1));
+    const int iChannelId{UTILS::Narrow<int>(
+        m_gridModel->GetChannelItem(iIndex)->GetProperty("channelid").asInteger(-1))};
     if (iChannelId == channel->ChannelID())
     {
       GoToChannel(iIndex);
