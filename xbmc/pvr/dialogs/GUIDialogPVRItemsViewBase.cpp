@@ -17,12 +17,14 @@
 #include "input/actions/ActionIDs.h"
 #include "pvr/PVRManager.h"
 #include "pvr/guilib/PVRGUIActionsEPG.h"
+#include "utils/Narrow.h"
 #include "view/ViewState.h"
 
 #include <utility>
 
 #define CONTROL_LIST 11
 
+using namespace KODI;
 using namespace PVR;
 
 CGUIDialogPVRItemsViewBase::CGUIDialogPVRItemsViewBase(int id, const std::string& xmlFile)
@@ -131,7 +133,7 @@ bool CGUIDialogPVRItemsViewBase::ContextMenu(int itemIdx)
     return true;
 
   int idx = CGUIDialogContextMenu::Show(buttons);
-  if (idx < 0 || idx >= static_cast<int>(buttons.size()))
+  if (idx < 0 || idx >= UTILS::Narrow<int>(buttons.size()))
     return false;
 
   Close();

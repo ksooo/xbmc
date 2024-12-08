@@ -43,6 +43,7 @@
 #include "pvr/timers/PVRTimers.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "view/GUIViewState.h"
 
 #include <functional>
@@ -51,6 +52,7 @@
 #include <utility>
 #include <vector>
 
+using namespace KODI;
 using namespace KODI::MESSAGING;
 using namespace PVR;
 using namespace std::chrono_literals;
@@ -630,13 +632,13 @@ public:
 
   void Add(bool (A::*function)(), unsigned int resId)
   {
-    CContextButtons::Add(static_cast<unsigned int>(size()), resId);
+    CContextButtons::Add(UTILS::Narrow<unsigned int>(size()), resId);
     m_functions.emplace_back(std::bind(function, m_instance));
   }
 
   bool Call(int idx)
   {
-    if (idx < 0 || idx >= static_cast<int>(m_functions.size()))
+    if (idx < 0 || idx >= UTILS::Narrow<int>(m_functions.size()))
       return false;
 
     return m_functions[idx]();

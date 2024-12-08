@@ -16,6 +16,7 @@
 #include "pvr/epg/EpgInfoTag.h"
 #include "pvr/recordings/PVRRecording.h"
 #include "pvr/recordings/PVRRecordingsPath.h"
+#include "utils/Narrow.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
 #include "video/VideoDatabase.h"
@@ -27,6 +28,7 @@
 #include <utility>
 #include <vector>
 
+using namespace KODI;
 using namespace PVR;
 
 CPVRRecordings::CPVRRecordings() = default;
@@ -215,7 +217,7 @@ unsigned int CPVRRecordings::GetRecordingCountByProvider(bool isRadio,
   auto recs = std::count_if(m_recordings.cbegin(), m_recordings.cend(),
                             [isRadio, clientId, providerId](const auto& entry)
                             { return MatchProvider(entry.second, isRadio, clientId, providerId); });
-  return static_cast<unsigned int>(recs);
+  return UTILS::Narrow<unsigned int>(recs);
 }
 
 void CPVRRecordings::UpdateFromClient(const std::shared_ptr<CPVRRecording>& tag,

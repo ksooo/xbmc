@@ -22,6 +22,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "utils/FileUtils.h"
+#include "utils/Narrow.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
 
@@ -30,6 +31,7 @@
 #include <string>
 #include <vector>
 
+using namespace KODI;
 using namespace PVR;
 
 void CPVRGUIChannelIconUpdater::SearchAndUpdateMissingChannelIcons() const
@@ -65,13 +67,13 @@ void CPVRGUIChannelIconUpdater::SearchAndUpdateMissingChannelIcons() const
   for (const auto& group : m_groups)
   {
     const std::vector<std::shared_ptr<CPVRChannelGroupMember>> members = group->GetMembers();
+    const unsigned int countMembers{UTILS::Narrow<const unsigned int>(members.size())};
     int channelIndex = 0;
     for (const auto& member : members)
     {
       const std::shared_ptr<CPVRChannel> channel = member->Channel();
 
-      progressHandler->UpdateProgress(channel->ChannelName(), channelIndex++,
-                                      static_cast<unsigned int>(members.size()));
+      progressHandler->UpdateProgress(channel->ChannelName(), channelIndex++, countMembers);
 
       // skip if an icon is already set and exists
       if (CFileUtils::Exists(channel->IconPath()))

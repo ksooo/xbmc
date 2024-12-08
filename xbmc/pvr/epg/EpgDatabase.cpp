@@ -16,6 +16,7 @@
 #include "pvr/epg/EpgSearchFilter.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -25,6 +26,7 @@
 #include <vector>
 
 using namespace dbiplus;
+using namespace KODI;
 using namespace PVR;
 
 bool CPVREpgDatabase::Open()
@@ -1245,7 +1247,7 @@ int CPVREpgDatabase::Persist(const CPVREpg& epg, bool bQueueWrite)
   else
   {
     if (ExecuteQuery(strQuery))
-      iReturn = epg.EpgID() <= 0 ? static_cast<int>(m_pDS->lastinsertid()) : epg.EpgID();
+      iReturn = epg.EpgID() <= 0 ? UTILS::Narrow<int>(m_pDS->lastinsertid()) : epg.EpgID();
   }
 
   return iReturn;
@@ -1544,7 +1546,7 @@ bool CPVREpgDatabase::Persist(CPVREpgSearchFilter& epgSearch)
   {
     // Set the database id for searches persisted for the first time
     if (epgSearch.GetDatabaseId() == PVR_EPG_SEARCH_INVALID_DATABASE_ID)
-      epgSearch.SetDatabaseId(static_cast<int>(m_pDS->lastinsertid()));
+      epgSearch.SetDatabaseId(UTILS::Narrow<int>(m_pDS->lastinsertid()));
 
     epgSearch.SetChanged(false);
   }
