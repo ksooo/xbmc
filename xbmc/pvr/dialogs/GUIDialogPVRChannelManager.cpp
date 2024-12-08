@@ -39,6 +39,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "storage/MediaManager.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 
@@ -539,7 +540,7 @@ bool CGUIDialogPVRChannelManager::OnClickButtonNewChannel()
     iSelection = pDlgSelect->GetSelectedItem();
   }
 
-  if (iSelection >= 0 && iSelection < static_cast<int>(m_clientsWithSettingsList.size()))
+  if (iSelection >= 0 && iSelection < KODI::UTILS::Narrow<int>(m_clientsWithSettingsList.size()))
   {
     int iClientID = m_clientsWithSettingsList[iSelection]->GetID();
 
@@ -966,8 +967,10 @@ bool CGUIDialogPVRChannelManager::UpdateChannelData(const std::shared_ptr<CFileI
   {
     if (m_bAllowRenumber)
     {
-      groupMember->SetChannelNumber(CPVRChannelNumber(
-          static_cast<unsigned int>(pItem->GetProperty(PROPERTY_CHANNEL_NUMBER).asInteger()), 0));
+      groupMember->SetChannelNumber(
+          CPVRChannelNumber(KODI::UTILS::Narrow<unsigned int>(
+                                pItem->GetProperty(PROPERTY_CHANNEL_NUMBER).asInteger()),
+                            0));
     }
 
     // make sure the channel is part of the group

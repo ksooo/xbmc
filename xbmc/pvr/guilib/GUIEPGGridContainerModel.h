@@ -75,14 +75,11 @@ public:
 
   std::shared_ptr<CFileItem> GetChannelItem(int iIndex) const { return m_channelItems[iIndex]; }
   bool HasChannelItems() const { return !m_channelItems.empty(); }
-  int ChannelItemsSize() const { return static_cast<int>(m_channelItems.size()); }
-  int GetLastChannel() const
-  {
-    return m_channelItems.empty() ? -1 : static_cast<int>(m_channelItems.size()) - 1;
-  }
+  int ChannelItemsSize() const;
+  int GetLastChannel() const;
 
   std::shared_ptr<CFileItem> GetRulerItem(int iIndex) const { return m_rulerItems[iIndex]; }
-  int RulerItemsSize() const { return static_cast<int>(m_rulerItems.size()); }
+  int RulerItemsSize() const;
 
   int GridItemsSize() const { return m_blocks; }
   bool IsSameGridItem(int iChannel, int iBlock1, int iBlock2) const;

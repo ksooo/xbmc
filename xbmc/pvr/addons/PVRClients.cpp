@@ -23,6 +23,7 @@
 #include "pvr/addons/PVRClientUID.h"
 #include "pvr/guilib/PVRGUIProgressHandler.h"
 #include "utils/JobManager.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -35,6 +36,7 @@
 #include <vector>
 
 using namespace ADDON;
+using namespace KODI;
 using namespace PVR;
 
 CPVRClients::CPVRClients()
@@ -172,7 +174,7 @@ void CPVRClients::UpdateClients(
     {
       progressHandler->UpdateProgress(
           client->Name(), i++,
-          static_cast<unsigned int>(clientsToCreate.size() + clientsToReCreate.size()));
+          UTILS::Narrow<unsigned int>(clientsToCreate.size() + clientsToReCreate.size()));
 
       const ADDON_STATUS status = client->Create();
 
@@ -194,7 +196,7 @@ void CPVRClients::UpdateClients(
     {
       progressHandler->UpdateProgress(
           clientInfo.second, i++,
-          static_cast<unsigned int>(clientsToCreate.size() + clientsToReCreate.size()));
+          UTILS::Narrow<unsigned int>(clientsToCreate.size() + clientsToReCreate.size()));
 
       // stop and recreate client
       StopClient(clientInfo.first, true /* restart */);
@@ -307,9 +309,9 @@ std::shared_ptr<CPVRClient> CPVRClients::GetClient(int clientId) const
 int CPVRClients::CreatedClientAmount() const
 {
   std::unique_lock<CCriticalSection> lock(m_critSection);
-  return static_cast<int>(std::count_if(m_clientMap.cbegin(), m_clientMap.cend(),
-                                        [](const auto& client)
-                                        { return client.second->ReadyToUse(); }));
+  return UTILS::Narrow<int>(std::count_if(m_clientMap.cbegin(), m_clientMap.cend(),
+                                          [](const auto& client)
+                                          { return client.second->ReadyToUse(); }));
 }
 
 bool CPVRClients::HasCreatedClients() const
@@ -447,9 +449,9 @@ int CPVRClients::EnabledClientAmount() const
   }
 
   ADDON::CAddonMgr& addonMgr = CServiceBroker::GetAddonMgr();
-  return static_cast<int>(std::count_if(
-      clientMap.cbegin(), clientMap.cend(),
-      [&addonMgr](const auto& client) { return !addonMgr.IsAddonDisabled(client.second->ID()); }));
+  return UTILS::Narrow<int>(
+      std::count_if(clientMap.cbegin(), clientMap.cend(), [&addonMgr](const auto& client)
+                    { return !addonMgr.IsAddonDisabled(client.second->ID()); }));
 }
 
 bool CPVRClients::IsEnabledClient(int clientId) const

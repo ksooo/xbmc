@@ -37,6 +37,7 @@
 #include "pvr/timers/PVRTimers.h"
 #include "settings/Settings.h"
 #include "threads/IRunnable.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 #include "utils/Variant.h"
@@ -50,6 +51,7 @@
 #include <utility>
 
 using namespace PVR;
+using namespace KODI;
 using namespace KODI::MESSAGING;
 
 namespace
@@ -401,7 +403,7 @@ void InstantRecordingActionSelector::AddAction(PVRRECORD_INSTANTRECORDACTION eAc
         return;
     }
 
-    m_actions.insert(std::make_pair(eAction, static_cast<int>(m_actions.size())));
+    m_actions.insert(std::make_pair(eAction, UTILS::Narrow<int>(m_actions.size())));
   }
 }
 

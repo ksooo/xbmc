@@ -23,6 +23,7 @@
 #include "pvr/epg/Epg.h"
 #include "pvr/epg/EpgChannelData.h"
 #include "pvr/epg/EpgInfoTag.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -35,6 +36,7 @@
 #include <utility>
 #include <vector>
 
+using namespace KODI;
 using namespace PVR;
 
 CPVRChannelGroup::CPVRChannelGroup(const CPVRChannelsPath& path,
@@ -331,7 +333,7 @@ unsigned int CPVRChannelGroup::GetChannelCountByProvider(int clientId, int provi
       std::count_if(m_members.cbegin(), m_members.cend(),
                     [clientId, providerId](const auto& member)
                     { return MatchProvider(member.second->Channel(), clientId, providerId); });
-  return static_cast<unsigned int>(channels);
+  return UTILS::Narrow<unsigned int>(channels);
 }
 
 std::shared_ptr<CPVRChannelGroupMember> CPVRChannelGroup::GetLastPlayedChannelGroupMember(
@@ -567,7 +569,7 @@ int CPVRChannelGroup::LoadFromDatabase(const std::vector<std::shared_ptr<CPVRCli
 
   DeleteGroupMembersFromDb(membersToDelete);
 
-  return static_cast<int>(results.size() - membersToDelete.size());
+  return UTILS::Narrow<int>(results.size() - membersToDelete.size());
 }
 
 void CPVRChannelGroup::DeleteGroupMembersFromDb(
@@ -877,7 +879,7 @@ bool CPVRChannelGroup::Persist()
   if (database)
   {
     CLog::LogFC(LOGDEBUG, LOGPVR, "Persisting channel group '{}' with {} channels", GroupName(),
-                static_cast<int>(m_members.size()));
+                UTILS::Narrow<int>(m_members.size()));
 
     bReturn = database->Persist(*this);
     m_bChanged = false;

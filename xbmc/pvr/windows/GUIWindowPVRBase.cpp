@@ -35,6 +35,7 @@
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "pvr/filesystem/PVRGUIDirectory.h"
 #include "pvr/guilib/PVRGUIActionsChannels.h"
+#include "utils/Narrow.h"
 #include "utils/Variant.h"
 #include "utils/log.h"
 
@@ -50,6 +51,7 @@ using namespace std::chrono_literals;
 #define MAX_INVALIDATION_FREQUENCY 2000ms // limit to one invalidation per X milliseconds
 
 using namespace PVR;
+using namespace KODI;
 using namespace KODI::MESSAGING;
 
 namespace PVR
@@ -641,7 +643,7 @@ void CGUIWindowPVRBase::ShowProgressDialog(const std::string& strText, int iProg
     m_progressHandle = loadingProgressDialog->GetHandle(g_localizeStrings.Get(19235)); // PVR manager is starting up
   }
 
-  m_progressHandle->SetPercentage(static_cast<float>(iProgress));
+  m_progressHandle->SetPercentage(UTILS::Narrow<float>(iProgress));
   m_progressHandle->SetText(strText);
 }
 

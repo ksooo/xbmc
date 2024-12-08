@@ -26,6 +26,7 @@
 #include "pvr/timers/PVRTimerType.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -39,6 +40,7 @@
 #include <vector>
 
 using namespace dbiplus;
+using namespace KODI;
 using namespace PVR;
 
 namespace
@@ -588,7 +590,7 @@ int CPVRDatabase::GetClientID(const std::string& addonID, unsigned int instanceI
                    "sDateTimeFirstChannelsAdded) VALUES (%i, '%s', %i, '%s')",
                    0, addonID.c_str(), instanceID, "");
   if (ExecuteQuery(sql))
-    return static_cast<int>(m_pDS->lastinsertid());
+    return UTILS::Narrow<int>(m_pDS->lastinsertid());
 
   return PVR_CLIENT_INVALID_UID;
 }
@@ -623,7 +625,7 @@ bool CPVRDatabase::Persist(CPVRProvider& provider, bool updateRecord /* = false 
                      "iType, sIconPath, sCountries, sLanguages) "
                      "VALUES (%i, %i, %i, '%s', %i, '%s', '%s', '%s');",
                      provider.GetDatabaseId(), provider.GetUniqueId(), provider.GetClientId(),
-                     provider.GetName().c_str(), static_cast<int>(provider.GetType()),
+                     provider.GetName().c_str(), UTILS::Narrow<int>(provider.GetType()),
                      provider.GetClientIconPath().c_str(), provider.GetCountriesDBString().c_str(),
                      provider.GetLanguagesDBString().c_str());
     else
@@ -632,7 +634,7 @@ bool CPVRDatabase::Persist(CPVRProvider& provider, bool updateRecord /* = false 
                      "iType, sIconPath, sCountries, sLanguages) "
                      "VALUES (%i, %i, %i, '%s', %i, '%s', '%s', '%s');",
                      provider.GetDatabaseId(), provider.GetUniqueId(), provider.GetClientId(),
-                     provider.GetName().c_str(), static_cast<int>(provider.GetType()),
+                     provider.GetName().c_str(), UTILS::Narrow<int>(provider.GetType()),
                      provider.GetClientIconPath().c_str(), provider.GetCountriesDBString().c_str(),
                      provider.GetLanguagesDBString().c_str());
 
@@ -641,7 +643,7 @@ bool CPVRDatabase::Persist(CPVRProvider& provider, bool updateRecord /* = false 
     /* set the provider id if it was <= 0 */
     if (bReturn && provider.GetDatabaseId() <= 0)
     {
-      provider.SetDatabaseId(static_cast<int>(m_pDS->lastinsertid()));
+      provider.SetDatabaseId(UTILS::Narrow<int>(m_pDS->lastinsertid()));
     }
   }
 
@@ -889,7 +891,7 @@ int CPVRDatabase::GetGroups(CPVRChannelGroups& results, const std::string& query
         group->m_iLastWatched = static_cast<time_t>(m_pDS->fv("iLastWatched").get_asInt());
         group->m_bHidden = m_pDS->fv("bIsHidden").get_asBool();
         group->m_iPosition = m_pDS->fv("iPosition").get_asInt();
-        group->m_iLastOpened = static_cast<uint64_t>(m_pDS->fv("iLastOpened").get_asInt64());
+        group->m_iLastOpened = UTILS::Narrow<uint64_t>(m_pDS->fv("iLastOpened").get_asInt64());
         group->m_isUserSetName = m_pDS->fv("bIsUserSetName").get_asBool();
         group->m_clientGroupName = m_pDS->fv("sClientName").get_asString();
         group->m_iClientPosition = m_pDS->fv("iClientPosition").get_asInt();
@@ -981,12 +983,12 @@ std::vector<std::shared_ptr<CPVRChannelGroupMember>> CPVRDatabase::Get(
         newMember->m_iGroupClientID = group.GetClientID();
         newMember->m_bIsRadio = m_pDS->fv("bIsRadio").get_asBool();
         newMember->m_channelNumber = {
-            static_cast<unsigned int>(m_pDS->fv("iChannelNumber").get_asInt()),
-            static_cast<unsigned int>(m_pDS->fv("iSubChannelNumber").get_asInt())};
+            UTILS::Narrow<unsigned int>(m_pDS->fv("iChannelNumber").get_asInt()),
+            UTILS::Narrow<unsigned int>(m_pDS->fv("iSubChannelNumber").get_asInt())};
         newMember->m_clientChannelNumber = {
-            static_cast<unsigned int>(m_pDS->fv("iClientChannelNumber").get_asInt()),
-            static_cast<unsigned int>(m_pDS->fv("iClientSubChannelNumber").get_asInt())};
-        newMember->m_iOrder = static_cast<int>(m_pDS->fv("iOrder").get_asInt());
+            UTILS::Narrow<unsigned int>(m_pDS->fv("iClientChannelNumber").get_asInt()),
+            UTILS::Narrow<unsigned int>(m_pDS->fv("iClientSubChannelNumber").get_asInt())};
+        newMember->m_iOrder = m_pDS->fv("iOrder").get_asInt();
         newMember->SetGroupName(group.GroupName());
 
         results.emplace_back(newMember);
@@ -1147,7 +1149,7 @@ bool CPVRDatabase::Persist(CPVRChannelGroup& group)
                             "sClientName, iClientPosition) VALUES (%i, %i, '%s', "
                             "%u, %i, %i, %llu, %i, %i, '%s', %i)",
                             (group.IsRadio() ? 1 : 0), group.GroupType(), group.GroupName().c_str(),
-                            static_cast<unsigned int>(group.LastWatched()), group.IsHidden(),
+                            UTILS::Narrow<unsigned int>(group.LastWatched()), group.IsHidden(),
                             group.GetPosition(), group.LastOpened(), group.GetClientID(),
                             (group.IsUserSetName() ? 1 : 0), group.ClientGroupName().c_str(),
                             group.GetClientPosition());
@@ -1157,7 +1159,7 @@ bool CPVRDatabase::Persist(CPVRChannelGroup& group)
           "bIsHidden, iPosition, iLastOpened, iClientId, bIsUserSetName, sClientName, "
           "iClientPosition) VALUES (%i, %i, %i, '%s', %u, %i, %i, %llu, %i, %i, '%s', %i)",
           group.GroupID(), (group.IsRadio() ? 1 : 0), group.GroupType(), group.GroupName().c_str(),
-          static_cast<unsigned int>(group.LastWatched()), group.IsHidden(), group.GetPosition(),
+          UTILS::Narrow<unsigned int>(group.LastWatched()), group.IsHidden(), group.GetPosition(),
           group.LastOpened(), group.GetClientID(), (group.IsUserSetName() ? 1 : 0),
           group.ClientGroupName().c_str(), group.GetClientPosition());
 
@@ -1165,7 +1167,7 @@ bool CPVRDatabase::Persist(CPVRChannelGroup& group)
 
     // set the group ID for new groups
     if (bReturn && group.IsNew())
-      group.SetGroupID(static_cast<int>(m_pDS->lastinsertid()));
+      group.SetGroupID(UTILS::Narrow<int>(m_pDS->lastinsertid()));
   }
   else
     bReturn = true;
@@ -1218,7 +1220,7 @@ bool CPVRDatabase::Persist(CPVRChannel& channel, bool bCommit)
         (channel.IsUserSetIcon() ? 1 : 0), (channel.IsUserSetName() ? 1 : 0),
         (channel.IsLocked() ? 1 : 0), channel.IconPath().c_str(), channel.ChannelName().c_str(), 0,
         (channel.EPGEnabled() ? 1 : 0), channel.EPGScraper().c_str(),
-        static_cast<unsigned int>(channel.LastWatched()), channel.ClientID(), channel.EpgID(),
+        UTILS::Narrow<unsigned int>(channel.LastWatched()), channel.ClientID(), channel.EpgID(),
         channel.HasArchive(), channel.ClientProviderUid(), channel.IsUserSetHidden() ? 1 : 0,
         channel.LastWatchedGroupId(), dateTimeAdded.c_str());
   }
@@ -1237,7 +1239,7 @@ bool CPVRDatabase::Persist(CPVRChannel& channel, bool bCommit)
         (channel.IsUserSetIcon() ? 1 : 0), (channel.IsUserSetName() ? 1 : 0),
         (channel.IsLocked() ? 1 : 0), channel.ClientIconPath().c_str(),
         channel.ChannelName().c_str(), 0, (channel.EPGEnabled() ? 1 : 0),
-        channel.EPGScraper().c_str(), static_cast<unsigned int>(channel.LastWatched()),
+        channel.EPGScraper().c_str(), UTILS::Narrow<unsigned int>(channel.LastWatched()),
         channel.ClientID(), strValue.c_str(), channel.EpgID(), channel.HasArchive(),
         channel.ClientProviderUid(), channel.IsUserSetHidden() ? 1 : 0,
         channel.LastWatchedGroupId(), dateTimeAdded.c_str());
@@ -1259,7 +1261,7 @@ bool CPVRDatabase::UpdateLastWatched(const CPVRChannel& channel, int groupId)
   std::unique_lock<CCriticalSection> lock(m_critSection);
   const std::string strQuery = PrepareSQL(
       "UPDATE channels SET iLastWatched = %u, iLastWatchedGroupId = %i WHERE idChannel = %i",
-      static_cast<unsigned int>(channel.LastWatched()), groupId, channel.ChannelID());
+      UTILS::Narrow<unsigned int>(channel.LastWatched()), groupId, channel.ChannelID());
   return ExecuteQuery(strQuery);
 }
 
@@ -1268,7 +1270,7 @@ bool CPVRDatabase::UpdateLastWatched(const CPVRChannelGroup& group)
   std::unique_lock<CCriticalSection> lock(m_critSection);
   const std::string strQuery =
       PrepareSQL("UPDATE channelgroups SET iLastWatched = %u WHERE idGroup = %i",
-                 static_cast<unsigned int>(group.LastWatched()), group.GroupID());
+                 UTILS::Narrow<unsigned int>(group.LastWatched()), group.GroupID());
   return ExecuteQuery(strQuery);
 }
 
@@ -1385,7 +1387,7 @@ bool CPVRDatabase::Persist(CPVRTimerInfoTag& timer)
   if (bReturn && timer.m_iClientIndex == PVR_TIMER_NO_CLIENT_INDEX)
   {
     // index must be negative for local timers!
-    timer.m_iClientIndex = -static_cast<int>(m_pDS->lastinsertid());
+    timer.m_iClientIndex = -UTILS::Narrow<int>(m_pDS->lastinsertid());
   }
 
   return bReturn;

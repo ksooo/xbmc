@@ -11,6 +11,7 @@
 #include "ServiceBroker.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 
 #include <algorithm>
@@ -19,6 +20,7 @@
 #include <string>
 
 using namespace PVR;
+using namespace KODI;
 using namespace std::chrono_literals;
 
 CPVRChannelNumberInputHandler::CPVRChannelNumberInputHandler()
@@ -96,7 +98,7 @@ void CPVRChannelNumberInputHandler::AppendChannelNumberCharacter(char cCharacter
       return;
   }
 
-  if (m_inputBuffer.size() == static_cast<size_t>(m_iMaxDigits))
+  if (UTILS::Narrow<int>(m_inputBuffer.size()) == m_iMaxDigits)
   {
     m_inputBuffer.erase(m_inputBuffer.begin());
     SetLabel(m_inputBuffer);

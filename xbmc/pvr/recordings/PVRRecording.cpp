@@ -23,6 +23,7 @@
 #include "pvr/timers/PVRTimers.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #include "utils/log.h"
@@ -33,6 +34,7 @@
 #include <string>
 #include <vector>
 
+using namespace KODI;
 using namespace PVR;
 
 using namespace std::chrono_literals;
@@ -336,7 +338,7 @@ bool CPVRRecording::SetResumePoint(const CBookmark& resumePoint)
   if (client && client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
   {
     if (client->SetRecordingLastPlayedPosition(
-            *this, static_cast<int>(std::lrint(resumePoint.timeInSeconds))) != PVR_ERROR_NO_ERROR)
+            *this, UTILS::Narrow<int>(std::lrint(resumePoint.timeInSeconds))) != PVR_ERROR_NO_ERROR)
       return false;
   }
 
@@ -351,7 +353,7 @@ bool CPVRRecording::SetResumePoint(double timeInSeconds,
   if (client && client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
   {
     if (client->SetRecordingLastPlayedPosition(
-            *this, static_cast<int>(std::lrint(timeInSeconds))) != PVR_ERROR_NO_ERROR)
+            *this, UTILS::Narrow<int>(std::lrint(timeInSeconds))) != PVR_ERROR_NO_ERROR)
       return false;
   }
 

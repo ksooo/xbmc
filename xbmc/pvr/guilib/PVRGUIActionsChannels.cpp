@@ -98,9 +98,8 @@ void TriggerChannelSwitchAction(const CPVRChannelNumber& channelNumber)
 {
   CServiceBroker::GetAppMessenger()->SendMsg(
       TMSG_GUI_ACTION, WINDOW_INVALID, -1,
-      static_cast<void*>(new CAction(ACTION_CHANNEL_SWITCH,
-                                     static_cast<float>(channelNumber.GetChannelNumber()),
-                                     static_cast<float>(channelNumber.GetSubChannelNumber()))));
+      static_cast<void*>(new CAction(ACTION_CHANNEL_SWITCH, channelNumber.GetChannelNumber(),
+                                     channelNumber.GetSubChannelNumber())));
 }
 } // unnamed namespace
 

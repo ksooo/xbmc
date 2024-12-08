@@ -18,6 +18,7 @@
 #include "pvr/epg/EpgDatabase.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #include "utils/log.h"
@@ -28,6 +29,7 @@
 #include <string>
 #include <vector>
 
+using namespace KODI;
 using namespace PVR;
 
 const std::string CPVREpgInfoTag::IMAGE_OWNER_PATTERN = "epgtag_{}";
@@ -103,7 +105,7 @@ CPVREpgInfoTag::CPVREpgInfoTag(const EPG_TAG& data,
     if (m_channelData->ClientId() != iClientId)
       CLog::LogF(LOGERROR, "Client id mismatch (channel: {}, epg: {})!", m_channelData->ClientId(),
                  iClientId);
-    if (m_channelData->UniqueClientChannelId() != static_cast<int>(data.iUniqueChannelId))
+    if (m_channelData->UniqueClientChannelId() != UTILS::Narrow<int>(data.iUniqueChannelId))
       CLog::LogF(LOGERROR, "Channel uid mismatch (channel: {}, epg: {})!",
                  m_channelData->UniqueClientChannelId(), data.iUniqueChannelId);
   }

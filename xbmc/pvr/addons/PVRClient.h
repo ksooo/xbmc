@@ -547,11 +547,11 @@ public:
   /*!
    * @brief Read from an open live stream.
    * @param lpBuf The buffer to store the data in.
-   * @param uiBufSize The amount of bytes to read.
+   * @param iBufSize The amount of bytes to read.
    * @param iRead The amount of bytes that were actually read from the stream.
    * @return PVR_ERROR_NO_ERROR on success, respective error code otherwise.
    */
-  PVR_ERROR ReadLiveStream(void* lpBuf, int64_t uiBufSize, int& iRead);
+  PVR_ERROR ReadLiveStream(void* lpBuf, int64_t iBufSize, int& iRead);
 
   /*!
    * @brief Seek in a live stream on a backend.
@@ -667,11 +667,11 @@ public:
    * @brief Read from an open recording stream.
    * @param streamId The id of the stream to read, as returned by OpenRecordedStream.
    * @param lpBuf The buffer to store the data in.
-   * @param uiBufSize The amount of bytes to read.
+   * @param iBufSize The amount of bytes to read.
    * @param iRead The amount of bytes that were actually read from the stream.
    * @return PVR_ERROR_NO_ERROR on success, respective error code otherwise.
    */
-  PVR_ERROR ReadRecordedStream(int64_t streamId, void* lpBuf, int64_t uiBufSize, int& iRead);
+  PVR_ERROR ReadRecordedStream(int64_t streamId, void* lpBuf, int64_t iBufSize, int& iRead);
 
   /*!
    * @brief Seek in a recording stream on a backend.

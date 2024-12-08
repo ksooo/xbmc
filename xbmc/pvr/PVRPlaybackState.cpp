@@ -30,12 +30,14 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "threads/Timer.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 #include <algorithm>
 #include <memory>
 #include <mutex>
 
+using namespace KODI;
 using namespace PVR;
 
 class CPVRPlaybackState::CLastWatchedUpdateTimer : public CTimer, private ITimerCallback
@@ -655,7 +657,8 @@ CDateTime CPVRPlaybackState::GetPlaybackTime(int iClientID, int iUniqueChannelID
     // playing an epg tag on requested channel
     return epgTag->StartAsUTC() +
            CDateTimeSpan(0, 0, 0,
-                         static_cast<int>(CServiceBroker::GetDataCacheCore().GetPlayTime()) / 1000);
+                         UTILS::Narrow<int>(CServiceBroker::GetDataCacheCore().GetPlayTime()) /
+                             1000);
   }
 
   // not playing / playing live / playing timeshifted
