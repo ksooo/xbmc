@@ -19,6 +19,7 @@
 #include "cores/VideoPlayer/DVDInputStreams/DVDFactoryInputStream.h"
 #include "cores/VideoPlayer/DVDStreamInfo.h"
 #include "music/tags/TagLoaderTagLib.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -319,7 +320,7 @@ int VideoPlayerCodec::ReadPCM(uint8_t* pBuffer, size_t size, size_t* actualsize)
     *actualsize = nLen;
     if (m_needConvert)
     {
-      int samples = *actualsize / (m_bitsPerSample>>3);
+      const int samples = KODI::UTILS::Narrow<int>(*actualsize / (m_bitsPerSample >> 3));
       int frames = samples / m_channels;
       m_pResampler->Resample(&pBuffer, frames, m_audioFrame.data, frames, 1.0);
       for (int i=0; i<m_planes; i++)
@@ -379,7 +380,7 @@ int VideoPlayerCodec::ReadPCM(uint8_t* pBuffer, size_t size, size_t* actualsize)
   {
     if (m_needConvert)
     {
-      int samples = *actualsize / (m_bitsPerSample>>3);
+      const int samples = KODI::UTILS::Narrow<int>(*actualsize / (m_bitsPerSample >> 3));
       int frames = samples / m_channels;
       m_pResampler->Resample(&pBuffer, frames, m_audioFrame.data, frames, 1.0);
       for (int i=0; i<m_planes; i++)

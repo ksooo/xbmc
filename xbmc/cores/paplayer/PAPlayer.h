@@ -93,13 +93,13 @@ private:
 
     bool m_started;                      /* if playback of this stream has been started */
     bool m_finishing;                    /* if this stream is finishing */
-    int m_framesSent;                    /* number of frames sent to the stream */
+    int64_t m_framesSent; /* number of frames sent to the stream */
     int m_prepareNextAtFrame;            /* when to prepare the next stream */
     bool m_prepareTriggered;             /* if the next stream has been prepared */
-    int m_playNextAtFrame;               /* when to start playing the next stream */
+    int64_t m_playNextAtFrame; /* when to start playing the next stream */
     bool m_playNextTriggered;            /* if this stream has started the next one */
     bool m_fadeOutTriggered;             /* if the stream has been told to fade out */
-    int m_seekNextAtFrame;               /* the FF/RR sample to seek at */
+    int64_t m_seekNextAtFrame; /* the FF/RR sample to seek at */
     int m_seekFrame;                     /* the exact position to seek too, -1 for none */
 
     IAE::StreamPtr m_stream; /* the playback stream */

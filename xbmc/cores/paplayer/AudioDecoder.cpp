@@ -17,6 +17,7 @@
 #include "music/tags/MusicInfoTag.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
 
@@ -272,7 +273,8 @@ int CAudioDecoder::ReadSamples(int numsamples)
       if (result != READ_ERROR && readSize)
       {
         // move it into our buffer
-        m_pcmBuffer.WriteData((char *)m_pcmInputBuffer, readSize);
+        m_pcmBuffer.WriteData(reinterpret_cast<char*>(m_pcmInputBuffer),
+                              KODI::UTILS::Narrow<unsigned int>(readSize));
 
         // update status
         if (m_status == STATUS_QUEUING && m_pcmBuffer.getMaxReadSize() > m_pcmBuffer.getSize() * 0.9)
