@@ -66,7 +66,7 @@ public:
     }
   }
 
-  double GetLastError(unsigned int &time)
+  double GetLastError(uint64_t& time)
   {
     time = m_timer.GetStartTime().time_since_epoch().count();
     return m_lastError;

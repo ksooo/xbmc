@@ -15,6 +15,7 @@
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "utils/EndianSwap.h"
 #include "utils/MemUtils.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 #include <algorithm>
@@ -283,7 +284,7 @@ void CActiveAESink::StateMachine(int signal, Protocol *port, Message *msg)
             reply.hasVolume = m_sink->HasVolume();
             m_state = S_TOP_CONFIGURED_IDLE;
             m_extTimeout = 10s;
-            m_sinkLatency = (int64_t)(reply.latency * 1000);
+            m_sinkLatency = KODI::UTILS::Narrow<int>(reply.latency * 1000);
             msg->Reply(CSinkControlProtocol::ACC, &reply, sizeof(SinkReply));
           }
           else

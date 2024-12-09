@@ -11,6 +11,7 @@
 #include "ActiveAE.h"
 #include "cores/AudioEngine/Interfaces/AESound.h"
 #include "filesystem/File.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 extern "C" {
@@ -120,7 +121,7 @@ bool CActiveAESound::Prepare()
     return false;
   }
   m_isSeekPossible = m_pFile->IoControl(IOCTRL_SEEK_POSSIBLE, NULL) != 0;
-  m_fileSize = m_pFile->GetLength();
+  m_fileSize = KODI::UTILS::Narrow<int>(m_pFile->GetLength());
   return true;
 }
 
@@ -138,11 +139,11 @@ int CActiveAESound::GetChunkSize()
 int CActiveAESound::Read(void *h, uint8_t* buf, int size)
 {
   CFile *pFile = static_cast<CActiveAESound*>(h)->m_pFile;
-  int len = pFile->Read(buf, size);
+  const ssize_t len = pFile->Read(buf, size);
   if (len == 0)
     return AVERROR_EOF;
   else
-    return len;
+    return KODI::UTILS::Narrow<int>(len);
 }
 
 int64_t CActiveAESound::Seek(void *h, int64_t pos, int whence)

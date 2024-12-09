@@ -220,7 +220,7 @@ protected:
     double m_bufferedTime;
     double m_resampleRatio;
     double m_syncError;
-    unsigned int m_errorTime;
+    uint64_t m_errorTime;
     CAESyncInfo::AESyncState m_syncState;
   };
   std::vector<StreamStats> m_streamStats;

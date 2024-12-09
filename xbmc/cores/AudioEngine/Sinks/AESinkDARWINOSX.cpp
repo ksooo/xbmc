@@ -16,6 +16,7 @@
 #include "cores/AudioEngine/Utils/AERingBuffer.h"
 #include "threads/SystemClock.h"
 #include "utils/MemUtils.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/TimeUtils.h"
 #include "utils/log.h"
@@ -238,7 +239,8 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
 
     if (devEnum.IsPlanar())
     {
-      numOutputChannels = std::min((size_t)format.m_channelLayout.Count(), (size_t)devEnum.GetNumPlanes());
+      numOutputChannels = KODI::UTILS::Narrow<UInt32>(
+          std::min(format.m_channelLayout.Count(), devEnum.GetNumPlanes()));
       m_planes = numOutputChannels;
       CLog::Log(LOGDEBUG, "{} Found planar audio with {} channels using {} of them.", __FUNCTION__,
                 (unsigned int)devEnum.GetNumPlanes(), (unsigned int)numOutputChannels);
@@ -512,8 +514,9 @@ OSStatus CAESinkDARWINOSX::renderCallback(AudioDeviceID inDevice, const AudioTim
        We reverse the float->S16LE conversion done in the stream or device */
       static const float mul = 1.0f / (INT16_MAX + 1);
 
-      size_t wanted = outOutputData->mBuffers[0].mDataByteSize / sizeof(float) * sizeof(int16_t);
-      size_t bytes = std::min((size_t)sink->m_buffer->GetReadSize(), wanted);
+      unsigned int wanted =
+          outOutputData->mBuffers[0].mDataByteSize / sizeof(float) * sizeof(int16_t);
+      unsigned int bytes = std::min(sink->m_buffer->GetReadSize(), wanted);
       for (unsigned int j = 0; j < bytes / sizeof(int16_t); j++)
       {
         for (unsigned int i = startIdx; i < endIdx; i++)

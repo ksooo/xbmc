@@ -34,7 +34,7 @@ public:
   double delay;
   double error;
   double rr;
-  unsigned int errortime;
+  uint64_t errortime;
   enum AESyncState
   {
     SYNC_OFF,

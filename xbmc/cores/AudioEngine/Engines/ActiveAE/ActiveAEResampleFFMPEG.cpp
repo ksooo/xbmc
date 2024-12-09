@@ -6,8 +6,10 @@
  *  See LICENSES/README.md for more information.
  */
 
-#include "cores/AudioEngine/Utils/AEUtil.h"
 #include "ActiveAEResampleFFMPEG.h"
+
+#include "cores/AudioEngine/Utils/AEUtil.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 extern "C" {
@@ -282,13 +284,13 @@ int64_t CActiveAEResampleFFMPEG::GetDelay(int64_t base)
 
 int CActiveAEResampleFFMPEG::GetBufferedSamples()
 {
-  return av_rescale_rnd(swr_get_delay(m_pContext, m_src_rate),
-                                    m_dst_rate, m_src_rate, AV_ROUND_UP);
+  return KODI::UTILS::Narrow<int>(
+      av_rescale_rnd(swr_get_delay(m_pContext, m_src_rate), m_dst_rate, m_src_rate, AV_ROUND_UP));
 }
 
 int CActiveAEResampleFFMPEG::CalcDstSampleCount(int src_samples, int dst_rate, int src_rate)
 {
-  return av_rescale_rnd(src_samples, dst_rate, src_rate, AV_ROUND_UP);
+  return KODI::UTILS::Narrow<int>(av_rescale_rnd(src_samples, dst_rate, src_rate, AV_ROUND_UP));
 }
 
 int CActiveAEResampleFFMPEG::GetSrcBufferSize(int samples)

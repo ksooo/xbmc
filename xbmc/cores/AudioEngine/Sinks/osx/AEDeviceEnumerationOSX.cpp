@@ -11,6 +11,7 @@
 #include "cores/AudioEngine/Sinks/darwin/CoreAudioHelpers.h"
 #include "cores/AudioEngine/Sinks/osx/CoreAudioChannelLayout.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -186,7 +187,7 @@ enum AEDeviceType AEDeviceEnumerationOSX::getDeviceType(bool hasPassthroughForma
 CADeviceList AEDeviceEnumerationOSX::GetDeviceInfoList() const
 {
   CADeviceList list;
-  UInt32 numDevices = m_caStreamInfos.size();
+  size_t numDevices = m_caStreamInfos.size();
   if (m_isPlanar)
     numDevices = 1;
 
@@ -232,9 +233,9 @@ CADeviceList AEDeviceEnumerationOSX::GetDeviceInfoList() const
 unsigned int AEDeviceEnumerationOSX::GetNumPlanes() const
 {
   if (m_isPlanar)
-    return m_caStreamInfos.size();
+    return KODI::UTILS::Narrow<unsigned int>(m_caStreamInfos.size());
   else
-    return 1;//interleaved - one plane
+    return 1; // interleaved - one plane
 }
 
 bool AEDeviceEnumerationOSX::hasSampleRate(const AESampleRateList &list, const unsigned int samplerate) const
@@ -588,7 +589,7 @@ bool AEDeviceEnumerationOSX::FindSuitableFormatForStream(UInt32 &streamIdx, cons
   if (streamIdx == INT_MAX)
   {
     streamIdxStart = 0;
-    streamIdxEnd = m_caStreamInfos.size();
+    streamIdxEnd = KODI::UTILS::Narrow<UInt32>(m_caStreamInfos.size());
     streamIdxCurrent = 0;
   }
 
@@ -637,7 +638,8 @@ bool AEDeviceEnumerationOSX::FindSuitableFormatForStream(UInt32 &streamIdx, cons
   }
 
   if (m_isPlanar)
-    outputFormat.mChannelsPerFrame = std::min((size_t)format.m_channelLayout.Count(), m_caStreamInfos.size());
+    outputFormat.mChannelsPerFrame = KODI::UTILS::Narrow<UInt32>(
+        std::min(static_cast<size_t>(format.m_channelLayout.Count()), m_caStreamInfos.size()));
 
   return formatFound;
 }

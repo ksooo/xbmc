@@ -74,7 +74,8 @@ void CActiveAEStream::InitRemapper()
 {
   // check if input format follows ffmpeg channel mask
   bool needRemap = false;
-  unsigned int avLast, avCur = 0;
+  uint64_t avLast{0};
+  uint64_t avCur{0};
   for(unsigned int i=0; i<m_format.m_channelLayout.Count(); i++)
   {
     avLast = avCur;
