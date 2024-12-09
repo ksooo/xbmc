@@ -125,7 +125,8 @@ void ff_avutil_log(void* ptr, int level, const char* format, va_list va)
   }
 
   buffer += message;
-  int pos, start = 0;
+  size_t pos{0};
+  size_t start{0};
   while ((pos = buffer.find_first_of('\n', start)) >= 0)
   {
     if (pos > start)
