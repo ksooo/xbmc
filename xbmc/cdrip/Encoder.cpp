@@ -42,7 +42,7 @@ bool CEncoder::EncoderInit(const std::string& strFile, int iInChannels, int iInR
 
 ssize_t CEncoder::EncoderEncode(uint8_t* pbtStream, size_t nNumBytesRead)
 {
-  const int iBytes = Encode(pbtStream, nNumBytesRead);
+  const ssize_t iBytes = Encode(pbtStream, nNumBytesRead);
   if (iBytes < 0)
   {
     CLog::Log(LOGERROR, "CEncoder::{} - Internal encoder error: {}", __func__, iBytes);

@@ -14,6 +14,7 @@
 #include "cores/FFmpeg.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 #include "utils/URIUtils.h"
@@ -165,7 +166,8 @@ bool CEncoderFFmpeg::Init()
       throw FFMpegException("Could not allocate output frame samples (error '{}')",
                             FFMpegErrorToString(err));
 
-    avcodec_fill_audio_frame(m_bufferFrame, m_iInChannels, m_inFormat, m_buffer, m_neededBytes, 0);
+    avcodec_fill_audio_frame(m_bufferFrame, m_iInChannels, m_inFormat, m_buffer,
+                             KODI::UTILS::Narrow<int>(m_neededBytes), 0);
 
     if (m_needConversion)
     {
@@ -194,7 +196,7 @@ bool CEncoderFFmpeg::Init()
                               FFMpegErrorToString(err));
 
       avcodec_fill_audio_frame(m_resampledFrame, m_iInChannels, m_outFormat, m_resampledBuffer,
-                               m_resampledBufferSize, 0);
+                               KODI::UTILS::Narrow<int>(m_resampledBufferSize), 0);
     }
 
     /* set the tags */

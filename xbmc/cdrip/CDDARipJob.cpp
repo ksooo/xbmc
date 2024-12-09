@@ -27,6 +27,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "storage/MediaManager.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 #include "utils/log.h"
@@ -177,7 +178,7 @@ int CCDDARipJob::RipChunk(CFile& reader, const std::unique_ptr<CEncoder>& encode
   if (reader.GetPosition() == reader.GetLength())
     return 2;
 
-  return -(1 - encres);
+  return -(1 - KODI::UTILS::Narrow<int>(encres));
 }
 
 std::unique_ptr<CEncoder> CCDDARipJob::SetupEncoder(CFile& reader)
