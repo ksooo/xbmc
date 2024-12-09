@@ -9,6 +9,7 @@
 #include "RenderBufferOpenGL.h"
 
 #include "cores/RetroPlayer/rendering/RenderContext.h"
+#include "utils/Narrow.h"
 
 using namespace KODI;
 using namespace RETRO;
@@ -50,7 +51,7 @@ bool CRenderBufferOpenGL::UploadTexture()
 
   glBindTexture(m_textureTarget, m_textureId);
 
-  const int stride = GetFrameSize() / m_height;
+  const int stride = UTILS::Narrow<int>(GetFrameSize() / m_height);
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, m_bpp);
 
