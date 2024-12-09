@@ -23,6 +23,7 @@
 #include "settings/SettingsComponent.h"
 #include "settings/lib/SettingsManager.h"
 #include "utils/FileUtils.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/XMLUtils.h"
 #include "utils/log.h"
@@ -208,7 +209,7 @@ int CPlayerCoreFactory::GetPlayerIndex(const std::string& strCoreName) const
     for(size_t i = 0; i < m_vecPlayerConfigs.size(); i++)
     {
       if (StringUtils::EqualsNoCase(m_vecPlayerConfigs[i]->GetName(), strRealCoreName))
-        return i;
+        return KODI::UTILS::Narrow<int>(i);
     }
     CLog::Log(LOGWARNING, "CPlayerCoreFactory::GetPlayer({}): no such player: {}", strCoreName,
               strRealCoreName);
