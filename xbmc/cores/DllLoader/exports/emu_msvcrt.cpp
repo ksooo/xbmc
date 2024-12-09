@@ -56,6 +56,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "util/EmuFileWrapper.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 #ifndef TARGET_POSIX
 #include "utils/CharsetConverter.h"
@@ -342,7 +343,7 @@ extern "C"
   {
     //ported from WINE code
     PFV *tmp;
-    int len;
+    long len;
 
     if (!start || !*start || !end || !*end)
     {
@@ -401,12 +402,12 @@ extern "C"
     tmp[2048 - 1] = 0;
     CLog::Log(LOGDEBUG, "  msg: {}", tmp);
 
-    return strlen(tmp);
+    return KODI::UTILS::Narrow<int>(strlen(tmp));
   }
 
   char *dll_fullpath(char *absPath, const char *relPath, size_t maxLength)
   {
-    unsigned int len = strlen(relPath);
+    size_t len = strlen(relPath);
     if (len > maxLength && absPath != NULL) return NULL;
 
     // dll has to make sure it uses the correct path for now
@@ -573,13 +574,13 @@ extern "C"
 
         return -1;
       }
-      return ret;
+      return KODI::UTILS::Narrow<int>(ret);
     }
     else if (!IS_STD_DESCRIPTOR(fd))
     {
       // it might be something else than a file, or the file is not emulated
       // let the operating system handle it
-      return read(fd, buffer, uiSize);
+      return KODI::UTILS::Narrow<int>(read(fd, buffer, uiSize));
     }
     CLog::Log(LOGERROR, "{} emulated function failed", __FUNCTION__);
     errno = EBADF;
@@ -605,13 +606,13 @@ extern "C"
 
         return -1;
       }
-      return ret;
+      return KODI::UTILS::Narrow<int>(ret);
     }
     else if (!IS_STD_DESCRIPTOR(fd))
     {
       // it might be something else than a file, or the file is not emulated
       // let the operating system handle it
-      return write(fd, buffer, uiSize);
+      return KODI::UTILS::Narrow<int>(write(fd, buffer, uiSize));
     }
     CLog::Log(LOGERROR, "{} emulated function failed", __FUNCTION__);
     errno = EBADF;
@@ -1098,7 +1099,7 @@ extern "C"
           break;
         read += r;
       } while (bufSize > read);
-      return read / size;
+      return KODI::UTILS::Narrow<int>(read / size);
     }
     CLog::Log(LOGERROR, "{} emulated function failed", __FUNCTION__);
     return 0;
@@ -1217,7 +1218,8 @@ extern "C"
       if (g_emuFileWrapper.StreamIsEmulatedFile(stream))
       {
         size_t len = strlen(szLine);
-        return dll_fwrite(static_cast<const void*>(szLine), sizeof(char), len, stream);
+        return KODI::UTILS::Narrow<int>(
+            dll_fwrite(static_cast<const void*>(szLine), sizeof(char), len, stream));
       }
     }
 
@@ -1406,7 +1408,7 @@ extern "C"
   {
     std::string buffer = StringUtils::FormatV(format, va);
     CLog::Log(LOGDEBUG, "  msg: {}", buffer);
-    return buffer.length();
+    return KODI::UTILS::Narrow<int>(buffer.length());
   }
 
   int dll_vfprintf(FILE *stream, const char *format, va_list va)
@@ -1422,18 +1424,18 @@ extern "C"
     if (IS_STDOUT_STREAM(stream) || IS_STDERR_STREAM(stream) || !IS_VALID_STREAM(stream))
     {
       CLog::Log(LOGINFO, "  msg: {}", tmp);
-      return strlen(tmp);
+      return KODI::UTILS::Narrow<int>(strlen(tmp));
     }
     else
     {
       CFile* pFile = g_emuFileWrapper.GetFileXbmcByStream(stream);
       if (pFile != NULL)
       {
-        int len = strlen(tmp);
+        size_t len = strlen(tmp);
         // replace all '\n' occurrences with '\r\n'...
         char tmp2[2048];
         int j = 0;
-        for (int i = 0; i < len; i++)
+        for (size_t i = 0; i < len; i++)
         {
           if (j == 2047)
           { // out of space
@@ -1455,12 +1457,12 @@ extern "C"
         tmp2[j] = 0;
         len = strlen(tmp2);
         pFile->Write(tmp2, len);
-        return len;
+        return KODI::UTILS::Narrow<int>(len);
       }
     }
 
     CLog::Log(LOGERROR, "{} emulated function failed", __FUNCTION__);
-    return strlen(tmp);
+    return KODI::UTILS::Narrow<int>(strlen(tmp));
   }
 
   int dll_fscanf(FILE* stream, const char* format, ...)
@@ -1824,7 +1826,7 @@ extern "C"
         if (!var)
           return -1;
 
-        int size = strlen(envstring) + 1;
+        size_t size = strlen(envstring) + 1;
         char *value = (char*)malloc(size);
 
         if (!value)
