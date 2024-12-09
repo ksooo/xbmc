@@ -19,6 +19,7 @@
 #include "platform/Filesystem.h"
 #include "utils/Crc32.h"
 #include "utils/HttpHeader.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
@@ -726,7 +727,7 @@ char** Interface_Filesystem::http_header_get_values(void* kodiBase,
 
 
   std::vector<std::string> values = static_cast<CHttpHeader*>(handle)->GetValues(param);
-  *length = values.size();
+  *length = KODI::UTILS::Narrow<int>(values.size());
   char** ret = static_cast<char**>(malloc(sizeof(char*) * values.size()));
   for (int i = 0; i < *length; ++i)
   {
@@ -1106,7 +1107,7 @@ char** Interface_Filesystem::get_property_values(
   };
   std::vector<std::string> values =
       static_cast<CFile*>(file)->GetPropertyValues(internalType, name);
-  *numValues = values.size();
+  *numValues = KODI::UTILS::Narrow<int>(values.size());
   char** ret = static_cast<char**>(malloc(sizeof(char*) * values.size()));
   for (int i = 0; i < *numValues; ++i)
   {

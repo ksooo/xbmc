@@ -31,6 +31,7 @@
 #include "settings/SettingsComponent.h"
 #include "settings/lib/SettingSection.h"
 #include "settings/lib/SettingsManager.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #include "utils/log.h"
@@ -305,7 +306,8 @@ bool CGUIDialogAddonSettings::ShowForMultipleInstances(const ADDON::AddonPtr& ad
     lastSelected = dialog->GetSelectedItem();
 
     item = dialog->GetSelectedFileItem();
-    ADDON::AddonInstanceId instanceId = item->GetProperty("id").asInteger();
+    ADDON::AddonInstanceId instanceId =
+        UTILS::Narrow<ADDON::AddonInstanceId>(item->GetProperty("id").asInteger());
 
     if (instanceId == addInstanceId)
     {
@@ -353,7 +355,7 @@ bool CGUIDialogAddonSettings::ShowForMultipleInstances(const ADDON::AddonPtr& ad
         if (CGUIDialogYesNo::ShowAndGetInput(10009, // Confirm add-on configuration removal
                                              label))
         {
-          instanceId = item->GetProperty("id").asInteger();
+          instanceId = UTILS::Narrow<ADDON::AddonInstanceId>(item->GetProperty("id").asInteger());
           addon->DeleteInstanceSettings(instanceId);
           CServiceBroker::GetAddonMgr().PublishInstanceRemoved(addon->ID(), instanceId);
         }

@@ -39,6 +39,7 @@
 #include "utils/FileOperationJob.h"
 #include "utils/FileUtils.h"
 #include "utils/JobManager.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
@@ -1147,8 +1148,9 @@ bool CAddonInstallJob::Install(const std::string &installFrom, const RepositoryP
       }
     }
 
-    if (ShouldCancel(std::distance(deps.begin(), it), totalSteps))
-        return false;
+    if (ShouldCancel(KODI::UTILS::Narrow<unsigned int>(std::distance(deps.begin(), it)),
+                     totalSteps))
+      return false;
   }
 
   SetText(g_localizeStrings.Get(24086));

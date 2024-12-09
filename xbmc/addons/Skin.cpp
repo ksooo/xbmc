@@ -28,6 +28,7 @@
 #include "settings/lib/SettingDefinitions.h"
 #include "threads/Timer.h"
 #include "utils/FileUtils.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
@@ -644,7 +645,7 @@ int CSkinInfo::TranslateString(const std::string &setting)
   CSkinSettingStringPtr skinString(new CSkinSettingString());
   skinString->name = setting;
 
-  int number = m_bools.size() + m_strings.size();
+  const int number = KODI::UTILS::Narrow<int>(m_bools.size() + m_strings.size());
   m_strings.insert(std::pair<int, CSkinSettingStringPtr>(number, skinString));
 
   return number;
@@ -698,7 +699,7 @@ int CSkinInfo::TranslateBool(const std::string &setting)
   CSkinSettingBoolPtr skinBool(new CSkinSettingBool());
   skinBool->name = setting;
 
-  int number = m_bools.size() + m_strings.size();
+  const int number = KODI::UTILS::Narrow<int>(m_bools.size() + m_strings.size());
   m_bools.insert(std::pair<int, CSkinSettingBoolPtr>(number, skinBool));
   m_settingsUpdateHandler->TriggerSave();
 

@@ -32,6 +32,7 @@
 #include "settings/lib/SettingSection.h"
 #include "settings/lib/SettingsManager.h"
 #include "utils/FileExtensionProvider.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/XBMCTinyXML.h"
@@ -1532,7 +1533,7 @@ bool CAddonSettings::ParseOldLabel(const TiXmlElement* element,
   if (parsed)
   {
     char* endptr;
-    labelId = std::strtol(labelString.c_str(), &endptr, 10);
+    labelId = KODI::UTILS::Narrow<int>(std::strtol(labelString.c_str(), &endptr, 10));
     if (endptr == nullptr || *endptr == '\0')
       return true;
   }
@@ -1572,7 +1573,8 @@ bool CAddonSettings::ParseOldCondition(const std::shared_ptr<const CSetting>& se
                    setting->GetId());
     return false;
   }
-  int32_t currentSettingIndex = std::distance(settings.cbegin(), settingIt);
+  const int32_t currentSettingIndex =
+      KODI::UTILS::Narrow<int32_t>(std::distance(settings.cbegin(), settingIt));
 
   CSettingDependencyConditionCombinationPtr dependencyCombination;
   std::vector<std::string> conditions;

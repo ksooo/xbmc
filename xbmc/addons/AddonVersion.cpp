@@ -7,6 +7,8 @@
  */
 
 #include "AddonVersion.h"
+
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -37,7 +39,7 @@ CAddonVersion::CAddonVersion(const std::string& version)
   size_t pos = mUpstream.find(':');
   if (pos != std::string::npos)
   {
-    mEpoch = strtol(mUpstream.c_str(), nullptr, 10);
+    mEpoch = KODI::UTILS::Narrow<int>(strtol(mUpstream.c_str(), nullptr, 10));
     mUpstream.erase(0, pos + 1);
   }
 

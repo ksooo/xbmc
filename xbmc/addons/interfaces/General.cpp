@@ -26,6 +26,7 @@
 #include "utils/Digest.h"
 #include "utils/LangCodeExpander.h"
 #include "utils/MemUtils.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -453,7 +454,7 @@ bool Interface_General::change_keyboard_layout(void* kodiBase, char** layout_nam
     {
       layouts.emplace_back(keyboardLayout->second);
       if (layoutName.asString() == activeLayout)
-        currentLayout = layouts.size() - 1;
+        currentLayout = KODI::UTILS::Narrow<unsigned int>(layouts.size()) - 1;
     }
   }
 

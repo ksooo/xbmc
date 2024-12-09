@@ -14,6 +14,7 @@
 #include "dialogs/GUIDialogFileBrowser.h"
 #include "settings/MediaSourceSettings.h"
 #include "storage/MediaManager.h"
+#include "utils/Narrow.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
 
@@ -187,7 +188,7 @@ bool Interface_GUIDialogFileBrowser::show_and_get_file_list(KODI_HANDLE kodiBase
                                                         use_thumbs, use_file_directories);
   if (bRet)
   {
-    *entries = pathsInt.size();
+    *entries = KODI::UTILS::Narrow<unsigned int>(pathsInt.size());
     *file_list = static_cast<char**>(malloc(*entries * sizeof(char*)));
     for (unsigned int i = 0; i < *entries; ++i)
       (*file_list)[i] = strdup(pathsInt[i].c_str());
@@ -297,7 +298,7 @@ bool Interface_GUIDialogFileBrowser::show_and_get_image_list(KODI_HANDLE kodiBas
   bool bRet = CGUIDialogFileBrowser::ShowAndGetImageList(vecShares, heading, pathsInt);
   if (bRet)
   {
-    *entries = pathsInt.size();
+    *entries = KODI::UTILS::Narrow<unsigned int>(pathsInt.size());
     *file_list = static_cast<char**>(malloc(*entries * sizeof(char*)));
     for (unsigned int i = 0; i < *entries; ++i)
       (*file_list)[i] = strdup(pathsInt[i].c_str());

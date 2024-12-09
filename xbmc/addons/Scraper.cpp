@@ -32,6 +32,7 @@
 #include "settings/SettingsValueFlatJsonSerializer.h"
 #include "utils/CharsetConverter.h"
 #include "utils/JSONVariantWriter.h"
+#include "utils/Narrow.h"
 #include "utils/ScraperParser.h"
 #include "utils/ScraperUrl.h"
 #include "utils/StringUtils.h"
@@ -1282,7 +1283,8 @@ VIDEO::EPISODELIST CScraper::GetEpisodeList(XFILE::CCurlFile& fcurl, const CScra
       ep.iSeason = tag.m_iSeason;
       ep.iEpisode = tag.m_iEpisode;
       ep.cDate = tag.m_firstAired;
-      ep.iSubepisode = items[i]->GetProperty("video.sub_episode").asInteger();
+      ep.iSubepisode =
+          KODI::UTILS::Narrow<int>(items[i]->GetProperty("video.sub_episode").asInteger());
       CScraperUrl::SUrlEntry surl;
       surl.m_type = CScraperUrl::UrlType::General;
       surl.m_url = items[i]->GetURL().Get();

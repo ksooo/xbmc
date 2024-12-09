@@ -22,6 +22,7 @@
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"
 #include "settings/lib/Setting.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
@@ -254,9 +255,10 @@ char* Interface_Base::get_localized_string(const KODI_ADDON_BACKEND_HDL hdl, lon
   if (g_application.m_bStop)
     return nullptr;
 
-  std::string label = g_localizeStrings.GetAddonString(addon->ID(), label_id);
+  const unsigned int labelId{KODI::UTILS::Narrow<unsigned int>(label_id)};
+  std::string label = g_localizeStrings.GetAddonString(addon->ID(), labelId);
   if (label.empty())
-    label = g_localizeStrings.Get(label_id);
+    label = g_localizeStrings.Get(labelId);
   char* buffer = strdup(label.c_str());
   return buffer;
 }
