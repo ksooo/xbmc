@@ -136,6 +136,7 @@
 #include "utils/FileExtensionProvider.h"
 #include "utils/JobManager.h"
 #include "utils/LangCodeExpander.h"
+#include "utils/Narrow.h"
 #include "utils/PlayerUtils.h"
 #include "utils/RegExp.h"
 #include "utils/Screenshot.h"
@@ -2988,7 +2989,7 @@ bool CApplication::OnMessage(CGUIMessage& message)
     CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::Player, "OnSeek",
                                                        m_itemCurrentFile, param);
 
-    CDataCacheCore::GetInstance().SeekFinished(static_cast<int>(seekOffset));
+    CDataCacheCore::GetInstance().SeekFinished(seekOffset);
 
     return true;
   }

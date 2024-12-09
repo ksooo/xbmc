@@ -14,6 +14,7 @@
 #include "Util.h"
 #include "cores/VideoPlayer/DVDFileInfo.h"
 #include "filesystem/StackDirectory.h"
+#include "utils/Narrow.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
 #include "video/VideoDatabase.h"
@@ -92,7 +93,7 @@ std::optional<int64_t> CApplicationStackHelper::InitializeStackStartPartAndOffse
   if (m_currentStackIsDiscImageStack)
   {
     // first assume values passed to the stack
-    int selectedFile = item.m_lStartPartNumber;
+    long selectedFile = item.m_lStartPartNumber;
     startoffset = item.GetStartOffset();
 
     // check if we instructed the stack to resume from default
@@ -129,7 +130,7 @@ std::optional<int64_t> CApplicationStackHelper::InitializeStackStartPartAndOffse
     }
 
     // set startoffset in selected item, track stack item for updating purposes, and finally play disc part
-    m_currentStackPosition = selectedFile - 1;
+    m_currentStackPosition = KODI::UTILS::Narrow<int>(selectedFile) - 1;
     startoffset = startoffset > 0 ? STARTOFFSET_RESUME : 0;
   }
   // case 2: all other stacks

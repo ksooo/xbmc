@@ -46,7 +46,7 @@ namespace JSONRPC
   class CJSONUtils
   {
   public:
-    static void MillisecondsToTimeObject(int time, CVariant &result)
+    static void MillisecondsToTimeObject(int64_t time, CVariant& result)
     {
       int ms = time % 1000;
       result["milliseconds"] = ms;

@@ -41,6 +41,7 @@
 #include "settings/SettingsComponent.h"
 #include "settings/SkinSettings.h"
 #include "settings/lib/Setting.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/XBMCTinyXML.h"
@@ -315,7 +316,7 @@ bool CApplicationSkinHandling::LoadCustomWindows()
           {
             const TiXmlNode* pType = pRootElement->FirstChild("id");
             if (pType && pType->FirstChild())
-              id = atol(pType->FirstChild()->Value());
+              id = KODI::UTILS::Narrow<int>(std::atol(pType->FirstChild()->Value()));
           }
 
           int windowId = id + WINDOW_HOME;
