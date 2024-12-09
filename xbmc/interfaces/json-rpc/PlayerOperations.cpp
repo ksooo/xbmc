@@ -49,6 +49,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "utils/MathUtils.h"
+#include "utils/Narrow.h"
 #include "utils/PlayerUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
@@ -1297,7 +1298,7 @@ JSONRPC_STATUS CPlayerOperations::SetAudioStream(const std::string &method, ITra
           else if (action.compare("next") == 0)
           {
             index = appPlayer->GetAudioStream() + 1;
-            if (index >= appPlayer->GetAudioStreamCount())
+            if (index >= UTILS::Narrow<int>(appPlayer->GetAudioStreamCount()))
               index = 0;
           }
           else
@@ -1306,7 +1307,7 @@ JSONRPC_STATUS CPlayerOperations::SetAudioStream(const std::string &method, ITra
         else if (parameterObject["stream"].isInteger())
           index = (int)parameterObject["stream"].asInteger();
 
-        if (index < 0 || appPlayer->GetAudioStreamCount() <= index)
+        if (index < 0 || UTILS::Narrow<int>(appPlayer->GetAudioStreamCount()) <= index)
           return InvalidParams;
 
         appPlayer->SetAudioStream(index);
@@ -1367,7 +1368,7 @@ JSONRPC_STATUS CPlayerOperations::SetSubtitle(const std::string &method, ITransp
           else if (action.compare("next") == 0)
           {
             index = appPlayer->GetSubtitle() + 1;
-            if (index >= appPlayer->GetSubtitleCount())
+            if (index >= UTILS::Narrow<int>(appPlayer->GetSubtitleCount()))
               index = 0;
           }
           else if (action.compare("off") == 0)
@@ -1386,7 +1387,7 @@ JSONRPC_STATUS CPlayerOperations::SetSubtitle(const std::string &method, ITransp
         else if (parameterObject["subtitle"].isInteger())
           index = (int)parameterObject["subtitle"].asInteger();
 
-        if (index < 0 || appPlayer->GetSubtitleCount() <= index)
+        if (index < 0 || UTILS::Narrow<int>(appPlayer->GetSubtitleCount()) <= index)
           return InvalidParams;
 
         appPlayer->SetSubtitle(index);
@@ -2018,7 +2019,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const std:
         const auto appPlayer = components.GetComponent<CApplicationPlayer>();
         if (appPlayer->HasPlayer())
         {
-          for (int index = 0; index < appPlayer->GetAudioStreamCount(); index++)
+          for (int index = 0; index < UTILS::Narrow<int>(appPlayer->GetAudioStreamCount()); ++index)
           {
             AudioStreamInfo info;
             appPlayer->GetAudioStreamInfo(index, info);
@@ -2178,7 +2179,7 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const std:
         const auto appPlayer = components.GetComponent<CApplicationPlayer>();
         if (appPlayer->HasPlayer())
         {
-          for (int index = 0; index < appPlayer->GetSubtitleCount(); index++)
+          for (int index = 0; index < UTILS::Narrow<int>(appPlayer->GetSubtitleCount()); ++index)
           {
             SubtitleStreamInfo info;
             appPlayer->GetSubtitleStreamInfo(index, info);

@@ -886,7 +886,7 @@ void CWebVTTHandler::ConvertSubtitle(std::string& text)
   int flagTags[FLAG_TAG_COUNT] = {0};
 
   std::string textRaw;
-  int lastPos{0};
+  size_t lastPos{0};
   webvttCssStyle baseStyle;
   bool isBaseStyleSet = GetBaseStyle(baseStyle);
 

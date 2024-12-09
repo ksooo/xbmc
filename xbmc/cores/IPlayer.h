@@ -120,7 +120,7 @@ public:
 
   virtual void SetSubTitleDelay(float fValue = 0.0f) {}
   virtual float GetSubTitleDelay()    { return 0.0f; }
-  virtual int GetSubtitleCount() const { return 0; }
+  virtual size_t GetSubtitleCount() const { return 0; }
   virtual int  GetSubtitle()          { return -1; }
   virtual void GetSubtitleStreamInfo(int index, SubtitleStreamInfo& info) const {}
   virtual void SetSubtitle(int iStream) {}
@@ -141,25 +141,25 @@ public:
   */
   virtual void AddSubtitle(const std::string& strSubPath) {}
 
-  virtual int GetAudioStreamCount() const { return 0; }
+  virtual size_t GetAudioStreamCount() const { return 0; }
   virtual int  GetAudioStream()       { return -1; }
   virtual void SetAudioStream(int iStream) {}
   virtual void GetAudioStreamInfo(int index, AudioStreamInfo& info) const {}
 
   virtual int GetVideoStream() const { return -1; }
-  virtual int GetVideoStreamCount() const { return 0; }
+  virtual size_t GetVideoStreamCount() const { return 0; }
   virtual void GetVideoStreamInfo(int streamId, VideoStreamInfo& info) const {}
   virtual void SetVideoStream(int iStream) {}
 
-  virtual int GetPrograms(std::vector<ProgramInfo>& programs) { return 0; }
+  virtual size_t GetPrograms(std::vector<ProgramInfo>& programs) { return 0; }
   virtual void SetProgram(int progId) {}
-  virtual int GetProgramsCount() const { return 0; }
+  virtual size_t GetProgramsCount() const { return 0; }
 
   virtual bool HasTeletextCache() const { return false; }
   virtual std::shared_ptr<TextCacheStruct_t> GetTeletextCache() { return nullptr; }
   virtual void LoadPage(int p, int sp, unsigned char* buffer) {}
 
-  virtual int GetChapterCount() const { return 0; }
+  virtual size_t GetChapterCount() const { return 0; }
   virtual int GetChapter() const { return -1; }
   virtual void GetChapterName(std::string& strChapterName, int chapterIdx = -1) const {}
   virtual int64_t GetChapterPos(int chapterIdx = -1) const { return 0; }

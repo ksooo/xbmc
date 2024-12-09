@@ -12,6 +12,7 @@
 #include "DVDInputStreams/DVDInputStream.h"
 #include "utils/CharsetConverter.h"
 #include "utils/CharsetDetection.h"
+#include "utils/Narrow.h"
 #include "utils/URIUtils.h"
 #include "utils/Utf8Utils.h"
 #include "utils/log.h"
@@ -86,7 +87,7 @@ bool CDVDSubtitleStream::Open(const std::string& strFile)
       m_subtitleData = converted;
     }
 
-    m_arrayParser.Reset(m_subtitleData.c_str(), m_subtitleData.size());
+    m_arrayParser.Reset(m_subtitleData.c_str(), KODI::UTILS::Narrow<int>(m_subtitleData.size()));
     return true;
   }
 

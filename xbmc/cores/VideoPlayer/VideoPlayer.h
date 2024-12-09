@@ -208,8 +208,8 @@ public:
   CSelectionStreams() = default;
 
   int TypeIndexOf(StreamType type, int source, int64_t demuxerId, int id) const;
-  int CountTypeOfSource(StreamType type, StreamSource source) const;
-  int CountType(StreamType type) const;
+  size_t CountTypeOfSource(StreamType type, StreamSource source) const;
+  size_t CountType(StreamType type) const;
   SelectionStream& Get(StreamType type, int index);
   const SelectionStream& Get(StreamType type, int index) const;
   bool Get(StreamType type, StreamFlags flag, SelectionStream& out);
@@ -285,7 +285,7 @@ public:
 
   void SetSubTitleDelay(float fValue = 0.0f) override;
   float GetSubTitleDelay() override;
-  int GetSubtitleCount() const override;
+  size_t GetSubtitleCount() const override;
   int GetSubtitle() override;
   void GetSubtitleStreamInfo(int index, SubtitleStreamInfo& info) const override;
   void SetSubtitle(int iStream) override;
@@ -302,24 +302,24 @@ public:
 
   void AddSubtitle(const std::string& strSubPath) override;
 
-  int GetAudioStreamCount() const override;
+  size_t GetAudioStreamCount() const override;
   int GetAudioStream() override;
   void SetAudioStream(int iStream) override;
 
   int GetVideoStream() const override;
-  int GetVideoStreamCount() const override;
+  size_t GetVideoStreamCount() const override;
   void GetVideoStreamInfo(int streamId, VideoStreamInfo& info) const override;
   void SetVideoStream(int iStream) override;
 
-  int GetPrograms(std::vector<ProgramInfo>& programs) override;
+  size_t GetPrograms(std::vector<ProgramInfo>& programs) override;
   void SetProgram(int progId) override;
-  int GetProgramsCount() const override;
+  size_t GetProgramsCount() const override;
 
   std::shared_ptr<TextCacheStruct_t> GetTeletextCache() override;
   bool HasTeletextCache() const override;
   void LoadPage(int p, int sp, unsigned char* buffer) override;
 
-  int GetChapterCount() const override;
+  size_t GetChapterCount() const override;
   int GetChapter() const override;
   void GetChapterName(std::string& strChapterName, int chapterIdx = -1) const override;
   int64_t GetChapterPos(int chapterIdx = -1) const override;
@@ -382,7 +382,7 @@ protected:
   void GetDebugInfo(std::string &audio, std::string &video, std::string &general) override;
   void UpdateClockSync(bool enabled) override;
   void UpdateRenderInfo(CRenderInfo &info) override;
-  void UpdateRenderBuffers(int queued, int discard, int free) override;
+  void UpdateRenderBuffers(size_t queued, size_t discard, size_t free) override;
   void UpdateGuiRender(bool gui) override;
   void UpdateVideoRender(bool video) override;
 

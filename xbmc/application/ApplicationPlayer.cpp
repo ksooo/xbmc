@@ -182,7 +182,7 @@ int CApplicationPlayer::GetChapter() const
     return -1;
 }
 
-int CApplicationPlayer::GetChapterCount() const
+size_t CApplicationPlayer::GetChapterCount() const
 {
   const std::shared_ptr<const IPlayer> player = GetInternal();
   if (player)
@@ -433,7 +433,7 @@ int CApplicationPlayer::GetCacheLevel() const
     return 0;
 }
 
-int CApplicationPlayer::GetSubtitleCount() const
+size_t CApplicationPlayer::GetSubtitleCount() const
 {
   const std::shared_ptr<const IPlayer> player = GetInternal();
   if (player)
@@ -588,9 +588,9 @@ void CApplicationPlayer::GetAudioStreamInfo(int index, AudioStreamInfo& info) co
     player->GetAudioStreamInfo(index, info);
 }
 
-int CApplicationPlayer::GetPrograms(std::vector<ProgramInfo> &programs)
+size_t CApplicationPlayer::GetPrograms(std::vector<ProgramInfo>& programs)
 {
-  int ret = 0;
+  size_t ret = 0;
   std::shared_ptr<IPlayer> player = GetInternal();
   if (player)
     ret = player->GetPrograms(programs);
@@ -604,9 +604,9 @@ void CApplicationPlayer::SetProgram(int progId)
     player->SetProgram(progId);
 }
 
-int CApplicationPlayer::GetProgramsCount() const
+size_t CApplicationPlayer::GetProgramsCount() const
 {
-  int ret = 0;
+  size_t ret = 0;
   const std::shared_ptr<const IPlayer> player = GetInternal();
   if (player)
     ret = player->GetProgramsCount();
@@ -619,7 +619,7 @@ bool CApplicationPlayer::OnAction(const CAction &action)
   return (player && player->OnAction(action));
 }
 
-int CApplicationPlayer::GetAudioStreamCount() const
+size_t CApplicationPlayer::GetAudioStreamCount() const
 {
   const std::shared_ptr<const IPlayer> player = GetInternal();
   if (player)
@@ -644,7 +644,7 @@ int CApplicationPlayer::GetVideoStream()
     return 0;
 }
 
-int CApplicationPlayer::GetVideoStreamCount() const
+size_t CApplicationPlayer::GetVideoStreamCount() const
 {
   const std::shared_ptr<const IPlayer> player = GetInternal();
   if (player)

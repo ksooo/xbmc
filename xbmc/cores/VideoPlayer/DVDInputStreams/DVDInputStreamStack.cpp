@@ -12,6 +12,7 @@
 #include "FileItemList.h"
 #include "filesystem/File.h"
 #include "filesystem/StackDirectory.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 #include <limits.h>
@@ -103,7 +104,7 @@ int CDVDInputStreamStack::Read(uint8_t* buf, int buf_size)
   if(m_file == NULL || m_eof)
     return 0;
 
-  unsigned int ret = m_file->Read(buf, buf_size);
+  unsigned int ret = KODI::UTILS::Narrow<unsigned int>(m_file->Read(buf, buf_size));
 
   if(ret > INT_MAX)
     return -1;

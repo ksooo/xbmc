@@ -896,7 +896,8 @@ CVideoPlayerVideo::EOutputState CVideoPlayerVideo::OutputPicture(const VideoPict
   if (m_speed < 0)
   {
     double renderPts;
-    int queued, discard;
+    size_t queued{0};
+    size_t discard{0};
     int lateframes;
     double inputPts = m_droppingStats.m_lastPts;
     m_renderManager.GetStats(lateframes, renderPts, queued, discard);
@@ -964,7 +965,7 @@ std::string CVideoPlayerVideo::GetPlayerInfo()
   s << ", drop:" << m_iDroppedFrames;
   s << ", skip:" << m_renderManager.GetSkippedFrames();
 
-  int pc = m_ptsTracker.GetPatternLength();
+  const size_t pc = m_ptsTracker.GetPatternLength();
   if (pc > 0)
     s << ", pc:" << pc;
   else
@@ -991,7 +992,8 @@ double CVideoPlayerVideo::GetCurrentPts()
 {
   double renderPts;
   int sleepTime;
-  int queued, discard;
+  size_t queued{0};
+  size_t discard{0};
 
   // get render stats
   m_renderManager.GetStats(sleepTime, renderPts, queued, discard);
@@ -1094,8 +1096,9 @@ int CVideoPlayerVideo::CalcDropRequirement(double pts)
   double iDecoderPts, iRenderPts;
   int iSkippedPicture = -1;
   int iDroppedFrames = -1;
-  int iBufferLevel;
-  int queued, discard;
+  size_t iBufferLevel;
+  size_t queued{0};
+  size_t discard{0};
 
   m_droppingStats.m_lastPts = pts;
 

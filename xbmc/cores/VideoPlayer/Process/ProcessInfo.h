@@ -77,8 +77,8 @@ public:
   void SetRenderClockSync(bool enabled);
   bool IsRenderClockSync();
   void UpdateRenderInfo(CRenderInfo &info);
-  void UpdateRenderBuffers(int queued, int discard, int free);
-  void GetRenderBuffers(int &queued, int &discard, int &free);
+  void UpdateRenderBuffers(size_t queued, size_t discard, size_t free);
+  void GetRenderBuffers(size_t& queued, size_t& discard, size_t& free);
   virtual std::vector<AVPixelFormat> GetRenderFormats();
 
   // player states
@@ -152,9 +152,9 @@ protected:
   CCriticalSection m_renderSection;
   bool m_isClockSync;
   CRenderInfo m_renderInfo;
-  int m_renderBufQueued = 0;
-  int m_renderBufFree = 0;
-  int m_renderBufDiscard = 0;
+  size_t m_renderBufQueued = 0;
+  size_t m_renderBufFree = 0;
+  size_t m_renderBufDiscard = 0;
 
   // player states
   CCriticalSection m_stateSection;

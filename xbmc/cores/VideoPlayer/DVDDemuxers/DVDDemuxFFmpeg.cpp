@@ -30,6 +30,7 @@
 #include "threads/SystemClock.h"
 #include "utils/FontUtils.h"
 #include "utils/LangCodeExpander.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/XTimeUtils.h"
@@ -1380,9 +1381,9 @@ std::vector<CDemuxStream*> CDVDDemuxFFmpeg::GetStreams() const
   return streams;
 }
 
-int CDVDDemuxFFmpeg::GetNrOfStreams() const
+size_t CDVDDemuxFFmpeg::GetNrOfStreams() const
 {
-  return static_cast<int>(m_streams.size());
+  return m_streams.size();
 }
 
 int CDVDDemuxFFmpeg::GetPrograms(std::vector<ProgramInfo>& programs)
@@ -1551,7 +1552,7 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
         CDemuxStreamAudioFFmpeg* st = new CDemuxStreamAudioFFmpeg(pStream);
         stream = st;
         int codecparChannels = pStream->codecpar->ch_layout.nb_channels;
-        int codecparChannelLayout = pStream->codecpar->ch_layout.u.mask;
+        const uint64_t codecparChannelLayout = pStream->codecpar->ch_layout.u.mask;
         st->iChannels = codecparChannels;
         st->iChannelLayout = codecparChannelLayout;
         st->iSampleRate = pStream->codecpar->sample_rate;
@@ -2277,7 +2278,7 @@ void CDVDDemuxFFmpeg::ParsePacket(AVPacket* pkt)
       FFmpegExtraData retExtraData = GetPacketExtradata(pkt, st->codecpar);
       if (retExtraData)
       {
-        st->codecpar->extradata_size = retExtraData.GetSize();
+        st->codecpar->extradata_size = KODI::UTILS::Narrow<int>(retExtraData.GetSize());
         st->codecpar->extradata = retExtraData.TakeData();
 
         if (parser->second->m_parserCtx->parser->parser_parse)
@@ -2476,9 +2477,9 @@ void CDVDDemuxFFmpeg::GetL16Parameters(int &channels, int &samplerate)
           StringUtils::Trim(no_channels, " \t");
           if (!no_channels.empty())
           {
-            int val = strtol(no_channels.c_str(), NULL, 0);
+            const long val = std::strtol(no_channels.c_str(), NULL, 0);
             if (val > 0)
-              channels = val;
+              channels = KODI::UTILS::Narrow<int>(val);
             else
               CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::{} - no parameter for channels", __FUNCTION__);
           }
@@ -2494,9 +2495,9 @@ void CDVDDemuxFFmpeg::GetL16Parameters(int &channels, int &samplerate)
           StringUtils::Trim(rate, " \t");
           if (!rate.empty())
           {
-            int val = strtol(rate.c_str(), NULL, 0);
+            const long val = std::strtol(rate.c_str(), NULL, 0);
             if (val > 0)
-              samplerate = val;
+              samplerate = KODI::UTILS::Narrow<int>(val);
             else
               CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::{} - no parameter for samplerate",
                         __FUNCTION__);

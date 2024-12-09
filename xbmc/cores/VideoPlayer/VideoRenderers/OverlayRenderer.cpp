@@ -20,6 +20,7 @@
 #include "settings/DisplaySettings.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "windowing/GraphicContext.h"
 
 #include <algorithm>
@@ -522,7 +523,7 @@ std::shared_ptr<COverlay> CRenderer::ConvertLibass(
     if (changes == 0)
     {
       std::map<unsigned int, std::shared_ptr<COverlay>>::iterator it =
-          m_textureCache.find(o.m_textureid);
+          m_textureCache.find(KODI::UTILS::Narrow<unsigned int>(o.m_textureid));
       if (it != m_textureCache.end())
         return it->second;
     }
@@ -561,7 +562,7 @@ std::shared_ptr<COverlay> CRenderer::Convert(CDVDOverlay& o, double pts)
   else if (o.m_textureid)
   {
     std::map<unsigned int, std::shared_ptr<COverlay>>::iterator it =
-        m_textureCache.find(o.m_textureid);
+        m_textureCache.find(KODI::UTILS::Narrow<unsigned int>(o.m_textureid));
     if (it != m_textureCache.end())
       r = it->second;
   }

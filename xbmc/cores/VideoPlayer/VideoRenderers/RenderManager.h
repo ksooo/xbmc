@@ -46,7 +46,7 @@ protected:
   virtual void GetDebugInfo(std::string &audio, std::string &video, std::string &general) = 0;
   virtual void UpdateClockSync(bool enabled) = 0;
   virtual void UpdateRenderInfo(CRenderInfo &info) = 0;
-  virtual void UpdateRenderBuffers(int queued, int discard, int free) = 0;
+  virtual void UpdateRenderBuffers(size_t queued, size_t discard, size_t free) = 0;
   virtual void UpdateGuiRender(bool gui) = 0;
   virtual void UpdateVideoRender(bool video) = 0;
   virtual CVideoSettings GetVideoSettings() const = 0;
@@ -114,7 +114,7 @@ public:
    * Can be called by player for lateness detection. This is done best by
    * looking at the end of the queue.
    */
-  bool GetStats(int &lateframes, double &pts, int &queued, int &discard);
+  bool GetStats(int& lateframes, double& pts, size_t& queued, size_t& discard);
 
   /**
    * Video player call this on flush in oder to discard any queued frames

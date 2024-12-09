@@ -643,7 +643,10 @@ std::string CStreamDetails::VideoAspectToAspectDescription(float fAspect)
   return "2.76";
 }
 
-bool CStreamDetails::SetStreams(const VideoStreamInfo& videoInfo, int videoDuration, const AudioStreamInfo& audioInfo, const SubtitleStreamInfo& subtitleInfo)
+bool CStreamDetails::SetStreams(const VideoStreamInfo& videoInfo,
+                                int64_t videoDuration,
+                                const AudioStreamInfo& audioInfo,
+                                const SubtitleStreamInfo& subtitleInfo)
 {
   if (!videoInfo.valid && !audioInfo.valid && !subtitleInfo.valid)
     return false;

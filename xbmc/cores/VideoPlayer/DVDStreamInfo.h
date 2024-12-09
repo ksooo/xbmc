@@ -48,7 +48,7 @@ public:
   AVCodecID codec;
   StreamType type;
   int uniqueId;
-  int demuxerId = -1;
+  int64_t demuxerId = -1;
   int source{STREAM_SOURCE_NONE};
   int flags;
   std::string filename;

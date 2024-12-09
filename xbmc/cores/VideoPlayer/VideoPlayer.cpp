@@ -53,6 +53,7 @@
 #include "utils/FontUtils.h"
 #include "utils/JobManager.h"
 #include "utils/LangCodeExpander.h"
+#include "utils/Narrow.h"
 #include "utils/StreamDetails.h"
 #include "utils/StreamUtils.h"
 #include "utils/StringUtils.h"
@@ -424,7 +425,7 @@ void CSelectionStreams::Update(SelectionStream& s)
   }
   else
   {
-    s.type_index = CountType(s.type);
+    s.type_index = KODI::UTILS::Narrow<int>(CountType(s.type));
     m_Streams.push_back(s);
   }
 }
@@ -579,13 +580,13 @@ void CSelectionStreams::Update(const std::shared_ptr<CDVDInputStream>& input, CD
   Update(input, demuxer, "");
 }
 
-int CSelectionStreams::CountTypeOfSource(StreamType type, StreamSource source) const
+size_t CSelectionStreams::CountTypeOfSource(StreamType type, StreamSource source) const
 {
-  return std::count_if(m_Streams.begin(), m_Streams.end(),
-    [&](const SelectionStream& stream) {return (stream.type == type) && (stream.source == source);});
+  return std::count_if(m_Streams.begin(), m_Streams.end(), [&](const SelectionStream& stream)
+                       { return (stream.type == type) && (stream.source == source); });
 }
 
-int CSelectionStreams::CountType(StreamType type) const
+size_t CSelectionStreams::CountType(StreamType type) const
 {
   return std::count_if(m_Streams.begin(), m_Streams.end(),
                        [&](const SelectionStream& stream) { return stream.type == type; });
@@ -2790,7 +2791,7 @@ void CVideoPlayer::HandleMessages()
 
       CDVDMsgPlayerSeekChapter& msg(*std::static_pointer_cast<CDVDMsgPlayerSeekChapter>(pMsg));
       double start = DVD_NOPTS_VALUE;
-      int offset = 0;
+      int64_t offset = 0;
 
       // This should always be the case.
       if(m_pDemuxer && m_pDemuxer->SeekChapter(msg.GetChapter(), &start))
@@ -3226,7 +3227,7 @@ void CVideoPlayer::Seek(bool bPlus, bool bLargeStep, bool bChapterOverride)
       SeekChapter(GetPreviousChapter());
       return;
     }
-    else if (GetChapter() < GetChapterCount())
+    else if (GetChapter() >= 0 && static_cast<size_t>(GetChapter()) < GetChapterCount())
     {
       SeekChapter(GetChapter() + 1);
       return;
@@ -4426,7 +4427,8 @@ bool CVideoPlayer::OnAction(const CAction &action)
       case ACTION_NEXT_ITEM:
         THREAD_ACTION(action);
         CLog::Log(LOGDEBUG, " - pushed next in menu, stream will decide");
-        if (pMenus->CanSeek() && GetChapterCount() > 0 && GetChapter() < GetChapterCount())
+        if (pMenus->CanSeek() && GetChapterCount() > 0 && GetChapter() >= 0 &&
+            static_cast<size_t>(GetChapter()) < GetChapterCount())
           m_messenger.Put(std::make_shared<CDVDMsgPlayerSeekChapter>(GetChapter() + 1));
         else
           pMenus->OnNext();
@@ -4551,7 +4553,7 @@ bool CVideoPlayer::OnAction(const CAction &action)
   switch (action.GetID())
   {
     case ACTION_NEXT_ITEM:
-      if (GetChapter() > 0 && GetChapter() < GetChapterCount())
+      if (GetChapter() > 0 && static_cast<size_t>(GetChapter()) < GetChapterCount())
       {
         m_messenger.Put(std::make_shared<CDVDMsgPlayerSeekChapter>(GetChapter() + 1));
         m_processInfo->SeekFinished(0);
@@ -4632,7 +4634,7 @@ bool CVideoPlayer::SetPlayerState(const std::string& state)
   return true;
 }
 
-int CVideoPlayer::GetChapterCount() const
+size_t CVideoPlayer::GetChapterCount() const
 {
   std::unique_lock<CCriticalSection> lock(m_StateSection);
   return m_State.chapters.size();
@@ -4659,7 +4661,7 @@ int CVideoPlayer::SeekChapter(int iChapter)
   {
     if (iChapter < 0)
       iChapter = 0;
-    if (iChapter > GetChapterCount())
+    if (static_cast<size_t>(iChapter) > GetChapterCount())
       return 0;
 
     // Seek to the chapter.
@@ -5163,7 +5165,7 @@ void CVideoPlayer::UpdateRenderInfo(CRenderInfo &info)
   m_processInfo->UpdateRenderInfo(info);
 }
 
-void CVideoPlayer::UpdateRenderBuffers(int queued, int discard, int free)
+void CVideoPlayer::UpdateRenderBuffers(size_t queued, size_t discard, size_t free)
 {
   m_processInfo->UpdateRenderBuffers(queued, discard, free);
 }
@@ -5222,13 +5224,13 @@ void CVideoPlayer::UpdateFileItemStreamDetails(CFileItem& item)
 
   //grab all the audio and subtitle info and save it
 
-  for (int i = 0; i < GetAudioStreamCount(); i++)
+  for (int i = 0; i < KODI::UTILS::Narrow<int>(GetAudioStreamCount()); ++i)
   {
     GetAudioStreamInfo(i, audioInfo);
     info->m_streamDetails.AddStream(new CStreamDetailAudio(audioInfo));
   }
 
-  for (int i = 0; i < GetSubtitleCount(); i++)
+  for (int i = 0; i < KODI::UTILS::Narrow<int>(GetSubtitleCount()); ++i)
   {
     GetSubtitleStreamInfo(i, subtitleInfo);
     info->m_streamDetails.AddStream(new CStreamDetailSubtitle(subtitleInfo));
@@ -5285,7 +5287,7 @@ void CVideoPlayer::GetVideoStreamInfo(int streamId, VideoStreamInfo& info) const
   if (streamId == CURRENT_STREAM)
     streamId = m_content.m_videoIndex;
 
-  if (streamId < 0 || streamId > GetVideoStreamCount() - 1)
+  if (streamId < 0 || static_cast<size_t>(streamId) > GetVideoStreamCount() - 1)
   {
     info.valid = false;
     return;
@@ -5313,7 +5315,7 @@ void CVideoPlayer::GetVideoStreamInfo(int streamId, VideoStreamInfo& info) const
   info.fpsScale = s.fpsScale;
 }
 
-int CVideoPlayer::GetVideoStreamCount() const
+size_t CVideoPlayer::GetVideoStreamCount() const
 {
   std::unique_lock<CCriticalSection> lock(m_content.m_section);
   return m_content.m_selectionStreams.CountType(STREAM_VIDEO);
@@ -5339,7 +5341,7 @@ void CVideoPlayer::GetAudioStreamInfo(int index, AudioStreamInfo& info) const
   if (index == CURRENT_STREAM)
     index = m_content.m_audioIndex;
 
-  if (index < 0 || index > GetAudioStreamCount() - 1)
+  if (index < 0 || static_cast<size_t>(index) > GetAudioStreamCount() - 1)
   {
     info.valid = false;
     return;
@@ -5360,7 +5362,7 @@ void CVideoPlayer::GetAudioStreamInfo(int index, AudioStreamInfo& info) const
   info.flags = s.flags;
 }
 
-int CVideoPlayer::GetAudioStreamCount() const
+size_t CVideoPlayer::GetAudioStreamCount() const
 {
   std::unique_lock<CCriticalSection> lock(m_content.m_section);
   return m_content.m_selectionStreams.CountType(STREAM_AUDIO);
@@ -5386,7 +5388,7 @@ void CVideoPlayer::GetSubtitleStreamInfo(int index, SubtitleStreamInfo& info) co
   if (index == CURRENT_STREAM)
     index = m_content.m_subtitleIndex;
 
-  if (index < 0 || index > GetSubtitleCount() - 1)
+  if (index < 0 || static_cast<size_t>(index) > GetSubtitleCount() - 1)
   {
     info.valid = false;
     info.language.clear();
@@ -5413,7 +5415,7 @@ void CVideoPlayer::SetSubtitle(int iStream)
   m_processInfo->GetVideoSettingsLocked().SetSubtitleStream(iStream);
 }
 
-int CVideoPlayer::GetSubtitleCount() const
+size_t CVideoPlayer::GetSubtitleCount() const
 {
   std::unique_lock<CCriticalSection> lock(m_content.m_section);
   return m_content.m_selectionStreams.CountType(STREAM_SUBTITLE);
@@ -5425,7 +5427,7 @@ int CVideoPlayer::GetSubtitle()
   return m_content.m_subtitleIndex;
 }
 
-int CVideoPlayer::GetPrograms(std::vector<ProgramInfo>& programs)
+size_t CVideoPlayer::GetPrograms(std::vector<ProgramInfo>& programs)
 {
   std::unique_lock<CCriticalSection> lock(m_content.m_section);
   programs = m_programs;
@@ -5437,7 +5439,7 @@ void CVideoPlayer::SetProgram(int progId)
   m_messenger.Put(std::make_shared<CDVDMsgInt>(CDVDMsg::PLAYER_SET_PROGRAM, progId));
 }
 
-int CVideoPlayer::GetProgramsCount() const
+size_t CVideoPlayer::GetProgramsCount() const
 {
   std::unique_lock<CCriticalSection> lock(m_content.m_section);
   return m_programs.size();

@@ -98,7 +98,7 @@ unsigned int CAudioSinkAE::AddPackets(const DVDAudioFrame &audioframe)
   CAESyncInfo info = m_pAudioStream->GetSyncInfo();
   if (info.state == CAESyncInfo::SYNC_INSYNC)
   {
-    unsigned int newTime = info.errortime;
+    uint64_t newTime = info.errortime;
     if (newTime != m_syncErrorTime)
     {
       m_syncErrorTime = info.errortime;

@@ -443,7 +443,7 @@ void CProcessInfo::UpdateRenderInfo(CRenderInfo &info)
   }
 }
 
-void CProcessInfo::UpdateRenderBuffers(int queued, int discard, int free)
+void CProcessInfo::UpdateRenderBuffers(size_t queued, size_t discard, size_t free)
 {
   std::unique_lock<CCriticalSection> lock(m_renderSection);
   m_renderBufQueued = queued;
@@ -451,7 +451,7 @@ void CProcessInfo::UpdateRenderBuffers(int queued, int discard, int free)
   m_renderBufFree = free;
 }
 
-void CProcessInfo::GetRenderBuffers(int &queued, int &discard, int &free)
+void CProcessInfo::GetRenderBuffers(size_t& queued, size_t& discard, size_t& free)
 {
   std::unique_lock<CCriticalSection> lock(m_renderSection);
   queued = m_renderBufQueued;

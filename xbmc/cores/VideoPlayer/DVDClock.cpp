@@ -122,7 +122,7 @@ void CDVDClock::Advance(double time)
   }
 }
 
-void CDVDClock::SetSpeed(int iSpeed)
+void CDVDClock::SetSpeed(int64_t iSpeed)
 {
   // this will sometimes be a little bit of due to rounding errors, ie clock might jump a bit when changing speed
   std::unique_lock<CCriticalSection> lock(m_critSection);

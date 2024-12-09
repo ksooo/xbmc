@@ -16,6 +16,7 @@
 #include "DVDSubtitles/DVDSubtitleStream.h"
 #include "cores/VideoPlayer/Interface/DemuxPacket.h"
 #include "cores/VideoPlayer/Interface/TimingConstants.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 
 #include <memory>
@@ -223,7 +224,7 @@ bool CDVDDemuxVobsub::ParseId(SState& state, std::string& line)
     stream->uniqueId = -1;
 
   stream->codec = AV_CODEC_ID_DVD_SUBTITLE;
-  stream->uniqueId = m_Streams.size();
+  stream->uniqueId = KODI::UTILS::Narrow<int>(m_Streams.size());
   stream->source = m_source;
   stream->demuxerId = m_demuxerId;
 

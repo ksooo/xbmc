@@ -14,6 +14,7 @@
 #include "cores/VideoPlayer/DVDStreamInfo.h"
 #include "cores/VideoPlayer/Interface/DemuxCrypto.h"
 #include "cores/VideoPlayer/Interface/TimingConstants.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 namespace
@@ -233,7 +234,7 @@ bool CAddonVideoCodec::CopyToInitData(VIDEOCODEC_INITDATA &initData, CDVDStreamI
   }
 
   initData.extraData = hints.extradata.GetData();
-  initData.extraDataSize = hints.extradata.GetSize();
+  initData.extraDataSize = KODI::UTILS::Narrow<unsigned int>(hints.extradata.GetSize());
   initData.width = hints.width;
   initData.height = hints.height;
   initData.videoFormats = m_formats;
@@ -417,7 +418,8 @@ void CAddonVideoCodec::Reset()
 
 bool CAddonVideoCodec::GetFrameBuffer(VIDEOCODEC_PICTURE &picture)
 {
-  CVideoBuffer *videoBuffer = m_processInfo.GetVideoBufferManager().Get(AV_PIX_FMT_YUV420P, picture.decodedDataSize, nullptr);
+  CVideoBuffer* videoBuffer = m_processInfo.GetVideoBufferManager().Get(
+      AV_PIX_FMT_YUV420P, KODI::UTILS::Narrow<int>(picture.decodedDataSize), nullptr);
   if (!videoBuffer)
   {
     CLog::Log(LOGERROR,"CAddonVideoCodec::GetFrameBuffer Failed to allocate buffer");

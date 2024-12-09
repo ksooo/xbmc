@@ -313,7 +313,7 @@ public:
   /*
    * return nr of streams, 0 if none
    */
-  virtual int GetNrOfStreams() const = 0;
+  virtual size_t GetNrOfStreams() const = 0;
 
   /*
    * get a list of available programs

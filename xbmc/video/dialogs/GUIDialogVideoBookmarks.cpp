@@ -31,6 +31,7 @@
 #include "settings/SettingsComponent.h"
 #include "utils/Crc32.h"
 #include "utils/FileUtils.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
@@ -236,7 +237,7 @@ void CGUIDialogVideoBookmarks::OnRefreshList()
   // add chapters if around
   const auto& components = CServiceBroker::GetAppComponents();
   const auto appPlayer = components.GetComponent<CApplicationPlayer>();
-  for (int i = 1; i <= appPlayer->GetChapterCount(); ++i)
+  for (int i = 1; i <= KODI::UTILS::Narrow<int>(appPlayer->GetChapterCount()); ++i)
   {
     std::string chapterName;
     appPlayer->GetChapterName(chapterName, i);

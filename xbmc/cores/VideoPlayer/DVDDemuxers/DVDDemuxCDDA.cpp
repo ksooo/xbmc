@@ -169,7 +169,7 @@ std::vector<CDemuxStream*> CDVDDemuxCDDA::GetStreams() const
   return streams;
 }
 
-int CDVDDemuxCDDA::GetNrOfStreams() const
+size_t CDVDDemuxCDDA::GetNrOfStreams() const
 {
   return (m_stream == NULL ? 0 : 1);
 }

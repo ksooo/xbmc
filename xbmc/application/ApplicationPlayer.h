@@ -85,11 +85,11 @@ public:
   int GetAudioDelay() const;
   void GetAudioCapabilities(std::vector<IPlayerAudioCaps>& caps) const;
   int GetAudioStream();
-  int GetAudioStreamCount() const;
+  size_t GetAudioStreamCount() const;
   void GetAudioStreamInfo(int index, AudioStreamInfo& info) const;
   int GetCacheLevel() const;
   float GetCachePercentage() const;
-  int GetChapterCount() const;
+  size_t GetChapterCount() const;
   int GetChapter() const;
   void GetChapterName(std::string& strChapterName, int chapterIdx = -1) const;
   int64_t GetChapterPos(int chapterIdx = -1) const;
@@ -99,7 +99,7 @@ public:
   int GetSubtitleDelay() const;
   int GetSubtitle();
   void GetSubtitleCapabilities(std::vector<IPlayerSubtitleCaps>& caps) const;
-  int GetSubtitleCount() const;
+  size_t GetSubtitleCount() const;
   void GetSubtitleStreamInfo(int index, SubtitleStreamInfo& info) const;
   bool GetSubtitleVisible() const;
   bool HasTeletextCache() const;
@@ -110,11 +110,11 @@ public:
   time_t GetStartTime() const;
   int64_t GetTotalTime() const;
   int GetVideoStream();
-  int GetVideoStreamCount() const;
+  size_t GetVideoStreamCount() const;
   void GetVideoStreamInfo(int streamId, VideoStreamInfo& info) const;
-  int GetPrograms(std::vector<ProgramInfo>& programs);
+  size_t GetPrograms(std::vector<ProgramInfo>& programs);
   void SetProgram(int progId);
-  int GetProgramsCount() const;
+  size_t GetProgramsCount() const;
   bool HasAudio() const;
 
   /*!

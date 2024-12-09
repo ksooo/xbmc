@@ -21,6 +21,7 @@
 #include "rendering/gl/RenderSystemGL.h"
 #include "utils/GLUtils.h"
 #include "utils/MathUtils.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 #include "windowing/WinSystem.h"
 
@@ -333,7 +334,7 @@ void COverlayGlyphGL::Render(SRenderState& state)
 
   glUniform1f(depthLoc, -1.0f);
 
-  glDrawArrays(GL_TRIANGLES, 0, vecVertices.size());
+  glDrawArrays(GL_TRIANGLES, 0, KODI::UTILS::Narrow<GLsizei>(vecVertices.size()));
 
   glDisableVertexAttribArray(posLoc);
   glDisableVertexAttribArray(colLoc);

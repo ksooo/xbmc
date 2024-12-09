@@ -14,6 +14,7 @@
 #include "cores/VideoPlayer/Interface/DemuxPacket.h"
 #include "cores/VideoPlayer/Interface/TimingConstants.h"
 #include "utils/EndianSwap.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 #include "windowing/GraphicContext.h"
 
@@ -62,13 +63,13 @@ bool CDVDOverlayCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
 
   if (hints.extradata)
   {
-    m_pCodecContext->extradata_size = hints.extradata.GetSize();
+    m_pCodecContext->extradata_size = KODI::UTILS::Narrow<int>(hints.extradata.GetSize());
     m_pCodecContext->extradata =
         (uint8_t*)av_mallocz(hints.extradata.GetSize() + AV_INPUT_BUFFER_PADDING_SIZE);
     memcpy(m_pCodecContext->extradata, hints.extradata.GetData(), hints.extradata.GetSize());
 
     // start parsing of extra data - create a copy to be safe and make it zero-terminating to avoid access violations!
-    unsigned int parse_extrasize = hints.extradata.GetSize();
+    const size_t parse_extrasize = hints.extradata.GetSize();
     char* parse_extra = new char[parse_extrasize + 1];
     memcpy(parse_extra, hints.extradata.GetData(), parse_extrasize);
     parse_extra[parse_extrasize] = '\0';

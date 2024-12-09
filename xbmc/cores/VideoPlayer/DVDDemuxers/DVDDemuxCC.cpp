@@ -12,6 +12,7 @@
 #include "cores/VideoPlayer/DVDCodecs/Overlay/contrib/cc_decoder708.h"
 #include "cores/VideoPlayer/Interface/TimingConstants.h"
 #include "utils/ColorUtils.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 
 #include <algorithm>
@@ -187,7 +188,7 @@ CDVDDemuxCC::~CDVDDemuxCC()
 
 CDemuxStream* CDVDDemuxCC::GetStream(int iStreamId) const
 {
-  for (int i=0; i<GetNrOfStreams(); i++)
+  for (size_t i = 0; i < GetNrOfStreams(); ++i)
   {
     if (m_streams[i].uniqueId == iStreamId)
       return const_cast<CDemuxStreamSubtitle*>(&m_streams[i]);
@@ -199,9 +200,9 @@ std::vector<CDemuxStream*> CDVDDemuxCC::GetStreams() const
 {
   std::vector<CDemuxStream*> streams;
 
-  int num = GetNrOfStreams();
+  const size_t num = GetNrOfStreams();
   streams.reserve(num);
-  for (int i = 0; i < num; ++i)
+  for (size_t i = 0; i < num; ++i)
   {
     streams.push_back(const_cast<CDemuxStreamSubtitle*>(&m_streams[i]));
   }
@@ -209,7 +210,7 @@ std::vector<CDemuxStream*> CDVDDemuxCC::GetStreams() const
   return streams;
 }
 
-int CDVDDemuxCC::GetNrOfStreams() const
+size_t CDVDDemuxCC::GetNrOfStreams() const
 {
   return m_streams.size();
 }
@@ -483,8 +484,9 @@ DemuxPacket* CDVDDemuxCC::Decode()
           data = m_ccDecoder->m_cc708decoders[service].text;
         }
 
-        pPacket = CDVDDemuxUtils::AllocateDemuxPacket(data.size());
-        pPacket->iSize = data.size();
+        const int packetSize{KODI::UTILS::Narrow<int>(data.size())};
+        pPacket = CDVDDemuxUtils::AllocateDemuxPacket(packetSize);
+        pPacket->iSize = packetSize;
         if (pPacket->iSize)
           memcpy(pPacket->pData, data.c_str(), pPacket->iSize);
 

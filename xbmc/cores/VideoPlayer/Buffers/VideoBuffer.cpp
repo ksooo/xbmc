@@ -8,6 +8,7 @@
 
 #include "VideoBuffer.h"
 
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 #include <mutex>
@@ -312,7 +313,7 @@ CVideoBuffer* CVideoBufferPoolSysMem::Get()
   }
   else
   {
-    int id = m_all.size();
+    int id = KODI::UTILS::Narrow<int>(m_all.size());
     buf = new CVideoBufferSysMem(*this, id, m_pixFormat, m_size);
     buf->Alloc();
     m_all.push_back(buf);

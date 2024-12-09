@@ -10,6 +10,7 @@
 
 #include "cores/FFmpeg.h"
 #include "cores/VideoPlayer/Interface/TimingConstants.h"
+#include "utils/Narrow.h"
 
 #include <array>
 
@@ -56,7 +57,7 @@ double CDVDCodecUtils::NormalizeFrameduration(double frameduration, bool *match)
     double diff = fabs(frameduration - durations[i]);
     if (diff < DVD_MSEC_TO_TIME(0.02) && diff < lowestdiff)
     {
-      selected = i;
+      selected = KODI::UTILS::Narrow<int>(i);
       lowestdiff = diff;
     }
   }

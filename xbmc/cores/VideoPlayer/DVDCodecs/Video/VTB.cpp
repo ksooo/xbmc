@@ -15,6 +15,7 @@
 #include "cores/VideoPlayer/Process/ProcessInfo.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 
 #include <mutex>
 
@@ -94,7 +95,7 @@ CVideoBuffer* CVideoBufferPoolVTB::Get()
   }
   else
   {
-    int id = m_all.size();
+    const int id = KODI::UTILS::Narrow<int>(m_all.size());
     buf = new CVideoBufferVTB(*this, id);
     m_all.push_back(buf);
     m_used.push_back(id);

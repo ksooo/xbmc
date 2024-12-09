@@ -31,7 +31,7 @@ public:
   }
   CDemuxStream* GetStream(int iStreamId) const override;
   std::vector<CDemuxStream*> GetStreams() const override;
-  int GetNrOfStreams() const override;
+  size_t GetNrOfStreams() const override;
 
   DemuxPacket* Read(DemuxPacket *packet);
   static void Handler(int service, void *userdata);

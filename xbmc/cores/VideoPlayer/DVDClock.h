@@ -33,7 +33,7 @@ public:
   }
 
   void Reset() { m_bReset = true; }
-  void SetSpeed(int iSpeed);
+  void SetSpeed(int64_t iSpeed);
   void SetSpeedAdjust(double adjust);
   double GetSpeedAdjust();
 
@@ -67,7 +67,7 @@ protected:
   double m_iDisc;
   bool m_bReset;
   bool m_paused;
-  int m_speedAfterPause;
+  int64_t m_speedAfterPause;
   std::unique_ptr<CVideoReferenceClock> m_videoRefClock;
 
   int64_t m_systemFrequency;

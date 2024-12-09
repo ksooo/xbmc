@@ -99,7 +99,7 @@ public:
   int GetStreamLength() override;
   CDemuxStream* GetStream(int iStreamId) const override;
   std::vector<CDemuxStream*> GetStreams() const override;
-  int GetNrOfStreams() const override;
+  size_t GetNrOfStreams() const override;
   int GetPrograms(std::vector<ProgramInfo>& programs) override;
   void SetProgram(int progId) override;
 

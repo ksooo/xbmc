@@ -28,7 +28,7 @@ void CDVDOverlayContainer::ProcessAndAddOverlayIfValid(const std::shared_ptr<CDV
   // multiple overlays queued at same start
   // point so only stop them when we get a
   // new startpoint
-  for(int i = m_overlays.size();i>0;)
+  for (size_t i = m_overlays.size(); i > 0;)
   {
     i--;
     if(m_overlays[i]->iPTSStopTime)

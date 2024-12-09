@@ -33,7 +33,7 @@ public:
   bool SeekTime(double time, bool backwards, double* startpts = NULL) override;
   CDemuxStream* GetStream(int index) const override { return m_Streams[index]; }
   std::vector<CDemuxStream*> GetStreams() const override;
-  int GetNrOfStreams() const override { return m_Streams.size(); }
+  size_t GetNrOfStreams() const override { return m_Streams.size(); }
   std::string GetFileName() override { return m_Filename; }
   void EnableStream(int id, bool enable) override;
 

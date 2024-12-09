@@ -174,7 +174,7 @@ std::unique_ptr<CTexture> CDVDFileInfo::ExtractThumbToTexture(const CFileItem& f
         VideoPicture picture = {};
 
         // num streams * 160 frames, should get a valid frame, if not abort.
-        int abort_index = demuxer->GetNrOfStreams() * 160;
+        size_t abort_index = demuxer->GetNrOfStreams() * 160;
         do
         {
           DemuxPacket* pPacket = demuxer->Read();

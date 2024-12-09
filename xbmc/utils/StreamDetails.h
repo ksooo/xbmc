@@ -132,7 +132,11 @@ public:
   void Archive(CArchive& ar) override;
   void Serialize(CVariant& value) const override;
 
-  bool SetStreams(const VideoStreamInfo& videoInfo, int videoDuration, const AudioStreamInfo& audioInfo, const SubtitleStreamInfo& subtitleInfo);
+  bool SetStreams(const VideoStreamInfo& videoInfo,
+                  int64_t videoDuration,
+                  const AudioStreamInfo& audioInfo,
+                  const SubtitleStreamInfo& subtitleInfo);
+
 private:
   CStreamDetail *NewStream(CStreamDetail::StreamType type);
   std::vector<std::unique_ptr<CStreamDetail>> m_vecItems;

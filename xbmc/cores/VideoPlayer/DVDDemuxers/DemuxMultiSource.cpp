@@ -58,9 +58,9 @@ void CDemuxMultiSource::Flush()
     iter.second->Flush();
 }
 
-int CDemuxMultiSource::GetNrOfStreams() const
+size_t CDemuxMultiSource::GetNrOfStreams() const
 {
-  int streamsCount = 0;
+  size_t streamsCount = 0;
   for (auto& iter : m_demuxerMap)
     streamsCount += iter.second->GetNrOfStreams();
 

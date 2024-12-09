@@ -113,10 +113,10 @@ void CPtsTracker::Add(double pts)
 }
 
 //gets a diff diffnr into the past
-inline double CPtsTracker::GetDiff(int diffnr)
+inline double CPtsTracker::GetDiff(size_t diffnr)
 {
   //m_ringpos is the last added diff, so if we want to go in the past we have to move back in the ringbuffer
-  int pos = m_ringpos - diffnr;
+  size_t pos = m_ringpos - diffnr;
   if (pos < 0)
     pos += DIFFRINGSIZE;
 
@@ -131,7 +131,7 @@ void CPtsTracker::GetPattern(std::vector<double>& pattern)
 
   //get the difftypes
   std::vector<double> difftypes;
-  for (int i = 0; i < m_ringfill; i++)
+  for (size_t i = 0; i < m_ringfill; i++)
   {
     bool hasmatch = false;
     for (unsigned int j = 0; j < difftypes.size(); j++)
@@ -149,7 +149,7 @@ void CPtsTracker::GetPattern(std::vector<double>& pattern)
   }
 
   //mark each diff with what difftype it is
-  for (int i = 0; i < m_ringfill; i++)
+  for (size_t i = 0; i < m_ringfill; i++)
   {
     for (unsigned int j = 0; j < difftypes.size(); j++)
     {
@@ -164,15 +164,15 @@ void CPtsTracker::GetPattern(std::vector<double>& pattern)
   bool checkexisting = !m_pattern.empty();
 
   //we check for patterns to the length of DIFFRINGSIZE / 2
-  for (int i = 1; i <= m_ringfill / 2; i++)
+  for (size_t i = 1; i <= m_ringfill / 2; ++i)
   {
     //check the existing pattern length first
-    int length = checkexisting ? m_pattern.size() : i;
+    size_t length = checkexisting ? m_pattern.size() : i;
 
     bool hasmatch = true;
-    for (int j = 1; j <= m_ringfill / length; j++)
+    for (size_t j = 1; j <= m_ringfill / length; ++j)
     {
-      int nrdiffs = length;
+      size_t nrdiffs = length;
       //we want to check the full buffer to see if the pattern repeats
       //but we can't go beyond the buffer
       if (j * length + length > m_ringfill)
@@ -196,10 +196,10 @@ void CPtsTracker::GetPattern(std::vector<double>& pattern)
 
     if (hasmatch)
     {
-      for (int i = 0; i < length; i++)
+      for (size_t i = 0; i < length; ++i)
       {
         double avgdiff = 0.0;
-        for (int j = 0; j < m_ringfill / length; j++)
+        for (size_t j = 0; j < m_ringfill / length; ++j)
           avgdiff += GetDiff(j * length + i);
 
         avgdiff /= m_ringfill / length;
@@ -217,9 +217,9 @@ inline bool CPtsTracker::MatchDiff(double diff1, double diff2)
 }
 
 //check if diffs1 is the same as diffs2
-inline bool CPtsTracker::MatchDifftype(int diffs1[], int diffs2[], int nrdiffs)
+inline bool CPtsTracker::MatchDifftype(int diffs1[], int diffs2[], size_t nrdiffs)
 {
-  for (int i = 0; i < nrdiffs; i++)
+  for (size_t i = 0; i < nrdiffs; ++i)
   {
     if (diffs1[i] != diffs2[i])
       return false;

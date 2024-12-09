@@ -20,6 +20,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "utils/CPUInfo.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/XTimeUtils.h"
 #include "utils/log.h"
@@ -156,7 +157,7 @@ CVideoBuffer* CVideoBufferPoolFFmpeg::Get()
   }
   else
   {
-    int id = m_all.size();
+    const int id = KODI::UTILS::Narrow<int>(m_all.size());
     buf = new CVideoBufferFFmpeg(*this, id);
     m_all.push_back(buf);
     m_used.push_back(id);
@@ -406,7 +407,7 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
         (uint8_t*)av_mallocz(hints.extradata.GetSize() + AV_INPUT_BUFFER_PADDING_SIZE);
     if (m_pCodecContext->extradata)
     {
-      m_pCodecContext->extradata_size = hints.extradata.GetSize();
+      m_pCodecContext->extradata_size = KODI::UTILS::Narrow<int>(hints.extradata.GetSize());
       memcpy(m_pCodecContext->extradata, hints.extradata.GetData(), hints.extradata.GetSize());
     }
   }

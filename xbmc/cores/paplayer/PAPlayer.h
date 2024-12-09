@@ -52,7 +52,7 @@ public:
   void SeekTime(int64_t iTime = 0) override;
   void GetAudioCapabilities(std::vector<IPlayerAudioCaps>& caps) const override {}
 
-  int GetAudioStreamCount() const override { return 1; }
+  size_t GetAudioStreamCount() const override { return 1; }
   int GetAudioStream() override { return 0; }
 
   // implementation of IJobCallback

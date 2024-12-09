@@ -35,7 +35,7 @@ public:
   int GetStreamLength() override;
   CDemuxStream* GetStream(int iStreamId) const override;
   std::vector<CDemuxStream*> GetStreams() const override;
-  int GetNrOfStreams() const override;
+  size_t GetNrOfStreams() const override;
   std::string GetFileName() override;
   std::string GetStreamCodecName(int iStreamId) override;
 

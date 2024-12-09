@@ -109,7 +109,7 @@ bool CPlayerController::OnAction(const CAction &action)
         if (appPlayer->GetSubtitleVisible())
         {
           currentSub += (action.GetID() == ACTION_PREV_SUBTITLE) ? -1 : 1;
-          if (currentSub < 0 || currentSub >= appPlayer->GetSubtitleCount())
+          if (currentSub < 0 || static_cast<size_t>(currentSub) >= appPlayer->GetSubtitleCount())
           {
             currentSub = 0;
             if (action.GetID() != ACTION_CYCLE_SUBTITLE)

@@ -16,6 +16,7 @@
 #include "cores/VideoPlayer/Interface/TimingConstants.h"
 #include "settings/SettingsComponent.h"
 #include "settings/SubtitlesSettings.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 
 #include <memory>
@@ -39,7 +40,7 @@ bool CDVDOverlayCodecSSA::Open(CDVDStreamInfo& hints, CDVDCodecOptions& options)
   m_pOverlay.reset();
 
   return m_libass->DecodeHeader(reinterpret_cast<char*>(hints.extradata.GetData()),
-                                hints.extradata.GetSize());
+                                UTILS::Narrow<int>(hints.extradata.GetSize()));
 }
 
 OverlayMessage CDVDOverlayCodecSSA::Decode(DemuxPacket* pPacket)

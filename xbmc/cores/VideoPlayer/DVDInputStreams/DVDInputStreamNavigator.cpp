@@ -23,6 +23,7 @@
 #include "settings/SettingsComponent.h"
 #include "utils/Geometry.h"
 #include "utils/LangCodeExpander.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
@@ -1560,7 +1561,7 @@ int dvd_inputstreamnavigator_cb_readv(void * p_stream, void * p_iovec, int i_blo
 
   for (i_index = i_blocks; i_index; i_index--, lpiovec++)
   {
-    i_len = lpiovec->iov_len;
+    i_len = KODI::UTILS::Narrow<int>(lpiovec->iov_len);
     p_base = reinterpret_cast<unsigned char*>(lpiovec->iov_base);
 
     if (i_len <= 0)
@@ -1576,7 +1577,7 @@ int dvd_inputstreamnavigator_cb_readv(void * p_stream, void * p_iovec, int i_blo
     {
       /* We reached the end of the file or a signal interrupted
       * the read. Return a partial read. */
-      int i_seek = lpstream->Seek(i_total,0);
+      const int i_seek = KODI::UTILS::Narrow<int>(lpstream->Seek(i_total, 0));
       if (i_seek < 0)
         return i_seek;
 

@@ -41,7 +41,7 @@ public:
   void Abort() override;
   void EnableStream(int64_t demuxerId, int id, bool enable) override;
   void Flush() override;
-  int GetNrOfStreams() const override;
+  size_t GetNrOfStreams() const override;
   CDemuxStream* GetStream(int64_t demuxerId, int iStreamId) const override;
   std::vector<CDemuxStream*> GetStreams() const override;
   std::string GetStreamCodecName(int64_t demuxerId, int iStreamId) override;

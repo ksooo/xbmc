@@ -439,7 +439,10 @@ static unsigned char sRDSAddChar[128] =
 
 static char *rds_entitychar(char *text)
 {
-  int i = 0, l, lof, lre, space;
+  size_t l{0};
+  size_t lof{0};
+  size_t lre{0};
+  int i = 0, space;
   char *temp;
 
   while (i < EntityChars)
@@ -1018,7 +1021,7 @@ unsigned int CDVDRadioRDSData::DecodePTYN(uint8_t *msgElement)
 
 inline void rtrim_str(std::string &text)
 {
-  for (int i = text.length()-1; i >= 0; --i)
+  for (size_t i = text.length() - 1; i >= 0; --i)
   {
     if (text[i] == ' ' || text[i] == '\t' || text[i] == '\n' || text[i] == '\r')
       text[i] = 0;

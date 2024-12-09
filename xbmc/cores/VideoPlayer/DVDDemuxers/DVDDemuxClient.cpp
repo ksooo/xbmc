@@ -636,7 +636,7 @@ std::shared_ptr<CDemuxStream> CDVDDemuxClient::GetStreamInternal(int iStreamId)
     return nullptr;
 }
 
-int CDVDDemuxClient::GetNrOfStreams() const
+size_t CDVDDemuxClient::GetNrOfStreams() const
 {
   return m_streams.size();
 }

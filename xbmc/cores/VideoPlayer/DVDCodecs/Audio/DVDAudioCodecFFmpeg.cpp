@@ -16,6 +16,7 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 
 extern "C" {
@@ -109,7 +110,7 @@ bool CDVDAudioCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
         (uint8_t*)av_mallocz(hints.extradata.GetSize() + AV_INPUT_BUFFER_PADDING_SIZE);
     if(m_pCodecContext->extradata)
     {
-      m_pCodecContext->extradata_size = hints.extradata.GetSize();
+      m_pCodecContext->extradata_size = KODI::UTILS::Narrow<int>(hints.extradata.GetSize());
       memcpy(m_pCodecContext->extradata, hints.extradata.GetData(), hints.extradata.GetSize());
     }
   }

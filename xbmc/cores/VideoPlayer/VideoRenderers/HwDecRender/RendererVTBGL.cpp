@@ -12,6 +12,7 @@
 #include "ServiceBroker.h"
 #include "cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodec.h"
 #include "cores/VideoPlayer/DVDCodecs/Video/VTB.h"
+#include "utils/Narrow.h"
 #include "utils/log.h"
 #include "windowing/WinSystem.h"
 #include "windowing/osx/WinSystemOSX.h"
@@ -159,17 +160,17 @@ bool CRendererVTB::UploadTexture(int index)
     return false;
   }
 
-  GLsizei surfplanes = IOSurfaceGetPlaneCount(surface);
+  GLsizei surfplanes = KODI::UTILS::Narrow<GLsizei>(IOSurfaceGetPlaneCount(surface));
 
   if (surfplanes != 2)
   {
     return false;
   }
 
-  GLsizei widthY = IOSurfaceGetWidthOfPlane(surface, 0);
-  GLsizei widthUV = IOSurfaceGetWidthOfPlane(surface, 1);
-  GLsizei heightY = IOSurfaceGetHeightOfPlane(surface, 0);
-  GLsizei heightUV = IOSurfaceGetHeightOfPlane(surface, 1);
+  GLsizei widthY = KODI::UTILS::Narrow<GLsizei>(IOSurfaceGetWidthOfPlane(surface, 0));
+  GLsizei widthUV = KODI::UTILS::Narrow<GLsizei>(IOSurfaceGetWidthOfPlane(surface, 1));
+  GLsizei heightY = KODI::UTILS::Narrow<GLsizei>(IOSurfaceGetHeightOfPlane(surface, 0));
+  GLsizei heightUV = KODI::UTILS::Narrow<GLsizei>(IOSurfaceGetHeightOfPlane(surface, 1));
 
   glBindTexture(m_textureTarget, planes[0].id);
 

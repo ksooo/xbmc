@@ -21,6 +21,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "threads/SingleLock.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/XTimeUtils.h"
 #include "utils/log.h"
@@ -1121,7 +1122,7 @@ int CRenderManager::WaitForBuffer(volatile std::atomic_bool& bStop,
   m_overlays.Release(m_free.front());
 
   // return buffer level
-  return m_queued.size() + m_discard.size();
+  return KODI::UTILS::Narrow<int>(m_queued.size() + m_discard.size());
 }
 
 void CRenderManager::PrepareNextRender()
@@ -1263,7 +1264,7 @@ void CRenderManager::DiscardBuffer()
   m_presentevent.notifyAll();
 }
 
-bool CRenderManager::GetStats(int &lateframes, double &pts, int &queued, int &discard)
+bool CRenderManager::GetStats(int& lateframes, double& pts, size_t& queued, size_t& discard)
 {
   std::unique_lock<CCriticalSection> lock(m_presentlock);
   lateframes = m_lateframes / 10;

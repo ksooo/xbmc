@@ -68,7 +68,7 @@ protected:
   double m_playingPts;
   double m_timeOfPts;
   double m_syncError;
-  unsigned int m_syncErrorTime;
+  uint64_t m_syncErrorTime;
   double m_resampleRatio = 0.0; // invalid
   CCriticalSection m_critSection;
 
