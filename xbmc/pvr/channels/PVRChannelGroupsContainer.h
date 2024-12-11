@@ -168,7 +168,7 @@ public:
    * @param providerId The providerId.
    * @return The total count of matching channels.
    */
-  unsigned int GetChannelCountByProvider(bool isRadio, int clientId, int providerId) const;
+  size_t GetChannelCountByProvider(bool isRadio, int clientId, int providerId) const;
 
   /*!
    * @brief Erase stale texture db entries and image files.

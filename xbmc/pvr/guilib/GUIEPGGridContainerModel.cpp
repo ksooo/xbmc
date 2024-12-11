@@ -17,6 +17,7 @@
 #include "pvr/epg/EpgChannelData.h"
 #include "pvr/epg/EpgContainer.h"
 #include "pvr/epg/EpgInfoTag.h"
+#include "utils/Narrow.h"
 #include "utils/Variant.h"
 #include "utils/log.h"
 
@@ -26,6 +27,7 @@
 #include <memory>
 #include <vector>
 
+using namespace KODI;
 using namespace PVR;
 
 static const unsigned int GRID_START_PADDING = 30; // minutes
@@ -724,4 +726,19 @@ std::unique_ptr<CFileItemList> CGUIEPGGridContainerModel::GetCurrentTimeLineItem
     }
   }
   return items;
+}
+
+int CGUIEPGGridContainerModel::ChannelItemsSize() const
+{
+  return UTILS::Narrow<int>(m_channelItems.size());
+}
+
+int CGUIEPGGridContainerModel::GetLastChannel() const
+{
+  return m_channelItems.empty() ? -1 : UTILS::Narrow<int>(m_channelItems.size()) - 1;
+}
+
+int CGUIEPGGridContainerModel::RulerItemsSize() const
+{
+  return UTILS::Narrow<int>(m_rulerItems.size());
 }

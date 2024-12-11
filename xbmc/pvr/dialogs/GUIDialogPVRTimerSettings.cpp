@@ -30,6 +30,7 @@
 #include "settings/lib/Setting.h"
 #include "settings/lib/SettingsManager.h"
 #include "settings/windows/GUIControlSettings.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #include "utils/log.h"
@@ -42,6 +43,7 @@
 #include <vector>
 
 using namespace PVR;
+using namespace KODI;
 using namespace KODI::MESSAGING;
 
 #define SETTING_TMR_TYPE "timer.type"
@@ -455,7 +457,7 @@ void CGUIDialogPVRTimerSettings::AddSingleStringSetting(const std::shared_ptr<CS
   AddTypeDependentEnableCondition(setting, settingName);
 }
 
-int CGUIDialogPVRTimerSettings::GetWeekdaysFromSetting(const SettingConstPtr& setting)
+unsigned int CGUIDialogPVRTimerSettings::GetWeekdaysFromSetting(const SettingConstPtr& setting)
 {
   std::shared_ptr<const CSettingList> settingList =
       std::static_pointer_cast<const CSettingList>(setting);
@@ -464,7 +466,7 @@ int CGUIDialogPVRTimerSettings::GetWeekdaysFromSetting(const SettingConstPtr& se
     CLog::LogF(LOGERROR, "Wrong weekdays element type");
     return 0;
   }
-  int weekdays = 0;
+  unsigned int weekdays = 0;
   std::vector<CVariant> list = CSettingUtils::GetList(settingList);
   for (const auto& value : list)
   {
@@ -473,7 +475,7 @@ int CGUIDialogPVRTimerSettings::GetWeekdaysFromSetting(const SettingConstPtr& se
       CLog::LogF(LOGERROR, "Wrong weekdays value type");
       return 0;
     }
-    weekdays += static_cast<int>(value.asInteger());
+    weekdays += value.asInteger();
   }
 
   return weekdays;
@@ -866,7 +868,7 @@ int CGUIDialogPVRTimerSettings::GetDateAsIndex(const CDateTime& datetime)
   const CDateTime date(datetime.GetYear(), datetime.GetMonth(), datetime.GetDay(), 0, 0, 0);
   time_t t(0);
   date.GetAsTime(t);
-  return static_cast<int>(t);
+  return UTILS::Narrow<int>(t);
 }
 
 void CGUIDialogPVRTimerSettings::SetDateFromIndex(CDateTime& datetime, int date)

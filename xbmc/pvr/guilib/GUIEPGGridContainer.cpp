@@ -25,6 +25,7 @@
 #include "pvr/epg/EpgInfoTag.h"
 #include "pvr/guilib/GUIEPGGridContainerModel.h"
 #include "utils/MathUtils.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 
@@ -154,6 +155,14 @@ void CGUIEPGGridContainer::SetPageControl(int id)
   m_pageControl = id;
 }
 
+namespace
+{
+int RoundedIntFromFloat(float val)
+{
+  return MathUtils::round_int(static_cast<double>(val));
+}
+} // unnamed namespace
+
 void CGUIEPGGridContainer::Process(unsigned int currentTime, CDirtyRegionList& dirtyregions)
 {
   ValidateOffset();
@@ -194,9 +203,8 @@ void CGUIEPGGridContainer::Process(unsigned int currentTime, CDirtyRegionList& d
   {
     int iItem =
         (m_orientation == VERTICAL)
-            ? MathUtils::round_int(static_cast<double>(m_channelScrollOffset / m_channelHeight))
-            : MathUtils::round_int(
-                  static_cast<double>(m_programmeScrollOffset / (m_gridHeight / m_blocksPerPage)));
+            ? RoundedIntFromFloat(m_channelScrollOffset / m_channelHeight)
+            : RoundedIntFromFloat(m_programmeScrollOffset / (m_gridHeight / m_blocksPerPage));
 
     CGUIMessage msg(GUI_MSG_ITEM_SELECT, GetID(), m_pageControl, iItem);
     SendWindowMessage(msg);
@@ -838,8 +846,7 @@ float CGUIEPGGridContainer::GetProgrammeScrollOffsetPos() const
 int CGUIEPGGridContainer::GetChannelScrollOffset(CGUIListItemLayout* layout) const
 {
   if (m_bEnableChannelScrolling)
-    return MathUtils::round_int(
-        static_cast<double>(m_channelScrollOffset / layout->Size(m_orientation)));
+    return RoundedIntFromFloat(m_channelScrollOffset / layout->Size(m_orientation));
   else
     return m_channelOffset;
 }
@@ -847,7 +854,7 @@ int CGUIEPGGridContainer::GetChannelScrollOffset(CGUIListItemLayout* layout) con
 int CGUIEPGGridContainer::GetProgrammeScrollOffset() const
 {
   if (m_bEnableProgrammeScrolling)
-    return MathUtils::round_int(static_cast<double>(m_programmeScrollOffset / m_blockSize));
+    return RoundedIntFromFloat(m_programmeScrollOffset / m_blockSize);
   else
     return m_blockOffset;
 }
@@ -1102,7 +1109,8 @@ bool CGUIEPGGridContainer::SetChannel(const std::shared_ptr<CPVRChannel>& channe
 {
   for (int iIndex = 0; iIndex < m_gridModel->ChannelItemsSize(); iIndex++)
   {
-    int iChannelId = static_cast<int>(m_gridModel->GetChannelItem(iIndex)->GetProperty("channelid").asInteger(-1));
+    const int iChannelId{UTILS::Narrow<int>(
+        m_gridModel->GetChannelItem(iIndex)->GetProperty("channelid").asInteger(-1))};
     if (iChannelId == channel->ChannelID())
     {
       GoToChannel(iIndex);
@@ -1262,11 +1270,10 @@ EVENT_RESULT CGUIEPGGridContainer::OnMouseEvent(const CPoint& point,
       // we're done with exclusive access
       CGUIMessage msg(GUI_MSG_EXCLUSIVE_MOUSE, 0, GetParentID());
       SendWindowMessage(msg);
-      ScrollToChannelOffset(MathUtils::round_int(
-          static_cast<double>(m_channelScrollOffset / m_channelLayout->Size(m_orientation))));
+      ScrollToChannelOffset(
+          RoundedIntFromFloat(m_channelScrollOffset / m_channelLayout->Size(m_orientation)));
       SetChannel(m_channelCursor);
-      ScrollToBlockOffset(
-          MathUtils::round_int(static_cast<double>(m_programmeScrollOffset / m_blockSize)));
+      ScrollToBlockOffset(RoundedIntFromFloat(m_programmeScrollOffset / m_blockSize));
       SetBlock(m_blockCursor);
       return EVENT_RESULT_HANDLED;
     }
@@ -1278,10 +1285,9 @@ EVENT_RESULT CGUIEPGGridContainer::OnMouseEvent(const CPoint& point,
       {
         std::unique_lock<CCriticalSection> lock(m_critSection);
 
-        m_channelOffset = MathUtils::round_int(
-            static_cast<double>(m_channelScrollOffset / m_channelLayout->Size(m_orientation)));
-        m_blockOffset =
-            MathUtils::round_int(static_cast<double>(m_programmeScrollOffset / m_blockSize));
+        m_channelOffset =
+            RoundedIntFromFloat(m_channelScrollOffset / m_channelLayout->Size(m_orientation));
+        m_blockOffset = RoundedIntFromFloat(m_programmeScrollOffset / m_blockSize);
         ValidateOffset();
       }
       return EVENT_RESULT_HANDLED;
@@ -2556,8 +2562,8 @@ void CGUIEPGGridContainer::HandleProgrammeGrid(bool bRender,
         // increment our X position
         posA2 += m_gridModel->GetGridItemWidth(
             channel, block); // assumes focused & unfocused layouts have equal length
-        block += MathUtils::round_int(
-            static_cast<double>(m_gridModel->GetGridItemOriginWidth(channel, block) / m_blockSize));
+        block +=
+            RoundedIntFromFloat(m_gridModel->GetGridItemOriginWidth(channel, block) / m_blockSize);
       }
     }
 

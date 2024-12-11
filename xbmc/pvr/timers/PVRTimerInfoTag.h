@@ -426,7 +426,7 @@ public:
    * @brief Get the duration of this timer in seconds, excluding padding times.
    * @return The duration.
    */
-  int GetDuration() const;
+  size_t GetDuration() const;
 
   /*!
    * @brief Get time in minutes to start the recording before the start time of the programme.

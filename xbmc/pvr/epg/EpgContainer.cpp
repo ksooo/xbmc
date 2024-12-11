@@ -733,7 +733,7 @@ bool CPVREpgContainer::UpdateEPG(bool bOnlyPending /* = false */)
 
   std::vector<std::shared_ptr<CPVREpg>> invalidTables;
 
-  unsigned int iCounter = 0;
+  size_t counter = 0;
   const std::shared_ptr<CPVREpgDatabase> database = GetEpgDatabase();
 
   m_critSection.lock();
@@ -758,8 +758,8 @@ bool CPVREpgContainer::UpdateEPG(bool bOnlyPending /* = false */)
       continue;
 
     if (progressHandler)
-      progressHandler->UpdateProgress(epg->GetChannelData()->ChannelName(), ++iCounter,
-                                      static_cast<unsigned int>(epgsToUpdate.size()));
+      progressHandler->UpdateProgress(epg->GetChannelData()->ChannelName(), ++counter,
+                                      epgsToUpdate.size());
 
     if ((!bOnlyPending || epg->UpdatePending()) &&
         epg->Update(start,

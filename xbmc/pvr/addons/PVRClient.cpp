@@ -44,6 +44,7 @@
 #include "pvr/timers/PVRTimers.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -60,6 +61,7 @@ extern "C"
 }
 
 using namespace ADDON;
+using namespace KODI;
 using namespace PVR;
 
 namespace
@@ -169,8 +171,9 @@ public:
     iGenreType = recording.GenreType();
     iGenreSubType = recording.GenreSubType();
     iPlayCount = recording.GetLocalPlayCount();
+    //! @todo API change to fix possible data loss.
     iLastPlayedPosition =
-        static_cast<int>(std::lrint(recording.GetLocalResumePoint().timeInSeconds));
+        UTILS::Narrow<int>(std::lrint(recording.GetLocalResumePoint().timeInSeconds));
     bIsDeleted = recording.IsDeleted();
     iEpgEventId = recording.BroadcastUid();
     iChannelUid = recording.ChannelUid();
@@ -260,7 +263,8 @@ public:
     strSeriesLink = m_seriesLink.c_str();
 
     const auto& props{timer.GetCustomProperties()};
-    iCustomPropsSize = static_cast<unsigned int>(props.size());
+    //! @todo API change to fix possible data loss.
+    iCustomPropsSize = UTILS::Narrow<unsigned int>(props.size());
     if (iCustomPropsSize)
     {
       m_customProps = std::make_unique<PVR_SETTING_KEY_VALUE_PAIR[]>(iCustomPropsSize);
@@ -1217,14 +1221,16 @@ PVR_ERROR CPVRClient::SetRecordingPlayCount(const CPVRRecording& recording, int 
 }
 
 PVR_ERROR CPVRClient::SetRecordingLastPlayedPosition(const CPVRRecording& recording,
-                                                     int lastplayedposition)
+                                                     size_t lastplayedposition)
 {
   return DoAddonCall(
       __func__,
       [&recording, lastplayedposition](const AddonInstance* addon)
       {
         const CAddonRecording tag{recording};
-        return addon->toAddon->SetRecordingLastPlayedPosition(addon, &tag, lastplayedposition);
+        //! @todo API change to fix possible data loss.
+        const int pos{KODI::UTILS::Narrow<int>(lastplayedposition)};
+        return addon->toAddon->SetRecordingLastPlayedPosition(addon, &tag, pos);
       },
       m_clientCapabilities.SupportsRecordingsLastPlayedPosition());
 }
@@ -1488,30 +1494,32 @@ PVR_ERROR CPVRClient::GetStreamReadChunkSize(int& iChunkSize) const
       m_clientCapabilities.SupportsRecordings() || m_clientCapabilities.HandlesInputStream());
 }
 
-PVR_ERROR CPVRClient::ReadLiveStream(void* lpBuf, int64_t uiBufSize, int& iRead)
+PVR_ERROR CPVRClient::ReadLiveStream(void* lpBuf, int64_t iBufSize, int& iRead)
 {
   iRead = -1;
   return DoAddonCall(__func__,
-                     [&lpBuf, uiBufSize, &iRead](const AddonInstance* addon)
+                     [&lpBuf, iBufSize, &iRead](const AddonInstance* addon)
                      {
+                       //! @todo API change to fix possible data loss.
                        iRead = addon->toAddon->ReadLiveStream(
-                           addon, static_cast<unsigned char*>(lpBuf), static_cast<int>(uiBufSize));
+                           addon, static_cast<unsigned char*>(lpBuf), UTILS::Narrow<int>(iBufSize));
                        return (iRead == -1) ? PVR_ERROR_NOT_IMPLEMENTED : PVR_ERROR_NO_ERROR;
                      });
 }
 
 PVR_ERROR CPVRClient::ReadRecordedStream(int64_t streamId,
                                          void* lpBuf,
-                                         int64_t uiBufSize,
+                                         int64_t iBufSize,
                                          int& iRead)
 {
   iRead = -1;
   return DoAddonCall(__func__,
-                     [streamId, &lpBuf, uiBufSize, &iRead](const AddonInstance* addon)
+                     [streamId, &lpBuf, iBufSize, &iRead](const AddonInstance* addon)
                      {
+                       //! @todo API change to fix possible data loss.
                        iRead = addon->toAddon->ReadRecordedStream(
                            addon, streamId, static_cast<unsigned char*>(lpBuf),
-                           static_cast<int>(uiBufSize));
+                           UTILS::Narrow<int>(iBufSize));
                        return (iRead == -1) ? PVR_ERROR_NOT_IMPLEMENTED : PVR_ERROR_NO_ERROR;
                      });
 }

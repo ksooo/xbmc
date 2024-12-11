@@ -19,6 +19,7 @@
 #include "pvr/epg/EpgContainer.h"
 #include "pvr/epg/EpgInfoTag.h"
 #include "pvr/providers/PVRProviders.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #include "utils/log.h"
@@ -27,6 +28,7 @@
 #include <mutex>
 #include <string>
 
+using namespace KODI;
 using namespace PVR;
 
 const std::string CPVRChannel::IMAGE_OWNER_PATTERN = "pvrchannel_{}";
@@ -730,6 +732,11 @@ std::string CPVRChannel::ChannelName() const
 {
   std::unique_lock<CCriticalSection> lock(m_critSection);
   return m_strChannelName;
+}
+
+unsigned int CPVRChannel::LastWatchedAsUInt() const
+{
+  return UTILS::Narrow<unsigned int>(LastWatched());
 }
 
 time_t CPVRChannel::LastWatched() const

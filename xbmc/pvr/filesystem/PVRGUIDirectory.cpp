@@ -904,7 +904,7 @@ bool CPVRGUIDirectory::GetProvidersDirectory(CFileItemList& results) const
 
       const std::shared_ptr<const CPVRChannelGroupsContainer> groups{
           CServiceBroker::GetPVRManager().ChannelGroups()};
-      const unsigned int channelCount{groups->GetChannelCountByProvider(
+      const size_t channelCount{groups->GetChannelCountByProvider(
           path.IsRadio(), path.GetClientId(), path.GetProviderUid())};
       if (channelCount > 0)
       {
@@ -913,13 +913,13 @@ bool CPVRGUIDirectory::GetProvidersDirectory(CFileItemList& results) const
         auto channelsItem{std::make_shared<CFileItem>(channelsPath, true)};
         channelsItem->SetLabel(g_localizeStrings.Get(19019)); // Channels
         channelsItem->SetArt("icon", "DefaultPVRChannels.png");
-        channelsItem->SetProperty("totalcount", channelCount);
+        channelsItem->SetProperty("totalcount", static_cast<unsigned int>(channelCount));
         results.Add(std::move(channelsItem));
       }
 
       const std::shared_ptr<const CPVRRecordings> recordings{
           CServiceBroker::GetPVRManager().Recordings()};
-      const unsigned int recordingCount{recordings->GetRecordingCountByProvider(
+      const uint64_t recordingCount{recordings->GetRecordingCountByProvider(
           path.IsRadio(), path.GetClientId(), path.GetProviderUid())};
       if (recordingCount > 0)
       {

@@ -115,7 +115,7 @@ public:
    * @param providerId The providerId.
    * @return The total count of matching recordings.
    */
-  unsigned int GetRecordingCountByProvider(bool isRadio, int clientId, int providerId) const;
+  uint64_t GetRecordingCountByProvider(bool isRadio, int clientId, int providerId) const;
 
   /*!
    * @brief Get the recording for the given epg tag, if any.

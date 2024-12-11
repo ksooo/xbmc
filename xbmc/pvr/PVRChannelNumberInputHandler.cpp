@@ -30,8 +30,8 @@ CPVRChannelNumberInputHandler::CPVRChannelNumberInputHandler()
 }
 
 CPVRChannelNumberInputHandler::CPVRChannelNumberInputHandler(
-    int iDelay, int iMaxDigits /* = CHANNEL_NUMBER_INPUT_MAX_DIGITS */)
-  : m_iDelay(iDelay), m_iMaxDigits(iMaxDigits), m_timer(this)
+    int iDelay, size_t maxDigits /* = CHANNEL_NUMBER_INPUT_MAX_DIGITS */)
+  : m_iDelay(iDelay), m_maxDigits(maxDigits), m_timer(this)
 {
 }
 
@@ -96,7 +96,7 @@ void CPVRChannelNumberInputHandler::AppendChannelNumberCharacter(char cCharacter
       return;
   }
 
-  if (m_inputBuffer.size() == static_cast<size_t>(m_iMaxDigits))
+  if (m_inputBuffer.size() == m_maxDigits)
   {
     m_inputBuffer.erase(m_inputBuffer.begin());
     SetLabel(m_inputBuffer);

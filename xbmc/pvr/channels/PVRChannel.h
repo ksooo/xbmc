@@ -204,6 +204,11 @@ public:
   bool SetChannelName(const std::string& strChannelName, bool bIsUserSetName = false);
 
   /*!
+   * @return Time channel has been watched last, as unsigned int.
+   */
+  unsigned int LastWatchedAsUInt() const;
+
+  /*!
    * @return Time channel has been watched last.
    */
   time_t LastWatched() const;
