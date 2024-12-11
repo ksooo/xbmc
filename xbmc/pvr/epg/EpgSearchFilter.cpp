@@ -20,12 +20,14 @@
 #include "pvr/epg/EpgSearchPath.h"
 #include "pvr/recordings/PVRRecordings.h"
 #include "pvr/timers/PVRTimers.h"
+#include "utils/Narrow.h"
 #include "utils/TextSearch.h"
 #include "utils/log.h"
 
 #include <algorithm>
 #include <memory>
 
+using namespace KODI;
 using namespace PVR;
 
 CPVREpgSearchFilter::CPVREpgSearchFilter(bool bRadio) : m_bIsRadio(bRadio)
@@ -310,10 +312,10 @@ bool CPVREpgSearchFilter::MatchDuration(const std::shared_ptr<const CPVREpgInfoT
   bool bReturn(true);
 
   if (m_iMinimumDuration != EPG_SEARCH_UNSET)
-    bReturn = (tag->GetDuration() > static_cast<unsigned int>(m_iMinimumDuration) * 60);
+    bReturn = (tag->GetDuration() > UTILS::Narrow<unsigned int>(m_iMinimumDuration) * 60);
 
   if (bReturn && m_iMaximumDuration != EPG_SEARCH_UNSET)
-    bReturn = (tag->GetDuration() < static_cast<unsigned int>(m_iMaximumDuration) * 60);
+    bReturn = (tag->GetDuration() < UTILS::Narrow<unsigned int>(m_iMaximumDuration) * 60);
 
   return bReturn;
 }

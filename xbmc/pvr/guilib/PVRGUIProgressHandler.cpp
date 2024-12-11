@@ -44,10 +44,10 @@ void CPVRGUIProgressHandler::UpdateProgress(const std::string& strText, float fP
 }
 
 void CPVRGUIProgressHandler::UpdateProgress(const std::string& strText,
-                                            unsigned int iCurrent,
-                                            unsigned int iMax)
+                                            size_t currentValue,
+                                            size_t maxValue)
 {
-  float fPercentage = (iCurrent * 100.0f) / iMax;
+  float fPercentage = (currentValue * 100.0f) / maxValue;
   if (!std::isnan(fPercentage))
     fPercentage = std::min(100.0f, fPercentage);
 

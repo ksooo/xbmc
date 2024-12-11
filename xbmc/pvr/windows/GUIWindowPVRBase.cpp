@@ -273,7 +273,7 @@ void CGUIWindowPVRBase::OnInitWindow()
   else
   {
     CGUIWindow::OnInitWindow(); // do not call CGUIMediaWindow as it will do a Refresh which in no case works in this state (no channelgroup!)
-    ShowProgressDialog(g_localizeStrings.Get(19235), 0); // PVR manager is starting up
+    ShowProgressDialog(g_localizeStrings.Get(19235)); // PVR manager is starting up
   }
 }
 
@@ -628,7 +628,7 @@ void CGUIWindowPVRBase::UpdateButtons()
   m_channelGroupsSelector->SelectChannelGroup(channelGroup);
 }
 
-void CGUIWindowPVRBase::ShowProgressDialog(const std::string& strText, int iProgress)
+void CGUIWindowPVRBase::ShowProgressDialog(const std::string& text)
 {
   if (!m_progressHandle)
   {
@@ -641,8 +641,8 @@ void CGUIWindowPVRBase::ShowProgressDialog(const std::string& strText, int iProg
     m_progressHandle = loadingProgressDialog->GetHandle(g_localizeStrings.Get(19235)); // PVR manager is starting up
   }
 
-  m_progressHandle->SetPercentage(static_cast<float>(iProgress));
-  m_progressHandle->SetText(strText);
+  m_progressHandle->SetPercentage(0.0f);
+  m_progressHandle->SetText(text);
 }
 
 void CGUIWindowPVRBase::HideProgressDialog()

@@ -23,6 +23,7 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/Narrow.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
@@ -34,6 +35,7 @@
 #include <stdexcept>
 #include <string>
 
+using namespace KODI;
 using namespace PVR;
 
 CPVRTimerInfoTag::CPVRTimerInfoTag(bool bRadio /* = false */)
@@ -1153,12 +1155,12 @@ void CPVRTimerInfoTag::SetEndFromLocalTime(const CDateTime& end)
   m_StopTime = ConvertLocalTimeToUTC(end);
 }
 
-int CPVRTimerInfoTag::GetDuration() const
+size_t CPVRTimerInfoTag::GetDuration() const
 {
   time_t start, end;
   m_StartTime.GetAsTime(start);
   m_StopTime.GetAsTime(end);
-  return end - start > 0 ? static_cast<int>(end - start) : 3600;
+  return end - start > 0 ? end - start : 3600;
 }
 
 CDateTime CPVRTimerInfoTag::FirstDayAsUTC() const

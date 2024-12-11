@@ -207,15 +207,15 @@ bool CPVRRecordings::HasRecordingForProvider(bool isRadio, int clientId, int pro
                      { return MatchProvider(entry.second, isRadio, clientId, providerId); });
 }
 
-unsigned int CPVRRecordings::GetRecordingCountByProvider(bool isRadio,
-                                                         int clientId,
-                                                         int providerId) const
+uint64_t CPVRRecordings::GetRecordingCountByProvider(bool isRadio,
+                                                     int clientId,
+                                                     int providerId) const
 {
   std::unique_lock<CCriticalSection> lock(m_critSection);
   auto recs = std::count_if(m_recordings.cbegin(), m_recordings.cend(),
                             [isRadio, clientId, providerId](const auto& entry)
                             { return MatchProvider(entry.second, isRadio, clientId, providerId); });
-  return static_cast<unsigned int>(recs);
+  return recs;
 }
 
 void CPVRRecordings::UpdateFromClient(const std::shared_ptr<CPVRRecording>& tag,

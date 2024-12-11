@@ -114,11 +114,10 @@ namespace PVR
 
   private:
     /*!
-     * @brief Show or update the progress dialog.
-     * @param strText The current status.
-     * @param iProgress The current progress in %.
+     * @brief Show the progress dialog, with initial percentage of 0%.
+     * @param text A status text.
      */
-    void ShowProgressDialog(const std::string& strText, int iProgress);
+    void ShowProgressDialog(const std::string& text);
 
     /*!
      * @brief Hide the progress dialog if it's visible.

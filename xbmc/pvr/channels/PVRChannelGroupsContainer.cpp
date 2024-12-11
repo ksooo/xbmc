@@ -178,9 +178,9 @@ bool CPVRChannelGroupsContainer::HasChannelForProvider(bool isRadio,
     return m_groupsTV->GetGroupAll()->HasChannelForProvider(clientId, providerId);
 }
 
-unsigned int CPVRChannelGroupsContainer::GetChannelCountByProvider(bool isRadio,
-                                                                   int clientId,
-                                                                   int providerId) const
+uint64_t CPVRChannelGroupsContainer::GetChannelCountByProvider(bool isRadio,
+                                                               int clientId,
+                                                               int providerId) const
 {
   if (isRadio)
     return m_groupsRadio->GetGroupAll()->GetChannelCountByProvider(clientId, providerId);

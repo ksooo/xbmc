@@ -630,13 +630,14 @@ public:
 
   void Add(bool (A::*function)(), unsigned int resId)
   {
-    CContextButtons::Add(static_cast<unsigned int>(size()), resId);
+    CContextButtons::Add(m_size, resId);
     m_functions.emplace_back(std::bind(function, m_instance));
+    m_size++;
   }
 
   bool Call(int idx)
   {
-    if (idx < 0 || idx >= static_cast<int>(m_functions.size()))
+    if (idx < 0 || idx >= m_size)
       return false;
 
     return m_functions[idx]();
@@ -645,6 +646,7 @@ public:
 private:
   A* m_instance = nullptr;
   std::vector<std::function<bool()>> m_functions;
+  int m_size{0};
 };
 
 } // unnamed namespace
@@ -692,6 +694,9 @@ bool CGUIWindowPVRGuideBase::OnContextButtonNavigate(CONTEXT_BUTTON button)
       while (buttonIdx >= 0)
       {
         buttonIdx = CGUIDialogContextMenu::Show(buttons, lastButtonIdx);
+        if (buttonIdx < 0)
+          break; // canceled
+
         lastButtonIdx = buttonIdx;
         buttons.Call(buttonIdx);
       }

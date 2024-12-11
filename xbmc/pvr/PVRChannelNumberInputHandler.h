@@ -29,7 +29,7 @@ struct PVRChannelNumberInputChangedEvent
 class CPVRChannelNumberInputHandler : private ITimerCallback
 {
 public:
-  static const int CHANNEL_NUMBER_INPUT_MAX_DIGITS = 5;
+  static constexpr size_t CHANNEL_NUMBER_INPUT_MAX_DIGITS = 5;
 
   CPVRChannelNumberInputHandler();
 
@@ -38,7 +38,7 @@ public:
    * @param iDelay timer delay in millisecods.
    * @param iMaxDigits maximum number of display digits to use.
    */
-  CPVRChannelNumberInputHandler(int iDelay, int iMaxDigits = CHANNEL_NUMBER_INPUT_MAX_DIGITS);
+  CPVRChannelNumberInputHandler(int iDelay, size_t maxDigits = CHANNEL_NUMBER_INPUT_MAX_DIGITS);
 
   ~CPVRChannelNumberInputHandler() override = default;
 
@@ -108,7 +108,7 @@ private:
 
   std::vector<std::string> m_sortedChannelNumbers;
   const int m_iDelay;
-  const int m_iMaxDigits;
+  const size_t m_maxDigits;
   std::string m_inputBuffer;
   std::string m_label;
   CTimer m_timer;

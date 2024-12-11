@@ -90,7 +90,7 @@ bool CPVRChannelGroup::LoadFromDatabase(
     const std::map<std::pair<int, int>, std::shared_ptr<CPVRChannel>>& channels,
     const std::vector<std::shared_ptr<CPVRClient>>& clients)
 {
-  const int iChannelCount = m_iGroupId > 0 ? LoadFromDatabase(clients) : 0;
+  const uint64_t iChannelCount = m_iGroupId > 0 ? LoadFromDatabase(clients) : 0;
   CLog::LogFC(LOGDEBUG, LOGPVR, "Fetched {} {} group members from the database for group '{}'",
               iChannelCount, IsRadio() ? "radio" : "TV", GroupName());
 
@@ -324,14 +324,14 @@ bool CPVRChannelGroup::HasChannelForProvider(int clientId, int providerId) const
                      { return MatchProvider(member.second->Channel(), clientId, providerId); });
 }
 
-unsigned int CPVRChannelGroup::GetChannelCountByProvider(int clientId, int providerId) const
+uint64_t CPVRChannelGroup::GetChannelCountByProvider(int clientId, int providerId) const
 {
   std::unique_lock<CCriticalSection> lock(m_critSection);
   auto channels =
       std::count_if(m_members.cbegin(), m_members.cend(),
                     [clientId, providerId](const auto& member)
                     { return MatchProvider(member.second->Channel(), clientId, providerId); });
-  return static_cast<unsigned int>(channels);
+  return channels;
 }
 
 std::shared_ptr<CPVRChannelGroupMember> CPVRChannelGroup::GetLastPlayedChannelGroupMember(
@@ -510,12 +510,15 @@ void CPVRChannelGroup::GetChannelNumbers(std::vector<std::string>& channelNumber
   }
 }
 
-int CPVRChannelGroup::LoadFromDatabase(const std::vector<std::shared_ptr<CPVRClient>>& clients)
+uint64_t CPVRChannelGroup::LoadFromDatabase(const std::vector<std::shared_ptr<CPVRClient>>& clients)
 {
   const std::shared_ptr<const CPVRDatabase> database(
       CServiceBroker::GetPVRManager().GetTVDatabase());
   if (!database)
-    return -1;
+  {
+    CLog::LogF(LOGERROR, "No TV database");
+    return 0;
+  }
 
   const std::vector<std::shared_ptr<CPVRChannelGroupMember>> results =
       database->Get(*this, clients);
@@ -567,7 +570,7 @@ int CPVRChannelGroup::LoadFromDatabase(const std::vector<std::shared_ptr<CPVRCli
 
   DeleteGroupMembersFromDb(membersToDelete);
 
-  return static_cast<int>(results.size() - membersToDelete.size());
+  return results.size() - membersToDelete.size();
 }
 
 void CPVRChannelGroup::DeleteGroupMembersFromDb(
@@ -877,7 +880,7 @@ bool CPVRChannelGroup::Persist()
   if (database)
   {
     CLog::LogFC(LOGDEBUG, LOGPVR, "Persisting channel group '{}' with {} channels", GroupName(),
-                static_cast<int>(m_members.size()));
+                m_members.size());
 
     bReturn = database->Persist(*this);
     m_bChanged = false;

@@ -390,7 +390,7 @@ public:
    * @param providerId The providerId.
    * @return The total count of matching channels.
    */
-  unsigned int GetChannelCountByProvider(int clientId, int providerId) const;
+  uint64_t GetChannelCountByProvider(int clientId, int providerId) const;
 
   /*!
    * @brief Set the hidden state of this group.
@@ -603,7 +603,7 @@ private:
    * @param clients The PVR clients to load data for. Leave empty for all clients.
    * @return The amount of channel group members that were added.
    */
-  int LoadFromDatabase(const std::vector<std::shared_ptr<CPVRClient>>& clients);
+  uint64_t LoadFromDatabase(const std::vector<std::shared_ptr<CPVRClient>>& clients);
 
   /*!
    * @brief Delete channel group members from database.
