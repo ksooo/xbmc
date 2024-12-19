@@ -3050,7 +3050,7 @@ bool CApplication::ExecuteXBMCAction(std::string actionStr,
   {
     if (!CBuiltins::GetInstance().IsSystemPowerdownCommand(actionStr) ||
         CServiceBroker::GetPVRManager().Get<PVR::GUI::PowerManagement>().CanSystemPowerdown())
-      CBuiltins::GetInstance().Execute(actionStr);
+      CBuiltins::GetInstance().Execute(actionStr, item);
   }
   else
   {
