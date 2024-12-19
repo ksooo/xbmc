@@ -32,6 +32,8 @@
 #include "utils/Variant.h"
 #include "utils/XMLUtils.h"
 #include "utils/guilib/GUIBuiltinsUtils.h"
+#include "utils/guilib/GUIBuiltinsVideoPlayActionProcessor.h"
+#include "utils/guilib/GUIBuiltinsVideoSelectActionProcessor.h"
 #include "utils/guilib/GUIContentUtils.h"
 #include "utils/log.h"
 #include "video/VideoFileItemClassify.h"
@@ -39,8 +41,6 @@
 #include "video/VideoThumbLoader.h"
 #include "video/VideoUtils.h"
 #include "video/guilib/VideoGUIUtils.h"
-#include "video/guilib/VideoPlayActionProcessor.h"
-#include "video/guilib/VideoSelectActionProcessor.h"
 
 #include <memory>
 #include <mutex>
@@ -455,39 +455,15 @@ std::string CDirectoryProvider::GetTarget(const CFileItem& item) const
 
 namespace
 {
-class CVideoSelectActionProcessor : public VIDEO::GUILIB::CVideoSelectActionProcessorBase
+class CVideoSelectActionProcessor : public UTILS::GUILIB::CGUIBuiltinsVideoSelectActionProcessor
 {
 public:
   CVideoSelectActionProcessor(CDirectoryProvider& provider, const std::shared_ptr<CFileItem>& item)
-    : CVideoSelectActionProcessorBase(item), m_provider(provider)
+    : CGUIBuiltinsVideoSelectActionProcessor(item), m_provider(provider)
   {
   }
 
 protected:
-  bool OnPlayPartSelected(unsigned int part) override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaPart(m_item, part);
-    return true;
-  }
-
-  bool OnResumeSelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaResume(m_item);
-    return true;
-  }
-
-  bool OnPlaySelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaNoResume(m_item);
-    return true;
-  }
-
-  bool OnQueueSelected() override
-  {
-    CGUIBuiltinsUtils::ExecuteQueueMedia(m_item);
-    return true;
-  }
-
   bool OnInfoSelected() override
   {
     m_provider.OnInfo(m_item);
@@ -502,28 +478,6 @@ protected:
 
 private:
   CDirectoryProvider& m_provider;
-};
-
-class CVideoPlayActionProcessor : public VIDEO::GUILIB::CVideoPlayActionProcessorBase
-{
-public:
-  explicit CVideoPlayActionProcessor(const std::shared_ptr<CFileItem>& item)
-    : CVideoPlayActionProcessorBase(item)
-  {
-  }
-
-protected:
-  bool OnResumeSelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaResume(m_item);
-    return true;
-  }
-
-  bool OnPlaySelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaNoResume(m_item);
-    return true;
-  }
 };
 } // namespace
 
@@ -581,7 +535,7 @@ bool CDirectoryProvider::OnPlay(const std::shared_ptr<CGUIListItem>& item)
   if (targetItem.HasVideoInfoTag() ||
       (targetItem.m_bIsFolder && VIDEO::UTILS::IsItemPlayable(targetItem)))
   {
-    CVideoPlayActionProcessor proc{std::make_shared<CFileItem>(targetItem)};
+    CGUIBuiltinsVideoPlayActionProcessor proc{std::make_shared<CFileItem>(targetItem)};
     if (proc.ProcessDefaultAction())
       return true;
   }

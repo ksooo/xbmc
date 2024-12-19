@@ -23,7 +23,7 @@
 #include "settings/SettingsComponent.h"
 #include "utils/ContentUtils.h"
 #include "utils/URIUtils.h"
-#include "utils/guilib/GUIBuiltinsUtils.h"
+#include "utils/guilib/GUIBuiltinsVideoSelectActionProcessor.h"
 #include "video/VideoFileItemClassify.h"
 #include "video/VideoInfoTag.h"
 #include "video/VideoManagerTypes.h"
@@ -31,7 +31,6 @@
 #include "video/dialogs/GUIDialogVideoInfo.h"
 #include "video/guilib/VideoGUIUtils.h"
 #include "video/guilib/VideoPlayActionProcessor.h"
-#include "video/guilib/VideoSelectActionProcessor.h"
 #include "video/guilib/VideoVersionHelper.h"
 
 #include <utility>
@@ -175,39 +174,15 @@ bool CVideoBrowse::Execute(const std::shared_ptr<CFileItem>& item) const
 
 namespace
 {
-class CVideoSelectActionProcessor : public VIDEO::GUILIB::CVideoSelectActionProcessorBase
+class CVideoSelectActionProcessor : public UTILS::GUILIB::CGUIBuiltinsVideoSelectActionProcessor
 {
 public:
   explicit CVideoSelectActionProcessor(const std::shared_ptr<CFileItem>& item)
-    : CVideoSelectActionProcessorBase(item)
+    : CGUIBuiltinsVideoSelectActionProcessor(item)
   {
   }
 
 protected:
-  bool OnPlayPartSelected(unsigned int part) override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaPart(m_item, part);
-    return true;
-  }
-
-  bool OnResumeSelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaResume(m_item);
-    return true;
-  }
-
-  bool OnPlaySelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaNoResume(m_item);
-    return true;
-  }
-
-  bool OnQueueSelected() override
-  {
-    CGUIBuiltinsUtils::ExecuteQueueMedia(m_item);
-    return true;
-  }
-
   bool OnInfoSelected() override
   {
     CGUIDialogVideoInfo::ShowFor(*m_item);

@@ -18,12 +18,11 @@
 #include "messaging/ApplicationMessenger.h"
 #include "utils/PlayerUtils.h"
 #include "utils/StringUtils.h"
-#include "utils/guilib/GUIBuiltinsUtils.h"
+#include "utils/guilib/GUIBuiltinsVideoPlayActionProcessor.h"
+#include "utils/guilib/GUIBuiltinsVideoSelectActionProcessor.h"
 #include "utils/guilib/GUIContentUtils.h"
 #include "video/VideoUtils.h"
 #include "video/guilib/VideoGUIUtils.h"
-#include "video/guilib/VideoPlayActionProcessor.h"
-#include "video/guilib/VideoSelectActionProcessor.h"
 
 using namespace KODI;
 using namespace KODI::UTILS::GUILIB;
@@ -49,39 +48,15 @@ void CGUIWindowFavourites::OnFavouritesEvent(const CFavouritesService::Favourite
 
 namespace
 {
-class CVideoSelectActionProcessor : public VIDEO::GUILIB::CVideoSelectActionProcessorBase
+class CVideoSelectActionProcessor : public UTILS::GUILIB::CGUIBuiltinsVideoSelectActionProcessor
 {
 public:
   explicit CVideoSelectActionProcessor(const std::shared_ptr<CFileItem>& item)
-    : CVideoSelectActionProcessorBase(item)
+    : CGUIBuiltinsVideoSelectActionProcessor(item)
   {
   }
 
 protected:
-  bool OnPlayPartSelected(unsigned int part) override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaPart(m_item, part);
-    return true;
-  }
-
-  bool OnResumeSelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaResume(m_item);
-    return true;
-  }
-
-  bool OnPlaySelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaNoResume(m_item);
-    return true;
-  }
-
-  bool OnQueueSelected() override
-  {
-    CGUIBuiltinsUtils::ExecuteQueueMedia(m_item);
-    return true;
-  }
-
   bool OnInfoSelected() override
   {
     return UTILS::GUILIB::CGUIContentUtils::ShowInfoForItem(*m_item);
@@ -90,28 +65,6 @@ protected:
   bool OnChooseSelected() override
   {
     CONTEXTMENU::ShowFor(m_item, CContextMenuManager::MAIN);
-    return true;
-  }
-};
-
-class CVideoPlayActionProcessor : public VIDEO::GUILIB::CVideoPlayActionProcessorBase
-{
-public:
-  explicit CVideoPlayActionProcessor(const ::std::shared_ptr<CFileItem>& item)
-    : CVideoPlayActionProcessorBase(item)
-  {
-  }
-
-protected:
-  bool OnResumeSelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaResume(m_item);
-    return true;
-  }
-
-  bool OnPlaySelected() override
-  {
-    CGUIBuiltinsUtils::ExecutePlayMediaNoResume(m_item);
     return true;
   }
 };
@@ -168,7 +121,7 @@ bool CGUIWindowFavourites::OnAction(const CAction& action)
     // video play action setting is for files and folders...
     if (item->HasVideoInfoTag() || (item->m_bIsFolder && VIDEO::UTILS::IsItemPlayable(*item)))
     {
-      CVideoPlayActionProcessor proc{item};
+      CGUIBuiltinsVideoPlayActionProcessor proc{item};
       if (proc.ProcessDefaultAction())
         return true;
     }
