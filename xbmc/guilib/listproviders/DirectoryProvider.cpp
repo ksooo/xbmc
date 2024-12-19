@@ -455,11 +455,11 @@ std::string CDirectoryProvider::GetTarget(const CFileItem& item) const
 
 namespace
 {
-bool ExecuteAction(const std::string& execute)
+bool ExecuteAction(const std::string& execute, const std::shared_ptr<CFileItem>& item)
 {
   if (!execute.empty())
   {
-    CGUIMessage message(GUI_MSG_EXECUTE, 0, 0);
+    CGUIMessage message(GUI_MSG_EXECUTE, 0, 0, 0, 0, item);
     message.SetStringParam(execute);
     CServiceBroker::GetGUI()->GetWindowManager().SendMessage(message);
     return true;
@@ -467,9 +467,9 @@ bool ExecuteAction(const std::string& execute)
   return false;
 }
 
-bool ExecuteAction(const CExecString& execute)
+bool ExecuteAction(const CExecString& execute, const std::shared_ptr<CFileItem>& item)
 {
-  return ExecuteAction(execute.GetExecString());
+  return ExecuteAction(execute.GetExecString(), item);
 }
 
 class CVideoSelectActionProcessor : public VIDEO::GUILIB::CVideoSelectActionProcessorBase
@@ -484,25 +484,25 @@ protected:
   bool OnPlayPartSelected(unsigned int part) override
   {
     // part numbers are 1-based
-    ExecuteAction({"PlayMedia", *m_item, StringUtils::Format("playoffset={}", part - 1)});
+    ExecuteAction({"PlayMedia", *m_item, StringUtils::Format("playoffset={}", part - 1)}, m_item);
     return true;
   }
 
   bool OnResumeSelected() override
   {
-    ExecuteAction({"PlayMedia", *m_item, "resume"});
+    ExecuteAction({"PlayMedia", *m_item, "resume"}, m_item);
     return true;
   }
 
   bool OnPlaySelected() override
   {
-    ExecuteAction({"PlayMedia", *m_item, "noresume"});
+    ExecuteAction({"PlayMedia", *m_item, "noresume"}, m_item);
     return true;
   }
 
   bool OnQueueSelected() override
   {
-    ExecuteAction({"QueueMedia", *m_item, ""});
+    ExecuteAction({"QueueMedia", *m_item, ""}, m_item);
     return true;
   }
 
@@ -533,13 +533,13 @@ public:
 protected:
   bool OnResumeSelected() override
   {
-    ExecuteAction({"PlayMedia", *m_item, "resume"});
+    ExecuteAction({"PlayMedia", *m_item, "resume"}, m_item);
     return true;
   }
 
   bool OnPlaySelected() override
   {
-    ExecuteAction({"PlayMedia", *m_item, "noresume"});
+    ExecuteAction({"PlayMedia", *m_item, "noresume"}, m_item);
     return true;
   }
 };
@@ -578,7 +578,7 @@ bool CDirectoryProvider::OnClick(const std::shared_ptr<CGUIListItem>& item)
   if (fileItem.HasProperty("node.target_url"))
     fileItem.SetPath(fileItem.GetProperty("node.target_url").asString());
 
-  return ExecuteAction({fileItem, GetTarget(fileItem)});
+  return ExecuteAction({fileItem, GetTarget(fileItem)}, std::make_shared<CFileItem>(fileItem));
 }
 
 bool CDirectoryProvider::OnPlay(const std::shared_ptr<CGUIListItem>& item)
@@ -609,12 +609,12 @@ bool CDirectoryProvider::OnPlay(const std::shared_ptr<CGUIListItem>& item)
     if (exec.GetFunction() == "playmedia")
     {
       // exec as is
-      return ExecuteAction(exec);
+      return ExecuteAction(exec, std::make_shared<CFileItem>(targetItem));
     }
     else
     {
       // build a playmedia execute string for given target and exec this
-      return ExecuteAction({"PlayMedia", targetItem, ""});
+      return ExecuteAction({"PlayMedia", targetItem, ""}, std::make_shared<CFileItem>(targetItem));
     }
   }
   return true;

@@ -63,25 +63,25 @@ protected:
   {
     // part numbers are 1-based
     FAVOURITES_UTILS::ExecuteAction(
-        {"PlayMedia", *m_item, StringUtils::Format("playoffset={}", part - 1)});
+        {"PlayMedia", *m_item, StringUtils::Format("playoffset={}", part - 1)}, m_item);
     return true;
   }
 
   bool OnResumeSelected() override
   {
-    FAVOURITES_UTILS::ExecuteAction({"PlayMedia", *m_item, "resume"});
+    FAVOURITES_UTILS::ExecuteAction({"PlayMedia", *m_item, "resume"}, m_item);
     return true;
   }
 
   bool OnPlaySelected() override
   {
-    FAVOURITES_UTILS::ExecuteAction({"PlayMedia", *m_item, "noresume"});
+    FAVOURITES_UTILS::ExecuteAction({"PlayMedia", *m_item, "noresume"}, m_item);
     return true;
   }
 
   bool OnQueueSelected() override
   {
-    FAVOURITES_UTILS::ExecuteAction({"QueueMedia", *m_item, ""});
+    FAVOURITES_UTILS::ExecuteAction({"QueueMedia", *m_item, ""}, m_item);
     return true;
   }
 
@@ -108,13 +108,13 @@ public:
 protected:
   bool OnResumeSelected() override
   {
-    FAVOURITES_UTILS::ExecuteAction({"PlayMedia", *m_item, "resume"});
+    FAVOURITES_UTILS::ExecuteAction({"PlayMedia", *m_item, "resume"}, m_item);
     return true;
   }
 
   bool OnPlaySelected() override
   {
-    FAVOURITES_UTILS::ExecuteAction({"PlayMedia", *m_item, "noresume"});
+    FAVOURITES_UTILS::ExecuteAction({"PlayMedia", *m_item, "noresume"}, m_item);
     return true;
   }
 };
@@ -150,7 +150,7 @@ bool CGUIWindowFavourites::OnSelect(int itemIdx)
   }
 
   // exec the execute string for the original (!) item
-  return FAVOURITES_UTILS::ExecuteAction(favURL);
+  return FAVOURITES_UTILS::ExecuteAction(favURL, item);
 }
 
 bool CGUIWindowFavourites::OnAction(const CAction& action)
@@ -185,7 +185,7 @@ bool CGUIWindowFavourites::OnAction(const CAction& action)
         target = CFavouritesURL{CFavouritesURL::Action::PLAY_MEDIA,
                                 {StringUtils::Paramify(item->GetPath())}};
       }
-      return FAVOURITES_UTILS::ExecuteAction(target);
+      return FAVOURITES_UTILS::ExecuteAction(target, targetItem);
     }
     return false;
   }
