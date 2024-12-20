@@ -755,13 +755,13 @@ void CGUIWindowVideoBase::LoadVideoInfo(CFileItemList& items,
 
 namespace
 {
-class CVideoPlayActionProcessor : public VIDEO::GUILIB::CVideoPlayActionProcessorBase
+class CVideoPlayActionProcessor : public VIDEO::GUILIB::CVideoPlayActionProcessor
 {
 public:
   CVideoPlayActionProcessor(CGUIWindowVideoBase& window,
                             const std::shared_ptr<CFileItem>& item,
                             const std::string& player)
-    : CVideoPlayActionProcessorBase(item), m_window(window), m_player(player)
+    : VIDEO::GUILIB::CVideoPlayActionProcessor(item), m_window(window), m_player(player)
   {
   }
 

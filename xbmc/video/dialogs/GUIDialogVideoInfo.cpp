@@ -734,11 +734,11 @@ void CGUIDialogVideoInfo::ClearCastList()
 
 namespace
 {
-class CVideoPlayActionProcessor : public VIDEO::GUILIB::CVideoPlayActionProcessorBase
+class CVideoPlayActionProcessor : public VIDEO::GUILIB::CVideoPlayActionProcessor
 {
 public:
   explicit CVideoPlayActionProcessor(const std::shared_ptr<CFileItem>& item)
-    : CVideoPlayActionProcessorBase(item)
+    : VIDEO::GUILIB::CVideoPlayActionProcessor(item)
   {
   }
 

@@ -287,11 +287,11 @@ std::vector<std::string> GetPlayers(const CPlayerCoreFactory& playerCoreFactory,
   return players;
 }
 
-class CVideoPlayActionProcessor : public VIDEO::GUILIB::CVideoPlayActionProcessorBase
+class CVideoPlayActionProcessor : public VIDEO::GUILIB::CVideoPlayActionProcessor
 {
 public:
   CVideoPlayActionProcessor(const std::shared_ptr<CFileItem>& item, bool choosePlayer)
-    : CVideoPlayActionProcessorBase(item), m_choosePlayer(choosePlayer)
+    : VIDEO::GUILIB::CVideoPlayActionProcessor(item), m_choosePlayer(choosePlayer)
   {
   }
 
