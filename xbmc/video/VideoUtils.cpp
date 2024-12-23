@@ -214,7 +214,10 @@ ResumeInformation GetStackPartResumeInformation(const CFileItem& item, unsigned 
       CFileItemList parts;
       XFILE::CDirectory::GetDirectory(path, parts, "", XFILE::DIR_FLAG_DEFAULTS);
 
-      resumeInfo = GetItemResumeInformation(*parts[partNumber - 1]);
+      const auto partItem{parts[partNumber - 1]};
+      partItem->LoadDetails();
+
+      resumeInfo = GetItemResumeInformation(*partItem);
       resumeInfo.partNumber = partNumber;
     }
     else

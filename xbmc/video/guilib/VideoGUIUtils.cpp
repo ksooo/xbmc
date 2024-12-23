@@ -361,8 +361,10 @@ void AddItemToPlayListAndPlay(const std::shared_ptr<CFileItem>& itemToQueue,
     for (const std::shared_ptr<CFileItem>& queuedItem : queuedItems)
     {
       if (queuedItem->IsSamePath(itemToPlay.get()))
+      {
+        queuedItem->m_lStartPartNumber = itemToPlay->m_lStartPartNumber;
         break;
-
+      }
       pos++;
     }
   }
@@ -443,6 +445,36 @@ void PlayItem(
       playlistPlayer.Play(item, player);
     }
   }
+}
+
+bool PlayStackPart(
+    const std::shared_ptr<CFileItem>& item,
+    unsigned int partNumber,
+    const std::string& player,
+    ContentUtils::PlayMode mode /* = ContentUtils::PlayMode::CHECK_AUTO_PLAY_NEXT_ITEM */)
+{
+  // part numbers are 1-based.
+  if (partNumber < 1)
+  {
+    CLog::LogF(LOGERROR, "Invalid item (part number must be greater than 0)!");
+    return false;
+  }
+
+  if (!URIUtils::IsStack(item->GetDynPath()))
+  {
+    CLog::LogF(LOGERROR, "Invalid item (not a stack)!");
+    return false;
+  }
+
+  //! @todo handle play from beginning/resume according to default play action
+
+  const ResumeInformation resumeInfo{
+      VIDEO::UTILS::GetStackPartResumeInformation(*item, partNumber)};
+  item->SetStartOffset(resumeInfo.startOffset);
+  item->m_lStartPartNumber = partNumber;
+
+  PlayItem(item, player, mode);
+  return true;
 }
 
 void QueueItem(const std::shared_ptr<CFileItem>& itemIn, QueuePosition pos)

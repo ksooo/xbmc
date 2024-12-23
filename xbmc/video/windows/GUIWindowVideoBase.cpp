@@ -588,7 +588,7 @@ public:
 protected:
   bool OnPlayPartSelected(unsigned int part) override
   {
-    return m_window.OnPlayStackPart(m_item, part);
+    return m_window.OnPlayStackPart(m_item, part, m_player);
   }
 
   bool OnResumeSelected() override
@@ -851,51 +851,20 @@ void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &but
 }
 
 bool CGUIWindowVideoBase::OnPlayStackPart(const std::shared_ptr<CFileItem>& item,
-                                          unsigned int partNumber)
+                                          unsigned int partNumber,
+                                          const std::string& player)
 {
-  // part numbers are 1-based.
-  if (partNumber < 1)
-    return false;
+  if (m_thumbLoader.IsLoading())
+    m_thumbLoader.StopAsync();
 
-  const std::string path = item->GetDynPath();
+  const bool ret{VIDEO::UTILS::PlayStackPart(item, partNumber, player)};
 
-  if (!URIUtils::IsStack(path))
-    return false;
+  const auto& components = CServiceBroker::GetAppComponents();
+  const auto appPlayer = components.GetComponent<CApplicationPlayer>();
+  if (!appPlayer->IsPlayingVideo())
+    m_thumbLoader.Load(*m_vecItems);
 
-  if (URIUtils::IsDiscImageStack(path))
-  {
-    // disc image stack
-    CFileItemList parts;
-    CDirectory::GetDirectory(path, parts, "", DIR_FLAG_DEFAULTS);
-
-    const int value = CVideoSelectActionProcessor::ChoosePlayOrResume(*parts[partNumber - 1]);
-    if (value == VIDEO::GUILIB::ACTION_RESUME)
-    {
-      const VIDEO::UTILS::ResumeInformation resumeInfo =
-          VIDEO::UTILS::GetItemResumeInformation(*parts[partNumber - 1]);
-      item->SetStartOffset(resumeInfo.startOffset);
-    }
-    else if (value != VIDEO::GUILIB::ACTION_PLAY_FROM_BEGINNING)
-      return false; // if not selected PLAY, then we changed our mind so return
-
-    item->m_lStartPartNumber = partNumber;
-  }
-  else
-  {
-    // video file stack
-    if (partNumber > 1)
-    {
-      std::vector<uint64_t> times;
-      if (m_database.GetStackTimes(path, times))
-        item->SetStartOffset(times[partNumber - 1]);
-    }
-    else
-    {
-      item->SetStartOffset(0);
-    }
-  }
-  // play the video
-  return PlayItem(item, "");
+  return ret;
 }
 
 bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)

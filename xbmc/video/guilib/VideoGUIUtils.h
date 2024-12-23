@@ -28,6 +28,18 @@ void PlayItem(const std::shared_ptr<CFileItem>& item,
               const std::string& player,
               ContentUtils::PlayMode mode = ContentUtils::PlayMode::CHECK_AUTO_PLAY_NEXT_ITEM);
 
+/*! \brief Start playback of a part of the given stack of disc images or video files.
+  \param item [in] the item to play
+  \param partNumber [in] the part number, which is one-based
+  \param player [in] the player to use, empty for default player
+  \param mode [in] queue all successors and play them after item
+  \return true on success, false otherwise
+  */
+bool PlayStackPart(const std::shared_ptr<CFileItem>& item,
+                   unsigned int partNumber,
+                   const std::string& player,
+                   ContentUtils::PlayMode mode = ContentUtils::PlayMode::CHECK_AUTO_PLAY_NEXT_ITEM);
+
 enum class QueuePosition
 {
   POSITION_BEGIN, // place at begin of queue, before other items

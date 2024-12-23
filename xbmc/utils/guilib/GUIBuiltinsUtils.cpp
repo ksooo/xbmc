@@ -55,13 +55,6 @@ bool CGUIBuiltinsUtils::ExecutePlayMediaAskResume(const std::shared_ptr<CFileIte
   return ExecuteAction({"PlayMedia", *item, ""}, item);
 }
 
-bool CGUIBuiltinsUtils::ExecutePlayMediaPart(const std::shared_ptr<CFileItem>& item,
-                                             unsigned int part)
-{
-  // part numbers are 1-based
-  return ExecuteAction({"PlayMedia", *item, StringUtils::Format("playoffset={}", part - 1)}, item);
-}
-
 bool CGUIBuiltinsUtils::ExecuteQueueMedia(const std::shared_ptr<CFileItem>& item)
 {
   return ExecuteAction({"QueueMedia", *item, ""}, item);

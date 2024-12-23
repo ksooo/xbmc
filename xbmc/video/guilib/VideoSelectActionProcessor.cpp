@@ -21,7 +21,6 @@
 #include "settings/SettingsComponent.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
-#include "utils/guilib/GUIBuiltinsUtils.h"
 #include "utils/guilib/GUIContentUtils.h"
 #include "video/VideoFileItemClassify.h"
 #include "video/guilib/VideoGUIUtils.h"
@@ -83,9 +82,7 @@ bool CVideoSelectActionProcessor::Process(Action action)
 
 bool CVideoSelectActionProcessor::OnPlayPartSelected(unsigned int part)
 {
-  //! @todo implement different (not using builtins function)
-  KODI::UTILS::GUILIB::CGUIBuiltinsUtils::ExecutePlayMediaPart(m_item, part);
-  return true;
+  return VIDEO::UTILS::PlayStackPart(m_item, part, "");
 }
 
 bool CVideoSelectActionProcessor::OnQueueSelected()
