@@ -9,14 +9,24 @@
 #include "VideoPlayActionProcessor.h"
 
 #include "FileItem.h"
+#include "FileItemList.h"
 #include "ServiceBroker.h"
 #include "cores/playercorefactory/PlayerCoreFactory.h"
 #include "dialogs/GUIDialogContextMenu.h"
+#include "dialogs/GUIDialogSelect.h"
+#include "filesystem/Directory.h"
+#include "guilib/GUIComponent.h"
+#include "guilib/GUIWindowManager.h"
+#include "guilib/LocalizeStrings.h"
 #include "playlists/PlayListTypes.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/StringUtils.h"
+#include "utils/URIUtils.h"
 #include "utils/Variant.h"
+#include "utils/log.h"
 #include "video/VideoFileItemClassify.h"
+#include "video/VideoUtils.h"
 #include "video/guilib/VideoGUIUtils.h"
 #include "video/guilib/VideoVersionHelper.h"
 
@@ -45,6 +55,28 @@ bool CVideoPlayActionProcessor::ProcessAction(Action action)
   {
     m_userCancelled = true;
     return true; // User cancelled the select menu. We're done.
+  }
+
+  if (m_chooseStackPart)
+  {
+    if (!URIUtils::IsStack(m_item->GetDynPath()))
+    {
+      CLog::LogF(LOGERROR, "Invalid item (not a stack)!");
+      return true; // done
+    }
+
+    CFileItemList parts;
+    const unsigned int partNumber{ChooseStackPart(parts)};
+    if (partNumber < 1)
+    {
+      m_userCancelled = true;
+      return true; // User cancelled the select menu. We're done.
+    }
+
+    const VIDEO::UTILS::ResumeInformation resumeInfo{
+        VIDEO::UTILS::GetStackPartResumeInformation(*m_item, parts, partNumber)};
+    m_item->SetStartOffset(resumeInfo.startOffset);
+    m_item->m_lStartPartNumber = partNumber;
   }
 
   return Process(action);
@@ -94,6 +126,28 @@ Action CVideoPlayActionProcessor::ChoosePlayOrResume(const CFileItem& item)
   }
 
   return action;
+}
+
+unsigned int CVideoPlayActionProcessor::ChooseStackPart(CFileItemList& parts) const
+{
+  XFILE::CDirectory::GetDirectory(m_item->GetDynPath(), parts, "", XFILE::DIR_FLAG_DEFAULTS);
+
+  for (int i = 0; i < parts.Size(); ++i)
+    parts[i]->SetLabel(StringUtils::Format(g_localizeStrings.Get(23051), i + 1)); // Part #
+
+  CGUIDialogSelect* dialog =
+      CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogSelect>(
+          WINDOW_DIALOG_SELECT);
+
+  dialog->Reset();
+  dialog->SetHeading(CVariant{20324}); // Play part...
+  dialog->SetItems(parts);
+  dialog->Open();
+
+  if (!dialog->IsConfirmed())
+    return 0; // User cancelled the dialog.
+
+  return dialog->GetSelectedItem() + 1; // part numbers are 1-based
 }
 
 bool CVideoPlayActionProcessor::OnResumeSelected()

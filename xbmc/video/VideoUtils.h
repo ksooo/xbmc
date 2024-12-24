@@ -12,6 +12,7 @@
 #include <string>
 
 class CFileItem;
+class CFileItemList;
 
 namespace KODI::VIDEO::UTILS
 {
@@ -60,10 +61,13 @@ ResumeInformation GetItemResumeInformation(const CFileItem& item);
 /*!
  \brief Get resume information for a part of a stack item.
  \param item The stack item to retrieve information for
+ \param parts The parts of the stack
  \param partNumber The number of the part
  \return The resume information.
  */
-ResumeInformation GetStackPartResumeInformation(const CFileItem& item, unsigned int partNumber);
+ResumeInformation GetStackPartResumeInformation(const CFileItem& item,
+                                                const CFileItemList& parts,
+                                                unsigned int partNumber);
 
 /*!
  \brief For a given non-library folder containing video files, load info from the video database.

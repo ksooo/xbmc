@@ -586,14 +586,11 @@ public:
   }
 
 protected:
-  bool OnPlayPartSelected(unsigned int part) override
-  {
-    return m_window.OnPlayStackPart(m_item, part, m_player);
-  }
-
   bool OnResumeSelected() override
   {
-    m_item->SetStartOffset(STARTOFFSET_RESUME);
+    if (m_item->GetStartOffset() == 0)
+      m_item->SetStartOffset(STARTOFFSET_RESUME);
+
     return m_window.PlayItem(m_item, m_player);
   }
 
@@ -637,6 +634,11 @@ bool CGUIWindowVideoBase::OnFileAction(int iItem,
     return false;
 
   CVideoSelectActionProcessor proc(*this, item, iItem, player);
+  if (action == VIDEO::GUILIB::ACTION_PLAYPART)
+  {
+    proc.SetChooseStackPart();
+    return proc.ProcessAction(VIDEO::GUILIB::ACTION_PLAY_OR_RESUME); //! @todo correct action?
+  }
   return proc.ProcessAction(action);
 }
 
@@ -850,23 +852,6 @@ void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &but
   CGUIMediaWindow::GetContextButtons(itemNumber, buttons);
 }
 
-bool CGUIWindowVideoBase::OnPlayStackPart(const std::shared_ptr<CFileItem>& item,
-                                          unsigned int partNumber,
-                                          const std::string& player)
-{
-  if (m_thumbLoader.IsLoading())
-    m_thumbLoader.StopAsync();
-
-  const bool ret{VIDEO::UTILS::PlayStackPart(item, partNumber, player)};
-
-  const auto& components = CServiceBroker::GetAppComponents();
-  const auto appPlayer = components.GetComponent<CApplicationPlayer>();
-  if (!appPlayer->IsPlayingVideo())
-    m_thumbLoader.Load(*m_vecItems);
-
-  return ret;
-}
-
 bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 {
   CFileItemPtr item;
@@ -1069,6 +1054,20 @@ void CGUIWindowVideoBase::LoadPlayList(const std::string& strPlayList,
 bool CGUIWindowVideoBase::PlayItem(const std::shared_ptr<CFileItem>& pItem,
                                    const std::string& player)
 {
+  if (URIUtils::IsStack(pItem->GetDynPath()))
+  {
+    if (m_thumbLoader.IsLoading())
+      m_thumbLoader.StopAsync();
+
+    VIDEO::UTILS::PlayItem(pItem, player);
+
+    const auto& components = CServiceBroker::GetAppComponents();
+    const auto appPlayer = components.GetComponent<CApplicationPlayer>();
+    if (!appPlayer->IsPlayingVideo())
+      m_thumbLoader.Load(*m_vecItems);
+
+    return true;
+  }
   if (!pItem->m_bIsFolder && VIDEO::IsVideoDb(*pItem) && !pItem->Exists())
   {
     CLog::LogF(LOGDEBUG, "File '{}' for library item '{}' doesn't exist.", pItem->GetDynPath(),

@@ -59,9 +59,6 @@ public:
                             bool allowReplaceLabels = true);
 
   bool PlayItem(const std::shared_ptr<CFileItem>& item, const std::string& player);
-  bool OnPlayStackPart(const std::shared_ptr<CFileItem>& item,
-                       unsigned int partNumber,
-                       const std::string& player);
   void OnQueueItem(const std::shared_ptr<CFileItem>& item, int iItem, bool first = false);
 
 protected:

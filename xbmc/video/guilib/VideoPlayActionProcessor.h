@@ -13,6 +13,7 @@
 #include <memory>
 
 class CFileItem;
+class CFileItemList;
 
 namespace KODI::VIDEO::GUILIB
 {
@@ -26,6 +27,7 @@ public:
   bool ProcessAction(Action action);
 
   void SetChoosePlayer() { m_choosePlayer = true; }
+  void SetChooseStackPart() { m_chooseStackPart = true; }
 
   bool UserCancelled() const { return m_userCancelled; }
 
@@ -43,8 +45,10 @@ protected:
   std::shared_ptr<CFileItem> m_item;
   bool m_userCancelled{false};
   bool m_choosePlayer{false};
+  bool m_chooseStackPart{false};
 
 private:
   CVideoPlayActionProcessor() = delete;
+  unsigned int ChooseStackPart(CFileItemList& parts) const;
 };
 } // namespace KODI::VIDEO::GUILIB

@@ -181,12 +181,22 @@ ResumeInformation GetItemResumeInformation(const CFileItem& item)
   if (item.IsLiveTV() || item.IsDeleted())
     return {};
 
+  if (item.GetStartOffset() > 0)
+  {
+    ResumeInformation resumeInfo;
+    resumeInfo.startOffset = item.GetStartOffset();
+    resumeInfo.partNumber = item.m_lStartPartNumber;
+    resumeInfo.isResumable = true;
+    return resumeInfo;
+  }
+
   int64_t startOffset{0};
   int partNumber{0};
   if (item.GetCurrentResumeTimeAndPartNumber(startOffset, partNumber) && startOffset > 0)
   {
     ResumeInformation resumeInfo;
     resumeInfo.startOffset = CUtil::ConvertSecsToMilliSecs(startOffset);
+    resumeInfo.partNumber = partNumber;
     resumeInfo.isResumable = true;
     return resumeInfo;
   }
@@ -201,7 +211,9 @@ ResumeInformation GetItemResumeInformation(const CFileItem& item)
   return {};
 }
 
-ResumeInformation GetStackPartResumeInformation(const CFileItem& item, unsigned int partNumber)
+ResumeInformation GetStackPartResumeInformation(const CFileItem& item,
+                                                const CFileItemList& parts,
+                                                unsigned int partNumber)
 {
   ResumeInformation resumeInfo;
 
@@ -211,9 +223,6 @@ ResumeInformation GetStackPartResumeInformation(const CFileItem& item, unsigned 
     if (URIUtils::IsDiscImageStack(path))
     {
       // disc image stack
-      CFileItemList parts;
-      XFILE::CDirectory::GetDirectory(path, parts, "", XFILE::DIR_FLAG_DEFAULTS);
-
       const auto partItem{parts[partNumber - 1]};
       partItem->LoadDetails();
 
