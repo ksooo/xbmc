@@ -361,8 +361,10 @@ void AddItemToPlayListAndPlay(const std::shared_ptr<CFileItem>& itemToQueue,
     for (const std::shared_ptr<CFileItem>& queuedItem : queuedItems)
     {
       if (queuedItem->IsSamePath(itemToPlay.get()))
+      {
+        queuedItem->m_lStartPartNumber = itemToPlay->m_lStartPartNumber;
         break;
-
+      }
       pos++;
     }
   }
@@ -641,7 +643,7 @@ std::string GetResumeString(const CFileItem& item)
           StringUtils::SecondsToTimeString(
               static_cast<long>(CUtil::ConvertMilliSecsToSecsInt(resumeInfo.startOffset)),
               TIME_FORMAT_HH_MM_SS));
-      if (resumeInfo.partNumber > 0)
+      if (resumeInfo.partNumber > 0 && URIUtils::IsStack(item.GetDynPath()))
       {
         const std::string partString =
             StringUtils::Format(g_localizeStrings.Get(23051), resumeInfo.partNumber);

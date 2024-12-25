@@ -13,19 +13,21 @@
 #include <memory>
 
 class CFileItem;
+class CFileItemList;
 
 namespace KODI::VIDEO::GUILIB
 {
 class CVideoPlayActionProcessor
 {
 public:
-  explicit CVideoPlayActionProcessor(const std::shared_ptr<CFileItem>& item) : m_item(item) {}
-  virtual ~CVideoPlayActionProcessor() = default;
+  explicit CVideoPlayActionProcessor(const std::shared_ptr<CFileItem>& item);
+  virtual ~CVideoPlayActionProcessor();
 
   bool ProcessDefaultAction();
   bool ProcessAction(Action action);
 
   void SetChoosePlayer() { m_choosePlayer = true; }
+  void SetChooseStackPart() { m_chooseStackPart = true; }
 
   bool UserCancelled() const { return m_userCancelled; }
 
@@ -43,8 +45,15 @@ protected:
   std::shared_ptr<CFileItem> m_item;
   bool m_userCancelled{false};
   bool m_choosePlayer{false};
+  bool m_chooseStackPart{false};
+  unsigned int m_chosenStackPart{0};
+  std::unique_ptr<CFileItemList> m_stackParts;
 
 private:
   CVideoPlayActionProcessor() = delete;
+  unsigned int ChooseStackPart() const;
+  Action ChoosePlayOrResume();
+  void SetResumeData();
+  void SetStartData();
 };
 } // namespace KODI::VIDEO::GUILIB
