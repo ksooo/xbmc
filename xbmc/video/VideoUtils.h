@@ -12,6 +12,7 @@
 #include <string>
 
 class CFileItem;
+class CFileItemList;
 
 namespace KODI::VIDEO::UTILS
 {
@@ -58,12 +59,26 @@ struct ResumeInformation
 ResumeInformation GetItemResumeInformation(const CFileItem& item);
 
 /*!
- \brief Get resume information for a part of a stack item.
- \param item The stack item to retrieve information for
- \param partNumber The number of the part
- \return The resume information.
+ \brief Get the resume offset for a part of a stack item.
+ \param item The stack item to retrieve the offset for
+ \param parts The parts of the stack
+ \param partNumber The number of the part (1-based)
+ \return The offset or -1 if not found
  */
-ResumeInformation GetStackPartResumeInformation(const CFileItem& item, unsigned int partNumber);
+int64_t GetStackPartResumeOffset(CFileItem& item,
+                                 const CFileItemList& parts,
+                                 unsigned int partNumber);
+
+/*!
+ \brief Get the start offset for a part of a stack item.
+ \param item The stack item to retrieve the offset for
+ \param parts The parts of the stack
+ \param partNumber The number of the part (1-based)
+ \return The offset or -1 if not found
+ */
+int64_t GetStackPartStartOffset(CFileItem& item,
+                                const CFileItemList& parts,
+                                unsigned int partNumber);
 
 /*!
  \brief For a given non-library folder containing video files, load info from the video database.
