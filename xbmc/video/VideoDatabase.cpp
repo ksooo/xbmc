@@ -4510,6 +4510,32 @@ CVideoInfoTag CVideoDatabase::GetDetailsForMovie(const dbiplus::sql_record* cons
   else
     details.SetPremieredFromDBDate(premieredString);
 
+  // set stack resume bookmark
+  if (URIUtils::IsStack(details.m_strFileNameAndPath))
+  {
+    if (URIUtils::IsDiscImageStack(details.m_strFileNameAndPath))
+    {
+      // disc image stack - set stack resume point from highest part which has a resume point
+      GetResumePointForDiscImageStack(details);
+    }
+    else if (details.GetResumePoint().IsSet())
+    {
+      // video file stack - complete stack resume point with part number
+      CBookmark bookmark{details.GetResumePoint()};
+      std::vector<uint64_t> times;
+      GetStackTimes(details.m_strFileNameAndPath, times);
+      for (size_t i = 0; i < times.size(); ++i)
+      {
+        if (bookmark.timeInSeconds < CUtil::ConvertMilliSecsToSecs(times[i]))
+        {
+          bookmark.partNumber = i + 1;
+          details.SetResumePoint(bookmark);
+          break;
+        }
+      }
+    }
+  }
+
   if (getDetails)
   {
     if (getDetails & VideoDbDetailsCast)
@@ -5563,19 +5589,20 @@ bool CVideoDatabase::GetStackTimes(const std::string &filePath, std::vector<uint
   try
   {
     // obtain the FileID (if it exists)
-    int idFile = GetFileId(filePath);
+    int idFile = GetFileId(filePath, m_pDS2);
     if (idFile < 0) return false;
     if (nullptr == m_pDB)
       return false;
-    if (nullptr == m_pDS)
+    if (nullptr == m_pDS2)
       return false;
     // ok, now obtain the settings for this file
     std::string strSQL=PrepareSQL("select times from stacktimes where idFile=%i\n", idFile);
-    m_pDS->query( strSQL );
-    if (m_pDS->num_rows() > 0)
+    m_pDS2->query(strSQL);
+    if (m_pDS2->num_rows() > 0)
     { // get the video settings info
       uint64_t timeTotal = 0;
-      std::vector<std::string> timeString = StringUtils::Split(m_pDS->fv("times").get_asString(), ",");
+      std::vector<std::string> timeString =
+          StringUtils::Split(m_pDS2->fv("times").get_asString(), ",");
       times.clear();
       for (const auto &i : timeString)
       {
@@ -5583,10 +5610,10 @@ bool CVideoDatabase::GetStackTimes(const std::string &filePath, std::vector<uint
         times.push_back(partTime); // db stores in secs, convert to msecs
         timeTotal += partTime;
       }
-      m_pDS->close();
+      m_pDS2->close();
       return (timeTotal > 0);
     }
-    m_pDS->close();
+    m_pDS2->close();
   }
   catch (...)
   {

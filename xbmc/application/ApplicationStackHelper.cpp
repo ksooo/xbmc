@@ -237,7 +237,7 @@ uint64_t CApplicationStackHelper::GetStackTotalTimeMs() const
   return GetStackPartEndTimeMs(m_currentStack->Size() - 1);
 }
 
-int CApplicationStackHelper::GetStackPartNumberAtTimeMs(uint64_t msecs)
+int CApplicationStackHelper::GetStackPartNumberAtTimeMs(uint64_t msecs) const
 {
   if (msecs > 0)
   {
@@ -256,8 +256,7 @@ void CApplicationStackHelper::ClearAllRegisteredStackInformation()
   m_stackmap.clear();
 }
 
-std::shared_ptr<const CFileItem> CApplicationStackHelper::GetRegisteredStack(
-    const CFileItem& item) const
+std::shared_ptr<CFileItem> CApplicationStackHelper::GetRegisteredStack(const CFileItem& item) const
 {
   return GetStackPartInformation(item.GetDynPath())->m_pStack;
 }
@@ -312,6 +311,35 @@ uint64_t CApplicationStackHelper::GetRegisteredStackTotalTimeMs(const CFileItem&
 void CApplicationStackHelper::SetRegisteredStackTotalTimeMs(const CFileItem& item, uint64_t totalTime)
 {
   GetStackPartInformation(item.GetDynPath())->m_lStackTotalTimeMs = totalTime;
+}
+
+bool CApplicationStackHelper::UpdateRegisteredStackResumePoint(const CFileItem& item)
+{
+  const auto stack{GetRegisteredStack(item)};
+  if (stack)
+  {
+    const std::string& partPath{item.GetPath()};
+    for (int partNumber = 1; partNumber <= m_currentStack->Size(); ++partNumber)
+    {
+      const auto part{(*m_currentStack)[partNumber - 1]};
+      if (part->GetPath() == partPath)
+      {
+        if (stack->GetVideoInfoTag()->GetResumePoint().partNumber <= partNumber)
+        {
+          CBookmark bookmark{item.GetVideoInfoTag()->GetResumePoint()};
+          bookmark.partNumber = partNumber;
+          stack->GetVideoInfoTag()->SetResumePoint(bookmark);
+          return true;
+        }
+        else
+        {
+          // There is a higher part with a resume point set. Do not update stack resume point.
+          break;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 CApplicationStackHelper::StackPartInformationPtr CApplicationStackHelper::GetStackPartInformation(

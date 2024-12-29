@@ -218,11 +218,21 @@ void CSaveFileState::DoWork(CFileItem& item,
 
           // Could be part of an ISO stack. In this case the bookmark is saved onto the part.
           // In order to properly update the list, we need to refresh the stack's resume point
-          const auto& components = CServiceBroker::GetAppComponents();
+          auto& components = CServiceBroker::GetAppComponents();
           const auto stackHelper = components.GetComponent<CApplicationStackHelper>();
           if (stackHelper->HasRegisteredStack(item) &&
               stackHelper->GetRegisteredStackTotalTimeMs(item) == 0)
+          {
+            // Update resume point at the stack part
             videodatabase.GetResumePoint(*(msgItem->GetVideoInfoTag()));
+
+            // Also update resume part at the stack
+            if (stackHelper->UpdateRegisteredStackResumePoint(*msgItem))
+            {
+              // Announce that the stack changed
+              msgItem = stackHelper->GetRegisteredStack(*msgItem);
+            }
+          }
 
           CGUIMessage message(GUI_MSG_NOTIFY_ALL, CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow(), 0, GUI_MSG_UPDATE_ITEM, 0, msgItem);
           CServiceBroker::GetGUI()->GetWindowManager().SendThreadMessage(message);

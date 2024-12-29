@@ -112,7 +112,7 @@ public:
   \brief Returns the stack part number corresponding to the given timestamp in a (non-ISO) stack playback
   \param msecs the requested timestamp in the stack (in milliseconds)
   */
-  int GetStackPartNumberAtTimeMs(uint64_t msecs);
+  int GetStackPartNumberAtTimeMs(uint64_t msecs) const;
 
   // Stack information registration methods
 
@@ -124,7 +124,7 @@ public:
   /*!
   \brief Returns a smart pointer to the stack CFileItem.
   */
-  std::shared_ptr<const CFileItem> GetRegisteredStack(const CFileItem& item) const;
+  std::shared_ptr<CFileItem> GetRegisteredStack(const CFileItem& item) const;
 
   /*!
   \brief Returns true if there is a registered stack for the given CFileItem part.
@@ -177,6 +177,12 @@ public:
   \param totalTime the total time of the stack
   */
   void SetRegisteredStackTotalTimeMs(const CFileItem& item, uint64_t totalTimeMs);
+
+  /*!
+  \brief Updates the stack's resume point to match resume point of given item.
+  \param item the reference to the item that is part of a stack
+  */
+  bool UpdateRegisteredStackResumePoint(const CFileItem& item);
 
   CCriticalSection m_critSection;
 
