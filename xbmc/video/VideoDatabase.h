@@ -1281,6 +1281,20 @@ private:
    */
   int RunQuery(const std::string &sql);
 
+  /*! \brief Get the id of a file from file name and path, using the given dataset to retrieve data
+   \param fileNameAndPath full path to the file
+   \param ds the dataset to use (either m_pDS or m_pDS2)
+   \return id of the file, -1 if it is not in the db.
+   */
+  int GetFileId(const std::string& fileNameAndPath, const std::unique_ptr<dbiplus::Dataset>& ds);
+
+  /*! \brief Get the id of a path from given path string, using the given dataset to retrieve data
+   \param path full path
+   \param ds the dataset to use (either m_pDS or m_pDS2)
+   \return id of the path, -1 if it is not in the db.
+   */
+  int GetPathId(const std::string& path, const std::unique_ptr<dbiplus::Dataset>& ds);
+
   void AppendIdLinkFilter(const char* field, const char *table, const MediaType& mediaType, const char *view, const char *viewKey, const CUrlOptions::UrlOptions& options, Filter &filter);
   void AppendLinkFilter(const char* field, const char *table, const MediaType& mediaType, const char *view, const char *viewKey, const CUrlOptions::UrlOptions& options, Filter &filter);
 

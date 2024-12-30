@@ -625,7 +625,8 @@ void CVideoDatabase::CreateViews()
 }
 
 //********************************************************************************************************************************
-int CVideoDatabase::GetPathId(const std::string& strPath)
+int CVideoDatabase::GetPathId(const std::string& strPath,
+                              const std::unique_ptr<dbiplus::Dataset>& ds)
 {
   std::string strSQL;
   try
@@ -633,7 +634,7 @@ int CVideoDatabase::GetPathId(const std::string& strPath)
     int idPath=-1;
     if (nullptr == m_pDB)
       return -1;
-    if (nullptr == m_pDS)
+    if (nullptr == ds)
       return -1;
 
     std::string strPath1(strPath);
@@ -643,11 +644,11 @@ int CVideoDatabase::GetPathId(const std::string& strPath)
     URIUtils::AddSlashAtEnd(strPath1);
 
     strSQL=PrepareSQL("select idPath from path where strPath='%s'",strPath1.c_str());
-    m_pDS->query(strSQL);
-    if (!m_pDS->eof())
-      idPath = m_pDS->fv("path.idPath").get_asInt();
+    ds->query(strSQL);
+    if (!ds->eof())
+      idPath = ds->fv("path.idPath").get_asInt();
 
-    m_pDS->close();
+    ds->close();
     return idPath;
   }
   catch (...)
@@ -655,6 +656,11 @@ int CVideoDatabase::GetPathId(const std::string& strPath)
     CLog::Log(LOGERROR, "{} unable to getpath ({})", __FUNCTION__, strSQL);
   }
   return -1;
+}
+
+int CVideoDatabase::GetPathId(const std::string& strPath)
+{
+  return GetPathId(strPath, m_pDS);
 }
 
 bool CVideoDatabase::GetPaths(std::set<std::string> &paths)
@@ -1201,27 +1207,28 @@ bool CVideoDatabase::GetLinksToTvShow(int idMovie, std::vector<int>& ids)
 
 
 //********************************************************************************************************************************
-int CVideoDatabase::GetFileId(const std::string& strFilenameAndPath)
+int CVideoDatabase::GetFileId(const std::string& strFilenameAndPath,
+                              const std::unique_ptr<dbiplus::Dataset>& ds)
 {
   try
   {
     if (nullptr == m_pDB)
       return -1;
-    if (nullptr == m_pDS)
+    if (nullptr == ds)
       return -1;
     std::string strPath, strFileName;
     SplitPath(strFilenameAndPath,strPath,strFileName);
 
-    int idPath = GetPathId(strPath);
+    int idPath = GetPathId(strPath, ds);
     if (idPath >= 0)
     {
       std::string strSQL;
       strSQL=PrepareSQL("select idFile from files where strFileName='%s' and idPath=%i", strFileName.c_str(),idPath);
-      m_pDS->query(strSQL);
-      if (m_pDS->num_rows() > 0)
+      ds->query(strSQL);
+      if (ds->num_rows() > 0)
       {
-        int idFile = m_pDS->fv("files.idFile").get_asInt();
-        m_pDS->close();
+        int idFile = ds->fv("files.idFile").get_asInt();
+        ds->close();
         return idFile;
       }
     }
@@ -1231,6 +1238,11 @@ int CVideoDatabase::GetFileId(const std::string& strFilenameAndPath)
     CLog::Log(LOGERROR, "{} ({}) failed", __FUNCTION__, strFilenameAndPath);
   }
   return -1;
+}
+
+int CVideoDatabase::GetFileId(const std::string& strFilenameAndPath)
+{
+  return GetFileId(strFilenameAndPath, m_pDS);
 }
 
 int CVideoDatabase::GetFileId(const CFileItem &item)
