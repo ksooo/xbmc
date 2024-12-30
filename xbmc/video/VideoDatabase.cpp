@@ -3504,53 +3504,65 @@ bool CVideoDatabase::GetResumeBookMark(const std::string& strFilenameAndPath, CB
 
 void CVideoDatabase::DeleteResumeBookMark(const CFileItem& item)
 {
-  if (!m_pDB || !m_pDS)
-    return;
-
-  int fileID = item.GetVideoInfoTag()->m_iFileId;
-  if (fileID < 0)
+  if (URIUtils::IsDiscImageStack(item.GetDynPath()))
   {
-    fileID = GetFileId(item.GetPath());
-    if (fileID < 0)
+    CStackDirectory dir;
+    CFileItemList fileList;
+    const CURL pathToUrl(item.GetDynPath());
+    dir.GetDirectory(pathToUrl, fileList);
+    for (const auto& fileItem : fileList)
+      DeleteResumeBookMark(*fileItem);
+  }
+  else
+  {
+    if (!m_pDB || !m_pDS)
       return;
-  }
 
-  try
-  {
-    std::string sql = PrepareSQL("delete from bookmark where idFile=%i and type=%i", fileID, CBookmark::RESUME);
-    m_pDS->exec(sql);
-
-    VideoDbContentType iType = static_cast<VideoDbContentType>(item.GetVideoContentType());
-    std::string content;
-    switch (iType)
+    int fileID{-1};
+    if (item.HasVideoInfoTag())
+      fileID = item.GetVideoInfoTag()->m_iFileId;
+    if (fileID < 0)
     {
-      case VideoDbContentType::MOVIES:
-        content = MediaTypeMovie;
-        break;
-      case VideoDbContentType::EPISODES:
-        content = MediaTypeEpisode;
-        break;
-      case VideoDbContentType::TVSHOWS:
-        content = MediaTypeTvShow;
-        break;
-      case VideoDbContentType::MUSICVIDEOS:
-        content = MediaTypeMusicVideo;
-        break;
-      default:
-        break;
+      fileID = GetFileId(item.GetPath());
+      if (fileID < 0)
+        return;
     }
 
-    if (!content.empty())
+    try
     {
-      AnnounceUpdate(content, item.GetVideoInfoTag()->m_iDbId);
+      const std::string sql{PrepareSQL("delete from bookmark where idFile=%i and type=%i", fileID,
+                                       CBookmark::RESUME)};
+      m_pDS->exec(sql);
     }
+    catch (...)
+    {
+      CLog::Log(LOGERROR, "{} ({}) failed", __FUNCTION__, item.GetPath());
+    }
+  }
 
-  }
-  catch(...)
+  const VideoDbContentType type{static_cast<VideoDbContentType>(item.GetVideoContentType())};
+  std::string content;
+  switch (type)
   {
-    CLog::Log(LOGERROR, "{} ({}) failed", __FUNCTION__,
-              item.GetVideoInfoTag()->m_strFileNameAndPath);
+    case VideoDbContentType::MOVIES:
+      content = MediaTypeMovie;
+      break;
+    case VideoDbContentType::EPISODES:
+      content = MediaTypeEpisode;
+      break;
+    case VideoDbContentType::TVSHOWS:
+      content = MediaTypeTvShow;
+      break;
+    case VideoDbContentType::MUSICVIDEOS:
+      content = MediaTypeMusicVideo;
+      break;
+    default:
+      break;
   }
+
+  const int dbId{item.HasVideoInfoTag() ? item.GetVideoInfoTag()->m_iDbId : -1};
+  if (!content.empty() && dbId != -1)
+    AnnounceUpdate(content, dbId);
 }
 
 void CVideoDatabase::GetEpisodesByFile(const std::string& strFilenameAndPath, std::vector<CVideoInfoTag>& episodes)
