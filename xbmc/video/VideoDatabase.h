@@ -1345,4 +1345,6 @@ private:
   static CDateTime GetDateAdded(const std::string& filename, CDateTime dateAdded = CDateTime());
 
   bool FillMovieItem(std::unique_ptr<dbiplus::Dataset>& dataset, int movieId, CFileItem& item);
+
+  bool GetResumePointForDiscImageStack(CVideoInfoTag& tag);
 };

@@ -3435,6 +3435,61 @@ void CVideoDatabase::GetBookMarksForFile(const std::string& strFilenameAndPath, 
   }
 }
 
+bool CVideoDatabase::GetResumePointForDiscImageStack(CVideoInfoTag& tag)
+{
+  if (!m_pDB)
+    return false;
+
+  if (!m_pDS2)
+    return false;
+
+  // Get all stack parts
+  CStackDirectory dir;
+  CFileItemList fileList;
+  const CURL pathToUrl{tag.m_strFileNameAndPath};
+  dir.GetDirectory(pathToUrl, fileList);
+  if (fileList.IsEmpty())
+    return false;
+
+  // Iterate stack parts from highest to lowest
+  for (int i = fileList.Size() - 1; i >= 0; i--)
+  {
+    const int idFile{GetFileId(fileList[i]->GetPath(), m_pDS2)};
+    if (idFile < 0)
+      return false;
+
+    try
+    {
+      // Get latest resume bookmark from current stack part
+      const std::string sql{PrepareSQL(
+          "select * from bookmark where idFile=%i and type=%i order by timeInSeconds desc limit 1",
+          idFile, static_cast<int>(CBookmark::RESUME))};
+      m_pDS2->query(sql);
+      if (m_pDS2->eof())
+        continue; // Current stack part has no resume bookmark, try next part
+
+      CBookmark bookmark;
+      bookmark.timeInSeconds = m_pDS2->fv("timeInSeconds").get_asDouble();
+      bookmark.totalTimeInSeconds = m_pDS2->fv("totalTimeInSeconds").get_asDouble();
+      bookmark.thumbNailImage = m_pDS2->fv("thumbNailImage").get_asString();
+      bookmark.playerState = m_pDS2->fv("playerState").get_asString();
+      bookmark.player = m_pDS2->fv("player").get_asString();
+      bookmark.partNumber = i + 1;
+      bookmark.type = CBookmark::RESUME;
+
+      m_pDS2->close();
+
+      tag.SetResumePoint(bookmark);
+      return true;
+    }
+    catch (...)
+    {
+      CLog::Log(LOGERROR, "{} ({}) failed", __FUNCTION__, tag.m_strFileNameAndPath);
+    }
+  }
+  return false;
+}
+
 bool CVideoDatabase::GetResumeBookMark(const std::string& strFilenameAndPath, CBookmark &bookmark)
 {
   VECBOOKMARKS bookmarks;
@@ -4371,22 +4426,7 @@ bool CVideoDatabase::GetResumePoint(CVideoInfoTag& tag)
   {
     if (URIUtils::IsDiscImageStack(tag.m_strFileNameAndPath))
     {
-      CStackDirectory dir;
-      CFileItemList fileList;
-      const CURL pathToUrl(tag.m_strFileNameAndPath);
-      dir.GetDirectory(pathToUrl, fileList);
-      tag.SetResumePoint(CBookmark());
-      for (int i = fileList.Size() - 1; i >= 0; i--)
-      {
-        CBookmark bookmark;
-        if (GetResumeBookMark(fileList[i]->GetPath(), bookmark))
-        {
-          bookmark.partNumber = (i+1); /* store part number in here */
-          tag.SetResumePoint(bookmark);
-          match = true;
-          break;
-        }
-      }
+      match = GetResumePointForDiscImageStack(tag);
     }
     else
     {
