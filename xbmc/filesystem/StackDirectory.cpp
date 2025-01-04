@@ -36,7 +36,8 @@ namespace XFILE
 
     for (const std::string& i : files)
     {
-      CFileItemPtr item(new CFileItem(i));
+      const size_t slash{i.find_last_of("/\\")};
+      const auto item{std::make_shared<CFileItem>(i.substr(slash + 1))};
       item->SetPath(i);
       item->m_bIsFolder = false;
       items.Add(item);

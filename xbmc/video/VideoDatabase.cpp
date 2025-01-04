@@ -64,6 +64,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -6517,6 +6518,27 @@ bool CVideoDatabase::GetPlayCounts(const std::string &strPath, CFileItemList &it
 
     return ret;
   }
+  else if (URIUtils::IsDiscImageStack(strPath))
+  {
+    // Note: CStackDirectory::GetPaths returns the full path for all stack parts incl. file name.
+    std::vector<std::string> files;
+    CStackDirectory::GetPaths(strPath, files);
+
+    std::set<std::string> paths;
+    for (const auto& file : files)
+    {
+      const std::string path{URIUtils::GetParentPath(file)};
+      paths.insert(path);
+    }
+
+    bool ret{false};
+    for (const auto& path : paths)
+    {
+      ret |= GetPlayCounts(path, items);
+    }
+    return ret;
+  }
+
   int pathID = -1;
   if (!URIUtils::IsPlugin(strPath))
   {
