@@ -339,6 +339,14 @@ bool CVideoPlayUsing::Execute(const std::shared_ptr<CFileItem>& itemIn) const
   return true;
 }
 
+std::string CVideoPlayStackPart::GetLabel(const CFileItem& item) const
+{
+  if (URIUtils::IsDiscImageStack(item.GetDynPath()))
+    return g_localizeStrings.Get(20341); // Play disc...
+  else
+    return g_localizeStrings.Get(20324); // Play part...
+}
+
 bool CVideoPlayStackPart::IsVisible(const CFileItem& item) const
 {
   return !item.IsParentFolder() && item.IsStack();

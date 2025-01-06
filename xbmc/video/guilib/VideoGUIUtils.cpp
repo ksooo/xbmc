@@ -645,8 +645,9 @@ std::string GetResumeString(const CFileItem& item)
               TIME_FORMAT_HH_MM_SS));
       if (resumeInfo.partNumber > 0 && URIUtils::IsStack(item.GetDynPath()))
       {
-        const std::string partString =
-            StringUtils::Format(g_localizeStrings.Get(23051), resumeInfo.partNumber);
+        const std::string partString = StringUtils::Format(
+            g_localizeStrings.Get(URIUtils::IsDiscImageStack(item.GetDynPath()) ? 23056 : 23051),
+            resumeInfo.partNumber);
         resumeString += " (" + partString + ")";
       }
       return resumeString;

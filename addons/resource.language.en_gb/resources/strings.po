@@ -13750,7 +13750,12 @@ msgctxt "#20340"
 msgid "Do you want to remove all items within this path from your library?"
 msgstr ""
 
-#empty string with id 20341
+#. Label for context menu entry to start playback of a disc of a disc image stack
+#: xbmc/video/guilib/VideoPlayActionProcessor.cpp
+#: xbmc/video/ContextMenus.cpp
+msgctxt "#20341"
+msgid "Play disc..."
+msgstr ""
 
 #: xbmc/dialogs/GUIDialogMediaFilter.cpp
 #: xbmc/dialogs/GUIDialogSmartPlaylistEditor.cpp
@@ -15815,9 +15820,9 @@ msgctxt "#23050"
 msgid "Activate teletext"
 msgstr ""
 
-#. Label for disc stack part and number
+#. Label for disc stack part number
 #: xbmc/video/guilib/VideoPlayActionProcessor.cpp
-#: xbmc/video/VideoUtils.cpp
+#: xbmc/video/guilib/VideoGUIUtils.cpp
 msgctxt "#23051"
 msgid "Part {0:d}"
 msgstr ""
@@ -15839,7 +15844,15 @@ msgctxt "#23055"
 msgid "Scale teletext to 4:3"
 msgstr ""
 
-#empty strings from id 23056 to 23099
+#. Label for stack disc number
+#: xbmc/video/guilib/VideoPlayActionProcessor.cpp
+#: xbmc/video/guilib/VideoGUIUtils.cpp
+msgctxt "#23056"
+msgid "Disc {0:d}"
+msgstr ""
+
+#empty strings from id 23057 to 23099
+
 #strings 23100 thru 23150 reserved for external player
 
 msgctxt "#23100"

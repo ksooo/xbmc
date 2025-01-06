@@ -159,7 +159,9 @@ unsigned int CVideoPlayActionProcessor::ChooseStackPart() const
   auto& parts{*m_stackParts};
   for (int i = 0; i < parts.Size(); ++i)
   {
-    parts[i]->SetLabel(StringUtils::Format(g_localizeStrings.Get(23051), i + 1)); // Part #
+    parts[i]->SetLabel(StringUtils::Format(
+        g_localizeStrings.Get(URIUtils::IsDiscImageStack(m_item->GetDynPath()) ? 23056 : 23051),
+        i + 1));
   }
 
   CGUIDialogSelect* dialog =
@@ -167,7 +169,7 @@ unsigned int CVideoPlayActionProcessor::ChooseStackPart() const
           WINDOW_DIALOG_SELECT);
 
   dialog->Reset();
-  dialog->SetHeading(CVariant{20324}); // Play part...
+  dialog->SetHeading(CVariant{URIUtils::IsDiscImageStack(m_item->GetDynPath()) ? 20341 : 20324});
   dialog->SetItems(*m_stackParts);
   dialog->Open();
 

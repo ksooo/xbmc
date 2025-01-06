@@ -127,9 +127,9 @@ struct CVideoPlayUsing : CStaticContextMenuAction
   bool Execute(const std::shared_ptr<CFileItem>& _item) const override;
 };
 
-struct CVideoPlayStackPart : CStaticContextMenuAction
+struct CVideoPlayStackPart : IContextMenuItem
 {
-  CVideoPlayStackPart() : CStaticContextMenuAction(20324) {} // Play part
+  std::string GetLabel(const CFileItem& item) const override;
   bool IsVisible(const CFileItem& item) const override;
   bool Execute(const std::shared_ptr<CFileItem>& _item) const override;
 };
