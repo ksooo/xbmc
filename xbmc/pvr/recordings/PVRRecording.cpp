@@ -130,7 +130,7 @@ CPVRRecording::CPVRRecording(const PVR_RECORDING& recording, unsigned int iClien
            recording.strGenreDescription ? recording.strGenreDescription : "");
   CVideoInfoTag::SetPlayCount(recording.iPlayCount);
   if (recording.iLastPlayedPosition > 0 && recording.iDuration > recording.iLastPlayedPosition)
-    CVideoInfoTag::SetResumePoint(recording.iLastPlayedPosition, recording.iDuration, "");
+    CVideoInfoTag::SetResumePoint(recording.iLastPlayedPosition, recording.iDuration, "", 1);
   SetDuration(recording.iDuration);
 
   m_parentalRating = recording.iParentalRating;
@@ -346,7 +346,8 @@ bool CPVRRecording::SetResumePoint(const CBookmark& resumePoint)
 
 bool CPVRRecording::SetResumePoint(double timeInSeconds,
                                    double totalTimeInSeconds,
-                                   const std::string& playerState /* = "" */)
+                                   const std::string& playerState,
+                                   int partNumber)
 {
   const std::shared_ptr<CPVRClient> client = CServiceBroker::GetPVRManager().GetClient(m_iClientId);
   if (client && client->GetClientCapabilities().SupportsRecordingsLastPlayedPosition())
@@ -356,7 +357,7 @@ bool CPVRRecording::SetResumePoint(double timeInSeconds,
       return false;
   }
 
-  return CVideoInfoTag::SetResumePoint(timeInSeconds, totalTimeInSeconds, playerState);
+  return CVideoInfoTag::SetResumePoint(timeInSeconds, totalTimeInSeconds, playerState, partNumber);
 }
 
 CBookmark CPVRRecording::GetResumePoint() const

@@ -136,7 +136,8 @@ public:
    */
   bool SetResumePoint(double timeInSeconds,
                       double totalTimeInSeconds,
-                      const std::string& playerState = "") override;
+                      const std::string& playerState,
+                      int partNumber) override;
 
   /*!
    * @brief Get this recording's resume point. The value will be obtained from the backend if it supports server-side resume points.
