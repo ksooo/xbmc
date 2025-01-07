@@ -91,7 +91,9 @@ bool CVideoDatabase::Open()
 void CVideoDatabase::CreateTables()
 {
   CLog::Log(LOGINFO, "create bookmark table");
-  m_pDS->exec("CREATE TABLE bookmark ( idBookmark integer primary key, idFile integer, timeInSeconds double, totalTimeInSeconds double, thumbNailImage text, player text, playerState text, type integer)\n");
+  m_pDS->exec("CREATE TABLE bookmark ( idBookmark integer primary key, idFile integer, "
+              "timeInSeconds double, totalTimeInSeconds double, thumbNailImage text, player text, "
+              "playerState text, type integer, partNumber integer)\n");
 
   CLog::Log(LOGINFO, "create settings table");
   m_pDS->exec("CREATE TABLE settings ( idFile integer, Deinterlace bool,"
@@ -399,6 +401,7 @@ void CVideoDatabase::CreateViews()
       "  bookmark.timeInSeconds AS resumeTimeInSeconds, "
       "  bookmark.totalTimeInSeconds AS totalTimeInSeconds, "
       "  bookmark.playerState AS playerState, "
+      "  bookmark.partNumber AS partNumber, "
       "  rating.rating AS rating, "
       "  rating.votes AS votes, "
       "  rating.rating_type AS rating_type, "
@@ -534,29 +537,29 @@ void CVideoDatabase::CreateViews()
   m_pDS->exec(seasonview);
 
   CLog::Log(LOGINFO, "create musicvideo_view");
-  m_pDS->exec(PrepareSQL(
-              "CREATE VIEW musicvideo_view AS SELECT"
-              "  musicvideo.*,"
-              "  files.strFileName as strFileName,"
-              "  path.strPath as strPath,"
-              "  files.playCount as playCount,"
-              "  files.lastPlayed as lastPlayed,"
-              "  files.dateAdded as dateAdded, "
-              "  bookmark.timeInSeconds AS resumeTimeInSeconds, "
-              "  bookmark.totalTimeInSeconds AS totalTimeInSeconds, "
-              "  bookmark.playerState AS playerState, "
-              "  uniqueid.value AS uniqueid_value, "
-              "  uniqueid.type AS uniqueid_type "
-              "FROM musicvideo"
-              "  JOIN files ON"
-              "    files.idFile=musicvideo.idFile"
-              "  JOIN path ON"
-              "    path.idPath=files.idPath"
-              "  LEFT JOIN bookmark ON"
-              "    bookmark.idFile=musicvideo.idFile AND bookmark.type=1"
-              "  LEFT JOIN uniqueid ON"
-              "    uniqueid.uniqueid_id=musicvideo.c%02d",
-              VIDEODB_ID_MUSICVIDEO_IDENT_ID));
+  m_pDS->exec(PrepareSQL("CREATE VIEW musicvideo_view AS SELECT"
+                         "  musicvideo.*,"
+                         "  files.strFileName as strFileName,"
+                         "  path.strPath as strPath,"
+                         "  files.playCount as playCount,"
+                         "  files.lastPlayed as lastPlayed,"
+                         "  files.dateAdded as dateAdded, "
+                         "  bookmark.timeInSeconds AS resumeTimeInSeconds, "
+                         "  bookmark.totalTimeInSeconds AS totalTimeInSeconds, "
+                         "  bookmark.playerState AS playerState, "
+                         "  bookmark.partNumber AS partNumber, "
+                         "  uniqueid.value AS uniqueid_value, "
+                         "  uniqueid.type AS uniqueid_type "
+                         "FROM musicvideo"
+                         "  JOIN files ON"
+                         "    files.idFile=musicvideo.idFile"
+                         "  JOIN path ON"
+                         "    path.idPath=files.idPath"
+                         "  LEFT JOIN bookmark ON"
+                         "    bookmark.idFile=musicvideo.idFile AND bookmark.type=1"
+                         "  LEFT JOIN uniqueid ON"
+                         "    uniqueid.uniqueid_id=musicvideo.c%02d",
+                         VIDEODB_ID_MUSICVIDEO_IDENT_ID));
 
   CLog::Log(LOGINFO, "create movie_view");
 
@@ -573,6 +576,7 @@ void CVideoDatabase::CreateViews()
                  "  bookmark.timeInSeconds AS resumeTimeInSeconds, "
                  "  bookmark.totalTimeInSeconds AS totalTimeInSeconds, "
                  "  bookmark.playerState AS playerState, "
+                 "  bookmark.partNumber AS partNumber, "
                  "  rating.rating AS rating, "
                  "  rating.votes AS votes, "
                  "  rating.rating_type AS rating_type, "
@@ -2512,7 +2516,8 @@ bool CVideoDatabase::GetFileInfo(const std::string& strFilenameAndPath, CVideoIn
     {
       details.SetResumePoint(m_pDS->fv("bookmark.timeInSeconds").get_asDouble(),
                              m_pDS->fv("bookmark.totalTimeInSeconds").get_asDouble(),
-                             m_pDS->fv("bookmark.playerState").get_asString());
+                             m_pDS->fv("bookmark.playerState").get_asString(),
+                             m_pDS->fv("bookmark.partNumber").get_asInt());
     }
 
     // get streamdetails
@@ -3364,58 +3369,53 @@ void CVideoDatabase::GetFilePathById(int idMovie, std::string& filePath, VideoDb
 }
 
 //********************************************************************************************************************************
-void CVideoDatabase::GetBookMarksForFile(const std::string& strFilenameAndPath, VECBOOKMARKS& bookmarks, CBookmark::EType type /*= CBookmark::STANDARD*/, bool bAppend, long partNumber)
+void CVideoDatabase::GetBookMarksForFile(const std::string& strFilenameAndPath,
+                                         VECBOOKMARKS& bookmarks,
+                                         CBookmark::EType type /* = CBookmark::STANDARD */,
+                                         bool bAppend /* = false */)
 {
   try
   {
-    if (URIUtils::IsDiscImageStack(strFilenameAndPath))
-    {
-      CStackDirectory dir;
-      CFileItemList fileList;
-      const CURL pathToUrl(strFilenameAndPath);
-      dir.GetDirectory(pathToUrl, fileList);
-      if (!bAppend)
-        bookmarks.clear();
-      for (int i = fileList.Size() - 1; i >= 0; i--) // put the bookmarks of the highest part first in the list
-        GetBookMarksForFile(fileList[i]->GetPath(), bookmarks, type, true, (i+1));
-    }
-    else
-    {
-      int idFile = GetFileId(strFilenameAndPath);
-      if (idFile < 0) return ;
-      if (!bAppend)
-        bookmarks.erase(bookmarks.begin(), bookmarks.end());
-      if (nullptr == m_pDB)
-        return;
-      if (nullptr == m_pDS)
-        return;
+    int idFile = GetFileId(strFilenameAndPath);
+    if (idFile < 0)
+      return;
+    if (!bAppend)
+      bookmarks.clear();
+    if (!m_pDB)
+      return;
+    if (!m_pDS)
+      return;
 
-      std::string strSQL=PrepareSQL("select * from bookmark where idFile=%i and type=%i order by timeInSeconds", idFile, (int)type);
-      m_pDS->query( strSQL );
-      while (!m_pDS->eof())
+    const std::string strSQL =
+        PrepareSQL("select * from bookmark where idFile=%i and type=%i order by timeInSeconds",
+                   idFile, (int)type);
+    m_pDS->query(strSQL);
+    while (!m_pDS->eof())
+    {
+      CBookmark bookmark;
+      bookmark.timeInSeconds = m_pDS->fv("timeInSeconds").get_asDouble();
+      bookmark.partNumber = m_pDS->fv("partNumber").get_asInt();
+      bookmark.totalTimeInSeconds = m_pDS->fv("totalTimeInSeconds").get_asDouble();
+      bookmark.thumbNailImage = m_pDS->fv("thumbNailImage").get_asString();
+      bookmark.playerState = m_pDS->fv("playerState").get_asString();
+      bookmark.player = m_pDS->fv("player").get_asString();
+      bookmark.type = type;
+      if (type == CBookmark::EPISODE)
       {
-        CBookmark bookmark;
-        bookmark.timeInSeconds = m_pDS->fv("timeInSeconds").get_asDouble();
-        bookmark.partNumber = partNumber;
-        bookmark.totalTimeInSeconds = m_pDS->fv("totalTimeInSeconds").get_asDouble();
-        bookmark.thumbNailImage = m_pDS->fv("thumbNailImage").get_asString();
-        bookmark.playerState = m_pDS->fv("playerState").get_asString();
-        bookmark.player = m_pDS->fv("player").get_asString();
-        bookmark.type = type;
-        if (type == CBookmark::EPISODE)
-        {
-          std::string strSQL2=PrepareSQL("select c%02d, c%02d from episode where c%02d=%i order by c%02d, c%02d", VIDEODB_ID_EPISODE_EPISODE, VIDEODB_ID_EPISODE_SEASON, VIDEODB_ID_EPISODE_BOOKMARK, m_pDS->fv("idBookmark").get_asInt(), VIDEODB_ID_EPISODE_SORTSEASON, VIDEODB_ID_EPISODE_SORTEPISODE);
-          m_pDS2->query(strSQL2);
-          bookmark.episodeNumber = m_pDS2->fv(0).get_asInt();
-          bookmark.seasonNumber = m_pDS2->fv(1).get_asInt();
-          m_pDS2->close();
-        }
-        bookmarks.push_back(bookmark);
-        m_pDS->next();
+        const std::string strSQL2 =
+            PrepareSQL("select c%02d, c%02d from episode where c%02d=%i order by c%02d, c%02d",
+                       VIDEODB_ID_EPISODE_EPISODE, VIDEODB_ID_EPISODE_SEASON,
+                       VIDEODB_ID_EPISODE_BOOKMARK, m_pDS->fv("idBookmark").get_asInt(),
+                       VIDEODB_ID_EPISODE_SORTSEASON, VIDEODB_ID_EPISODE_SORTEPISODE);
+        m_pDS2->query(strSQL2);
+        bookmark.episodeNumber = m_pDS2->fv(0).get_asInt();
+        bookmark.seasonNumber = m_pDS2->fv(1).get_asInt();
+        m_pDS2->close();
       }
-      //sort(bookmarks.begin(), bookmarks.end(), SortBookmarks);
-      m_pDS->close();
+      bookmarks.emplace_back(bookmark);
+      m_pDS->next();
     }
+    m_pDS->close();
   }
   catch (...)
   {
@@ -3505,11 +3505,67 @@ void CVideoDatabase::GetEpisodesByFile(const std::string& strFilenameAndPath, st
   }
 }
 
+std::vector<std::string> CVideoDatabase::GetDiscImageStackURLs(const std::string& fileNameAndPath)
+{
+  std::vector<std::string> stackURLs;
+
+  if (!m_pDB)
+    return stackURLs;
+  if (!m_pDS)
+    return stackURLs;
+
+  try
+  {
+    const std::string sql{
+        PrepareSQL("SELECT strFileName FROM files WHERE strFilename LIKE 'stack://%%%s%%'",
+                   fileNameAndPath.c_str())};
+    m_pDS->query(sql);
+    while (!m_pDS->eof())
+    {
+      const std::string fileName{m_pDS->fv(0).get_asString()};
+      if (URIUtils::IsDiscImageStack(fileName))
+        stackURLs.emplace_back(fileName);
+
+      m_pDS->next();
+    }
+    m_pDS->close();
+  }
+  catch (...)
+  {
+    CLog::Log(LOGERROR, "{} ({}) failed", __FUNCTION__, fileNameAndPath);
+  }
+
+  return stackURLs;
+}
+
 //********************************************************************************************************************************
 void CVideoDatabase::AddBookMarkToFile(const std::string& strFilenameAndPath, const CBookmark &bookmark, CBookmark::EType type /*= CBookmark::STANDARD*/)
 {
   try
   {
+    if (type == CBookmark::RESUME && !URIUtils::IsStack(strFilenameAndPath) &&
+        URIUtils::IsDiscImage(strFilenameAndPath))
+    {
+      // File could be part of disc image stacks. If so, also add/update stacks resume point.
+      const std::vector<std::string> stackURLs{GetDiscImageStackURLs(strFilenameAndPath)};
+      for (const auto& stackURL : stackURLs)
+      {
+        // Determine correct part number, disc image file will always have part number 1!
+        std::vector<std::string> files;
+        CStackDirectory::GetPaths(stackURL, files);
+        for (size_t i = 0; i < files.size(); ++i)
+        {
+          if (files[i] == strFilenameAndPath)
+          {
+            CBookmark stackBookmark{bookmark};
+            stackBookmark.partNumber = i + 1;
+            AddBookMarkToFile(stackURL, stackBookmark, type);
+            break;
+          }
+        }
+      }
+    }
+
     int idFile = AddFile(strFilenameAndPath);
     if (idFile < 0)
       return;
@@ -3542,9 +3598,18 @@ void CVideoDatabase::AddBookMarkToFile(const std::string& strFilenameAndPath, co
     }
     // update or insert depending if it existed before
     if (idBookmark >= 0 )
-      strSQL=PrepareSQL("update bookmark set timeInSeconds = %f, totalTimeInSeconds = %f, thumbNailImage = '%s', player = '%s', playerState = '%s' where idBookmark = %i", bookmark.timeInSeconds, bookmark.totalTimeInSeconds, bookmark.thumbNailImage.c_str(), bookmark.player.c_str(), bookmark.playerState.c_str(), idBookmark);
+      strSQL = PrepareSQL(
+          "update bookmark set timeInSeconds = %f, totalTimeInSeconds = %f, thumbNailImage = '%s', "
+          "player = '%s', playerState = '%s', partNumber = %i where idBookmark = %i",
+          bookmark.timeInSeconds, bookmark.totalTimeInSeconds, bookmark.thumbNailImage.c_str(),
+          bookmark.player.c_str(), bookmark.playerState.c_str(), bookmark.partNumber, idBookmark);
     else
-      strSQL=PrepareSQL("insert into bookmark (idBookmark, idFile, timeInSeconds, totalTimeInSeconds, thumbNailImage, player, playerState, type) values(NULL,%i,%f,%f,'%s','%s','%s', %i)", idFile, bookmark.timeInSeconds, bookmark.totalTimeInSeconds, bookmark.thumbNailImage.c_str(), bookmark.player.c_str(), bookmark.playerState.c_str(), (int)type);
+      strSQL = PrepareSQL(
+          "insert into bookmark (idBookmark, idFile, timeInSeconds, totalTimeInSeconds, "
+          "thumbNailImage, player, playerState, type) values(NULL,%i,%f,%f,'%s','%s','%s', %i)",
+          idFile, bookmark.timeInSeconds, bookmark.totalTimeInSeconds,
+          bookmark.thumbNailImage.c_str(), bookmark.player.c_str(), bookmark.playerState.c_str(),
+          static_cast<int>(type), bookmark.partNumber);
 
     m_pDS->exec(strSQL);
   }
@@ -3643,6 +3708,7 @@ bool CVideoDatabase::GetBookMarkForEpisode(const CVideoInfoTag& tag, CBookmark& 
       bookmark.playerState = m_pDS2->fv("playerState").get_asString();
       bookmark.player = m_pDS2->fv("player").get_asString();
       bookmark.type = (CBookmark::EType)m_pDS2->fv("type").get_asInt();
+      bookmark.partNumber = m_pDS2->fv("partNumber").get_asInt();
     }
     else
     {
@@ -4357,36 +4423,18 @@ bool CVideoDatabase::GetResumePoint(CVideoInfoTag& tag)
 
   try
   {
-    if (URIUtils::IsDiscImageStack(tag.m_strFileNameAndPath))
+    const std::string strSQL =
+        PrepareSQL("select timeInSeconds, totalTimeInSeconds, playerState, partNumber from "
+                   "bookmark where idFile=%i and type=%i order by timeInSeconds",
+                   tag.m_iFileId, CBookmark::RESUME);
+    m_pDS2->query(strSQL);
+    if (!m_pDS2->eof())
     {
-      CStackDirectory dir;
-      CFileItemList fileList;
-      const CURL pathToUrl(tag.m_strFileNameAndPath);
-      dir.GetDirectory(pathToUrl, fileList);
-      tag.SetResumePoint(CBookmark());
-      for (int i = fileList.Size() - 1; i >= 0; i--)
-      {
-        CBookmark bookmark;
-        if (GetResumeBookMark(fileList[i]->GetPath(), bookmark))
-        {
-          bookmark.partNumber = (i+1); /* store part number in here */
-          tag.SetResumePoint(bookmark);
-          match = true;
-          break;
-        }
-      }
+      tag.SetResumePoint(m_pDS2->fv(0).get_asDouble(), m_pDS2->fv(1).get_asDouble(),
+                         m_pDS2->fv(2).get_asString(), m_pDS2->fv(3).get_asInt());
+      match = true;
     }
-    else
-    {
-      std::string strSQL=PrepareSQL("select timeInSeconds, totalTimeInSeconds from bookmark where idFile=%i and type=%i order by timeInSeconds", tag.m_iFileId, CBookmark::RESUME);
-      m_pDS2->query( strSQL );
-      if (!m_pDS2->eof())
-      {
-        tag.SetResumePoint(m_pDS2->fv(0).get_asDouble(), m_pDS2->fv(1).get_asDouble(), "");
-        match = true;
-      }
-      m_pDS2->close();
-    }
+    m_pDS2->close();
   }
   catch (...)
   {
@@ -4432,9 +4480,10 @@ CVideoInfoTag CVideoDatabase::GetDetailsForMovie(const dbiplus::sql_record* cons
   details.SetPlayCount(record->at(VIDEODB_DETAILS_MOVIE_PLAYCOUNT).get_asInt());
   details.m_lastPlayed.SetFromDBDateTime(record->at(VIDEODB_DETAILS_MOVIE_LASTPLAYED).get_asString());
   details.m_dateAdded.SetFromDBDateTime(record->at(VIDEODB_DETAILS_MOVIE_DATEADDED).get_asString());
-  details.SetResumePoint(record->at(VIDEODB_DETAILS_MOVIE_RESUME_TIME).get_asInt(),
-                         record->at(VIDEODB_DETAILS_MOVIE_TOTAL_TIME).get_asInt(),
-                         record->at(VIDEODB_DETAILS_MOVIE_PLAYER_STATE).get_asString());
+  details.SetResumePoint(record->at(VIDEODB_DETAILS_MOVIE_RESUME_TIME).get_asDouble(),
+                         record->at(VIDEODB_DETAILS_MOVIE_TOTAL_TIME).get_asDouble(),
+                         record->at(VIDEODB_DETAILS_MOVIE_PLAYER_STATE).get_asString(),
+                         record->at(VIDEODB_DETAILS_MOVIE_PART_NUMBER).get_asInt());
   details.m_iUserRating = record->at(VIDEODB_DETAILS_MOVIE_USER_RATING).get_asInt();
   details.SetRating(record->at(VIDEODB_DETAILS_MOVIE_RATING).get_asFloat(),
                     record->at(VIDEODB_DETAILS_MOVIE_VOTES).get_asInt(),
@@ -4610,9 +4659,10 @@ CVideoInfoTag CVideoDatabase::GetDetailsForEpisode(const dbiplus::sql_record* co
   details.m_studio = StringUtils::Split(record->at(VIDEODB_DETAILS_EPISODE_TVSHOW_STUDIO).get_asString(), CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_videoItemSeparator);
   details.SetPremieredFromDBDate(record->at(VIDEODB_DETAILS_EPISODE_TVSHOW_AIRED).get_asString());
 
-  details.SetResumePoint(record->at(VIDEODB_DETAILS_EPISODE_RESUME_TIME).get_asInt(),
-                         record->at(VIDEODB_DETAILS_EPISODE_TOTAL_TIME).get_asInt(),
-                         record->at(VIDEODB_DETAILS_EPISODE_PLAYER_STATE).get_asString());
+  details.SetResumePoint(record->at(VIDEODB_DETAILS_EPISODE_RESUME_TIME).get_asDouble(),
+                         record->at(VIDEODB_DETAILS_EPISODE_TOTAL_TIME).get_asDouble(),
+                         record->at(VIDEODB_DETAILS_EPISODE_PLAYER_STATE).get_asString(),
+                         record->at(VIDEODB_DETAILS_EPISODE_PART_NUMBER).get_asInt());
 
   details.SetRating(record->at(VIDEODB_DETAILS_EPISODE_RATING).get_asFloat(),
                     record->at(VIDEODB_DETAILS_EPISODE_VOTES).get_asInt(),
@@ -4670,9 +4720,10 @@ CVideoInfoTag CVideoDatabase::GetDetailsForMusicVideo(const dbiplus::sql_record*
   details.SetPlayCount(record->at(VIDEODB_DETAILS_MUSICVIDEO_PLAYCOUNT).get_asInt());
   details.m_lastPlayed.SetFromDBDateTime(record->at(VIDEODB_DETAILS_MUSICVIDEO_LASTPLAYED).get_asString());
   details.m_dateAdded.SetFromDBDateTime(record->at(VIDEODB_DETAILS_MUSICVIDEO_DATEADDED).get_asString());
-  details.SetResumePoint(record->at(VIDEODB_DETAILS_MUSICVIDEO_RESUME_TIME).get_asInt(),
-                         record->at(VIDEODB_DETAILS_MUSICVIDEO_TOTAL_TIME).get_asInt(),
-                         record->at(VIDEODB_DETAILS_MUSICVIDEO_PLAYER_STATE).get_asString());
+  details.SetResumePoint(record->at(VIDEODB_DETAILS_MUSICVIDEO_RESUME_TIME).get_asDouble(),
+                         record->at(VIDEODB_DETAILS_MUSICVIDEO_TOTAL_TIME).get_asDouble(),
+                         record->at(VIDEODB_DETAILS_MUSICVIDEO_PLAYER_STATE).get_asString(),
+                         record->at(VIDEODB_DETAILS_MUSICVIDEO_PART_NUMBER).get_asInt());
   details.m_iUserRating = record->at(VIDEODB_DETAILS_MUSICVIDEO_USER_RATING).get_asInt();
   details.SetUniqueID(record->at(VIDEODB_DETAILS_MUSICVIDEO_UNIQUEID_VALUE).get_asString(),
                       record->at(VIDEODB_DETAILS_MUSICVIDEO_UNIQUEID_TYPE).get_asString(), true);
@@ -6487,11 +6538,16 @@ void CVideoDatabase::UpdateTables(int iVersion)
 
     m_pDS->exec("DELETE FROM episode WHERE idSeason NOT IN (SELECT idSeason from seasons)");
   }
+
+  if (iVersion < 134)
+  {
+    m_pDS->exec("ALTER TABLE bookmark ADD partNumber INTEGER");
+  }
 }
 
 int CVideoDatabase::GetSchemaVersion() const
 {
-  return 133;
+  return 134;
 }
 
 bool CVideoDatabase::LookupByFolders(const std::string &path, bool shows)
@@ -6533,13 +6589,13 @@ bool CVideoDatabase::GetPlayCounts(const std::string &strPath, CFileItemList &it
     if (nullptr == m_pDS)
       return false;
 
-    std::string sql =
-      "SELECT"
-      "  files.strFilename, files.playCount,"
-      "  bookmark.timeInSeconds, bookmark.totalTimeInSeconds "
-      "FROM files"
-      "  LEFT JOIN bookmark ON"
-      "    files.idFile = bookmark.idFile AND bookmark.type = %i ";
+    std::string sql = "SELECT"
+                      "  files.strFilename, files.playCount,"
+                      "  bookmark.timeInSeconds, bookmark.totalTimeInSeconds,"
+                      "  bookmark.playerState, bookmark.partNumber "
+                      "FROM files"
+                      "  LEFT JOIN bookmark ON"
+                      "    files.idFile = bookmark.idFile AND bookmark.type = %i ";
 
     if (URIUtils::IsPlugin(strPath))
     {
@@ -6560,7 +6616,9 @@ bool CVideoDatabase::GetPlayCounts(const std::string &strPath, CFileItemList &it
           if (!item->GetVideoInfoTag()->IsPlayCountSet())
             item->GetVideoInfoTag()->SetPlayCount(m_pDS->fv(1).get_asInt());
           if (!item->GetVideoInfoTag()->GetResumePoint().IsSet())
-            item->GetVideoInfoTag()->SetResumePoint(m_pDS->fv(2).get_asInt(), m_pDS->fv(3).get_asInt(), "");
+            item->GetVideoInfoTag()->SetResumePoint(
+                m_pDS->fv(2).get_asDouble(), m_pDS->fv(3).get_asDouble(),
+                m_pDS->fv(4).get_asString(), m_pDS->fv(5).get_asInt());
         }
         m_pDS->close();
       }
@@ -6586,7 +6644,9 @@ bool CVideoDatabase::GetPlayCounts(const std::string &strPath, CFileItemList &it
 
           if (!item->GetVideoInfoTag()->GetResumePoint().IsSet())
           {
-            item->GetVideoInfoTag()->SetResumePoint(m_pDS->fv(2).get_asInt(), m_pDS->fv(3).get_asInt(), "");
+            item->GetVideoInfoTag()->SetResumePoint(
+                m_pDS->fv(2).get_asDouble(), m_pDS->fv(3).get_asDouble(),
+                m_pDS->fv(4).get_asString(), m_pDS->fv(5).get_asInt());
           }
         }
         m_pDS->next();

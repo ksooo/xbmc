@@ -1814,12 +1814,16 @@ bool CVideoInfoTag::SetResumePoint(const CBookmark &resumePoint)
   return true;
 }
 
-bool CVideoInfoTag::SetResumePoint(double timeInSeconds, double totalTimeInSeconds, const std::string &playerState)
+bool CVideoInfoTag::SetResumePoint(double timeInSeconds,
+                                   double totalTimeInSeconds,
+                                   const std::string& playerState,
+                                   int partNumber)
 {
   CBookmark resumePoint;
   resumePoint.timeInSeconds = timeInSeconds;
   resumePoint.totalTimeInSeconds = totalTimeInSeconds;
   resumePoint.playerState = playerState;
+  resumePoint.partNumber = partNumber;
   resumePoint.type = CBookmark::RESUME;
 
   m_resumePoint = resumePoint;

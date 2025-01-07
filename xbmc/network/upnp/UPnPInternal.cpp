@@ -1126,7 +1126,8 @@ int PopulateTagFromObject(CVideoInfoTag& tag,
     if (object.m_MiscInfo.last_position > 0)
     {
       tag.SetResumePoint(object.m_MiscInfo.last_position, resource->m_Duration,
-                         object.m_XbmcInfo.last_playerstate.GetChars());
+                         object.m_XbmcInfo.last_playerstate.GetChars(),
+                         CVideoInfoTag::RESUME_POINT_DEFAULT_PART_NUMBER);
     }
     if (!resource->m_Resolution.IsEmpty())
     {

@@ -337,14 +337,20 @@ public:
   */
   bool GetUpdateSetOverview() const { return m_updateSetOverview; }
 
+  static constexpr int RESUME_POINT_DEFAULT_PART_NUMBER{1};
+
   /*!
    * @brief Set this videos's resume point.
    * @param timeInSeconds the time of the resume point
    * @param totalTimeInSeconds the total time of the video
    * @param playerState the player state
+   * @param partNumber the part number (1-based)
    * @return True if resume point was set successfully, false otherwise.
    */
-  virtual bool SetResumePoint(double timeInSeconds, double totalTimeInSeconds, const std::string &playerState);
+  virtual bool SetResumePoint(double timeInSeconds,
+                              double totalTimeInSeconds,
+                              const std::string& playerState,
+                              int partNumber);
 
   std::string m_basePath; // the base path of the video, for folder-based lookups
   int m_parentPathID;      // the parent path id where the base path of the video lies
