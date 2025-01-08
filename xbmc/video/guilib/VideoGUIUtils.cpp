@@ -643,7 +643,7 @@ std::string GetResumeString(const CFileItem& item)
           StringUtils::SecondsToTimeString(
               static_cast<long>(CUtil::ConvertMilliSecsToSecsInt(resumeInfo.startOffset)),
               TIME_FORMAT_HH_MM_SS));
-      if (resumeInfo.partNumber > 0)
+      if (resumeInfo.partNumber > 0 && URIUtils::IsStack(item.GetDynPath()))
       {
         const std::string partString =
             StringUtils::Format(g_localizeStrings.Get(23051), resumeInfo.partNumber);
