@@ -187,6 +187,7 @@ ResumeInformation GetItemResumeInformation(const CFileItem& item)
   {
     ResumeInformation resumeInfo;
     resumeInfo.startOffset = CUtil::ConvertSecsToMilliSecs(startOffset);
+    resumeInfo.partNumber = partNumber;
     resumeInfo.isResumable = true;
     return resumeInfo;
   }
