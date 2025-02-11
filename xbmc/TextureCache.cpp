@@ -61,6 +61,15 @@ void CTextureCache::Deinitialize()
   m_database.Close();
 }
 
+void CTextureCache::OnSleep()
+{
+  m_systemIsSleeping.test_and_set();
+}
+void CTextureCache::OnWake()
+{
+  m_systemIsSleeping.clear();
+}
+
 bool CTextureCache::IsCachedImage(const std::string &url) const
 {
   if (url.empty())
@@ -433,6 +442,9 @@ bool CTextureCache::CleanAllUnusedImagesJob(CGUIDialogProgress* progress)
 
 void CTextureCache::CleanTimer()
 {
+  if (m_systemIsSleeping.test())
+    return;
+
   CServiceBroker::GetJobManager()->Submit(
       [this]()
       {
