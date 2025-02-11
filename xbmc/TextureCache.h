@@ -52,6 +52,15 @@ public:
    */
   void Deinitialize();
 
+  /**
+   * Called when system is going to sleep (power management).
+   */
+  void OnSleep();
+  /**
+   * Called when system is awakened from sleep (power management).
+   */
+  void OnWake();
+
   /*! \brief Check whether we already have this image cached
 
    Check and return URL to cached image if it exists; If not, return empty string.
@@ -232,6 +241,7 @@ private:
   bool CleanAllUnusedImagesJob(CGUIDialogProgress* progress);
 
   std::atomic_flag m_cleaningInProgress;
+  std::atomic_flag m_systemIsSleeping{false};
   CTimer m_cleanTimer;
   CCriticalSection m_databaseSection;
   CTextureDatabase m_database;
