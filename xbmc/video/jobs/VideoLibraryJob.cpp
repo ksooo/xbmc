@@ -8,6 +8,7 @@
 
 #include "VideoLibraryJob.h"
 
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 CVideoLibraryJob::CVideoLibraryJob() = default;
@@ -18,7 +19,9 @@ bool CVideoLibraryJob::DoWork()
 {
   CVideoDatabase db;
   if (!db.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibraryJob::DoWork: Error opening video database!");
     return false;
-
+  }
   return Work(db);
 }

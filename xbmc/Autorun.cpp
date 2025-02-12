@@ -550,10 +550,16 @@ bool CAutorun::CanResumePlayDVD(const std::string& path)
   if (!strUniqueId.empty())
   {
     CVideoDatabase dbs;
-    dbs.Open();
-    CBookmark bookmark;
-    if (dbs.GetResumeBookMark(strUniqueId, bookmark))
-      return true;
+    if (dbs.Open())
+    {
+      CBookmark bookmark;
+      if (dbs.GetResumeBookMark(strUniqueId, bookmark))
+        return true;
+    }
+    else
+    {
+      CLog::Log(LOGERROR, "CAutorun::CanResumePlayDVD: Error opening video database!");
+    }
   }
   return false;
 }

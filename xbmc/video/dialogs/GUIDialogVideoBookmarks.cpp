@@ -217,7 +217,10 @@ void CGUIDialogVideoBookmarks::Delete(const CBookmark& bm)
 {
   CVideoDatabase videoDatabase;
   if (!videoDatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoBookmarks::Delete: Error opening video database!");
     return;
+  }
 
   const std::string path{g_application.CurrentFileItem().GetDynPath()};
   videoDatabase.ClearBookMarkOfFile(path, bm, bm.type);
@@ -236,7 +239,10 @@ void CGUIDialogVideoBookmarks::OnRefreshList()
 
   CVideoDatabase videoDatabase;
   if (!videoDatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoBookmarks::OnRefreshList: Error opening video database!");
     return;
+  }
 
   videoDatabase.GetBookMarksForFile(m_filePath, m_bookmarks);
   videoDatabase.GetBookMarksForFile(m_filePath, m_bookmarks, CBookmark::EPISODE, true);
@@ -322,7 +328,10 @@ void CGUIDialogVideoBookmarks::Update()
 {
   CVideoDatabase videoDatabase;
   if (!videoDatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoBookmarks::Update: Error opening video database!");
     return;
+  }
 
   if (g_application.CurrentFileItem().HasVideoInfoTag() && g_application.CurrentFileItem().GetVideoInfoTag()->m_iEpisode > -1)
   {
@@ -383,7 +392,10 @@ void CGUIDialogVideoBookmarks::ClearBookmarks()
 {
   CVideoDatabase videoDatabase;
   if (!videoDatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoBookmarks::ClearBookmarks: Error opening video database!");
     return;
+  }
 
   const std::string path{g_application.CurrentFileItem().GetDynPath()};
   videoDatabase.ClearBookMarksOfFile(path, CBookmark::STANDARD);
@@ -494,7 +506,10 @@ bool CGUIDialogVideoBookmarks::AddBookmark(CVideoInfoTag* tag)
 
   CVideoDatabase videoDatabase;
   if (!videoDatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoBookmarks::AddBookmark: Error opening video database!");
     return false;
+  }
 
   if (tag)
     videoDatabase.AddBookMarkForEpisode(*tag, bookmark);
@@ -535,7 +550,11 @@ bool CGUIDialogVideoBookmarks::AddEpisodeBookmark()
   std::vector<CVideoInfoTag> episodes;
   CVideoDatabase videoDatabase;
   if (!videoDatabase.Open())
+  {
+    CLog::Log(LOGERROR,
+              "CGUIDialogVideoBookmarks::AddEpisodeBookmark: Error opening video database!");
     return false;
+  }
 
   videoDatabase.GetEpisodesByFile(g_application.CurrentFile(), episodes);
   videoDatabase.Close();
@@ -585,7 +604,11 @@ bool CGUIDialogVideoBookmarks::OnAddEpisodeBookmark()
   {
     CVideoDatabase videoDatabase;
     if (!videoDatabase.Open())
+    {
+      CLog::Log(LOGERROR,
+                "CGUIDialogVideoBookmarks::OnAddEpisodeBookmark: Error opening video database!");
       return bReturn;
+    }
     std::vector<CVideoInfoTag> episodes;
     videoDatabase.GetEpisodesByFile(g_application.CurrentFile(),episodes);
     if (episodes.size() > 1)

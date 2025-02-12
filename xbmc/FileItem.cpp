@@ -2104,7 +2104,7 @@ bool CFileItem::LoadDetails()
     CVideoDatabase db;
     if (!db.Open())
     {
-      CLog::LogF(LOGERROR, "Error opening video database");
+      CLog::Log(LOGERROR, "CFileItem::LoadGameTag: Error opening video database!");
       return false;
     }
 

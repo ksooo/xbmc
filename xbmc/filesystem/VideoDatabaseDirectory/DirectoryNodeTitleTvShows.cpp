@@ -11,6 +11,7 @@
 #include "FileItem.h"
 #include "FileItemList.h"
 #include "QueryParams.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 using namespace XFILE::VIDEODATABASEDIRECTORY;
@@ -31,15 +32,25 @@ std::string CDirectoryNodeTitleTvShows::GetLocalizedName() const
 {
   CVideoDatabase db;
   if (db.Open())
+  {
     return db.GetTvShowTitleById(GetID());
-  return "";
+  }
+  else
+  {
+    CLog::Log(LOGERROR,
+              "CDirectoryNodeTitleTvShows::GetLocalizedName: Error opening video database!");
+    return "";
+  }
 }
 
 bool CDirectoryNodeTitleTvShows::GetContent(CFileItemList& items) const
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CDirectoryNodeTitleTvShows::GetContent: Error opening video database!");
     return false;
+  }
 
   CQueryParams params;
   CollectQueryParams(params);

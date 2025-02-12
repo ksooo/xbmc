@@ -397,7 +397,10 @@ PLT_MediaObject* CUPnPServer::Build(const std::shared_ptr<CFileItem>& item,
 
           CVideoDatabase db;
           if (!db.Open())
+          {
+            CLog::Log(LOGERROR, "CUPnPServer::Build: Error opening video database!");
             return NULL;
+          }
 
           if (params.GetMovieId() >= 0)
             db.GetMovieInfo(static_cast<const char*>(path), *item->GetVideoInfoTag(),
@@ -552,7 +555,11 @@ void CUPnPServer::Announce(AnnouncementFlag flag,
       {
         CVideoDatabase db;
         if (!db.Open())
+        {
+          CLog::Log(LOGERROR, "CUPnPServer::Announce: Error opening video database!");
           return;
+        }
+
         int show_id = db.GetTvShowForEpisode(item_id);
         int season_id = db.GetSeasonForEpisode(item_id);
         UpdateContainer(StringUtils::Format("videodb://tvshows/titles/{}/", show_id));
@@ -857,12 +864,18 @@ NPT_Result CUPnPServer::OnBrowseDirectChildren(PLT_ActionReference& action,
     items.Add(playlists);
 
     CVideoDatabase database;
-    database.Open();
-    if (database.HasContent(VideoDbContentType::MUSICVIDEOS))
+    if (database.Open())
     {
-      CFileItemPtr mvideos(new CFileItem("library://video/musicvideos/", true));
-      mvideos->SetLabel(g_localizeStrings.Get(20389));
-      items.Add(mvideos);
+      if (database.HasContent(VideoDbContentType::MUSICVIDEOS))
+      {
+        CFileItemPtr mvideos(new CFileItem("library://video/musicvideos/", true));
+        mvideos->SetLabel(g_localizeStrings.Get(20389));
+        items.Add(mvideos);
+      }
+    }
+    else
+    {
+      CLog::Log(LOGERROR, "CUPnPServer::OnBrowseDirectChildren: Error opening video database!");
     }
   }
 
@@ -1174,6 +1187,7 @@ NPT_Result CUPnPServer::OnSearchContainer(PLT_ActionReference& action,
     CVideoDatabase database;
     if (!database.Open())
     {
+      CLog::Log(LOGERROR, "CUPnPServer::OnSearchContainer: Error opening video database!");
       action->SetError(800, "Internal Error");
       return NPT_SUCCESS;
     }
@@ -1196,6 +1210,7 @@ NPT_Result CUPnPServer::OnSearchContainer(PLT_ActionReference& action,
     CVideoDatabase database;
     if (!database.Open())
     {
+      CLog::Log(LOGERROR, "CUPnPServer::OnSearchContainer: Error opening video database!");
       action->SetError(800, "Internal Error");
       return NPT_SUCCESS;
     }
@@ -1219,6 +1234,7 @@ NPT_Result CUPnPServer::OnSearchContainer(PLT_ActionReference& action,
     CVideoDatabase database;
     if (!database.Open())
     {
+      CLog::Log(LOGERROR, "CUPnPServer::OnSearchContainer: Error opening video database!");
       action->SetError(800, "Internal Error");
       return NPT_SUCCESS;
     }

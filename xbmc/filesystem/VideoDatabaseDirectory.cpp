@@ -22,6 +22,7 @@
 #include "utils/LegacyPathTranslation.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 using namespace XFILE;
@@ -205,7 +206,10 @@ bool CVideoDatabaseDirectory::GetLabel(const std::string& strDirectory, std::str
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoDatabaseDirectory::GetLabel: Error opening video database!");
     return false;
+  }
 
   // get genre
   if (params.GetGenreId() != -1)

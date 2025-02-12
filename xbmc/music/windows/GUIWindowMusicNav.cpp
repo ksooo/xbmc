@@ -668,9 +668,16 @@ void CGUIWindowMusicNav::GetContextButtons(int itemNumber, CContextButtons &butt
         if (item->HasMusicInfoTag() && !item->GetMusicInfoTag()->GetArtistString().empty())
         {
           CVideoDatabase database;
-          database.Open();
-          if (database.GetMatchingMusicVideo(item->GetMusicInfoTag()->GetArtistString()) > -1)
-            buttons.Add(CONTEXT_BUTTON_GO_TO_ARTIST, 20400);
+          if (database.Open())
+          {
+            if (database.GetMatchingMusicVideo(item->GetMusicInfoTag()->GetArtistString()) > -1)
+              buttons.Add(CONTEXT_BUTTON_GO_TO_ARTIST, 20400);
+          }
+          else
+          {
+            CLog::Log(LOGERROR,
+                      "CGUIWindowMusicNav::GetContextButtons: Error opening video database!");
+          }
         }
         if (item->HasMusicInfoTag() && !item->GetMusicInfoTag()->GetArtistString().empty() &&
           !item->GetMusicInfoTag()->GetAlbum().empty() &&
@@ -796,12 +803,18 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     {
       std::string strPath;
       CVideoDatabase database;
-      database.Open();
-      strPath = StringUtils::Format(
-          "videodb://musicvideos/artists/{}/",
-          database.GetMatchingMusicVideo(item->GetMusicInfoTag()->GetArtistString()));
-      CServiceBroker::GetGUI()->GetWindowManager().ActivateWindow(WINDOW_VIDEO_NAV,strPath);
-      return true;
+      if (database.Open())
+      {
+        strPath = StringUtils::Format(
+            "videodb://musicvideos/artists/{}/",
+            database.GetMatchingMusicVideo(item->GetMusicInfoTag()->GetArtistString()));
+        CServiceBroker::GetGUI()->GetWindowManager().ActivateWindow(WINDOW_VIDEO_NAV, strPath);
+      }
+      else
+      {
+        CLog::Log(LOGERROR, "CGUIWindowMusicNav::GetContextButtons: Error opening video database!");
+      }
+      return true; //! @todo why do we return true on error?
     }
 
   case CONTEXT_BUTTON_PLAY_OTHER:

@@ -755,7 +755,9 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
         (profileManager->GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser))
     {
       CVideoDatabase database;
-      database.Open();
+      if (!database.Open())
+        CLog::Log(LOGERROR, "CGUIWindowVideoNav::GetContextButtons: Error opening video database!");
+
       ADDON::ScraperPtr info = database.GetScraperForPath(item->GetPath());
 
       if (!item->IsLiveTV() && !item->IsAddonsPath() && !URIUtils::IsUPnP(item->GetPath()))
@@ -977,7 +979,10 @@ bool CGUIWindowVideoNav::OnClick(int iItem, const std::string &player)
 
     CVideoDatabase videodb;
     if (!videodb.Open())
+    {
+      CLog::Log(LOGERROR, "CGUIWindowVideoNav::OnClick: Error opening video database!");
       return true;
+    }
 
     // get the media type and convert from plural to singular (by removing the trailing "s")
     std::string mediaType = item->GetPath().substr(9);

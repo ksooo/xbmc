@@ -209,7 +209,8 @@ bool CGUIDialogVideoManagerVersions::AddVideoVersion()
   CVideoDatabase videoDb;
   if (!videoDb.Open())
   {
-    CLog::LogF(LOGERROR, "Failed to open video database!");
+    CLog::Log(LOGERROR,
+              "CGUIDialogVideoManagerVersions::AddVideoVersion: Error opening video database!");
     return false;
   }
 
@@ -439,7 +440,8 @@ bool CGUIDialogVideoManagerVersions::ProcessVideoVersion(VideoDbContentType item
   CVideoDatabase videodb;
   if (!videodb.Open())
   {
-    CLog::LogF(LOGERROR, "Failed to open video database!");
+    CLog::Log(LOGERROR,
+              "CGUIDialogVideoManagerVersions::ProcessVideoVersion: Error opening video database!");
     return false;
   }
 
@@ -648,7 +650,9 @@ bool CGUIDialogVideoManagerVersions::AddSimilarMovieAsVersion(
   CVideoDatabase videoDb;
   if (!videoDb.Open())
   {
-    CLog::LogF(LOGERROR, "Failed to open video database!");
+    CLog::Log(
+        LOGERROR,
+        "CGUIDialogVideoManagerVersions::AddSimilarMovieAsVersion: Error opening video database!");
     return false;
   }
 

@@ -160,6 +160,7 @@ bool CPartyModeManager::Enable(PartyModeContext context /*= PARTYMODECONTEXT_MUS
     else
     {
       pDialog->Close();
+      CLog::Log(LOGERROR, "CPartyModeManager::Enable: Error opening video database!");
       OnError(16033, "Party mode could not open database. Aborting.");
       return false;
     }
@@ -364,6 +365,7 @@ bool CPartyModeManager::AddRandomSongs()
       }
       else
       {
+        CLog::Log(LOGERROR, "CPartyModeManager::AddRandomSongs: Error opening video database!");
         OnError(16033, "Party mode could not open database. Aborting.");
         return false;
       }

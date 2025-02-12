@@ -10,6 +10,7 @@
 
 #include "FileItem.h"
 #include "FileItemList.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 using namespace XFILE::VIDEODATABASEDIRECTORY;
@@ -25,7 +26,11 @@ bool CDirectoryNodeRecentlyAddedMusicVideos::GetContent(CFileItemList& items) co
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR,
+              "CDirectoryNodeRecentlyAddedMusicVideos::GetContent: Error opening video database!");
     return false;
+  }
 
   int details = items.HasProperty("set_videodb_details")
                     ? items.GetProperty("set_videodb_details").asInteger32()

@@ -11,6 +11,7 @@
 #include "URL.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 #include "video/VideoInfoTag.h"
 
@@ -41,7 +42,10 @@ CVideoInfoTag CVideoDatabaseFile::GetVideoTag(const CURL& url)
 
   CVideoDatabase videoDatabase;
   if (!videoDatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoDatabaseFile::GetVideoTag: Error opening video database!");
     return tag;
+  }
 
   tag = videoDatabase.GetDetailsByTypeAndId(type, idDb);
 
@@ -90,7 +94,10 @@ std::string CVideoDatabaseFile::TranslatePath(const CURL& url)
 
   CVideoDatabase videoDatabase;
   if (!videoDatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoDatabaseFile::TranslatePath: Error opening video database!");
     return "";
+  }
 
   std::string realFilename;
   videoDatabase.GetFilePathById(idDb, realFilename, type);

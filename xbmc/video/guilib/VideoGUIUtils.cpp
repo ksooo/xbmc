@@ -230,6 +230,11 @@ void CAsyncGetItemsForPlaylist::GetItemsForPlaylist(const std::shared_ptr<CFileI
         // Get play counts and resume bookmarks for the items.
         db.GetPlayCounts(items.GetPath(), items);
       }
+      else
+      {
+        CLog::Log(LOGERROR,
+                  "CAsyncGetItemsForPlaylist::GetItemsForPlaylist: Error opening video database!");
+      }
     }
 
     if (m_resume)
@@ -632,7 +637,7 @@ bool HasItemVideoDbInformation(const CFileItem& item)
   CVideoDatabase db;
   if (!db.Open())
   {
-    CLog::LogF(LOGERROR, "Cannot open VideoDatabase");
+    CLog::LogF(LOGERROR, "Error opening video database!");
     return false;
   }
 

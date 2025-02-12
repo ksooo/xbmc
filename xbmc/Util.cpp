@@ -2364,7 +2364,9 @@ void CUtil::ScanForExternalAudio(const std::string& videoPath, std::vector<std::
   std::vector<std::string> exts = StringUtils::Split(CServiceBroker::GetFileExtensionProvider().GetMusicExtensions(), "|");
 
   CVideoDatabase database;
-  database.Open();
+  if (!database.Open())
+    CLog::Log(LOGERROR, "CUtil::ScanForExternalAudio: Error opening video database!");
+
   bool useAllExternalAudio = database.GetUseAllExternalAudioForVideo(videoPath);
 
   if (useAllExternalAudio)

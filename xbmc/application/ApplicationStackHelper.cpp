@@ -112,7 +112,10 @@ std::optional<int64_t> CApplicationStackHelper::InitializeStackStartPartAndOffse
         dbs.Close();
       }
       else
-        CLog::LogF(LOGERROR, "Cannot open VideoDatabase");
+      {
+        CLog::Log(LOGERROR, "CApplicationStackHelper::InitializeStackStartPartAndOffset: Error "
+                            "opening video database!");
+      }
     }
 
     // make sure that the selected part is within the boundaries

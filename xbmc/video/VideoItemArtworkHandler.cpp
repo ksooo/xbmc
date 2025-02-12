@@ -135,7 +135,7 @@ void CVideoItemArtworkHandler::PersistArt(const std::string& art)
   CVideoDatabase videodb;
   if (!videodb.Open())
   {
-    CLog::LogF(LOGERROR, "Cannot open video database!");
+    CLog::Log(LOGERROR, "CVideoItemArtworkHandler::PersistArt: Error opening video database!");
     return;
   }
 
@@ -198,7 +198,8 @@ std::string CVideoItemArtworkArtistHandler::GetCurrentArt() const
     CVideoDatabase videodb;
     if (!videodb.Open())
     {
-      CLog::LogF(LOGERROR, "Cannot open video database!");
+      CLog::Log(LOGERROR,
+                "CVideoItemArtworkArtistHandler::GetCurrentArt: Error opening video database!");
       return {};
     }
 
@@ -297,7 +298,8 @@ std::string CVideoItemArtworkActorHandler::GetCurrentArt() const
   CVideoDatabase videodb;
   if (!videodb.Open())
   {
-    CLog::LogF(LOGERROR, "Cannot open video database!");
+    CLog::Log(LOGERROR,
+              "CVideoItemArtworkActorHandler::GetCurrentArt: Error opening video database!");
     return {};
   }
 
@@ -337,7 +339,8 @@ std::vector<std::string> CVideoItemArtworkSeasonHandler::GetRemoteArt() const
   CVideoDatabase videodb;
   if (!videodb.Open())
   {
-    CLog::LogF(LOGERROR, "Cannot open video database!");
+    CLog::Log(LOGERROR,
+              "CVideoItemArtworkSeasonHandler::GetRemoteArt: Error opening video database!");
     return {};
   }
 
@@ -375,7 +378,8 @@ std::vector<std::string> CVideoItemArtworkMovieSetHandler::GetRemoteArt() const
   CVideoDatabase videodb;
   if (!videodb.Open())
   {
-    CLog::LogF(LOGERROR, "Cannot open video database!");
+    CLog::Log(LOGERROR,
+              "CVideoItemArtworkMovieSetHandler::GetRemoteArt: Error opening video database!");
     return {};
   }
 
@@ -489,7 +493,8 @@ std::string CVideoItemArtworkFanartHandler::UpdateEmbeddedArt(const std::string&
   CVideoDatabase videodb;
   if (!videodb.Open())
   {
-    CLog::LogF(LOGERROR, "Cannot open video database!");
+    CLog::Log(LOGERROR,
+              "CVideoItemArtworkFanartHandler::UpdateEmbeddedArt: Error opening video database!");
     return art;
   }
 
@@ -521,7 +526,8 @@ std::string CVideoItemArtworkFanartHandler::UpdateRemoteArt(const std::vector<st
   CVideoDatabase videodb;
   if (!videodb.Open())
   {
-    CLog::LogF(LOGERROR, "Cannot open video database!");
+    CLog::Log(LOGERROR,
+              "CVideoItemArtworkFanartHandler::UpdateRemoteArt: Error opening video database!");
   }
   else
   {

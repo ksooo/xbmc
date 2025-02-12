@@ -217,6 +217,10 @@ void CAnnouncementManager::DoAnnounce(AnnouncementFlag flag,
 
         videodatabase.Close();
       }
+      else
+      {
+        CLog::Log(LOGERROR, "CAnnouncementManager::DoAnnounce: Error opening video database!");
+      }
     }
 
     if (!item->GetVideoInfoTag()->m_type.empty())

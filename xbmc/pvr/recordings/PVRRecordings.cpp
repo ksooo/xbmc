@@ -375,7 +375,7 @@ CVideoDatabase& CPVRRecordings::GetVideoDatabase()
     m_database->Open();
 
     if (!m_database->IsOpen())
-      CLog::LogF(LOGERROR, "Failed to open the video database");
+      CLog::Log(LOGERROR, "CPVRRecordings::GetVideoDatabase: Error opening video database!");
   }
 
   return *m_database;

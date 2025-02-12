@@ -11,6 +11,7 @@
 #include "FileItem.h"
 #include "FileItemList.h"
 #include "QueryParams.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 using namespace XFILE::VIDEODATABASEDIRECTORY;
@@ -25,7 +26,10 @@ bool CDirectoryNodeEpisodes::GetContent(CFileItemList& items) const
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CDirectoryNodeEpisodes::GetContent: Error opening video database!");
     return false;
+  }
 
   CQueryParams params;
   CollectQueryParams(params);

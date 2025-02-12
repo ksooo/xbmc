@@ -259,7 +259,10 @@ bool CGUIDialogVideoSettings::Save()
   { // reset the settings
     CVideoDatabase db;
     if (!db.Open())
-      return true;
+    {
+      CLog::Log(LOGERROR, "CGUIDialogVideoSettings::Save: Error opening video database!");
+      return true; //! @todo why do we return true on error? settings will not be saved in this case!
+    }
     db.EraseAllVideoSettings();
     db.Close();
 

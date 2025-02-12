@@ -285,6 +285,11 @@ void CApplicationPlayerCallback::RequestVideoSettings(const CFileItem& fileItem)
 
     dbs.Close();
   }
+  else
+  {
+    CLog::Log(LOGERROR,
+              "CApplicationPlayerCallback::RequestVideoSettings: Error opening video database!");
+  }
 }
 
 void CApplicationPlayerCallback::StoreVideoSettings(const CFileItem& fileItem,
@@ -302,5 +307,10 @@ void CApplicationPlayerCallback::StoreVideoSettings(const CFileItem& fileItem,
       dbs.EraseVideoSettings(fileItem);
     }
     dbs.Close();
+  }
+  else
+  {
+    CLog::Log(LOGERROR,
+              "CApplicationPlayerCallback::StoreVideoSettings: Error opening video database!");
   }
 }

@@ -403,8 +403,15 @@ bool CScraper::IsInUse() const
   else
   { // video scraper
     CVideoDatabase db;
-    if (db.Open() && db.ScraperInUse(ID()))
-      return true;
+    if (db.Open())
+    {
+      if (db.ScraperInUse(ID()))
+        return true;
+    }
+    else
+    {
+      CLog::Log(LOGERROR, "CScraper::IsInUse: Error opening video database!");
+    }
   }
   return false;
 }

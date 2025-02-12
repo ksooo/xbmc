@@ -180,7 +180,7 @@ std::tuple<int64_t, unsigned int> GetStackResumeOffsetAndPartNumber(const CFileI
       CVideoDatabase db;
       if (!db.Open())
       {
-        CLog::LogF(LOGERROR, "Cannot open VideoDatabase");
+        CLog::LogF(LOGERROR, "Error opening video database!");
         return {};
       }
 
@@ -244,7 +244,7 @@ int64_t GetStackPartResumeOffset(const CFileItem& item, unsigned int partNumber)
       CVideoDatabase db;
       if (!db.Open())
       {
-        CLog::LogF(LOGERROR, "Cannot open VideoDatabase");
+        CLog::LogF(LOGERROR, "Error opening video database!");
         return offset;
       }
 
@@ -325,7 +325,7 @@ int64_t GetStackPartStartOffset(const CFileItem& item, unsigned int partNumber)
         CVideoDatabase db;
         if (!db.Open())
         {
-          CLog::LogF(LOGERROR, "Cannot open VideoDatabase");
+          CLog::LogF(LOGERROR, "Error opening video database!");
           return {};
         }
 
@@ -378,7 +378,7 @@ std::shared_ptr<CFileItem> LoadVideoFilesFolderInfo(const CFileItem& folder)
   CVideoDatabase db;
   if (!db.Open())
   {
-    CLog::LogF(LOGERROR, "Cannot open VideoDatabase");
+    CLog::LogF(LOGERROR, "Error opening video database!");
     return {};
   }
 

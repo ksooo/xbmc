@@ -243,4 +243,8 @@ void CDatabaseManager::LocalizationChanged()
     CLog::Log(LOGDEBUG, "{}, Video version type table updated for new language settings",
               __FUNCTION__);
   }
+  else
+  {
+    CLog::Log(LOGERROR, "CDatabaseManager::LocalizationChanged: Error opening video database!");
+  }
 }

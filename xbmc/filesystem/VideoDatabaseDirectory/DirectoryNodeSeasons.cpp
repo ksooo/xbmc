@@ -12,6 +12,7 @@
 #include "QueryParams.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/StringUtils.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 using namespace XFILE::VIDEODATABASEDIRECTORY;
@@ -58,6 +59,11 @@ std::string CDirectoryNodeSeasons::GetSeasonTitle() const
 
     season = db.GetTvShowNamedSeasonById(params.GetTvShowId(), params.GetSeason());
   }
+  else
+  {
+    CLog::Log(LOGERROR, "CDirectoryNodeSeasons::GetSeasonTitle: Error opening video database!");
+  }
+
   if (season.empty())
     season = StringUtils::Format(g_localizeStrings.Get(20358), GetID()); // Season <n>
 
@@ -68,7 +74,10 @@ bool CDirectoryNodeSeasons::GetContent(CFileItemList& items) const
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CDirectoryNodeSeasons::GetContent: Error opening video database!");
     return false;
+  }
 
   CQueryParams params;
   CollectQueryParams(params);

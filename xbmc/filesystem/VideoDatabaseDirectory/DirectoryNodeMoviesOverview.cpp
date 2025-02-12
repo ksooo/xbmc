@@ -12,6 +12,7 @@
 #include "FileItemList.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/StringUtils.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 #include "video/VideoDbUrl.h"
 
@@ -67,8 +68,16 @@ bool CDirectoryNodeMoviesOverview::GetContent(CFileItemList& items) const
     if (i == 6)
     {
       CVideoDatabase db;
-      if (db.Open() && !db.HasSets())
-        continue;
+      if (db.Open())
+      {
+        if (!db.HasSets())
+          continue;
+      }
+      else
+      {
+        CLog::Log(LOGERROR,
+                  "CDirectoryNodeMoviesOverview::GetContent: Error opening video database!");
+      }
     }
 
     CVideoDbUrl itemUrl = videoUrl;

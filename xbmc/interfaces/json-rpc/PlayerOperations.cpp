@@ -220,34 +220,40 @@ JSONRPC_STATUS CPlayerOperations::GetItem(const std::string &method, ITransportL
         }
 
         CVideoDatabase videodatabase;
-        if ((additionalInfo) &&
-            videodatabase.Open())
+        if (additionalInfo)
         {
-          switch (fileItem->GetVideoContentType())
+          if (videodatabase.Open())
           {
-            case VideoDbContentType::MOVIES:
-              videodatabase.GetMovieInfo("", *(fileItem->GetVideoInfoTag()),
-                                         fileItem->GetVideoInfoTag()->m_iDbId,
-                                         fileItem->GetVideoInfoTag()->GetAssetInfo().GetId());
-              break;
+            switch (fileItem->GetVideoContentType())
+            {
+              case VideoDbContentType::MOVIES:
+                videodatabase.GetMovieInfo("", *(fileItem->GetVideoInfoTag()),
+                                           fileItem->GetVideoInfoTag()->m_iDbId,
+                                           fileItem->GetVideoInfoTag()->GetAssetInfo().GetId());
+                break;
 
-            case VideoDbContentType::MUSICVIDEOS:
-              videodatabase.GetMusicVideoInfo("", *(fileItem->GetVideoInfoTag()),
-                                              fileItem->GetVideoInfoTag()->m_iDbId);
-              break;
+              case VideoDbContentType::MUSICVIDEOS:
+                videodatabase.GetMusicVideoInfo("", *(fileItem->GetVideoInfoTag()),
+                                                fileItem->GetVideoInfoTag()->m_iDbId);
+                break;
 
-            case VideoDbContentType::EPISODES:
-              videodatabase.GetEpisodeInfo("", *(fileItem->GetVideoInfoTag()),
-                                           fileItem->GetVideoInfoTag()->m_iDbId);
-              break;
+              case VideoDbContentType::EPISODES:
+                videodatabase.GetEpisodeInfo("", *(fileItem->GetVideoInfoTag()),
+                                             fileItem->GetVideoInfoTag()->m_iDbId);
+                break;
 
-            case VideoDbContentType::TVSHOWS:
-            case VideoDbContentType::MOVIE_SETS:
-            default:
-              break;
+              case VideoDbContentType::TVSHOWS:
+              case VideoDbContentType::MOVIE_SETS:
+              default:
+                break;
+            }
+
+            videodatabase.Close();
           }
-
-          videodatabase.Close();
+          else
+          {
+            CLog::Log(LOGERROR, "CPlayerOperations::GetItem: Error opening video database!");
+          }
         }
       }
       else // Audio

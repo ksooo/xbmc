@@ -121,7 +121,8 @@ CVideoInfoScanner::~CVideoInfoScanner()
 
       auto start = std::chrono::steady_clock::now();
 
-      m_database.Open();
+      if (!m_database.Open())
+        CLog::Log(LOGERROR, "CVideoInfoScanner::Process: Error opening video database!");
 
       m_bCanInterrupt = true;
 
@@ -205,7 +206,9 @@ CVideoInfoScanner::~CVideoInfoScanner()
     m_pathsToScan.clear();
     m_pathsToClean.clear();
 
-    m_database.Open();
+    if (!m_database.Open())
+      CLog::Log(LOGERROR, "CVideoInfoScanner::Start: Error opening video database!");
+
     if (strDirectory.empty())
     { // scan all paths in the database.  We do this by scanning all paths in the db, and crossing them off the list as
       // we go.
@@ -469,7 +472,8 @@ CVideoInfoScanner::~CVideoInfoScanner()
       pDlgProgress->Progress();
     }
 
-    m_database.Open();
+    if (!m_database.Open())
+      CLog::Log(LOGERROR, "CVideoInfoScanner::RetrieveVideoInfo: Error opening video database!");
 
     bool FoundSomeInfo = false;
     std::vector<int> seenPaths;
@@ -1447,7 +1451,10 @@ CVideoInfoScanner::~CVideoInfoScanner()
   {
     // ensure our database is open (this can get called via other classes)
     if (!m_database.Open())
+    {
+      CLog::Log(LOGERROR, "CVideoInfoScanner::AddVideo: Error opening video database!");
       return -1;
+    }
 
     if (!libraryImport)
       GetArtwork(pItem, content, videoFolder, useLocal && !pItem->IsPlugin(), showInfo ? showInfo->m_strPath : "");

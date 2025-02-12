@@ -50,6 +50,7 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
+#include "utils/log.h"
 #include "video/VideoDbUrl.h"
 #include "video/VideoFileItemClassify.h"
 #include "video/VideoInfoScanner.h"
@@ -124,6 +125,10 @@ bool CGUIDialogVideoInfo::OnMessage(CGUIMessage& message)
           m_hasUpdatedUserrating = true;
           db.SetVideoUserRating(m_movieItem->GetVideoInfoTag()->m_iDbId, m_movieItem->GetVideoInfoTag()->m_iUserRating, m_movieItem->GetVideoInfoTag()->m_type);
           db.Close();
+        }
+        else
+        {
+          CLog::Log(LOGERROR, "CGUIDialogVideoInfo::OnMessage: Error opening video database!");
         }
       }
     }
@@ -404,7 +409,11 @@ void CGUIDialogVideoInfo::SetMovie(const CFileItem *item)
   else if (type == MediaTypeVideoCollection)
   {
     CVideoDatabase database;
-    database.Open();
+    if (!database.Open())
+    {
+      CLog::Log(LOGERROR, "CGUIDialogVideoInfo::SetMovie: Error opening video database!");
+    }
+
     database.GetMoviesNav(m_movieItem->GetPath(), *m_castList, -1, -1, -1, -1, -1, -1,
                           m_movieItem->GetVideoInfoTag()->m_set.id, -1,
                           SortDescription(), VideoDbDetailsAll);
@@ -620,7 +629,10 @@ void CGUIDialogVideoInfo::DoSearch(std::string& strSearch, CFileItemList& items)
 {
   CVideoDatabase db;
   if (!db.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::DoSearch: Error opening video database!");
     return;
+  }
 
   CFileItemList movies;
   db.GetMoviesByActor(strSearch, movies);
@@ -686,7 +698,10 @@ void CGUIDialogVideoInfo::OnSearchItemFound(const CFileItem* pItem)
 
   CVideoDatabase db;
   if (!db.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::OnSearchItemFound: Error opening video database!");
     return;
+  }
 
   CVideoInfoTag movieDetails;
   if (type == VideoDbContentType::MOVIES)
@@ -863,17 +878,22 @@ void AddAvailableArtTypes(std::vector<std::string>& artTypes,
 
 std::vector<std::string> GetArtTypesList(const CVideoInfoTag& tag)
 {
-  CVideoDatabase db;
-  db.Open();
-
   std::vector<std::string> artTypes;
 
-  AddHardCodedAndExtendedArtTypes(artTypes, tag);
-  AddCurrentArtTypes(artTypes, tag, db);
-  AddMediaTypeArtTypes(artTypes, tag, db);
-  AddAvailableArtTypes(artTypes, tag, db);
+  CVideoDatabase db;
+  if (db.Open())
+  {
+    AddHardCodedAndExtendedArtTypes(artTypes, tag);
+    AddCurrentArtTypes(artTypes, tag, db);
+    AddMediaTypeArtTypes(artTypes, tag, db);
+    AddAvailableArtTypes(artTypes, tag, db);
 
-  db.Close();
+    db.Close();
+  }
+  else
+  {
+    CLog::LogF(LOGERROR, "Error opening video database!");
+  }
   return artTypes;
 }
 
@@ -1043,7 +1063,10 @@ int CGUIDialogVideoInfo::ManageVideoItem(const std::shared_ptr<CFileItem>& item)
 
   CVideoDatabase database;
   if (!database.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::ManageVideoItem: Error opening video database!");
     return -1;
+  }
 
   const std::string &type = item->GetVideoInfoTag()->m_type;
   int dbId = item->GetVideoInfoTag()->m_iDbId;
@@ -1213,7 +1236,10 @@ bool CGUIDialogVideoInfo::UpdateVideoItemTitle(const std::shared_ptr<CFileItem>&
 
   CVideoDatabase database;
   if (!database.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::UpdateVideoItemTitle: Error opening video database!");
     return false;
+  }
 
   int iDbId = pItem->GetVideoInfoTag()->m_iDbId;
   MediaType mediaType = pItem->GetVideoInfoTag()->m_type;
@@ -1359,7 +1385,9 @@ bool CGUIDialogVideoInfo::DeleteVideoItemFromDatabase(const std::shared_ptr<CFil
     return false;
 
   CVideoDatabase database;
-  database.Open();
+  if (!database.Open())
+    CLog::Log(LOGERROR,
+              "CGUIDialogVideoInfo::DeleteVideoItemFromDatabase: Error opening video database!");
 
   if (item->GetVideoInfoTag()->m_iDbId < 0)
     return false;
@@ -1493,7 +1521,10 @@ bool CGUIDialogVideoInfo::GetMoviesForSet(const CFileItem *setItem, CFileItemLis
 
   CVideoDatabase videodb;
   if (!videodb.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::GetMoviesForSet: Error opening video database!");
     return false;
+  }
 
   std::string baseDir =
       StringUtils::Format("videodb://movies/sets/{}", setItem->GetVideoInfoTag()->m_iDbId);
@@ -1550,7 +1581,10 @@ bool CGUIDialogVideoInfo::GetSetForMovie(const CFileItem* movieItem,
 
   CVideoDatabase videodb;
   if (!videodb.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::GetSetForMovie: Error opening video database!");
     return false;
+  }
 
   CFileItemList listItems;
 
@@ -1651,7 +1685,10 @@ bool CGUIDialogVideoInfo::SetMovieSet(const CFileItem *movieItem, const CFileIte
 
   CVideoDatabase videodb;
   if (!videodb.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::SetMovieSet: Error opening video database!");
     return false;
+  }
 
   videodb.SetMovieSet(movieItem->GetVideoInfoTag()->m_iDbId, selectedSet->GetVideoInfoTag()->m_iDbId);
   return true;
@@ -1661,7 +1698,10 @@ bool CGUIDialogVideoInfo::GetItemsForTag(const std::string &strHeading, const st
 {
   CVideoDatabase videodb;
   if (!videodb.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::GetItemsForTag: Error opening video database!");
     return false;
+  }
 
   MediaType mediaType = MediaTypeNone;
   std::string baseDir = "videodb://";
@@ -1732,7 +1772,10 @@ bool CGUIDialogVideoInfo::AddItemsToTag(const std::shared_ptr<CFileItem>& tagIte
 
   CVideoDatabase videodb;
   if (!videodb.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::AddItemsToTag: Error opening video database!");
     return true;
+  }
 
   std::string mediaType = videoUrl.GetItemType();
   mediaType.pop_back();
@@ -1765,7 +1808,10 @@ bool CGUIDialogVideoInfo::RemoveItemsFromTag(const std::shared_ptr<CFileItem>& t
 
   CVideoDatabase videodb;
   if (!videodb.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogVideoInfo::RemoveItemsFromTag: Error opening video database!");
     return true;
+  }
 
   std::string mediaType = videoUrl.GetItemType();
   mediaType.pop_back();
@@ -2000,7 +2046,11 @@ bool CGUIDialogVideoInfo::UpdateVideoItemSortTitle(const std::shared_ptr<CFileIt
 
   CVideoDatabase database;
   if (!database.Open())
+  {
+    CLog::Log(LOGERROR,
+              "CGUIDialogVideoInfo::UpdateVideoItemSortTitle: Error opening video database!");
     return false;
+  }
 
   int iDbId = pItem->GetVideoInfoTag()->m_iDbId;
   CVideoInfoTag detail;

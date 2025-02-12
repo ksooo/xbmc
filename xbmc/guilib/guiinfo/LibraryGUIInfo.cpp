@@ -22,6 +22,7 @@
 #include "utils/FileUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 #include "video/VideoLibraryQueue.h"
 
@@ -130,6 +131,10 @@ bool CLibraryGUIInfo::GetBool(bool& value, const CGUIListItem *gitem, int contex
         {
           m_libraryHasMovies = db.HasContent(VideoDbContentType::MOVIES) ? 1 : 0;
           db.Close();
+        }
+        else
+        {
+          CLog::Log(LOGERROR, "CLibraryGUIInfo::GetBool: Error opening video database!");
         }
       }
       value = m_libraryHasMovies > 0;

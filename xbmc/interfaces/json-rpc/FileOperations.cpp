@@ -26,6 +26,7 @@
 #include "utils/FileUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 #include <memory>
@@ -237,7 +238,10 @@ JSONRPC_STATUS CFileOperations::SetFileDetails(const std::string &method, ITrans
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CFileOperations::SetFileDetails: Error opening video database!");
     return InternalError;
+  }
 
   int fileId = videodatabase.AddFile(file);
 

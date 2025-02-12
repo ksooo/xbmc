@@ -81,7 +81,7 @@ std::shared_ptr<const CFileItem> CVideoChooser::ChooseVideo()
   CVideoDatabase db;
   if (!db.Open())
   {
-    CLog::LogF(LOGERROR, "Unable to open video database!");
+    CLog::Log(LOGERROR, "CVideoChooser::ChooseVideo: Error opening video database!");
     return result;
   }
 
@@ -237,7 +237,8 @@ std::shared_ptr<CFileItem> CVideoVersionHelper::ChooseVideoFromAssets(
           CVideoDatabase db;
           if (!db.Open())
           {
-            CLog::LogF(LOGERROR, "Unable to open video database!");
+            CLog::Log(LOGERROR,
+                      "CVideoVersionHelper::ChooseVideoFromAssets: Error opening video database!");
           }
           else
           {

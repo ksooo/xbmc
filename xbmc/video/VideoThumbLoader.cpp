@@ -57,7 +57,9 @@ CVideoThumbLoader::~CVideoThumbLoader()
 
 void CVideoThumbLoader::OnLoaderStart()
 {
-  m_videoDatabase->Open();
+  if (!m_videoDatabase->Open())
+    CLog::Log(LOGERROR, "CVideoThumbLoader::OnLoaderStart: Error opening video database!");
+
   m_artCache.clear();
   CThumbLoader::OnLoaderStart();
 }
@@ -180,7 +182,8 @@ bool CVideoThumbLoader::LoadItemCached(CFileItem* pItem)
   ||  pItem->IsParentFolder())
     return false;
 
-  m_videoDatabase->Open();
+  if (!m_videoDatabase->Open())
+    CLog::Log(LOGERROR, "CVideoThumbLoader::LoadItemCached: Error opening video database!");
 
   if (!pItem->HasVideoInfoTag() || !pItem->GetVideoInfoTag()->HasStreamDetails()) // no stream details
   {
@@ -247,7 +250,8 @@ bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
       pItem->GetVideoInfoTag()->m_type != MediaTypeVideoVersion)
     return false; // Nothing to do here
 
-  m_videoDatabase->Open();
+  if (!m_videoDatabase->Open())
+    CLog::Log(LOGERROR, "CVideoThumbLoader::LoadItemLookup: Error opening video database!");
 
   const bool isLibraryItem = pItem->HasVideoInfoTag() && pItem->GetVideoInfoTag()->m_iDbId > -1 &&
                              !pItem->GetVideoInfoTag()->m_type.empty();
@@ -412,7 +416,8 @@ bool CVideoThumbLoader::FillLibraryArt(CFileItem &item)
 
   if (tag.m_iDbId > -1 && !tag.m_type.empty())
   {
-    m_videoDatabase->Open();
+    if (!m_videoDatabase->Open())
+      CLog::Log(LOGERROR, "CVideoThumbLoader::FillLibraryArt: Error opening video database!");
 
     // @todo unify asset path for other items path
     if (VIDEO::IsVideoAssetFile(item))
@@ -607,12 +612,21 @@ void CVideoThumbLoader::DetectAndAddMissingItemData(CFileItem &item)
 
     // check for custom stereomode setting in video settings
     CVideoSettings itemVideoSettings;
-    m_videoDatabase->Open();
-    if (m_videoDatabase->GetVideoSettings(item, itemVideoSettings) && itemVideoSettings.m_StereoMode != RENDER_STEREO_MODE_OFF)
+    if (m_videoDatabase->Open())
     {
-      stereoMode = CStereoscopicsManager::ConvertGuiStereoModeToString(static_cast<RENDER_STEREO_MODE>(itemVideoSettings.m_StereoMode));
+      if (m_videoDatabase->GetVideoSettings(item, itemVideoSettings) &&
+          itemVideoSettings.m_StereoMode != RENDER_STEREO_MODE_OFF)
+      {
+        stereoMode = CStereoscopicsManager::ConvertGuiStereoModeToString(
+            static_cast<RENDER_STEREO_MODE>(itemVideoSettings.m_StereoMode));
+      }
+      m_videoDatabase->Close();
     }
-    m_videoDatabase->Close();
+    else
+    {
+      CLog::Log(LOGERROR,
+                "CVideoThumbLoader::DetectAndAddMissingItemData: Error opening video database!");
+    }
 
     // still empty, try grabbing from filename
     //! @todo in case of too many false positives due to using the full path, extract the filename only using string utils

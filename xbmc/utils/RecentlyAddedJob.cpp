@@ -54,7 +54,8 @@ bool CRecentlyAddedJob::UpdateVideo()
   CVideoThumbLoader loader;
   loader.OnLoaderStart();
 
-  videodatabase.Open();
+  if (!videodatabase.Open())
+    CLog::Log(LOGERROR, "CRecentlyAddedJob::UpdateVideo: Error opening video database!");
 
   if (videodatabase.GetRecentlyAddedMoviesNav("videodb://recentlyaddedmovies/", items, NUM_ITEMS))
   {
@@ -350,7 +351,9 @@ bool CRecentlyAddedJob::UpdateTotal()
   int MusAlbumTotals  = atoi(musicdatabase.GetSingleValue("songview"       , "count(distinct strAlbum)").c_str());
   musicdatabase.Close();
 
-  videodatabase.Open();
+  if (!videodatabase.Open())
+    CLog::Log(LOGERROR, "CRecentlyAddedJob::UpdateTotal: Error opening video database!");
+
   int tvShowCount     = atoi(videodatabase.GetSingleValue("tvshow_view"     , "count(1)").c_str());
   int movieTotals     = atoi(videodatabase.GetSingleValue("movie_view"      , "count(1)").c_str());
   int movieWatched    = atoi(videodatabase.GetSingleValue("movie_view"      , "count(playCount)").c_str());

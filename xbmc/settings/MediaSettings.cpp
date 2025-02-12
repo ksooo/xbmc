@@ -363,9 +363,15 @@ void CMediaSettings::OnSettingAction(const std::shared_ptr<const CSetting>& sett
     if (CGUIDialogFileBrowser::ShowAndGetDirectory(shares, g_localizeStrings.Get(651) , path))
     {
       CVideoDatabase videodatabase;
-      videodatabase.Open();
-      videodatabase.ImportFromXML(path);
-      videodatabase.Close();
+      if (videodatabase.Open())
+      {
+        videodatabase.ImportFromXML(path);
+        videodatabase.Close();
+      }
+      else
+      {
+        CLog::Log(LOGERROR, "CMediaSettings::OnSettingAction: Error opening video database!");
+      }
     }
   }
   else if (settingId == CSettings::SETTING_MAINTENANCE_CLEANIMAGECACHE)

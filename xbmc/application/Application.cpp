@@ -1096,6 +1096,11 @@ bool CApplication::OnAction(const CAction &action)
                               m_itemCurrentFile->GetVideoInfoTag()->m_type);
         db.Close();
       }
+      else
+      {
+        CLog::Log(LOGERROR, "CApplication::OnAction: Error opening video database!");
+      }
+
       // send a message to all windows to tell them to update the fileitem (eg playlistplayer, media windows)
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, m_itemCurrentFile);
       CServiceBroker::GetGUI()->GetWindowManager().SendMessage(msg);
@@ -2382,7 +2387,10 @@ bool CApplication::PlayFile(CFileItem item,
     {
       // open the d/b and retrieve the bookmarks for the current movie
       CVideoDatabase dbs;
-      dbs.Open();
+      if (!dbs.Open())
+      {
+        CLog::Log(LOGERROR, "CApplication::PlayFile: Error opening video database!");
+      }
 
       std::string path = item.GetPath();
       std::string videoInfoTagPath(item.GetVideoInfoTag()->m_strFileNameAndPath);

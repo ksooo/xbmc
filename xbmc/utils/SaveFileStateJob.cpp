@@ -81,8 +81,7 @@ void CSaveFileState::DoWork(CFileItem& item,
       CVideoDatabase videodatabase;
       if (!videodatabase.Open())
       {
-        CLog::Log(LOGWARNING, "{} - Unable to open video database. Can not save file state!",
-                  __FUNCTION__);
+        CLog::Log(LOGERROR, "CSaveFileState::DoWork: Error opening video database!");
       }
       else
       {

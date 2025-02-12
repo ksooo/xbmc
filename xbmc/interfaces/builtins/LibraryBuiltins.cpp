@@ -79,6 +79,10 @@ static int CleanLibrary(const std::vector<std::string>& params)
               }
             }
           }
+          else
+          {
+            CLog::LogF(LOGERROR, "Error opening video database!");
+          }
           if (paths.empty())
             return 0;
         }
@@ -212,9 +216,15 @@ static int ExportLibrary(const std::vector<std::string>& params)
     if (StringUtils::EqualsNoCase(params[0], "video"))
     {
       CVideoDatabase videodatabase;
-      videodatabase.Open();
-      videodatabase.ExportToXML(path, singleFile, thumbs, actorThumbs, overwrite);
-      videodatabase.Close();
+      if (videodatabase.Open())
+      {
+        videodatabase.ExportToXML(path, singleFile, thumbs, actorThumbs, overwrite);
+        videodatabase.Close();
+      }
+      else
+      {
+        CLog::LogF(LOGERROR, "Error opening video database!");
+      }
     }
     else
     {
@@ -293,10 +303,17 @@ static int ExportLibrary2(const std::vector<std::string>& params)
   else
   {
     CVideoDatabase videodatabase;
-    videodatabase.Open();
-    videodatabase.ExportToXML(settings.m_strPath, settings.IsSingleFile(),
-      settings.m_artwork, settings.IsItemExported(ELIBEXPORT_ACTORTHUMBS), settings.m_overwrite);
-    videodatabase.Close();
+    if (videodatabase.Open())
+    {
+      videodatabase.ExportToXML(settings.m_strPath, settings.IsSingleFile(), settings.m_artwork,
+                                settings.IsItemExported(ELIBEXPORT_ACTORTHUMBS),
+                                settings.m_overwrite);
+      videodatabase.Close();
+    }
+    else
+    {
+      CLog::LogF(LOGERROR, "Error opening video database!");
+    }
   }
   return 0;
 }

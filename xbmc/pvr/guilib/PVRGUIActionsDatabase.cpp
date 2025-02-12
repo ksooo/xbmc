@@ -324,6 +324,10 @@ bool CPVRGUIActionsDatabase::ResetDatabase(bool bResetEPGOnly)
 
       videoDatabase.Close();
     }
+    else
+    {
+      CLog::Log(LOGERROR, "CPVRGUIActionsDatabase::ResetDatabase: Error opening video database!");
+    }
   }
 
   // decrease db open refcounts; this actually closes dbs because refcounts drops to zero

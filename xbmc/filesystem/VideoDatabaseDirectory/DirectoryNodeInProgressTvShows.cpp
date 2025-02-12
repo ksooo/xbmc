@@ -10,6 +10,7 @@
 
 #include "FileItem.h"
 #include "FileItemList.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 using namespace XFILE::VIDEODATABASEDIRECTORY;
@@ -30,15 +31,26 @@ std::string CDirectoryNodeInProgressTvShows::GetLocalizedName() const
 {
   CVideoDatabase db;
   if (db.Open())
+  {
     return db.GetTvShowTitleById(GetID());
-  return "";
+  }
+  else
+  {
+    CLog::Log(LOGERROR,
+              "CDirectoryNodeInProgressTvShows::GetLocalizedName: Error opening video database!");
+    return "";
+  }
 }
 
 bool CDirectoryNodeInProgressTvShows::GetContent(CFileItemList& items) const
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR,
+              "CDirectoryNodeInProgressTvShows::GetContent: Error opening video database!");
     return false;
+  }
 
   int details = items.HasProperty("set_videodb_details")
                     ? items.GetProperty("set_videodb_details").asInteger32()

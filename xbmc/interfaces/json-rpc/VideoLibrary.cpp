@@ -19,6 +19,7 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 #include "video/VideoDbUrl.h"
 #include "video/VideoLibraryQueue.h"
@@ -31,7 +32,10 @@ JSONRPC_STATUS CVideoLibrary::GetMovies(const std::string &method, ITransportLay
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetMovies: Error opening video database!");
     return InternalError;
+  }
 
   SortDescription sorting;
   ParseLimits(parameterObject, sorting.limitStart, sorting.limitEnd);
@@ -90,7 +94,10 @@ JSONRPC_STATUS CVideoLibrary::GetMovieDetails(const std::string &method, ITransp
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetMovieDetails: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   if (!videodatabase.GetMovieInfo("", infos, id, -1, //! @todo API support for video version id
@@ -107,7 +114,10 @@ JSONRPC_STATUS CVideoLibrary::GetMovieSets(const std::string &method, ITransport
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetMovieSets: Error opening video database!");
     return InternalError;
+  }
 
   CFileItemList items;
   if (!videodatabase.GetSetsNav("videodb://movies/sets/", items, VideoDbContentType::MOVIES))
@@ -123,7 +133,10 @@ JSONRPC_STATUS CVideoLibrary::GetMovieSetDetails(const std::string &method, ITra
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetMovieSetDetails: Error opening video database!");
     return InternalError;
+  }
 
   // Get movie set details
   CVideoInfoTag infos;
@@ -145,7 +158,10 @@ JSONRPC_STATUS CVideoLibrary::GetTVShows(const std::string &method, ITransportLa
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetTVShows: Error opening video database!");
     return InternalError;
+  }
 
   SortDescription sorting;
   ParseLimits(parameterObject, sorting.limitStart, sorting.limitEnd);
@@ -190,7 +206,10 @@ JSONRPC_STATUS CVideoLibrary::GetTVShowDetails(const std::string &method, ITrans
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetTVShowDetails: Error opening video database!");
     return InternalError;
+  }
 
   int id = (int)parameterObject["tvshowid"].asInteger();
 
@@ -208,7 +227,10 @@ JSONRPC_STATUS CVideoLibrary::GetSeasons(const std::string &method, ITransportLa
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetSeasons: Error opening video database!");
     return InternalError;
+  }
 
   int tvshowID = (int)parameterObject["tvshowid"].asInteger();
 
@@ -225,7 +247,10 @@ JSONRPC_STATUS CVideoLibrary::GetSeasonDetails(const std::string &method, ITrans
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetSeasonDetails: Error opening video database!");
     return InternalError;
+  }
 
   int id = (int)parameterObject["seasonid"].asInteger();
 
@@ -243,7 +268,10 @@ JSONRPC_STATUS CVideoLibrary::GetEpisodes(const std::string &method, ITransportL
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetEpisodes: Error opening video database!");
     return InternalError;
+  }
 
   SortDescription sorting;
   ParseLimits(parameterObject, sorting.limitStart, sorting.limitEnd);
@@ -300,7 +328,10 @@ JSONRPC_STATUS CVideoLibrary::GetEpisodeDetails(const std::string &method, ITran
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetEpisodeDetails: Error opening video database!");
     return InternalError;
+  }
 
   int id = (int)parameterObject["episodeid"].asInteger();
 
@@ -326,7 +357,10 @@ JSONRPC_STATUS CVideoLibrary::GetMusicVideos(const std::string &method, ITranspo
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetMusicVideos: Error opening video database!");
     return InternalError;
+  }
 
   SortDescription sorting;
   ParseLimits(parameterObject, sorting.limitStart, sorting.limitEnd);
@@ -373,7 +407,10 @@ JSONRPC_STATUS CVideoLibrary::GetMusicVideoDetails(const std::string &method, IT
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetMusicVideoDetails: Error opening video database!");
     return InternalError;
+  }
 
   int id = (int)parameterObject["musicvideoid"].asInteger();
 
@@ -390,7 +427,10 @@ JSONRPC_STATUS CVideoLibrary::GetRecentlyAddedMovies(const std::string &method, 
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetRecentlyAddedMovies: Error opening video database!");
     return InternalError;
+  }
 
   CFileItemList items;
   if (!videodatabase.GetRecentlyAddedMoviesNav("videodb://recentlyaddedmovies/", items, 0, RequiresAdditionalDetails(MediaTypeMovie, parameterObject)))
@@ -403,7 +443,10 @@ JSONRPC_STATUS CVideoLibrary::GetRecentlyAddedEpisodes(const std::string &method
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetRecentlyAddedEpisodes: Error opening video database!");
     return InternalError;
+  }
 
   CFileItemList items;
   if (!videodatabase.GetRecentlyAddedEpisodesNav("videodb://recentlyaddedepisodes/", items, 0, RequiresAdditionalDetails(MediaTypeEpisode, parameterObject)))
@@ -416,7 +459,11 @@ JSONRPC_STATUS CVideoLibrary::GetRecentlyAddedMusicVideos(const std::string &met
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR,
+              "CVideoLibrary::GetRecentlyAddedMusicVideos: Error opening video database!");
     return InternalError;
+  }
 
   CFileItemList items;
   if (!videodatabase.GetRecentlyAddedMusicVideosNav("videodb://recentlyaddedmusicvideos/", items, 0, RequiresAdditionalDetails(MediaTypeMusicVideo, parameterObject)))
@@ -429,7 +476,10 @@ JSONRPC_STATUS CVideoLibrary::GetInProgressTVShows(const std::string &method, IT
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetInProgressTVShows: Error opening video database!");
     return InternalError;
+  }
 
   CFileItemList items;
   if (!videodatabase.GetInProgressTvShowsNav("videodb://inprogresstvshows/", items, 0, RequiresAdditionalDetails(MediaTypeTvShow, parameterObject)))
@@ -465,7 +515,10 @@ JSONRPC_STATUS CVideoLibrary::GetGenres(const std::string &method, ITransportLay
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetGenres: Error opening video database!");
     return InternalError;
+  }
 
   CFileItemList items;
   if (!videodatabase.GetGenresNav(strPath, items, idContent))
@@ -506,7 +559,10 @@ JSONRPC_STATUS CVideoLibrary::GetTags(const std::string &method, ITransportLayer
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetTags: Error opening video database!");
     return InternalError;
+  }
 
   CFileItemList items;
   if (!videodatabase.GetTagsNav(strPath, items, idContent))
@@ -549,7 +605,10 @@ JSONRPC_STATUS CVideoLibrary::GetAvailableArtTypes(const std::string& method, IT
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetAvailableArtTypes: Error opening video database!");
     return InternalError;
+  }
 
   CVariant availablearttypes = CVariant(CVariant::VariantTypeArray);
   for (const auto& artType : videodatabase.GetAvailableArtTypesForItem(mediaID, mediaType))
@@ -582,7 +641,10 @@ JSONRPC_STATUS CVideoLibrary::GetAvailableArt(const std::string& method, ITransp
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::GetAvailableArt: Error opening video database!");
     return InternalError;
+  }
 
   CVariant availableart = CVariant(CVariant::VariantTypeArray);
   for (const auto& artentry : videodatabase.GetAvailableArtForItem(mediaID, mediaType, artType))
@@ -606,7 +668,10 @@ JSONRPC_STATUS CVideoLibrary::SetMovieDetails(const std::string &method, ITransp
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::SetMovieDetails: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   if (!videodatabase.GetMovieInfo("", infos, id, -1) || //! @todo API support for video version id)
@@ -650,7 +715,10 @@ JSONRPC_STATUS CVideoLibrary::SetMovieSetDetails(const std::string &method, ITra
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::SetMoviesetDetails: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   videodatabase.GetSetInfo(id, infos);
@@ -684,7 +752,10 @@ JSONRPC_STATUS CVideoLibrary::SetTVShowDetails(const std::string &method, ITrans
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::SetTVShowDetails: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   if (!videodatabase.GetTvShowInfo("", infos, id) || infos.m_iDbId <= 0)
@@ -721,7 +792,10 @@ JSONRPC_STATUS CVideoLibrary::SetSeasonDetails(const std::string &method, ITrans
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::SetSeasonDetails: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   videodatabase.GetSeasonInfo(id, infos);
@@ -757,7 +831,10 @@ JSONRPC_STATUS CVideoLibrary::SetEpisodeDetails(const std::string &method, ITran
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::SetEpisodeDetails: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   videodatabase.GetEpisodeInfo("", infos, id);
@@ -811,7 +888,10 @@ JSONRPC_STATUS CVideoLibrary::SetMusicVideoDetails(const std::string &method, IT
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::SetMusicVideoDetails: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   videodatabase.GetMusicVideoInfo("", infos, id);
@@ -862,7 +942,10 @@ JSONRPC_STATUS CVideoLibrary::RefreshMovie(const std::string &method, ITransport
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::RefreshMovie: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   if (!videodatabase.GetMovieInfo("", infos, id, -1) || //! @todo API support for video version id
@@ -883,7 +966,10 @@ JSONRPC_STATUS CVideoLibrary::RefreshTVShow(const std::string &method, ITranspor
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::RefreshTVShow: Error opening video database!");
     return InternalError;
+  }
 
   CFileItemPtr item(new CFileItem());
   CVideoInfoTag infos;
@@ -906,7 +992,10 @@ JSONRPC_STATUS CVideoLibrary::RefreshEpisode(const std::string &method, ITranspo
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::RefreshEpisode: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   if (!videodatabase.GetEpisodeInfo("", infos, id) || infos.m_iDbId <= 0)
@@ -931,7 +1020,10 @@ JSONRPC_STATUS CVideoLibrary::RefreshMusicVideo(const std::string &method, ITran
 
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::RefreshMusicVideo: Error opening video database!");
     return InternalError;
+  }
 
   CVideoInfoTag infos;
   if (!videodatabase.GetMusicVideoInfo("", infos, id) || infos.m_iDbId <= 0)
@@ -1038,6 +1130,10 @@ bool CVideoLibrary::FillFileItem(
       filled = true;
     }
   }
+  else
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::FillFileItem: Error opening video database!");
+  }
 
   if (item->GetLabel().empty())
   {
@@ -1053,7 +1149,10 @@ bool CVideoLibrary::FillFileItemList(const CVariant &parameterObject, CFileItemL
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::FillFileItemList: Error opening video database!");
     return false;
+  }
 
   std::string file = parameterObject["file"].asString();
   int movieID = (int)parameterObject["movieid"].asInteger(-1);
@@ -1159,7 +1258,10 @@ JSONRPC_STATUS CVideoLibrary::RemoveVideo(const CVariant &parameterObject)
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CVideoLibrary::RemoveVideo: Error opening video database!");
     return InternalError;
+  }
 
   if (parameterObject.isMember("movieid"))
   {

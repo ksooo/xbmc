@@ -113,7 +113,7 @@ bool CGUIDialogVideoManager::OnAction(const CAction& action)
 void CGUIDialogVideoManager::OnInitWindow()
 {
   if (!m_database.IsOpen() && !m_database.Open())
-    CLog::LogF(LOGERROR, "Failed to open video database!");
+    CLog::Log(LOGERROR, "CGUIDialogVideoManager::OnInitWindow: Error opening video database!");
 
   CGUIDialog::OnInitWindow();
 
@@ -205,7 +205,7 @@ void CGUIDialogVideoManager::UpdateControls()
 void CGUIDialogVideoManager::Refresh()
 {
   if (!m_database.IsOpen() && !m_database.Open())
-    CLog::LogF(LOGERROR, "Failed to open video database!");
+    CLog::Log(LOGERROR, "CGUIDialogVideoManager::Refresh: Error opening video database!");
 
   Clear();
 
@@ -376,7 +376,7 @@ int CGUIDialogVideoManager::ChooseVideoAsset(const std::shared_ptr<CFileItem>& i
   CVideoDatabase videodb;
   if (!videodb.Open())
   {
-    CLog::LogF(LOGERROR, "Failed to open video database!");
+    CLog::Log(LOGERROR, "CGUIDialogVideoManager::ChooseVideoAsset: Error opening video database!");
     return -1;
   }
 

@@ -132,7 +132,9 @@ bool CGUIWindowVideoBase::OnMessage(CGUIMessage& message)
 
   case GUI_MSG_WINDOW_INIT:
     {
-      m_database.Open();
+      if (!m_database.Open())
+        CLog::Log(LOGERROR, "CGUIWindowVideoBase::OnMessage: Error opening video database!");
+
       m_dlgProgress = CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogProgress>(WINDOW_DIALOG_PROGRESS);
       return CGUIMediaWindow::OnMessage(message);
     }
@@ -252,7 +254,8 @@ bool CGUIWindowVideoBase::OnItemInfo(const CFileItem& fileItem)
   else
     strDir = URIUtils::GetDirectory(fileItem.GetPath());
 
-  m_database.Open();
+  if (!m_database.Open())
+    CLog::Log(LOGERROR, "CGUIWindowVideoBase::OnItemInfo: Error opening video database!");
 
   VIDEO::SScanSettings settings;
   bool foundDirectly = false;
@@ -373,7 +376,8 @@ bool CGUIWindowVideoBase::ShowInfo(const CFileItemPtr& item2, const ScraperPtr& 
   CVideoInfoTag movieDetails;
   if (info)
   {
-    m_database.Open(); // since we can be called from the music library
+    if (!m_database.Open()) // since we can be called from the music library
+      CLog::Log(LOGERROR, "CGUIWindowVideoBase::ShowInfo: Error opening video database!");
 
     int dbId = item->HasVideoInfoTag() ? item->GetVideoInfoTag()->m_iDbId : -1;
     if (info->Content() == CONTENT_MOVIES)
@@ -1375,7 +1379,9 @@ bool CGUIWindowVideoBase::OnUnAssignContent(const std::string &path, int header,
 {
   bool bCanceled;
   CVideoDatabase db;
-  db.Open();
+  if (!db.Open())
+    CLog::Log(LOGERROR, "CGUIWindowVideoBase::OnUnAssignContent: Error opening video database!");
+
   if (CGUIDialogYesNo::ShowAndGetInput(CVariant{header}, CVariant{text}, bCanceled, CVariant{ "" }, CVariant{ "" }, CGUIDialogYesNo::NO_TIMEOUT))
   {
     CGUIDialogProgress *progress = CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogProgress>(WINDOW_DIALOG_PROGRESS);
@@ -1403,7 +1409,8 @@ void CGUIWindowVideoBase::OnAssignContent(const std::string &path)
 {
   bool bScan=false;
   CVideoDatabase db;
-  db.Open();
+  if (!db.Open())
+    CLog::Log(LOGERROR, "CGUIWindowVideoBase::OnAssignContent: Error opening video database!");
 
   VIDEO::SScanSettings settings;
   ADDON::ScraperPtr info = db.GetScraperForPath(path, settings);

@@ -9,6 +9,7 @@
 #include "DirectoryNodeGrouped.h"
 
 #include "QueryParams.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 #include "video/VideoDbUrl.h"
 
@@ -52,7 +53,10 @@ bool CDirectoryNodeGrouped::GetContent(CFileItemList& items) const
 {
   CVideoDatabase videodatabase;
   if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CDirectoryNodeGrouped::GetContent: Error opening video database!");
     return false;
+  }
 
   CQueryParams params;
   CollectQueryParams(params);

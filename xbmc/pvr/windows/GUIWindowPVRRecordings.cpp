@@ -412,6 +412,11 @@ void CGUIWindowPVRRecordingsBase::OnPrepareFileItems(CFileItemList& items)
       CGUIWindowVideoBase::LoadVideoInfo(files, m_database, false);
       m_database.Close();
     }
+    else
+    {
+      CLog::Log(LOGERROR,
+                "CGUIWindowPVRRecordingsBase::OnPrepareFileItems: Error opening video database!");
+    }
     m_thumbLoader.Load(files);
   }
 

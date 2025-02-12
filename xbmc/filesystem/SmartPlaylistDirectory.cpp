@@ -23,6 +23,7 @@
 #include "utils/SortUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 #include "video/VideoDbUrl.h"
 
@@ -155,6 +156,10 @@ namespace XFILE
         if (strBaseDir.empty() && mediaType == MediaTypeEpisode && !isGrouped)
           videoUrl.AppendPath("-1/-1/");
         items.SetProperty(PROPERTY_PATH_DB, videoUrl.ToString());
+      }
+      else
+      {
+        CLog::Log(LOGERROR, "CSmartPlaylistDirectory::GetDirectory: Error opening video database!");
       }
     }
     else if (playlist.IsMusicType() || playlist.GetType().empty())

@@ -14,6 +14,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 #include <utility>
@@ -56,7 +57,12 @@ std::string CDirectoryNodeOverview::GetLocalizedName() const
 bool CDirectoryNodeOverview::GetContent(CFileItemList& items) const
 {
   CVideoDatabase database;
-  database.Open();
+  if (!database.Open())
+  {
+    CLog::Log(LOGERROR, "CDirectoryNodeOverview::GetContent: Error opening video database!");
+    return false;
+  }
+
   bool hasMovies = database.HasContent(VideoDbContentType::MOVIES);
   bool hasTvShows = database.HasContent(VideoDbContentType::TVSHOWS);
   bool hasMusicVideos = database.HasContent(VideoDbContentType::MUSICVIDEOS);

@@ -26,6 +26,7 @@
 #include "utils/LabelFormatter.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 
 #include <utility>
@@ -100,7 +101,10 @@ void CGUIDialogSmartPlaylistRule::OnBrowse()
   CMusicDatabase database;
   database.Open();
   CVideoDatabase videodatabase;
-  videodatabase.Open();
+  if (!videodatabase.Open())
+  {
+    CLog::Log(LOGERROR, "CGUIDialogSmartPlaylistRule::OnBrowse: Error opening video database!");
+  }
 
   std::string basePath;
   if (PLAYLIST::CSmartPlaylist::IsMusicType(m_type))

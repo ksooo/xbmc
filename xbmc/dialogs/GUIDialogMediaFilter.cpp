@@ -662,7 +662,10 @@ int CGUIDialogMediaFilter::GetItems(const Filter &filter, std::vector<std::strin
   {
     CVideoDatabase videodb;
     if (!videodb.Open())
+    {
+      CLog::Log(LOGERROR, "CGUIDialogMediaFilter::GetItems: Error opening video database!");
       return -1;
+    }
 
     std::set<std::string> playlists;
     CDatabase::Filter dbfilter;
@@ -895,6 +898,7 @@ bool CGUIDialogMediaFilter::GetMinMax(const std::string &table, const std::strin
     CVideoDatabase *videodb = new CVideoDatabase();
     if (!videodb->Open())
     {
+      CLog::Log(LOGERROR, "CGUIDialogMediaFilter::GetMinMax: Error opening video database!");
       delete videodb;
       return false;
     }

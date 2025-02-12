@@ -16,6 +16,7 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
+#include "utils/log.h"
 #include "video/VideoDatabase.h"
 #include "video/VideoDbUrl.h"
 #include "video/VideoFileItemClassify.h"
@@ -121,6 +122,11 @@ void CVideoFileItemListModifier::AddQueuingFolder(CFileItemList& items)
       {
         pItem->GetVideoInfoTag()->m_iDbId = db.GetSeasonId(pItem->GetVideoInfoTag()->m_iIdShow, -1);
         db.Close();
+      }
+      else
+      {
+        CLog::Log(LOGERROR,
+                  "CVideoFileItemListModifier::AddQueuingFolder: Error opening video database!");
       }
       pItem->GetVideoInfoTag()->m_type = MediaTypeSeason;
   }
