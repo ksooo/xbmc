@@ -130,8 +130,8 @@ bool CRenderManager::Configure(const VideoPicture& picture, float fps, unsigned 
 
   {
     std::unique_lock<CCriticalSection> lock(m_statelock);
+    SetFPS(fps);
     m_picture.SetParams(picture);
-    m_fps = fps;
     m_orientation = orientation;
     m_NumberBuffers  = buffers;
     m_renderState = STATE_CONFIGURING;
@@ -423,6 +423,8 @@ bool CRenderManager::Flush(bool wait, bool saveBuffers)
     std::unique_lock<CCriticalSection> lock(m_statelock);
     std::unique_lock<CCriticalSection> lock2(m_presentlock);
     std::unique_lock<CCriticalSection> lock3(m_datalock);
+
+    m_fpsAdjusted = false;
 
     if (m_pRenderer)
     {
@@ -894,14 +896,39 @@ void CRenderManager::UpdateResolution()
   {
     if (CServiceBroker::GetWinSystem()->GetGfxContext().IsFullScreenVideo() && CServiceBroker::GetWinSystem()->GetGfxContext().IsFullScreenRoot())
     {
-      if (CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(CSettings::SETTING_VIDEOPLAYER_ADJUSTREFRESHRATE) != ADJUST_REFRESHRATE_OFF && m_fps > 0.0f)
+      if (m_fps > 0.0f)
       {
-        RESOLUTION res = CResolutionUtils::ChooseBestResolution(
-            m_fps, m_picture.iWidth, m_picture.iHeight, !m_picture.stereoMode.empty());
-        CServiceBroker::GetWinSystem()->GetGfxContext().SetVideoResolution(res, false);
-        UpdateLatencyTweak();
-        if (m_pRenderer)
-          m_pRenderer->Update();
+        const int adjustMode{CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
+            CSettings::SETTING_VIDEOPLAYER_ADJUSTREFRESHRATE)};
+        bool adjustResolution{true};
+        switch (adjustMode)
+        {
+          case ADJUST_REFRESHRATE_OFF:
+            adjustResolution = false;
+            break;
+          case ADJUST_REFRESHRATE_ALWAYS:
+            adjustResolution = true;
+            break;
+          case ADJUST_REFRESHRATE_ON_START:
+          case ADJUST_REFRESHRATE_ON_STARTSTOP:
+            adjustResolution = !m_fpsAdjusted;
+            break;
+          default:
+            CLog::Log(LOGWARNING, "CRenderManager::UpdateResolution - Unhandled refresh rate "
+                                  "adjust settings value. Triggering resolution switch.");
+            adjustResolution = true;
+            break;
+        }
+
+        if (adjustResolution)
+        {
+          const RESOLUTION res{CResolutionUtils::ChooseBestResolution(
+              m_fps, m_picture.iWidth, m_picture.iHeight, !m_picture.stereoMode.empty())};
+          CServiceBroker::GetWinSystem()->GetGfxContext().SetVideoResolution(res, false);
+          UpdateLatencyTweak();
+          if (m_pRenderer)
+            m_pRenderer->Update();
+        }
       }
       m_bTriggerUpdateResolution = false;
       m_playerPort->VideoParamsChange();
@@ -913,7 +940,7 @@ void CRenderManager::TriggerUpdateResolution(float fps, int width, int height, s
 {
   if (width)
   {
-    m_fps = fps;
+    SetFPS(fps);
     m_picture.iWidth = width;
     m_picture.iHeight = height;
     m_picture.stereoMode = stereomode;
@@ -1307,4 +1334,12 @@ void CRenderManager::CheckEnableClockSync()
   }
 
   m_playerPort->UpdateClockSync(m_clockSync.m_enabled);
+}
+
+void CRenderManager::SetFPS(float fps)
+{
+  if (m_fps > 0.0f && m_fps != fps)
+    m_fpsAdjusted = true; // FPS changed since start of playback
+
+  m_fps = fps;
 }
