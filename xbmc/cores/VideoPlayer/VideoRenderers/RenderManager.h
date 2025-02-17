@@ -144,6 +144,8 @@ protected:
   void UpdateLatencyTweak();
   void CheckEnableClockSync();
 
+  void SetFPS(float fps);
+
   CBaseRenderer *m_pRenderer = nullptr;
   OVERLAY::CRenderer m_overlays;
   CDebugRenderer m_debugRenderer;
@@ -208,7 +210,8 @@ protected:
 
   VideoPicture m_picture{};
 
-  float m_fps = 0.0;
+  float m_fps{0.0f};
+  bool m_fpsAdjusted{false};
   unsigned int m_orientation = 0;
   int m_NumberBuffers = 0;
   int m_lateframes = -1;
