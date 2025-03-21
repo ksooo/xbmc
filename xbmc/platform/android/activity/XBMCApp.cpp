@@ -350,7 +350,7 @@ void CXBMCApp::onResume()
 
 void CXBMCApp::onPause()
 {
-  android_printf("%s: ", __PRETTY_FUNCTION__);
+  CLog::Log(LOGINFO, "##### CXBMCApp::{}", __FUNCTION__);
   m_bResumePlayback = false;
 
   const auto& components = CServiceBroker::GetAppComponents();
@@ -383,7 +383,7 @@ void CXBMCApp::onPause()
 
 void CXBMCApp::onStop()
 {
-  android_printf("%s: ", __PRETTY_FUNCTION__);
+  CLog::Log(LOGINFO, "##### CXBMCApp::{}", __FUNCTION__);
 
   if ((m_playback_state & PLAYBACK_STATE_PLAYING) && !m_hasReqVisible)
   {
@@ -398,7 +398,7 @@ void CXBMCApp::onStop()
 
 void CXBMCApp::onDestroy()
 {
-  android_printf("%s", __PRETTY_FUNCTION__);
+  CLog::Log(LOGINFO, "##### CXBMCApp::{}", __FUNCTION__);
 
   unregisterReceiver(*this);
 
@@ -410,7 +410,7 @@ void CXBMCApp::onDestroy()
 
 void CXBMCApp::onSaveState(void **data, size_t *size)
 {
-  android_printf("%s: ", __PRETTY_FUNCTION__);
+  CLog::Log(LOGINFO, "##### CXBMCApp::{}", __FUNCTION__);
   // no need to save anything as XBMC is running in its own thread
 }
 
@@ -422,7 +422,7 @@ void CXBMCApp::onConfigurationChanged()
 
 void CXBMCApp::onLowMemory()
 {
-  android_printf("%s: ", __PRETTY_FUNCTION__);
+  CLog::Log(LOGINFO, "##### CXBMCApp::{}", __FUNCTION__);
   // can't do much as we don't want to close completely
 }
 
@@ -440,7 +440,7 @@ void CXBMCApp::onResizeWindow()
 
 void CXBMCApp::onDestroyWindow()
 {
-  android_printf("%s: ", __PRETTY_FUNCTION__);
+  CLog::Log(LOGINFO, "##### CXBMCApp::{}", __FUNCTION__);
 }
 
 void CXBMCApp::onGainFocus()
@@ -454,7 +454,7 @@ void CXBMCApp::onGainFocus()
 
 void CXBMCApp::onLostFocus()
 {
-  android_printf("%s: ", __PRETTY_FUNCTION__);
+  CLog::Log(LOGINFO, "##### CXBMCApp::{}", __FUNCTION__);
   m_hasFocus = false;
 }
 
@@ -1309,7 +1309,7 @@ void CXBMCApp::onReceive(CJNIIntent intent)
 
 void CXBMCApp::OnSleep()
 {
-  CLog::Log(LOGDEBUG, "CXBMCApp::OnSleep");
+  CLog::Log(LOGINFO, "##### CXBMCApp::OnSleep");
   IPowerSyscall* syscall = CServiceBroker::GetPowerManager().GetPowerSyscall();
   if (syscall)
     static_cast<CAndroidPowerSyscall*>(syscall)->SetSuspended();
@@ -1317,7 +1317,7 @@ void CXBMCApp::OnSleep()
 
 void CXBMCApp::OnWakeup()
 {
-  CLog::Log(LOGDEBUG, "CXBMCApp::OnWakeup");
+  CLog::Log(LOGINFO, "##### CXBMCApp::OnWakeup");
   IPowerSyscall* syscall = CServiceBroker::GetPowerManager().GetPowerSyscall();
   if (syscall)
     static_cast<CAndroidPowerSyscall*>(syscall)->SetResumed();
@@ -1339,7 +1339,7 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
   }
 
   std::string action = intent.getAction();
-  CLog::Log(LOGDEBUG, "CXBMCApp::onNewIntent - Got intent. Action: {}", action);
+  CLog::Log(LOGINFO, "##### CXBMCApp::onNewIntent - Got intent. Action: {}", action);
   std::string targetFile = GetFilenameFromIntent(intent);
   if (!targetFile.empty() &&
       (action == CJNIIntent::ACTION_VIEW || action == CJNIIntent::ACTION_GET_CONTENT))
@@ -1670,7 +1670,7 @@ void CXBMCApp::onDisplayAdded(int displayId)
 
 void CXBMCApp::onDisplayChanged(int displayId)
 {
-  CLog::Log(LOGDEBUG, "CXBMCApp::{}: id: {}", __FUNCTION__, displayId);
+  CLog::Log(LOGINFO, "##### CXBMCApp::{}: id: {}", __FUNCTION__, displayId);
 
   if (!g_application.IsInitialized())
     // Display mode has been changed during app startup; we want to reset audio engine on next ACTION_HDMI_AUDIO_PLUG event
