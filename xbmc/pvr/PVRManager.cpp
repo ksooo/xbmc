@@ -478,6 +478,7 @@ void CPVRManager::SetState(CPVRManager::ManagerState state)
 
 void CPVRManager::PublishEvent(PVREvent event)
 {
+  CLog::Log(LOGINFO, "====== {}", static_cast<int>(event));
   m_events.Publish(event);
 }
 
