@@ -400,6 +400,15 @@ void CDirectoryProvider::OnPVRManagerEvent(const PVR::PVREvent& event)
   std::unique_lock<CCriticalSection> lock(m_section);
   if (URIUtils::IsProtocol(m_currentUrl, "pvr"))
   {
+    static bool pvrStarted{false};
+    if (event == PVR::PVREvent::ManagerStarted)
+      pvrStarted = true;
+    else if (event == PVR::PVREvent::ManagerStopped)
+      pvrStarted = false;
+
+    if (!pvrStarted)
+      return;
+
     if (event == PVR::PVREvent::ManagerStarted || event == PVR::PVREvent::ManagerStopped ||
         event == PVR::PVREvent::ManagerError || event == PVR::PVREvent::ManagerInterrupted ||
         event == PVR::PVREvent::RecordingsInvalidated ||
