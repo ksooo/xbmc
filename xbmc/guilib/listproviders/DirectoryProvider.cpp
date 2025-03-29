@@ -191,7 +191,7 @@ private:
 };
 
 CDirectoryProvider::CDirectoryProvider(const TiXmlElement* element, int parentID)
-  : IListProvider(parentID)
+  : IListProvider(parentID), m_nextJobTimer(this)
 {
   assert(element);
   if (!element->NoChildren())
@@ -223,6 +223,7 @@ CDirectoryProvider::CDirectoryProvider(const TiXmlElement* element, int parentID
 CDirectoryProvider::CDirectoryProvider(const CDirectoryProvider& other)
   : IListProvider(other.m_parentID),
     m_updateState(INVALIDATED),
+    m_nextJobTimer(this),
     m_url(other.m_url),
     m_target(other.m_target),
     m_sortMethod(other.m_sortMethod),
@@ -245,6 +246,19 @@ CDirectoryProvider::~CDirectoryProvider()
 std::unique_ptr<IListProvider> CDirectoryProvider::Clone()
 {
   return std::make_unique<CDirectoryProvider>(*this);
+}
+
+void CDirectoryProvider::StartDirectoryJob()
+{
+  std::unique_lock<CCriticalSection> lock(m_section);
+  m_jobPending = false;
+  m_lastJobStartedAt = std::chrono::system_clock::now();
+  m_nextJobTimer.Stop();
+
+  m_jobID = CServiceBroker::GetJobManager()->AddJob(
+      new CDirectoryJob(m_currentUrl, m_target.GetLabel(m_parentID, false), m_currentSort,
+                        m_currentLimit, m_currentBrowse, m_parentID),
+      this);
 }
 
 bool CDirectoryProvider::Update(bool forceRefresh)
@@ -272,11 +286,28 @@ bool CDirectoryProvider::Update(bool forceRefresh)
   {
     CLog::Log(LOGDEBUG, "CDirectoryProvider[{}]: refreshing..", m_currentUrl);
     if (m_jobID)
-      CServiceBroker::GetJobManager()->CancelJob(m_jobID);
-    m_jobID = CServiceBroker::GetJobManager()->AddJob(
-        new CDirectoryJob(m_currentUrl, m_target.GetLabel(m_parentID, false), m_currentSort,
-                          m_currentLimit, m_currentBrowse, m_parentID),
-        this);
+    {
+      if (m_jobPending)
+        CLog::LogF(LOGINFO, "##### ignored 1a {}", m_currentUrl);
+      else
+        CLog::LogF(LOGINFO, "##### delayed 1 {}", m_currentUrl);
+
+      m_jobPending = true;
+      changed = false;
+    }
+    else
+    {
+      if (m_jobPending)
+      {
+        CLog::LogF(LOGINFO, "##### ignored 1b {}", m_currentUrl);
+        changed = false;
+      }
+      else
+      {
+        CLog::LogF(LOGINFO, "##### kicked 1 {}", m_currentUrl);
+        StartDirectoryJob();
+      }
+    }
   }
 
   if (!changed)
@@ -392,9 +423,6 @@ void CDirectoryProvider::Reset()
 {
   {
     std::unique_lock<CCriticalSection> lock(m_section);
-    if (m_jobID)
-      CServiceBroker::GetJobManager()->CancelJob(m_jobID);
-    m_jobID = 0;
     m_items.clear();
     m_currentTarget.clear();
     m_currentUrl.clear();
@@ -437,6 +465,37 @@ void CDirectoryProvider::OnJobComplete(unsigned int jobID, bool success, CJob *j
       m_updateState = DONE;
   }
   m_jobID = 0;
+
+  if (m_jobPending)
+  {
+    using namespace std::chrono_literals;
+    static constexpr auto MAX_JOB_FREQUENCY = 3s;
+    const auto now{std::chrono::system_clock::now()};
+    const auto nextJobAllowedAt{m_lastJobStartedAt + MAX_JOB_FREQUENCY};
+
+    if (now >= nextJobAllowedAt)
+    {
+      CLog::LogF(LOGINFO, "##### kicked 2 {}", m_currentUrl);
+      StartDirectoryJob();
+    }
+    else
+    {
+      CLog::LogF(LOGINFO, "##### delayed 2 {}", m_currentUrl);
+      m_nextJobTimer.Start(
+          std::chrono::duration_cast<std::chrono::milliseconds>(nextJobAllowedAt - now));
+    }
+  }
+}
+
+void CDirectoryProvider::OnTimeout()
+{
+  std::unique_lock<CCriticalSection> lock(m_section);
+
+  if (m_jobPending)
+  {
+    CLog::LogF(LOGINFO, "##### kicked 3 {}", m_currentUrl);
+    StartDirectoryJob();
+  }
 }
 
 std::string CDirectoryProvider::GetTarget(const CFileItem& item) const
@@ -550,7 +609,7 @@ bool CDirectoryProvider::OnContextMenu(const std::shared_ptr<CGUIListItem>& item
 bool CDirectoryProvider::IsUpdating() const
 {
   std::unique_lock<CCriticalSection> lock(m_section);
-  return m_jobID || m_updateState == DONE || m_updateState == INVALIDATED;
+  return m_jobID || m_jobPending || m_updateState == DONE || m_updateState == INVALIDATED;
 }
 
 bool CDirectoryProvider::UpdateURL()
