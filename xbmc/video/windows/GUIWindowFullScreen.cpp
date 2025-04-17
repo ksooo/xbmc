@@ -28,6 +28,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "utils/StringUtils.h"
+#include "utils/log.h"
 #include "video/VideoInfoTag.h"
 #include "video/ViewModeSettings.h"
 #include "video/dialogs/GUIDialogSubtitleSettings.h"
@@ -372,6 +373,8 @@ void CGUIWindowFullScreen::FrameMove()
     const CVideoInfoTag* tag = infoMgr.GetCurrentMovieTag();
     if (tag && tag->GetPath() != m_lastPlaybackPath)
     {
+      CLog::LogF(LOGINFO, "===== SHOW INFO: {} -> {} =====", m_lastPlaybackPath, tag->GetPath());
+
       m_lastPlaybackPath = tag->GetPath();
 
       // fade in
