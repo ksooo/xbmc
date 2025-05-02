@@ -4070,7 +4070,25 @@ msgctxt "#866"
 msgid "Recording deleted: '{0:s}'"
 msgstr ""
 
-#empty strings from id 867 to 996
+#. Text timer notifications toast message.
+#: xbmc/pvr/timers/PVRTimers..cpp
+msgctxt "#867"
+msgid "{0:d} timers added"
+msgstr ""
+
+#. Text timer notifications toast message.
+#: xbmc/pvr/timers/PVRTimers..cpp
+msgctxt "#868"
+msgid "{0:d} timers updated"
+msgstr ""
+
+#. Text timer notifications toast message.
+#: xbmc/pvr/timers/PVRTimers..cpp
+msgctxt "#869"
+msgid "{0:d} timers deleted"
+msgstr ""
+
+#empty strings from id 870 to 996
 
 #: xbmc/windows/GUIMediaWindow.cpp
 msgctxt "#997"
