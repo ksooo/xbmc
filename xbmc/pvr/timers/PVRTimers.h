@@ -26,6 +26,7 @@ class CPVRChannel;
 class CPVRClient;
 class CPVREpgInfoTag;
 class CPVRSettings;
+class CPVREventLogJob;
 class CPVRTimerInfoTag;
 class CPVRTimersPath;
 
@@ -295,6 +296,9 @@ private:
       const std::shared_ptr<CPVRTimerInfoTag>& timer,
       const std::shared_ptr<CPVRTimerInfoTag>& parentTimer);
   void NotifyTimersEvent(bool bAddedOrDeleted = true) const;
+  void NotifyTimerChanges(const std::vector<std::pair<int, std::string>>& notifications,
+                          const std::string& msg,
+                          CPVREventLogJob& job) const;
 
   enum TimerKind
   {
