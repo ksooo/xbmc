@@ -9,6 +9,7 @@
 #include "EpgContainer.h"
 
 #include "ServiceBroker.h"
+#include "XBDateTime.h"
 #include "addons/kodi-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_channels.h" // PVR_CHANNEL_INVALID_UID
 #include "guilib/LocalizeStrings.h"
 #include "pvr/PVRManager.h"
@@ -23,6 +24,7 @@
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
 #include "threads/SystemClock.h"
+#include "utils/StringUtils.h"
 #include "utils/log.h"
 
 #include <algorithm>
@@ -516,6 +518,27 @@ std::shared_ptr<CPVREpgInfoTag> CPVREpgContainer::GetTagByDatabaseId(int iDataba
   }
 
   return retval;
+}
+
+std::shared_ptr<CPVREpgInfoTag> CPVREpgContainer::GetTagByPath(const std::string& path) const
+{
+  //! @todo Add a class encapsulating EPG URLs if we get more use cases. For details of the
+  // format see CPVREpgInfoTag::Path() implementation.
+
+  if (!StringUtils::StartsWithNoCase(path, "pvr://guide") ||
+      !StringUtils::EndsWithNoCase(path, ".epg"))
+    return {};
+
+  const std::string epgIdString{path.substr(12, 4)}; // epg id string is always 4 chars
+  if (StringUtils::IsNaturalNumber(epgIdString))
+  {
+    const int epgId{std::atoi(epgIdString.c_str())};
+    const std::shared_ptr<const CPVREpg> epg{GetById(epgId)};
+    if (epg)
+      return epg->GetTagByStartDateTime(
+          CDateTime::FromDBDateTime(path.substr(17, path.size() - 17 - 4)));
+  }
+  return {};
 }
 
 std::vector<std::shared_ptr<CPVREpgInfoTag>> CPVREpgContainer::GetTags(
