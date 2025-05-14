@@ -41,10 +41,8 @@ void Interface_GUIControlImage::set_visible(KODI_HANDLE kodiBase,
   CGUIImage* control = static_cast<CGUIImage*>(handle);
   if (!addon || !control)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIControlImage::{} - invalid handler data (kodiBase='{}', handle='{}') "
-              "on addon '{}'",
-              __func__, kodiBase, handle, addon ? addon->ID() : "unknown");
+    CLog::LogF(LOGERROR, "Invalid handler data (kodiBase='{}', handle='{}'), addon '{}'", kodiBase,
+               handle, addon ? addon->ID() : "unknown");
     return;
   }
 
@@ -60,11 +58,9 @@ void Interface_GUIControlImage::set_filename(KODI_HANDLE kodiBase,
   CGUIImage* control = static_cast<CGUIImage*>(handle);
   if (!addon || !control || !filename)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIControlImage::{} - invalid handler data (kodiBase='{}', handle='{}', "
-              "filename='{}') on addon '{}'",
-              __func__, kodiBase, handle, static_cast<const void*>(filename),
-              addon ? addon->ID() : "unknown");
+    CLog::LogF(
+        LOGERROR, "Invalid handler data (kodiBase='{}', handle='{}', filename='{}'), addon '{}'",
+        kodiBase, handle, static_cast<const void*>(filename), addon ? addon->ID() : "unknown");
     return;
   }
 
@@ -79,10 +75,8 @@ void Interface_GUIControlImage::set_color_diffuse(KODI_HANDLE kodiBase,
   CGUIImage* control = static_cast<CGUIImage*>(handle);
   if (!addon || !control)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIControlImage::{} - invalid handler data (kodiBase='{}', handle='{}') "
-              "on addon '{}'",
-              __func__, kodiBase, handle, addon ? addon->ID() : "unknown");
+    CLog::LogF(LOGERROR, "Invalid handler data (kodiBase='{}', handle='{}'), addon '{}'", kodiBase,
+               handle, addon ? addon->ID() : "unknown");
     return;
   }
 

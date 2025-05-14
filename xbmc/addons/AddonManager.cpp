@@ -288,7 +288,7 @@ std::map<std::string, AddonWithUpdate> CAddonMgr::GetAddonsWithAvailableUpdate()
 
   auto end = std::chrono::steady_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  CLog::Log(LOGDEBUG, "CAddonMgr::{} took {} ms", __func__, duration.count());
+  CLog::LogF(LOGDEBUG, "took {} ms", duration.count());
 
   return result;
 }
@@ -307,7 +307,7 @@ std::vector<std::shared_ptr<IAddon>> CAddonMgr::GetCompatibleVersions(
 
   auto end = std::chrono::steady_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  CLog::Log(LOGDEBUG, "CAddonMgr::{} took {} ms", __func__, duration.count());
+  CLog::LogF(LOGDEBUG, "took {} ms", duration.count());
 
   return result;
 }
@@ -519,7 +519,7 @@ std::vector<AddonInfoPtr> CAddonMgr::MigrateAddons()
 {
   // install all addon updates
   std::lock_guard<std::mutex> lock(m_installAddonsMutex);
-  CLog::Log(LOGINFO, "ADDON: waiting for add-ons to update...");
+  CLog::Log(LOGINFO, "Addon Manager: waiting for add-ons to update...");
   VECADDONS updates;
   GetAddonUpdateCandidates(updates);
   InstallAddonUpdates(updates, true, AllowCheckForUpdates::CHOICE_NO);
@@ -537,7 +537,7 @@ std::vector<AddonInfoPtr> CAddonMgr::DisableIncompatibleAddons(
   std::vector<AddonInfoPtr> changed;
   for (const auto& addon : incompatible)
   {
-    CLog::Log(LOGINFO, "ADDON: {} version {} is incompatible", addon->ID(),
+    CLog::Log(LOGINFO, "Addon Manager: {} v{} is incompatible", addon->ID(),
               addon->Version().asString());
 
     if (!CAddonSystemSettings::GetInstance().UnsetActive(addon))
@@ -686,8 +686,7 @@ bool CAddonMgr::FindAddon(const std::string& addonId,
   std::unique_lock<CCriticalSection> lock(m_critSection);
 
   m_database->GetInstallData(it->second);
-  CLog::Log(LOGINFO, "CAddonMgr::{}: {} v{} installed", __FUNCTION__, addonId,
-            addonVersion.asString());
+  CLog::Log(LOGINFO, "Addon Manager: {} v{} installed", addonId, addonVersion.asString());
 
   m_installedAddons[addonId] = it->second; // insert/replace entry
   m_database->AddInstalledAddon(it->second, origin);
@@ -722,7 +721,7 @@ bool CAddonMgr::FindAddons()
   for (const auto& addon : installedAddons)
   {
     m_database->GetInstallData(addon.second);
-    CLog::Log(LOGINFO, "CAddonMgr::{}: {} v{} installed", __FUNCTION__, addon.second->ID(),
+    CLog::Log(LOGINFO, "Addon Manager: {} v{} installed", addon.second->ID(),
               addon.second->Version().asString());
   }
 
@@ -750,13 +749,12 @@ bool CAddonMgr::UnloadAddon(const std::string& addonId)
   if (GetAddon(addonId, localAddon, AddonType::UNKNOWN, OnlyEnabled::CHOICE_NO) &&
       localAddon->IsBinary() && localAddon->IsInUse())
   {
-    CLog::Log(LOGERROR, "CAddonMgr::{}: could not unload binary add-on {}, as is in use", __func__,
-              addonId);
+    CLog::LogF(LOGERROR, "could not unload binary add-on {}, as is in use", addonId);
     return false;
   }
 
   m_installedAddons.erase(addonId);
-  CLog::Log(LOGDEBUG, "CAddonMgr::{}: {} unloaded", __func__, addonId);
+  CLog::LogF(LOGDEBUG, "{} unloaded", addonId);
 
   lock.unlock();
   AddonEvents::Unload event(addonId);
@@ -1303,12 +1301,18 @@ void CAddonMgr::FindAddons(ADDON_INFO_LIST& addonmap, const std::string& path)
           {
             if (it->second->Version() > addonInfo->Version())
             {
-              CLog::Log(LOGWARNING, "CAddonMgr::{}: Addon '{}' already present with higher version {} at '{}' - other version {} at '{}' will be ignored",
-                           __FUNCTION__, addonInfo->ID(), it->second->Version().asString(), it->second->Path(), addonInfo->Version().asString(), addonInfo->Path());
+              CLog::LogF(LOGWARNING,
+                         "Addon '{}' already present with higher version {} at '{}' - other "
+                         "version {} at '{}' will be ignored",
+                         addonInfo->ID(), it->second->Version().asString(), it->second->Path(),
+                         addonInfo->Version().asString(), addonInfo->Path());
               continue;
             }
-            CLog::Log(LOGDEBUG, "CAddonMgr::{}: Addon '{}' already present with version {} at '{}' replaced with version {} at '{}'",
-                         __FUNCTION__, addonInfo->ID(), it->second->Version().asString(), it->second->Path(), addonInfo->Version().asString(), addonInfo->Path());
+            CLog::LogF(LOGDEBUG,
+                       "Addon '{}' already present with version {} at '{}' replaced with version "
+                       "{} at '{}'",
+                       addonInfo->ID(), it->second->Version().asString(), it->second->Path(),
+                       addonInfo->Version().asString(), addonInfo->Path());
           }
 
           addonmap[addonInfo->ID()] = addonInfo;
@@ -1363,14 +1367,14 @@ bool CAddonMgr::AddonsFromRepoXML(const RepositoryDirInfo& repo,
   CXBMCTinyXML2 doc;
   if (!doc.Parse(xml))
   {
-    CLog::Log(LOGERROR, "CAddonMgr::{}: Failed to parse addons.xml", __func__);
+    CLog::LogF(LOGERROR, "Failed to parse addons.xml");
     return false;
   }
 
   if (doc.RootElement() == nullptr ||
       !StringUtils::EqualsNoCase(doc.RootElement()->Value(), "addons"))
   {
-    CLog::Log(LOGERROR, "CAddonMgr::{}: Failed to parse addons.xml. Malformed", __func__);
+    CLog::LogF(LOGERROR, "Failed to parse addons.xml. Malformed");
     return false;
   }
 

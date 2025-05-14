@@ -152,7 +152,7 @@ int Interface_GUIGeneral::get_screen_height(KODI_HANDLE kodiBase)
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "kodi::gui::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return -1;
   }
 
@@ -164,7 +164,7 @@ int Interface_GUIGeneral::get_screen_width(KODI_HANDLE kodiBase)
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "kodi::gui::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return -1;
   }
 
@@ -176,7 +176,7 @@ int Interface_GUIGeneral::get_video_resolution(KODI_HANDLE kodiBase)
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "kodi::gui::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return -1;
   }
 
@@ -190,7 +190,7 @@ int Interface_GUIGeneral::get_current_window_dialog_id(KODI_HANDLE kodiBase)
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "kodi::gui::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return -1;
   }
 
@@ -203,7 +203,7 @@ int Interface_GUIGeneral::get_current_window_id(KODI_HANDLE kodiBase)
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "kodi::gui::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return -1;
   }
 
@@ -221,7 +221,7 @@ AdjustRefreshRateStatus Interface_GUIGeneral::get_adjust_refresh_rate_status(KOD
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "kodi::gui::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return ADJUST_REFRESHRATE_STATUS_OFF;
   }
 
@@ -241,7 +241,7 @@ AdjustRefreshRateStatus Interface_GUIGeneral::get_adjust_refresh_rate_status(KOD
       return ADJUST_REFRESHRATE_STATUS_ALWAYS;
       break;
     default:
-      CLog::Log(LOGERROR, "kodi::gui::{} - Unhandled Adjust refresh rate setting", __func__);
+      CLog::LogF(LOGERROR, "Unhandled adjust refresh rate setting");
       return ADJUST_REFRESHRATE_STATUS_OFF;
       break;
   }

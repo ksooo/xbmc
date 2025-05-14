@@ -57,17 +57,17 @@ bool Interface_GUIDialogKeyboard::show_and_get_input_with_head(KODI_HANDLE kodiB
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!text_in || !text_out || !heading)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogKeyboard::{} - invalid handler data (text_in='{}', "
-              "text_out='{}', heading='{}') on addon '{}'",
-              __func__, static_cast<const void*>(text_in), static_cast<void*>(text_out),
-              static_cast<const void*>(heading), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (text_in='{}', "
+               "text_out='{}', heading='{}'), addon '{}'",
+               static_cast<const void*>(text_in), static_cast<void*>(text_out),
+               static_cast<const void*>(heading), addon->ID());
     return false;
   }
 
@@ -88,17 +88,16 @@ bool Interface_GUIDialogKeyboard::show_and_get_input(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!text_in || !text_out)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogKeyboard::{} - invalid handler data (text_in='{}', "
-              "text_out='{}') on addon '{}'",
-              __func__, static_cast<const void*>(text_in), static_cast<void*>(text_out),
-              addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (text_in='{}', "
+               "text_out='{}'), addon '{}'",
+               static_cast<const void*>(text_in), static_cast<void*>(text_out), addon->ID());
     return false;
   }
 
@@ -119,17 +118,17 @@ bool Interface_GUIDialogKeyboard::show_and_get_new_password_with_head(KODI_HANDL
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!password_in || !password_out || !heading)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogKeyboard::{} - invalid handler data (password_in='{}', "
-              "password_out='{}', heading='{}') on addon '{}'",
-              __func__, static_cast<const void*>(password_in), static_cast<void*>(password_out),
-              static_cast<const void*>(heading), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (password_in='{}', "
+               "password_out='{}', heading='{}'), addon '{}'",
+               static_cast<const void*>(password_in), static_cast<void*>(password_out),
+               static_cast<const void*>(heading), addon->ID());
     return false;
   }
 
@@ -149,17 +148,17 @@ bool Interface_GUIDialogKeyboard::show_and_get_new_password(KODI_HANDLE kodiBase
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!password_in || !password_out)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogKeyboard::{} - invalid handler data (password_in='{}', "
-              "password_out='{}') on addon '{}'",
-              __func__, static_cast<const void*>(password_in), static_cast<void*>(password_out),
-              addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (password_in='{}', "
+               "password_out='{}'), addon '{}'",
+               static_cast<const void*>(password_in), static_cast<void*>(password_out),
+               addon->ID());
     return false;
   }
 
@@ -179,17 +178,16 @@ bool Interface_GUIDialogKeyboard::show_and_verify_new_password_with_head(KODI_HA
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!password_out || !heading)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogKeyboard::{} - invalid handler data (password_out='{}', "
-              "heading='{}') on addon '{}'",
-              __func__, static_cast<void*>(password_out), static_cast<const void*>(heading),
-              addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (password_out='{}', "
+               "heading='{}'), addon '{}'",
+               static_cast<void*>(password_out), static_cast<const void*>(heading), addon->ID());
     return false;
   }
 
@@ -208,16 +206,14 @@ bool Interface_GUIDialogKeyboard::show_and_verify_new_password(KODI_HANDLE kodiB
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!password_out)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogKeyboard::{} - invalid handler data (password_out='{}') on "
-              "addon '{}'",
-              __func__, static_cast<void*>(password_out), addon->ID());
+    CLog::LogF(LOGERROR, "Invalid handler data (password_out='{}'), addon '{}'",
+               static_cast<void*>(password_out), addon->ID());
     return false;
   }
 
@@ -238,17 +234,17 @@ int Interface_GUIDialogKeyboard::show_and_verify_password(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!password_in || !password_out || !heading)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogKeyboard::{} - invalid handler data (password_in='{}', "
-              "password_out='{}', heading='{}') on addon '{}'",
-              __func__, static_cast<const void*>(password_in), static_cast<void*>(password_out),
-              static_cast<const void*>(heading), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (password_in='{}', "
+               "password_out='{}', heading='{}'), addon '{}'",
+               static_cast<const void*>(password_in), static_cast<void*>(password_out),
+               static_cast<const void*>(heading), addon->ID());
     return false;
   }
 
@@ -268,17 +264,16 @@ bool Interface_GUIDialogKeyboard::show_and_get_filter(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!text_in || !text_out)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogKeyboard::{} - invalid handler data (text_in='{}', "
-              "text_out='{}') on addon '{}'",
-              __func__, static_cast<const void*>(text_in), static_cast<void*>(text_out),
-              addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (text_in='{}', "
+               "text_out='{}'), addon '{}'",
+               static_cast<const void*>(text_in), static_cast<void*>(text_out), addon->ID());
     return false;
   }
 
@@ -297,7 +292,7 @@ bool Interface_GUIDialogKeyboard::send_text_to_active_keyboard(KODI_HANDLE kodiB
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
@@ -309,7 +304,7 @@ bool Interface_GUIDialogKeyboard::is_keyboard_activated(KODI_HANDLE kodiBase)
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogKeyboard::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 

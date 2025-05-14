@@ -124,9 +124,8 @@ ADDON_STATUS IAddonInstanceHandler::CreateInstance()
   ADDON_STATUS status = m_addon->CreateInstance(&m_ifc);
   if (status != ADDON_STATUS_OK)
   {
-    CLog::Log(LOGERROR,
-              "IAddonInstanceHandler::{}: {} returned bad status \"{}\" during instance creation",
-              __func__, m_addon->ID(), kodi::addon::TranslateAddonStatus(status));
+    CLog::Log(LOGERROR, "{} returned bad status \"{}\" during instance creation", m_addon->ID(),
+              kodi::addon::TranslateAddonStatus(status));
   }
   return status;
 }
@@ -142,16 +141,14 @@ std::shared_ptr<CSetting> IAddonInstanceHandler::GetSetting(const std::string& s
 {
   if (!m_addon->HasSettings(m_instanceId))
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - couldn't get settings for add-on '{}'",
-              __func__, Name());
+    CLog::Log(LOGERROR, "Couldn't get settings for add-on '{}'", Name());
     return nullptr;
   }
 
   auto value = m_addon->GetSettings(m_instanceId)->GetSetting(setting);
   if (value == nullptr)
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - can't find setting '{}' in '{}'", __func__,
-              setting, Name());
+    CLog::Log(LOGERROR, "Can't find setting '{}' for '{}'", setting, Name());
     return nullptr;
   }
 
@@ -198,8 +195,7 @@ bool IAddonInstanceHandler::get_instance_setting_bool(const KODI_ADDON_INSTANCE_
 
   if (setting->GetType() != SettingType::Boolean)
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - setting '{}' is not a boolean in '{}'",
-              __func__, id, instance->Name());
+    CLog::LogF(LOGERROR, "Setting '{}' is not a boolean in '{}'", id, instance->Name());
     return false;
   }
 
@@ -221,8 +217,7 @@ bool IAddonInstanceHandler::get_instance_setting_int(const KODI_ADDON_INSTANCE_B
 
   if (setting->GetType() != SettingType::Integer && setting->GetType() != SettingType::Number)
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - setting '{}' is not a integer in '{}'",
-              __func__, id, instance->Name());
+    CLog::LogF(LOGERROR, "Setting '{}' is not an integer in '{}'", id, instance->Name());
     return false;
   }
 
@@ -247,8 +242,7 @@ bool IAddonInstanceHandler::get_instance_setting_float(const KODI_ADDON_INSTANCE
 
   if (setting->GetType() != SettingType::Number)
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - setting '{}' is not a number in '{}'",
-              __func__, id, instance->Name());
+    CLog::LogF(LOGERROR, "Setting '{}' is not a number in '{}'", id, instance->Name());
     return false;
   }
 
@@ -270,8 +264,7 @@ bool IAddonInstanceHandler::get_instance_setting_string(const KODI_ADDON_INSTANC
 
   if (setting->GetType() != SettingType::String)
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - setting '{}' is not a string in '{}'",
-              __func__, id, instance->Name());
+    CLog::LogF(LOGERROR, "Setting '{}' is not a string in '{}'", id, instance->Name());
     return false;
   }
 
@@ -293,7 +286,7 @@ bool IAddonInstanceHandler::set_instance_setting_bool(const KODI_ADDON_INSTANCE_
 
   if (!instance->m_addon->UpdateSettingBool(id, value, instance->m_instanceId))
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - invalid setting type", __func__);
+    CLog::LogF(LOGERROR, "Invalid setting type");
     return false;
   }
 
@@ -309,8 +302,8 @@ bool IAddonInstanceHandler::set_instance_setting_int(const KODI_ADDON_INSTANCE_B
   IAddonInstanceHandler* instance = static_cast<IAddonInstanceHandler*>(hdl);
   if (!instance || !id)
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - invalid data (instance='{}', id='{}')",
-              __func__, hdl, static_cast<const void*>(id));
+    CLog::LogF(LOGERROR, "Invalid data (instance='{}', id='{}')", hdl,
+               static_cast<const void*>(id));
 
     return false;
   }
@@ -321,7 +314,7 @@ bool IAddonInstanceHandler::set_instance_setting_int(const KODI_ADDON_INSTANCE_B
 
   if (!instance->m_addon->UpdateSettingInt(id, value, instance->m_instanceId))
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - invalid setting type", __func__);
+    CLog::Log(LOGERROR, "Invalid setting type");
     return false;
   }
 
@@ -337,8 +330,8 @@ bool IAddonInstanceHandler::set_instance_setting_float(const KODI_ADDON_INSTANCE
   IAddonInstanceHandler* instance = static_cast<IAddonInstanceHandler*>(hdl);
   if (!instance || !id)
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - invalid data (instance='{}', id='{}')",
-              __func__, hdl, static_cast<const void*>(id));
+    CLog::LogF(LOGERROR, "Invalid data (instance='{}', id='{}')", hdl,
+               static_cast<const void*>(id));
 
     return false;
   }
@@ -350,7 +343,7 @@ bool IAddonInstanceHandler::set_instance_setting_float(const KODI_ADDON_INSTANCE
   if (!instance->m_addon->UpdateSettingNumber(id, static_cast<double>(value),
                                               instance->m_instanceId))
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - invalid setting type", __func__);
+    CLog::LogF(LOGERROR, "Invalid setting type");
     return false;
   }
 
@@ -366,9 +359,8 @@ bool IAddonInstanceHandler::set_instance_setting_string(const KODI_ADDON_INSTANC
   IAddonInstanceHandler* instance = static_cast<IAddonInstanceHandler*>(hdl);
   if (!instance || !id || !value)
   {
-    CLog::Log(LOGERROR,
-              "IAddonInstanceHandler::{} - invalid data (instance='{}', id='{}', value='{}')",
-              __func__, hdl, static_cast<const void*>(id), static_cast<const void*>(value));
+    CLog::LogF(LOGERROR, "Invalid data (instance='{}', id='{}', value='{}')", hdl,
+               static_cast<const void*>(id), static_cast<const void*>(value));
 
     return false;
   }
@@ -379,7 +371,7 @@ bool IAddonInstanceHandler::set_instance_setting_string(const KODI_ADDON_INSTANC
 
   if (!instance->m_addon->UpdateSettingString(id, value, instance->m_instanceId))
   {
-    CLog::Log(LOGERROR, "IAddonInstanceHandler::{} - invalid setting type", __func__);
+    CLog::LogF(LOGERROR, "Invalid setting type");
     return false;
   }
 

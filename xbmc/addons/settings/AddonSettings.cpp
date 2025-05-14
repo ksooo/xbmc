@@ -226,10 +226,8 @@ bool CAddonSettings::AddInstanceSettings()
   if (GetSetting(ADDON_SETTING_INSTANCE_NAME_VALUE) ||
       GetSetting(ADDON_SETTING_INSTANCE_ENABLED_VALUE))
   {
-    CLog::Log(
-        LOGDEBUG,
-        "CAddonSettings::{} - Add-on {} using instance setting values byself, Kodi's add ignored",
-        __func__, m_addonId);
+    CLog::LogF(LOGDEBUG, "Add-on {} using instance setting values byself, Kodi's add ignored",
+               m_addonId);
     return true;
   }
 

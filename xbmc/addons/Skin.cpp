@@ -681,7 +681,7 @@ void CSkinInfo::SetString(int setting, const std::string &label)
     return;
   }
 
-  CLog::Log(LOGFATAL, "{}: unknown setting ({}) requested", __FUNCTION__, setting);
+  CLog::LogF(LOGFATAL, "unknown setting ({}) requested", setting);
   assert(false);
 }
 
@@ -725,7 +725,7 @@ void CSkinInfo::SetBool(int setting, bool set)
     return;
   }
 
-  CLog::Log(LOGFATAL, "{}: unknown setting ({}) requested", __FUNCTION__, setting);
+  CLog::LogF(LOGFATAL, "unknown setting ({}) requested", setting);
   assert(false);
 }
 

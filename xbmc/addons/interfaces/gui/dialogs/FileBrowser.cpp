@@ -54,17 +54,17 @@ bool Interface_GUIDialogFileBrowser::show_and_get_directory(KODI_HANDLE kodiBase
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogFileBrowser::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!shares || !heading || !path_in || !path_out)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogFileBrowser::{} - invalid handler data (shares='{}', "
-              "heading='{}', path_in='{}', path_out='{}') on addon '{}'",
-              __func__, static_cast<const void*>(shares), static_cast<const void*>(heading),
-              static_cast<const void*>(path_in), static_cast<void*>(path_out), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (shares='{}', "
+               "heading='{}', path_in='{}', path_out='{}'), addon '{}'",
+               static_cast<const void*>(shares), static_cast<const void*>(heading),
+               static_cast<const void*>(path_in), static_cast<void*>(path_out), addon->ID());
     return false;
   }
 
@@ -90,18 +90,18 @@ bool Interface_GUIDialogFileBrowser::show_and_get_file(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogFileBrowser::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!shares || !mask || !heading || !path_in || !path_out)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogFileBrowser::{} - invalid handler data (shares='{}', mask='{}', "
-              "heading='{}', path_in='{}', path_out='{}') on addon '{}'",
-              __func__, static_cast<const void*>(shares), static_cast<const void*>(mask),
-              static_cast<const void*>(heading), static_cast<const void*>(path_in),
-              static_cast<void*>(path_out), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (shares='{}', mask='{}', "
+               "heading='{}', path_in='{}', path_out='{}'), addon '{}'",
+               static_cast<const void*>(shares), static_cast<const void*>(mask),
+               static_cast<const void*>(heading), static_cast<const void*>(path_in),
+               static_cast<void*>(path_out), addon->ID());
     return false;
   }
 
@@ -129,18 +129,18 @@ bool Interface_GUIDialogFileBrowser::show_and_get_file_from_dir(KODI_HANDLE kodi
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogFileBrowser::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!directory || !mask || !heading || !path_in || !path_out)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogFileBrowser::{} - invalid handler data (directory='{}', "
-              "mask='{}', heading='{}', path_in='{}', path_out='{}') on addon '{}'",
-              __func__, static_cast<const void*>(directory), static_cast<const void*>(mask),
-              static_cast<const void*>(heading), static_cast<const void*>(path_in),
-              static_cast<void*>(path_out), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (directory='{}', "
+               "mask='{}', heading='{}', path_in='{}', path_out='{}'), addon '{}'",
+               static_cast<const void*>(directory), static_cast<const void*>(mask),
+               static_cast<const void*>(heading), static_cast<const void*>(path_in),
+               static_cast<void*>(path_out), addon->ID());
     return false;
   }
 
@@ -164,18 +164,18 @@ bool Interface_GUIDialogFileBrowser::show_and_get_file_list(KODI_HANDLE kodiBase
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogFileBrowser::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!shares || !mask || !heading || !file_list || !entries)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogFileBrowser::{} - invalid handler data (shares='{}', mask='{}', "
-              "heading='{}', file_list='{}', entries='{}') on addon '{}'",
-              __func__, static_cast<const void*>(shares), static_cast<const void*>(mask),
-              static_cast<const void*>(heading), static_cast<void*>(file_list),
-              static_cast<void*>(entries), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (shares='{}', mask='{}', "
+               "heading='{}', file_list='{}', entries='{}'), addon '{}'",
+               static_cast<const void*>(shares), static_cast<const void*>(mask),
+               static_cast<const void*>(heading), static_cast<void*>(file_list),
+               static_cast<void*>(entries), addon->ID());
     return false;
   }
 
@@ -207,18 +207,17 @@ bool Interface_GUIDialogFileBrowser::show_and_get_source(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogFileBrowser::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!strType || !additionalShare || !path_in || !path_out)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogFileBrowser::{} - invalid handler data (additionalShare='{}', "
-              "strType='{}', path_in='{}', path_out='{}') on addon '{}'",
-              __func__, static_cast<const void*>(additionalShare),
-              static_cast<const void*>(strType), static_cast<const void*>(path_in),
-              static_cast<void*>(path_out), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (additionalShare='{}', "
+               "strType='{}', path_in='{}', path_out='{}'), addon '{}'",
+               static_cast<const void*>(additionalShare), static_cast<const void*>(strType),
+               static_cast<const void*>(path_in), static_cast<void*>(path_out), addon->ID());
     return false;
   }
 
@@ -243,17 +242,16 @@ bool Interface_GUIDialogFileBrowser::show_and_get_image(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogFileBrowser::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!shares || !heading)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogFileBrowser::{} - invalid handler data (shares='{}', "
-              "heading='{}') on addon '{}'",
-              __func__, static_cast<const void*>(shares), static_cast<const void*>(heading),
-              addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (shares='{}', "
+               "heading='{}'), addon '{}'",
+               static_cast<const void*>(shares), static_cast<const void*>(heading), addon->ID());
     return false;
   }
 
@@ -276,17 +274,17 @@ bool Interface_GUIDialogFileBrowser::show_and_get_image_list(KODI_HANDLE kodiBas
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogFileBrowser::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return false;
   }
 
   if (!shares || !heading || !file_list || !entries)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogFileBrowser::{} - invalid handler data (shares='{}', "
-              "heading='{}', file_list='{}', entries='{}') on addon '{}'",
-              __func__, static_cast<const void*>(shares), static_cast<const void*>(heading),
-              static_cast<void*>(file_list), static_cast<void*>(entries), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (shares='{}', "
+               "heading='{}', file_list='{}', entries='{}'), addon '{}'",
+               static_cast<const void*>(shares), static_cast<const void*>(heading),
+               static_cast<void*>(file_list), static_cast<void*>(entries), addon->ID());
     return false;
   }
 
@@ -314,7 +312,7 @@ void Interface_GUIDialogFileBrowser::clear_file_list(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogFileBrowser::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return;
   }
 
@@ -328,10 +326,8 @@ void Interface_GUIDialogFileBrowser::clear_file_list(KODI_HANDLE kodiBase,
   else
   {
 
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogFileBrowser::{} - invalid handler data (file_list='{}') on "
-              "addon '{}'",
-              __func__, static_cast<void*>(file_list), addon->ID());
+    CLog::LogF(LOGERROR, "Invalid handler data (file_list='{}'), addon '{}'",
+               static_cast<void*>(file_list), addon->ID());
   }
 }
 

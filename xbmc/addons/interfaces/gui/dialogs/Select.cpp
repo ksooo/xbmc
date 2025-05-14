@@ -43,7 +43,7 @@ int Interface_GUIDialogSelect::open(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogSelect::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return -1;
   }
 
@@ -52,11 +52,11 @@ int Interface_GUIDialogSelect::open(KODI_HANDLE kodiBase,
           WINDOW_DIALOG_SELECT);
   if (!heading || !entries || !dialog)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogSelect::{} - invalid handler data (heading='{}', entries='{}', "
-              "dialog='{}') on addon '{}'",
-              __func__, static_cast<const void*>(heading), static_cast<const void*>(entries),
-              static_cast<void*>(dialog), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (heading='{}', entries='{}', "
+               "dialog='{}'), addon '{}'",
+               static_cast<const void*>(heading), static_cast<const void*>(entries),
+               static_cast<void*>(dialog), addon->ID());
     return -1;
   }
 
@@ -87,7 +87,7 @@ bool Interface_GUIDialogSelect::open_multi_select(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogMultiSelect::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "nvalid data");
     return false;
   }
 
@@ -96,12 +96,12 @@ bool Interface_GUIDialogSelect::open_multi_select(KODI_HANDLE kodiBase,
           WINDOW_DIALOG_SELECT);
   if (!heading || !entryIDs || !entryNames || !entriesSelected || !dialog)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogMultiSelect::{} - invalid handler data (heading='{}', "
-              "entryIDs='{}', entryNames='{}', entriesSelected='{}', dialog='{}') on addon '{}'",
-              __func__, static_cast<const void*>(heading), static_cast<const void*>(entryIDs),
-              static_cast<const void*>(entryNames), static_cast<void*>(entriesSelected),
-              static_cast<void*>(dialog), addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (heading='{}', "
+               "entryIDs='{}', entryNames='{}', entriesSelected='{}', dialog='{}'), addon '{}'",
+               static_cast<const void*>(heading), static_cast<const void*>(entryIDs),
+               static_cast<const void*>(entryNames), static_cast<void*>(entriesSelected),
+               static_cast<void*>(dialog), addon->ID());
     return false;
   }
 

@@ -40,7 +40,7 @@ int Interface_GUIDialogContextMenu::open(KODI_HANDLE kodiBase,
   CAddonDll* addon = static_cast<CAddonDll*>(kodiBase);
   if (!addon)
   {
-    CLog::Log(LOGERROR, "Interface_GUIDialogContextMenu::{} - invalid data", __func__);
+    CLog::LogF(LOGERROR, "Invalid data");
     return -1;
   }
 
@@ -49,11 +49,10 @@ int Interface_GUIDialogContextMenu::open(KODI_HANDLE kodiBase,
           WINDOW_DIALOG_CONTEXT_MENU);
   if (!heading || !entries || !dialog)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIDialogContextMenu::{} - invalid handler data (heading='{}', "
-              "entries='{}', dialog='{}') on addon '{}'",
-              __func__, static_cast<const void*>(heading), static_cast<const void*>(entries),
-              kodiBase, addon->ID());
+    CLog::LogF(LOGERROR,
+               "Invalid handler data (heading='{}', entries='{}', dialog='{}'), addon '{}'",
+               static_cast<const void*>(heading), static_cast<const void*>(entries), kodiBase,
+               addon->ID());
     return -1;
   }
 

@@ -192,7 +192,6 @@ extern "C"
     static KODI_GUI_CONTROL_HANDLE GetControl(KODI_HANDLE kodiBase,
                                               KODI_GUI_WINDOW_HANDLE handle,
                                               int control_id,
-                                              const char* function,
                                               CGUIControl::GUICONTROLTYPES type,
                                               const std::string& typeName);
     static int GetNextAvailableWindowId();

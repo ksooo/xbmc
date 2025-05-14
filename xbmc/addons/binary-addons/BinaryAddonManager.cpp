@@ -43,8 +43,7 @@ BinaryAddonBasePtr CBinaryAddonManager::GetAddonBase(const AddonInfoPtr& addonIn
   }
   if (!addon)
   {
-    CLog::Log(LOGFATAL, "CBinaryAddonManager::{}: Tried to get add-on '{}' who not available!",
-              __func__, addonInfo->ID());
+    CLog::LogF(LOGFATAL, "Tried to get add-on '{}' which is not available!", addonInfo->ID());
   }
 
   return addonBase;

@@ -40,10 +40,8 @@ void Interface_GUIControlProgress::set_visible(KODI_HANDLE kodiBase,
   CGUIProgressControl* control = static_cast<CGUIProgressControl*>(handle);
   if (!addon || !control)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIControlProgress::{} - invalid handler data (kodiBase='{}', "
-              "handle='{}') on addon '{}'",
-              __func__, kodiBase, handle, addon ? addon->ID() : "unknown");
+    CLog::LogF(LOGERROR, "Invalid handler data (kodiBase='{}', handle='{}'), addon '{}'", kodiBase,
+               handle, addon ? addon->ID() : "unknown");
     return;
   }
 
@@ -58,10 +56,8 @@ void Interface_GUIControlProgress::set_percentage(KODI_HANDLE kodiBase,
   CGUIProgressControl* control = static_cast<CGUIProgressControl*>(handle);
   if (!addon || !control)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIControlProgress::{} - invalid handler data (kodiBase='{}', "
-              "handle='{}') on addon '{}'",
-              __func__, kodiBase, handle, addon ? addon->ID() : "unknown");
+    CLog::LogF(LOGERROR, "Invalid handler data (kodiBase='{}', handle='{}'), addon '{}'", kodiBase,
+               handle, addon ? addon->ID() : "unknown");
     return;
   }
 
@@ -75,10 +71,8 @@ float Interface_GUIControlProgress::get_percentage(KODI_HANDLE kodiBase,
   CGUIProgressControl* control = static_cast<CGUIProgressControl*>(handle);
   if (!addon || !control)
   {
-    CLog::Log(LOGERROR,
-              "Interface_GUIControlProgress::{} - invalid handler data (kodiBase='{}', "
-              "handle='{}') on addon '{}'",
-              __func__, kodiBase, handle, addon ? addon->ID() : "unknown");
+    CLog::LogF(LOGERROR, "Invalid handler data (kodiBase='{}', handle='{}'), addon '{}'", kodiBase,
+               handle, addon ? addon->ID() : "unknown");
     return 0.0f;
   }
 

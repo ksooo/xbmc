@@ -75,10 +75,10 @@ bool CGUIDialogAddonSettings::OnMessage(CGUIMessage& message)
 
       if (instanceId != m_instanceId)
       {
-        CLog::Log(LOGERROR,
-                  "CGUIDialogAddonSettings::{}: Set value \"{}\" from add-on \"{}\" called with "
-                  "invalid instance id (given: {}, needed: {})",
-                  __func__, m_addon->ID(), settingId, instanceId, m_instanceId);
+        CLog::LogF(LOGERROR,
+                   "Set value \"{}\" from add-on \"{}\" called with invalid instance id (given: "
+                   "{}, needed: {})",
+                   m_addon->ID(), settingId, instanceId, m_instanceId);
         break;
       }
 

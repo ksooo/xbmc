@@ -322,8 +322,7 @@ std::vector<std::string> CAddonInstaller::RemoveOrphanedDepsRecursively() const
       }
       else
       {
-        CLog::Log(LOGERROR, "CAddonMgr::{}: failed to remove orphaned add-on/dependency: {}",
-                  __func__, dep->Name());
+        CLog::LogF(LOGERROR, "failed to remove orphaned add-on/dependency: {}", dep->Name());
       }
     }
 
@@ -1032,10 +1031,8 @@ bool CAddonInstallJob::Install(const std::string &installFrom, const RepositoryP
 
     if (notSystemAddon)
     {
-      CLog::Log(
-          LOGERROR,
-          "CAddonInstallJob::{}: failed to install repository [{}]. It has dependencies defined",
-          __func__, m_addon->ID());
+      CLog::LogF(LOGERROR, "Cfailed to install repository [{}]. It has dependencies defined",
+                 m_addon->ID());
       ReportInstallError(m_addon->ID(), m_addon->ID(), g_localizeStrings.Get(24088));
       return false;
     }

@@ -195,7 +195,7 @@ AddonInfoPtr CAddonInfoBuilder::Generate(const std::string& id, AddonType type)
   // any character to go through.
   if (id.empty() || id.find_first_not_of(VALID_ADDON_IDENTIFIER_CHARACTERS) != std::string::npos)
   {
-    CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: identifier '{}' is invalid", __FUNCTION__, id);
+    CLog::LogF(LOGERROR, "Identifier '{}' is invalid", id);
     return nullptr;
   }
 
@@ -212,9 +212,9 @@ AddonInfoPtr CAddonInfoBuilder::Generate(const std::string& addonPath, bool plat
   CXBMCTinyXML2 xmlDoc;
   if (!xmlDoc.LoadFile(URIUtils::AddFileToFolder(addonRealPath, "addon.xml")))
   {
-    CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: Unable to load '{}', Line {}\n{}", __FUNCTION__,
-              URIUtils::AddFileToFolder(addonRealPath, "addon.xml"), xmlDoc.ErrorLineNum(),
-              xmlDoc.ErrorStr());
+    CLog::LogF(LOGERROR, "Unable to load '{}', Line {}\n{}",
+               URIUtils::AddFileToFolder(addonRealPath, "addon.xml"), xmlDoc.ErrorLineNum(),
+               xmlDoc.ErrorStr());
     return nullptr;
   }
 
@@ -225,8 +225,8 @@ AddonInfoPtr CAddonInfoBuilder::Generate(const std::string& addonPath, bool plat
   if (!platformCheck || PlatformSupportsAddon(addon))
     return addon;
 
-  CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: No platform for add-on {} (supported platforms: {})",
-            __FUNCTION__, addon->ID(), StringUtils::Join(addon->m_platforms, ", "));
+  CLog::LogF(LOGERROR, "No platform for add-on {} (supported platforms: {})", addon->ID(),
+             StringUtils::Join(addon->m_platforms, ", "));
 
   return nullptr;
 }
@@ -279,7 +279,7 @@ bool CAddonInfoBuilder::ParseXML(const AddonInfoPtr& addon,
 
   if (!StringUtils::EqualsNoCase(element->Value(), "addon"))
   {
-    CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: file from '{}' doesn't contain <addon>", __FUNCTION__, addonPath);
+    CLog::LogF(LOGERROR, "File from '{}' doesn't contain <addon>", addonPath);
     return false;
   }
 
@@ -305,11 +305,10 @@ bool CAddonInfoBuilder::ParseXML(const AddonInfoPtr& addon,
 
   if (addon->m_id.empty() || addon->m_version.empty())
   {
-    CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: file '{}' doesn't contain required values on <addon ... > id='{}', version='{}'",
-              __FUNCTION__,
-              addonPath,
-              addon->m_id.empty() ? "missing" : addon->m_id,
-              addon->m_version.empty() ? "missing" : addon->m_version.asString());
+    CLog::LogF(LOGERROR,
+               "File '{}' doesn't contain required values on <addon ... > id='{}', version='{}'",
+               addonPath, addon->m_id.empty() ? "missing" : addon->m_id,
+               addon->m_version.empty() ? "missing" : addon->m_version.asString());
     return false;
   }
 
@@ -318,7 +317,7 @@ bool CAddonInfoBuilder::ParseXML(const AddonInfoPtr& addon,
   // any character to go through.
   if (addon->m_id.find_first_not_of(VALID_ADDON_IDENTIFIER_CHARACTERS) != std::string::npos)
   {
-    CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: identifier {} is invalid", __FUNCTION__, addon->m_id);
+    CLog::LogF(LOGERROR, "Identifier {} is invalid", addon->m_id);
     return false;
   }
 
@@ -565,7 +564,8 @@ bool CAddonInfoBuilder::ParseXML(const AddonInfoPtr& addon,
       AddonType type = CAddonInfo::TranslateType(point);
       if (type == AddonType::UNKNOWN || type >= AddonType::MAX_TYPES)
       {
-        CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: file '{}' doesn't contain a valid add-on type name ({})", __FUNCTION__, addon->m_path, point);
+        CLog::LogF(LOGERROR, "File '{}' doesn't contain a valid add-on type name ({})",
+                   addon->m_path, point);
         return false;
       }
 
@@ -603,8 +603,10 @@ bool CAddonInfoBuilder::ParseXML(const AddonInfoPtr& addon,
       // Prevent log file entry if data is from repository, there normal on
       // addons for other OS's
       if (!isRepoXMLContent)
-        CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: addon.xml from '{}' for binary type '{}' doesn't contain library and addon becomes ignored",
-                      __FUNCTION__, addon->ID(), CAddonInfo::TranslateType(addon->m_mainType));
+        CLog::LogF(LOGERROR,
+                   "addon.xml for '{}' with binary type '{}' doesn't contain a library name. Addon "
+                   "will be ignored",
+                   addon->ID(), CAddonInfo::TranslateType(addon->m_mainType));
       return false;
     }
   }
@@ -648,20 +650,19 @@ bool CAddonInfoBuilder::ParseXMLTypes(CAddonType& addonType,
         if (std::regex_match(library, libRegex))
         {
           info->SetBinary(true);
-          CLog::Log(LOGDEBUG, "CAddonInfoBuilder::{}: Binary addon found: {}", __func__,
-                    info->ID());
+          CLog::LogF(LOGDEBUG, "Binary addon found: {}", info->ID());
         }
       }
       catch (const std::regex_error& e)
       {
-        CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: Regex error caught: {}", __func__,
-                  e.what());
+        CLog::LogF(LOGERROR, "Regex error caught: {}", e.what());
       }
     }
 
     if (!ParseXMLExtension(addonType, child))
     {
-      CLog::Log(LOGERROR, "CAddonInfoBuilder::{}: addon.xml file doesn't contain a valid add-on extensions ({})", __FUNCTION__, info->ID());
+      CLog::LogF(LOGERROR, "addon.xml file doesn't contain a valid add-on extension ({})",
+                 info->ID());
       return false;
     }
     if (!addonType.GetValue("provides").empty())
