@@ -210,11 +210,11 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
         requestedStreamIndex = deviceInstance.streamIndex;
         requestedSourceId = deviceInstance.sourceId;
         if (requestedStreamIndex != INT_MAX)
-          CLog::Log(LOGINFO, "{} pseudo device - requesting stream {}", __FUNCTION__,
-                    (unsigned int)requestedStreamIndex);
+          CLog::Log(LOGINFO, "AE sink pseudo device - requesting stream {}",
+                    static_cast<unsigned int>(requestedStreamIndex));
         if (requestedSourceId != INT_MAX)
-          CLog::Log(LOGINFO, "{} device - requesting audiosource {}", __FUNCTION__,
-                    (unsigned int)requestedSourceId);
+          CLog::Log(LOGINFO, "AE sink device - requesting audiosource {}",
+                    static_cast<unsigned int>(requestedSourceId));
         break;
       }
     }
@@ -222,7 +222,7 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
 
   if (!deviceID)
   {
-    CLog::Log(LOGERROR, "{}: Unable to find device {}", __FUNCTION__, device);
+    CLog::LogF(LOGERROR, "Unable to find device {}", device);
     return false;
   }
 
@@ -240,13 +240,14 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
     {
       numOutputChannels = std::min((size_t)format.m_channelLayout.Count(), (size_t)devEnum.GetNumPlanes());
       m_planes = numOutputChannels;
-      CLog::Log(LOGDEBUG, "{} Found planar audio with {} channels using {} of them.", __FUNCTION__,
-                (unsigned int)devEnum.GetNumPlanes(), (unsigned int)numOutputChannels);
+      CLog::LogF(LOGDEBUG, "Found planar audio with {} channels using {} of them.",
+                 static_cast<unsigned int>(devEnum.GetNumPlanes()),
+                 static_cast<unsigned int>(numOutputChannels));
     }
   }
   else
   {
-    CLog::Log(LOGERROR, "{}, Unable to find suitable stream", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Unable to find suitable stream");
     return false;
   }
 
@@ -261,7 +262,7 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
     }
     else
     {
-      CLog::Log(LOGERROR, "{}, Unable to find suitable virtual stream", __FUNCTION__);
+      CLog::LogF(LOGERROR, "Unable to find suitable virtual stream");
       //return false;
       numOutputChannelsVirt = 0;
     }
@@ -278,15 +279,14 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
   if (passthrough && numOutputChannelsVirt == 0)
   {
     m_outputBitstream = true;
-    CLog::Log(LOGDEBUG, "{}: Bitstream passthrough with float -> int16 conversion enabled",
-              __FUNCTION__);
+    CLog::LogF(LOGDEBUG, "Bitstream passthrough with float -> int16 conversion enabled");
   }
 
   std::string formatString;
-  CLog::Log(LOGDEBUG, "{}: Selected stream[{}] - id: {:#04X}, Physical Format: {} {}", __FUNCTION__,
-            (unsigned int)m_outputBufferIndex, (unsigned int)outputStream,
-            StreamDescriptionToString(outputFormat, formatString),
-            passthrough ? "passthrough" : "");
+  CLog::LogF(
+      LOGDEBUG, "Selected stream[{}] - id: {:#04X}, Physical Format: {} {}",
+      static_cast<unsigned int>(m_outputBufferIndex), static_cast<unsigned int>(outputStream),
+      StreamDescriptionToString(outputFormat, formatString), passthrough ? "passthrough" : "");
 
   m_device.Open(deviceID);
   SetHogMode(passthrough);
@@ -297,23 +297,23 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
   AudioStreamBasicDescription virtualFormat, previousPhysicalFormat;
   m_outputStream.GetVirtualFormat(&virtualFormat);
   m_outputStream.GetPhysicalFormat(&previousPhysicalFormat);
-  CLog::Log(LOGDEBUG, "{}: Previous Virtual Format: {}", __FUNCTION__,
-            StreamDescriptionToString(virtualFormat, formatString));
-  CLog::Log(LOGDEBUG, "{}: Previous Physical Format: {}", __FUNCTION__,
-            StreamDescriptionToString(previousPhysicalFormat, formatString));
+  CLog::LogF(LOGDEBUG, "Previous Virtual Format: {}",
+             StreamDescriptionToString(virtualFormat, formatString));
+  CLog::LogF(LOGDEBUG, "Previous Physical Format: {}",
+             StreamDescriptionToString(previousPhysicalFormat, formatString));
 
   m_outputStream.SetPhysicalFormat(&outputFormat); // Set the active format (the old one will be reverted when we close)
   if (passthrough && numOutputChannelsVirt > 0)
     m_outputStream.SetVirtualFormat(&outputFormatVirt);
 
   m_outputStream.GetVirtualFormat(&virtualFormat);
-  CLog::Log(LOGDEBUG, "{}: New Virtual Format: {}", __FUNCTION__,
-            StreamDescriptionToString(virtualFormat, formatString));
-  CLog::Log(LOGDEBUG, "{}: New Physical Format: {}", __FUNCTION__,
-            StreamDescriptionToString(outputFormat, formatString));
+  CLog::LogF(LOGDEBUG, "New Virtual Format: {}",
+             StreamDescriptionToString(virtualFormat, formatString));
+  CLog::LogF(LOGDEBUG, "New Physical Format: {}",
+             StreamDescriptionToString(outputFormat, formatString));
 
   if (requestedSourceId != INT_MAX && !m_device.SetDataSource(requestedSourceId))
-    CLog::Log(LOGERROR, "{}: Error setting requested audio source.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Error setting requested audio source.");
 
   m_latentFrames = m_device.GetNumLatencyFrames();
   m_latentFrames += m_outputStream.GetNumLatencyFrames();
@@ -330,8 +330,9 @@ bool CAESinkDARWINOSX::Initialize(AEAudioFormat &format, std::string &device)
 
   unsigned int num_buffers = 4;
   m_buffer = new AERingBuffer(num_buffers * format.m_frames * m_frameSizePerPlane, m_planes);
-  CLog::Log(LOGDEBUG, "{}: using buffer size: {} ({:f} ms)", __FUNCTION__, m_buffer->GetMaxSize(),
-            (float)m_buffer->GetMaxSize() / (m_framesPerSecond * m_frameSizePerPlane));
+  CLog::LogF(LOGDEBUG, "using buffer size: {} ({:f} ms)", m_buffer->GetMaxSize(),
+             static_cast<float>(m_buffer->GetMaxSize()) /
+                 (m_framesPerSecond * m_frameSizePerPlane));
 
   if (!passthrough)
     format.m_dataFormat = (m_planes > 1) ? AE_FMT_FLOATP : AE_FMT_FLOAT;
@@ -358,10 +359,7 @@ void CAESinkDARWINOSX::SetHogMode(bool on)
     // Handle this on our own until it is fixed.
     CCoreAudioHardware::SetAutoHogMode(false);
     bool autoHog = CCoreAudioHardware::GetAutoHogMode();
-    CLog::Log(LOGDEBUG,
-              " CoreAudioRenderer::InitializeEncoded: "
-              "Auto 'hog' mode is set to '{}'.",
-              autoHog ? "On" : "Off");
+    CLog::LogF(LOGDEBUG, "Auto 'hog' mode is set to '{}'.", autoHog ? "On" : "Off");
     if (autoHog)
       return;
   }
@@ -434,7 +432,7 @@ unsigned int CAESinkDARWINOSX::AddPackets(uint8_t **data, unsigned int frames, u
     condVar.wait(mutex, timeout);
     if (!m_started && timer.IsTimePast())
     {
-      CLog::Log(LOGERROR, "{} engine didn't start in {} ms!", __FUNCTION__, timeout.count());
+      CLog::LogF(LOGERROR, "engine didn't start in {} ms!", timeout.count());
       return INT_MAX;
     }
   }

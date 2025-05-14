@@ -54,15 +54,15 @@ static void libass_log(int level, const char* fmt, va_list args, void* data)
 
 CDVDSubtitlesLibass::CDVDSubtitlesLibass()
 {
-  CLog::Log(LOGINFO, "CDVDSubtitlesLibass: Using libass version {0:x}", ass_library_version());
-  CLog::Log(LOGINFO, "CDVDSubtitlesLibass: Creating ASS library structure");
+  CLog::Log(LOGINFO, "Subtitles LibASS: Using libass version {0:x}", ass_library_version());
+  CLog::Log(LOGINFO, "Subtitles LibASS: Creating ASS library structure");
   m_library = ass_library_init();
   if (!m_library)
     return;
 
   ass_set_message_cb(m_library, libass_log, this);
 
-  CLog::Log(LOGINFO, "CDVDSubtitlesLibass: Initializing ASS Renderer");
+  CLog::Log(LOGINFO, "Subtitles LibASS: Initializing ASS Renderer");
 
   m_renderer = ass_renderer_init(m_library);
 
@@ -80,7 +80,7 @@ CDVDSubtitlesLibass::~CDVDSubtitlesLibass()
 
 void CDVDSubtitlesLibass::Configure()
 {
-  CLog::Log(LOGINFO, "CDVDSubtitlesLibass: Initializing ASS library font settings");
+  CLog::Log(LOGINFO, "Subtitles LibASS: Initializing ASS library font settings");
 
   if (!m_renderer)
   {
@@ -161,7 +161,7 @@ bool CDVDSubtitlesLibass::DecodeHeader(char* data, int size)
   if (!m_library || !data)
     return false;
 
-  CLog::Log(LOGINFO, "CDVDSubtitlesLibass: Creating new ASS track");
+  CLog::Log(LOGINFO, "Subtitles LibASS: Creating new ASS track");
   m_track = ass_new_track(m_library);
 
   ass_process_codec_private(m_track, data, size);
@@ -173,7 +173,7 @@ bool CDVDSubtitlesLibass::DecodeDemuxPkt(const char* data, int size, double star
   std::unique_lock<CCriticalSection> lock(m_section);
   if (!m_track)
   {
-    CLog::Log(LOGERROR, "{} - No SSA header found.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "No SSA header found.");
     return false;
   }
 
@@ -188,15 +188,15 @@ bool CDVDSubtitlesLibass::CreateTrack()
   std::unique_lock<CCriticalSection> lock(m_section);
   if (!m_library)
   {
-    CLog::Log(LOGERROR, "{} - Failed to create ASS track, library not initialized.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Failed to create ASS track, library not initialized.");
     return false;
   }
 
-  CLog::Log(LOGINFO, "CDVDSubtitlesLibass: Creating new ASS track");
+  CLog::Log(LOGINFO, "Subtitles LibASS: Creating new ASS track");
   m_track = ass_new_track(m_library);
   if (m_track == NULL)
   {
-    CLog::Log(LOGERROR, "{} - Failed to allocate ASS track.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Failed to allocate ASS track.");
     return false;
   }
 
@@ -219,13 +219,13 @@ bool CDVDSubtitlesLibass::CreateStyle()
   std::unique_lock<CCriticalSection> lock(m_section);
   if (!m_library)
   {
-    CLog::Log(LOGERROR, "{} - Failed to create ASS style, library not initialized.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Failed to create ASS style, library not initialized.");
     return false;
   }
 
   if (!m_track)
   {
-    CLog::Log(LOGERROR, "{} - Failed to create ASS style, track not initialized.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Failed to create ASS style, track not initialized.");
     return false;
   }
 
@@ -238,11 +238,11 @@ bool CDVDSubtitlesLibass::CreateTrack(char* buf, size_t size)
   std::unique_lock<CCriticalSection> lock(m_section);
   if (!m_library)
   {
-    CLog::Log(LOGERROR, "{} - No ASS library struct (m_library)", __FUNCTION__);
+    CLog::LogF(LOGERROR, "No ASS library struct (m_library)");
     return false;
   }
 
-  CLog::Log(LOGINFO, "CDVDSubtitlesLibass: Creating m_track from SSA buffer");
+  CLog::Log(LOGINFO, "Subtitles LibASS: Creating m_track from SSA buffer");
 
   m_track = ass_read_memory(m_library, buf, size, 0);
   if (m_track == NULL)
@@ -260,13 +260,13 @@ ASS_Image* CDVDSubtitlesLibass::RenderImage(double pts,
   std::unique_lock<CCriticalSection> lock(m_section);
   if (!m_renderer || !m_track)
   {
-    CLog::Log(LOGERROR, "{} - ASS renderer/ASS track not initialized.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "ASS renderer/ASS track not initialized.");
     return nullptr;
   }
 
   if (!subStyle)
   {
-    CLog::Log(LOGERROR, "{} - The subtitle overlay style is not set.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "The subtitle overlay style is not set.");
     return nullptr;
   }
 
@@ -336,11 +336,11 @@ ASS_Image* CDVDSubtitlesLibass::RenderImage(double pts,
 
 void CDVDSubtitlesLibass::ApplyStyle(const std::shared_ptr<struct style>& subStyle, renderOpts opts)
 {
-  CLog::Log(LOGDEBUG, "{} - Start setting up the LibAss style", __FUNCTION__);
+  CLog::LogF(LOGDEBUG, "Start setting up the LibAss style");
 
   if (!subStyle)
   {
-    CLog::Log(LOGERROR, "{} - The subtitle overlay style is not set.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "The subtitle overlay style is not set.");
     return;
   }
 
@@ -557,7 +557,7 @@ int CDVDSubtitlesLibass::GetPlayResY()
 {
   if (!m_track)
   {
-    CLog::Log(LOGERROR, "{} - ASS renderer/ASS track not initialized.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "ASS renderer/ASS track not initialized.");
     return VIEWPORT_HEIGHT;
   }
   return m_track->PlayResY;
@@ -568,7 +568,7 @@ void CDVDSubtitlesLibass::ConfigureAssOverride(const std::shared_ptr<struct styl
 {
   if (!subStyle)
   {
-    CLog::Log(LOGERROR, "{} - The subtitle overlay style is not set.", __FUNCTION__);
+    CLog::LogF(LOGERROR, "The subtitle overlay style is not set.");
     return;
   }
 
@@ -606,7 +606,7 @@ ASS_Event* CDVDSubtitlesLibass::GetEvents()
   std::unique_lock<CCriticalSection> lock(m_section);
   if (!m_track)
   {
-    CLog::Log(LOGERROR, "{} -  Missing ASS structs (m_track)", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Missing ASS structs (m_track)");
     return NULL;
   }
   return m_track->events;
@@ -632,16 +632,15 @@ int CDVDSubtitlesLibass::AddEvent(const char* text,
 {
   if (text == NULL || text[0] == '\0')
   {
-    CLog::Log(LOGDEBUG,
-              "{} - Add event skipped due to empty text (with start time: {}, stop time {})",
-              __FUNCTION__, startTime, stopTime);
+    CLog::LogF(LOGDEBUG, "Add event skipped due to empty text (with start time: {}, stop time {})",
+               startTime, stopTime);
     return ASS_NO_ID;
   }
 
   std::unique_lock<CCriticalSection> lock(m_section);
   if (!m_library || !m_track)
   {
-    CLog::Log(LOGERROR, "{} - Missing ASS structs (m_library or m_track)", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Missing ASS structs (m_library or m_track)");
     return ASS_NO_ID;
   }
 
@@ -663,7 +662,7 @@ int CDVDSubtitlesLibass::AddEvent(const char* text,
     return eventId;
   }
   else
-    CLog::Log(LOGERROR, "{} - Cannot allocate a new event", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Cannot allocate a new event");
   return ASS_NO_ID;
 }
 
@@ -674,15 +673,14 @@ void CDVDSubtitlesLibass::AppendTextToEvent(int eventId, const char* text)
     return;
   if (!m_track)
   {
-    CLog::Log(LOGERROR, "{} -  Missing ASS structs (m_track)", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Missing ASS structs (m_track)");
     return;
   }
 
   ASS_Event* assEvents = m_track->events;
   if (!assEvents)
   {
-    CLog::Log(LOGERROR, "{} -  Failed append text to Event ID {}, there are no Events",
-              __FUNCTION__, eventId);
+    CLog::LogF(LOGERROR, "Failed append text to Event ID {}, there are no Events", eventId);
     return;
   }
 
@@ -706,15 +704,14 @@ void CDVDSubtitlesLibass::ChangeEventStopTime(int eventId, double stopTime)
     return;
   if (!m_track)
   {
-    CLog::Log(LOGERROR, "{} -  Missing ASS structs (m_track)", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Missing ASS structs (m_track)");
     return;
   }
 
   ASS_Event* assEvents = m_track->events;
   if (!assEvents)
   {
-    CLog::Log(LOGERROR, "{} -  Failed change stop time to Event ID {}, there are no Events",
-              __FUNCTION__, eventId);
+    CLog::LogF(LOGERROR, "Failed change stop time to Event ID {}, there are no Events", eventId);
     return;
   }
 
@@ -728,7 +725,7 @@ void CDVDSubtitlesLibass::FlushEvents()
   std::unique_lock<CCriticalSection> lock(m_section);
   if (!m_library || !m_track)
   {
-    CLog::Log(LOGERROR, "{} - Missing ASS structs (m_library or m_track)", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Missing ASS structs (m_library or m_track)");
     return;
   }
 
@@ -740,7 +737,7 @@ int CDVDSubtitlesLibass::DeleteEvents(int nEvents, int threshold)
   std::unique_lock<CCriticalSection> lock(m_section);
   if (!m_library || !m_track)
   {
-    CLog::Log(LOGERROR, "{} - Missing ASS structs (m_library or m_track)", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Missing ASS structs (m_library or m_track)");
     return ASS_NO_ID;
   }
 

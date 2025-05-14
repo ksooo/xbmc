@@ -128,7 +128,7 @@ extern "C" int __stdcall dllFreeLibrary(HINSTANCE hLibModule)
 
   if( !dllhandle )
   {
-    CLog::Log(LOGERROR, "{} - Invalid hModule specified", __FUNCTION__);
+    CLog::LogF(LOGERROR, "Invalid module handle specified");
     return 1;
   }
 

@@ -191,7 +191,7 @@ bool CPartyModeManager::Enable(PartyModeContext context /*= PARTYMODECONTEXT_MUS
 
   auto end = std::chrono::steady_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  CLog::Log(LOGDEBUG, "{} time for song fetch: {} ms", __FUNCTION__, duration.count());
+  CLog::LogF(LOGDEBUG, "Time for song fetch: {} ms", duration.count());
 
   // start playing
   CServiceBroker::GetPlaylistPlayer().SetCurrentPlaylist(playlistId);
@@ -468,7 +468,7 @@ void CPartyModeManager::OnError(int iError, const std::string&  strLogMessage)
 {
   // open error dialog
   HELPERS::ShowOKDialogLines(CVariant{257}, CVariant{16030}, CVariant{iError}, CVariant{0});
-  CLog::Log(LOGERROR, "PARTY MODE MANAGER: {}", strLogMessage);
+  CLog::LogF(LOGERROR, "{}", strLogMessage);
   m_bEnabled = false;
   SendUpdateMessage();
 }

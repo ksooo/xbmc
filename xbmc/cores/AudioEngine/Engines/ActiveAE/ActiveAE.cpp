@@ -430,8 +430,8 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
       }
       {
         std::string portName = port == NULL ? "timer" : port->portName;
-        CLog::Log(LOGWARNING, "CActiveAE::{} - signal: {} from port: {} not handled for state: {}",
-                  __FUNCTION__, signal, portName, m_state);
+        CLog::LogF(LOGWARNING, "signal: {} from port: {} not handled for state: {}", signal,
+                   portName, m_state);
       }
       return;
 
@@ -1027,7 +1027,7 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
       break;
 
     default: // we are in no state, should not happen
-      CLog::Log(LOGERROR, "CActiveAE::{} - no valid state: {}", __FUNCTION__, m_state);
+      CLog::LogF(LOGERROR, "no valid state: {}", m_state);
       return;
     }
   } // for
@@ -1205,9 +1205,8 @@ void CActiveAE::Configure(AEAudioFormat *desiredFmt)
       double buffertime = (double)m_sinkFormat.m_frames / m_sinkFormat.m_sampleRate;
       if (buffertime > MAX_BUFFER_TIME)
       {
-        CLog::Log(LOGWARNING,
-                  "ActiveAE::{} - sink returned large period time of {} ms, reducing to {} ms",
-                  __FUNCTION__, (int)(buffertime * 1000), (int)(MAX_BUFFER_TIME * 1000));
+        CLog::LogF(LOGWARNING, "sink returned large period time of {} ms, reducing to {} ms",
+                   static_cast<int>(buffertime * 1000), static_cast<int>(MAX_BUFFER_TIME * 1000));
         m_sinkFormat.m_frames = MAX_BUFFER_TIME * m_sinkFormat.m_sampleRate;
       }
     }
@@ -1522,7 +1521,7 @@ void CActiveAE::DiscardStream(CActiveAEStream *stream)
         m_discardBufferPools.push_back((*it)->m_processingBuffers->GetResampleBuffers());
         m_discardBufferPools.push_back((*it)->m_processingBuffers->GetAtempoBuffers());
       }
-      CLog::Log(LOGDEBUG, "CActiveAE::DiscardStream - audio stream deleted");
+      CLog::LogF(LOGDEBUG, "audio stream deleted");
       m_stats.RemoveStream((*it)->m_id);
       delete (*it);
       it = m_streams.erase(it);
@@ -1572,14 +1571,14 @@ void CActiveAE::FlushEngine()
     bool success = reply->signal == CSinkControlProtocol::ACC;
     if (!success)
     {
-      CLog::Log(LOGERROR, "ActiveAE::{} - returned error on flush", __FUNCTION__);
+      CLog::LogF(LOGERROR, "returned error on flush");
       m_extError = true;
     }
     reply->Release();
   }
   else
   {
-    CLog::Log(LOGERROR, "ActiveAE::{} - failed to flush", __FUNCTION__);
+    CLog::LogF(LOGERROR, "failed to flush");
     m_extError = true;
   }
   m_stats.Reset(m_sinkFormat.m_sampleRate, m_mode == MODE_PCM);
@@ -1598,7 +1597,7 @@ void CActiveAE::ClearDiscardedBuffers()
     // if all buffers have returned, we can delete the buffer pool
     if ((*it)->m_allSamples.size() == (*it)->m_freeSamples.size())
     {
-      CLog::Log(LOGDEBUG, "CActiveAE::ClearDiscardedBuffers - buffer pool deleted");
+      CLog::LogF(LOGDEBUG, "buffer pool deleted");
       it = m_discardBufferPools.erase(it);
     }
     else
@@ -1739,7 +1738,7 @@ void CActiveAE::ApplySettingsToFormat(AEAudioFormat& format,
       if (format.m_sampleRate > m_settings.samplerate)
       {
         format.m_sampleRate = m_settings.samplerate;
-        CLog::Log(LOGINFO, "CActiveAE::ApplySettings - limit samplerate for SPDIF to {}",
+        CLog::Log(LOGINFO, "Active AE: Apply settings - limit samplerate for SPDIF to {}",
                   format.m_sampleRate);
       }
       format.m_channelLayout = AE_CH_LAYOUT_2_0;
@@ -1749,7 +1748,7 @@ void CActiveAE::ApplySettingsToFormat(AEAudioFormat& format,
     {
       format.m_sampleRate = m_settings.samplerate;
       format.m_dataFormat = AE_FMT_FLOAT;
-      CLog::Log(LOGINFO, "CActiveAE::ApplySettings - Forcing samplerate to {}",
+      CLog::Log(LOGINFO, "Active AE: Apply settings - Forcing samplerate to {}",
                 format.m_sampleRate);
     }
 
@@ -1805,7 +1804,7 @@ bool CActiveAE::InitSink()
     if (!success)
     {
       reply->Release();
-      CLog::Log(LOGERROR, "ActiveAE::{} - returned error", __FUNCTION__);
+      CLog::LogF(LOGERROR, "returned error");
       m_extError = true;
       return false;
     }
@@ -1824,7 +1823,7 @@ bool CActiveAE::InitSink()
   }
   else
   {
-    CLog::Log(LOGERROR, "ActiveAE::{} - failed to init", __FUNCTION__);
+    CLog::LogF(LOGERROR, "failed to init");
     m_stats.SetSinkCacheTotal(0);
     m_stats.SetSinkLatency(0);
     AEAudioFormat invalidFormat;
@@ -1848,7 +1847,7 @@ void CActiveAE::DrainSink()
     if (!success)
     {
       reply->Release();
-      CLog::Log(LOGERROR, "ActiveAE::{} - returned error on drain", __FUNCTION__);
+      CLog::LogF(LOGERROR, "returned error on drain");
       m_extError = true;
       return;
     }
@@ -1856,7 +1855,7 @@ void CActiveAE::DrainSink()
   }
   else
   {
-    CLog::Log(LOGERROR, "ActiveAE::{} - failed to drain", __FUNCTION__);
+    CLog::LogF(LOGERROR, "failed to drain");
     m_extError = true;
     return;
   }
@@ -1871,14 +1870,14 @@ void CActiveAE::UnconfigureSink()
     bool success = reply->signal == CSinkControlProtocol::ACC;
     if (!success)
     {
-      CLog::Log(LOGERROR, "ActiveAE::{} - returned error", __FUNCTION__);
+      CLog::LogF(LOGERROR, "returned error");
       m_extError = true;
     }
     reply->Release();
   }
   else
   {
-    CLog::Log(LOGERROR, "ActiveAE::{} - failed to unconfigure", __FUNCTION__);
+    CLog::LogF(LOGERROR, "failed to unconfigure");
     m_extError = true;
   }
 
@@ -2253,7 +2252,7 @@ bool CActiveAE::RunStages()
               m_vizBuffers->m_inputSamples.push_back(viz);
             }
             else
-              CLog::Log(LOGWARNING, "ActiveAE::{} - viz ran out of free buffers", __FUNCTION__);
+              CLog::LogF(LOGWARNING, "viz ran out of free buffers");
             AEDelayStatus status;
             m_stats.GetDelay(status);
             int64_t now = std::chrono::steady_clock::now().time_since_epoch().count();
@@ -2734,12 +2733,12 @@ void CActiveAE::Start()
     reply->Release();
     if (!success)
     {
-      CLog::Log(LOGERROR, "ActiveAE::{} - returned error", __FUNCTION__);
+      CLog::LogF(LOGERROR, "returned error");
     }
   }
   else
   {
-    CLog::Log(LOGERROR, "ActiveAE::{} - failed to init", __FUNCTION__);
+    CLog::LogF(LOGERROR, "failed to init");
   }
 
   m_inMsgEvent.Reset();
@@ -2925,13 +2924,13 @@ bool CActiveAE::Resume()
     reply->Release();
     if (!success)
     {
-      CLog::Log(LOGERROR, "ActiveAE::{} - returned error", __FUNCTION__);
+      CLog::LogF(LOGERROR, "returned error");
       return false;
     }
   }
   else
   {
-    CLog::Log(LOGERROR, "ActiveAE::{} - failed to init", __FUNCTION__);
+    CLog::LogF(LOGERROR, "failed to init");
     return false;
   }
 
@@ -2999,12 +2998,12 @@ void CActiveAE::OnLostDisplay()
     reply->Release();
     if (!success)
     {
-      CLog::Log(LOGERROR, "ActiveAE::{} - returned error", __FUNCTION__);
+      CLog::LogF(LOGERROR, "returned error");
     }
   }
   else
   {
-    CLog::Log(LOGERROR, "ActiveAE::{} - timed out", __FUNCTION__);
+    CLog::LogF(LOGERROR, "timed out");
   }
 }
 
@@ -3150,12 +3149,11 @@ IAE::SoundPtr CActiveAE::MakeSound(const std::string& file)
 
   AVPacket* avpkt = av_packet_alloc();
   if (!avpkt)
-    CLog::Log(LOGERROR, "CActiveAE::{} - av_packet_alloc failed: {}", __FUNCTION__,
-              strerror(errno));
+    CLog::LogF(LOGERROR, "av_packet_alloc failed: {}", strerror(errno));
 
   AVFrame* decoded_frame = av_frame_alloc();
   if (!decoded_frame)
-    CLog::Log(LOGERROR, "CActiveAE::{} - av_frame_alloc failed: {}", __FUNCTION__, strerror(errno));
+    CLog::LogF(LOGERROR, "av_frame_alloc failed: {}", strerror(errno));
 
   bool error = false;
 
@@ -3386,7 +3384,7 @@ IAE::StreamPtr CActiveAE::MakeStream(AEAudioFormat& audioFormat,
     reply->Release();
   }
 
-  CLog::Log(LOGERROR, "ActiveAE::{} - could not create stream", __FUNCTION__);
+  CLog::LogF(LOGERROR, "could not create stream");
   return NULL;
 }
 
@@ -3407,7 +3405,7 @@ bool CActiveAE::FreeStream(IAEStream *stream, bool finish)
       return true;
     }
   }
-  CLog::Log(LOGERROR, "CActiveAE::FreeStream - failed");
+  CLog::LogF(LOGERROR, "failed");
   return false;
 }
 
@@ -3421,7 +3419,7 @@ void CActiveAE::FlushStream(CActiveAEStream *stream)
     reply->Release();
     if (!success)
     {
-      CLog::Log(LOGERROR, "CActiveAE::FlushStream - failed");
+      CLog::LogF(LOGERROR, "failed");
     }
   }
 }

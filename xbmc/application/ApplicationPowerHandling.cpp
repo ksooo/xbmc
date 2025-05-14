@@ -495,7 +495,7 @@ void CApplicationPowerHandling::HandleShutdownMessage()
       break;
 
     default:
-      CLog::Log(LOGERROR, "{}: No valid shutdownstate matched", __FUNCTION__);
+      CLog::LogF(LOGERROR, "No valid shutdownstate matched");
       break;
   }
 }

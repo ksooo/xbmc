@@ -136,7 +136,7 @@ bool CDVDDemuxClient::ParsePacket(DemuxPacket* pkt)
     const AVCodec* codec = avcodec_find_decoder(st->codec);
     if (codec == nullptr)
     {
-      CLog::Log(LOGERROR, "{} - can't find decoder", __FUNCTION__);
+      CLog::LogF(LOGERROR, "can't find decoder");
       stream->DisposeParser();
       return change;
     }
@@ -144,7 +144,7 @@ bool CDVDDemuxClient::ParsePacket(DemuxPacket* pkt)
     stream->m_context = avcodec_alloc_context3(codec);
     if (stream->m_context == nullptr)
     {
-      CLog::Log(LOGERROR, "{} - can't allocate context", __FUNCTION__);
+      CLog::LogF(LOGERROR, "can't allocate context");
       stream->DisposeParser();
       return change;
     }
@@ -304,7 +304,7 @@ bool CDVDDemuxClient::ParsePacket(DemuxPacket* pkt)
     }
   }
   else
-    CLog::Log(LOGDEBUG, "{} - parser returned error {}", __FUNCTION__, len);
+    CLog::LogF(LOGDEBUG, "parser returned error {}", len);
 
   return change;
 }

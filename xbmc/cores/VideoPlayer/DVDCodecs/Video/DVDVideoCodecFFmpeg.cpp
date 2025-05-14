@@ -220,8 +220,7 @@ void CDVDVideoCodecFFmpeg::CDropControl::Process(int64_t pts, bool drop)
       m_diffPTS = m_diffPTS / m_count;
       if (m_diffPTS > 0)
       {
-        CLog::Log(LOGINFO, "CDVDVideoCodecFFmpeg::CDropControl: calculated diff time: {}",
-                  m_diffPTS);
+        CLog::Log(LOGINFO, "Drop Control: calculated diff time: {}", m_diffPTS);
         m_state = CDropControl::VALID;
         m_count = 0;
       }
@@ -234,7 +233,7 @@ void CDVDVideoCodecFFmpeg::CDropControl::Process(int64_t pts, bool drop)
       m_count++;
       if (m_count > 5)
       {
-        CLog::Log(LOGINFO, "CDVDVideoCodecFFmpeg::CDropControl: lost diff");
+        CLog::Log(LOGINFO, "Drop Control: lost diff");
         Reset(true);
       }
     }
@@ -353,11 +352,11 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
 
   if(pCodec == NULL)
   {
-    CLog::Log(LOGDEBUG, "CDVDVideoCodecFFmpeg::Open() Unable to find codec {}", hints.codec);
+    CLog::Log(LOGDEBUG, "Video Codec FFmpeg: Unable to find codec {}", hints.codec);
     return false;
   }
 
-  CLog::Log(LOGINFO, "CDVDVideoCodecFFmpeg::Open() Using codec: {}",
+  CLog::Log(LOGINFO, "Video Codec FFmpeg: Using codec: {}",
             pCodec->long_name ? pCodec->long_name : pCodec->name);
 
   m_pCodecContext = avcodec_alloc_context3(pCodec);
@@ -593,8 +592,7 @@ bool CDVDVideoCodecFFmpeg::AddData(const DemuxPacket &packet)
   AVPacket* avpkt = av_packet_alloc();
   if (!avpkt)
   {
-    CLog::Log(LOGERROR, "CDVDVideoCodecFFmpeg::{} - av_packet_alloc failed: {}", __FUNCTION__,
-              strerror(errno));
+    CLog::LogF(LOGERROR, "av_packet_alloc failed: {}", strerror(errno));
     return false;
   }
 
@@ -697,8 +695,7 @@ CDVDVideoCodec::VCReturn CDVDVideoCodecFFmpeg::GetPicture(VideoPicture* pVideoPi
     AVPacket* avpkt = av_packet_alloc();
     if (!avpkt)
     {
-      CLog::Log(LOGERROR, "CDVDVideoCodecFFmpeg::{} - av_packet_alloc failed: {}", __FUNCTION__,
-                strerror(errno));
+      CLog::LogF(LOGERROR, "av_packet_alloc failed: {}", strerror(errno));
       return VC_ERROR;
     }
     avpkt->data = nullptr;
@@ -771,7 +768,7 @@ CDVDVideoCodec::VCReturn CDVDVideoCodecFFmpeg::GetPicture(VideoPicture* pVideoPi
   }
   else if (ret)
   {
-    CLog::Log(LOGERROR, "{} - avcodec_receive_frame returned failure", __FUNCTION__);
+    CLog::LogF(LOGERROR, "avcodec_receive_frame returned failure");
     return VC_ERROR;
   }
 
