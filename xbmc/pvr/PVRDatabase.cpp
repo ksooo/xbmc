@@ -141,7 +141,7 @@ void CPVRDatabase::CreateTables()
 {
   std::unique_lock lock(m_critSection);
 
-  CLog::LogF(LOGINFO, "Creating PVR database tables");
+  CLog::Log(LOGINFO, "Creating PVR database tables");
 
   CLog::LogFC(LOGDEBUG, LOGPVR, "Creating table 'channels'");
   m_pDS->exec("CREATE TABLE channels ("
@@ -216,7 +216,7 @@ void CPVRDatabase::CreateAnalytics()
 {
   std::unique_lock lock(m_critSection);
 
-  CLog::LogF(LOGINFO, "Creating PVR database indices");
+  CLog::Log(LOGINFO, "Creating PVR database indices");
   m_pDS->exec("CREATE INDEX idx_clients_idClient on clients(idClient);");
   m_pDS->exec("CREATE UNIQUE INDEX idx_channels_iClientId_iUniqueId on channels(iClientId, iUniqueId);");
   m_pDS->exec("CREATE INDEX idx_channelgroups_bIsRadio on channelgroups(bIsRadio);");
