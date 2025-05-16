@@ -1133,8 +1133,7 @@ PVR_ERROR CPVRClient::GetChannelsAmount(int& iChannels) const
                      { return addon->toAddon->GetChannelsAmount(addon, &iChannels); });
 }
 
-PVR_ERROR CPVRClient::GetChannels(bool radio,
-                                  std::vector<std::shared_ptr<CPVRChannel>>& channels) const
+PVR_ERROR CPVRClient::GetChannels(bool radio, std::vector<std::shared_ptr<CPVRChannel>>& channels)
 {
   return DoAddonCall(
       std::source_location::current().function_name(),
@@ -1151,8 +1150,7 @@ PVR_ERROR CPVRClient::GetChannels(bool radio,
           if (!dateTime.IsValid())
           {
             // Remember when first channels were added for this client.
-            const_cast<CPVRClient*>(this)->SetDateTimeFirstChannelsAdded(
-                CDateTime::GetUTCDateTime());
+            SetDateTimeFirstChannelsAdded(CDateTime::GetUTCDateTime());
           }
         }
 
@@ -2225,6 +2223,31 @@ void CPVRClient::HandleAddonCallback(const char* strFunctionName,
   function(client);
 }
 
+template<typename F>
+void CPVRClient::HandleAddonCallback(const char* strFunctionName,
+                                     const void* kodiInstance,
+                                     F function,
+                                     bool bForceCall /* = false */)
+{
+  // Check preconditions.
+  auto* client{static_cast<const CPVRClient*>(kodiInstance)};
+  if (!client)
+  {
+    CLog::Log(LOGERROR, "{}: No instance pointer given!", strFunctionName);
+    return;
+  }
+
+  if (!bForceCall && client->m_bBlockAddonCalls && client->m_iAddonCalls == 0)
+  {
+    CLog::Log(LOGWARNING, LOGPVR, "{}: Ignoring callback from PVR client '{}'", strFunctionName,
+              client->ID());
+    return;
+  }
+
+  // Call.
+  function(client);
+}
+
 void CPVRClient::cb_transfer_channel_group(void* kodiInstance,
                                            const PVR_HANDLE handle,
                                            const PVR_CHANNEL_GROUP* group)
@@ -2646,10 +2669,9 @@ PVR_CODEC CPVRClient::cb_get_codec_by_name(const void* kodiInstance, const char*
   PVR_CODEC result = PVR_INVALID_CODEC;
 
   HandleAddonCallback(
-      std::source_location::current().function_name(), const_cast<void*>(kodiInstance),
+      std::source_location::current().function_name(), kodiInstance,
       [&result, strCodecName](const CPVRClient* client)
-      { result = CCodecIds::GetInstance().GetCodecByName(strCodecName); },
-      true);
+      { result = CCodecIds::GetInstance().GetCodecByName(strCodecName); }, true);
 
   return result;
 }
