@@ -415,7 +415,8 @@ private:
   UpdateClientAction GetUpdateClientAction(const std::shared_ptr<ADDON::CAddonInfo>& addon,
                                            ADDON::AddonInstanceId instanceId,
                                            int clientId,
-                                           bool instanceEnabled) const;
+                                           bool instanceEnabled,
+                                           std::shared_ptr<CPVRClient>& client) const;
 
   /*!
    * @brief Get the client instance for a given client id.

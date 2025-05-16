@@ -107,7 +107,8 @@ CPVRClients::UpdateClientAction CPVRClients::GetUpdateClientAction(
     const std::shared_ptr<ADDON::CAddonInfo>& addon,
     ADDON::AddonInstanceId instanceId,
     int clientId,
-    bool instanceEnabled) const
+    bool instanceEnabled,
+    std::shared_ptr<CPVRClient>& client) const
 {
   using enum UpdateClientAction;
 
@@ -118,7 +119,6 @@ CPVRClients::UpdateClientAction CPVRClients::GetUpdateClientAction(
     // determine actual enabled state of instance
     if (instanceId != ADDON_SINGLETON_INSTANCE_ID)
     {
-      std::shared_ptr<CPVRClient> client;
       if (isKnownClient)
         client = GetClient(clientId);
       else
@@ -175,19 +175,22 @@ void CPVRClients::UpdateClients(const std::string& changedAddonId /* = "" */)
 
         validClientIds.emplace_back(clientId);
 
+        std::shared_ptr<CPVRClient> client;
         const UpdateClientAction action{
-            GetUpdateClientAction(addon, instanceId, clientId, instanceEnabled)};
+            GetUpdateClientAction(addon, instanceId, clientId, instanceEnabled, client)};
         switch (action)
         {
           using enum UpdateClientAction;
 
           case CREATE:
           {
-            std::shared_ptr<CPVRClient> client;
-            if (IsKnownClient(clientId))
-              client = GetClient(clientId);
-            else
-              client = std::make_shared<CPVRClient>(addon, instanceId, clientId);
+            if (!client)
+            {
+              if (IsKnownClient(clientId))
+                client = GetClient(clientId);
+              else
+                client = std::make_shared<CPVRClient>(addon, instanceId, clientId);
+            }
 
             CLog::Log(LOGINFO, "Creating PVR client: addonId={}, instanceId={}, clientId={}",
                       addon->ID(), instanceId, clientId);
