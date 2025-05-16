@@ -418,32 +418,37 @@ EDL::Edit ConvertAddonEdl(const PVR_EDL_ENTRY& entry)
 
 namespace PVR
 {
+class CPVRClient::CPVRAddonInstanceHolder
+{
+public:
+  explicit CPVRAddonInstanceHolder(KODI_ADDON_INSTANCE_STRUCT& instanceStruct)
+  {
+    instanceStruct.pvr = &m_instance;
+    instanceStruct.pvr->props = &m_props;
+    instanceStruct.pvr->toKodi = &m_callbacks;
+    instanceStruct.pvr->toAddon = &m_funcs;
+  }
+
+private:
+  AddonInstance_PVR m_instance{};
+  AddonProperties_PVR m_props{};
+  AddonToKodiFuncTable_PVR m_callbacks{};
+  KodiToAddonFuncTable_PVR m_funcs{};
+};
+
 CPVRClient::CPVRClient(const ADDON::AddonInfoPtr& addonInfo,
                        ADDON::AddonInstanceId instanceId,
                        int clientId)
-  : IAddonInstanceHandler(ADDON_INSTANCE_PVR, addonInfo, instanceId), m_iClientId(clientId)
+  : IAddonInstanceHandler(ADDON_INSTANCE_PVR, addonInfo, instanceId),
+    m_iClientId(clientId),
+    m_instance(std::make_unique<CPVRAddonInstanceHolder>(m_ifc))
 {
-  // Create all interface parts independent to make API changes easier if
-  // something is added
-  m_ifc.pvr = new AddonInstance_PVR;
-  m_ifc.pvr->props = new AddonProperties_PVR();
-  m_ifc.pvr->toKodi = new AddonToKodiFuncTable_PVR();
-  m_ifc.pvr->toAddon = new KodiToAddonFuncTable_PVR();
-
   ResetProperties();
 }
 
 CPVRClient::~CPVRClient()
 {
   Destroy();
-
-  if (m_ifc.pvr)
-  {
-    delete m_ifc.pvr->props;
-    delete m_ifc.pvr->toKodi;
-    delete m_ifc.pvr->toAddon;
-  }
-  delete m_ifc.pvr;
 }
 
 void CPVRClient::StopRunningInstance()
@@ -495,6 +500,7 @@ void CPVRClient::ResetProperties()
   m_ifc.pvr->props->iEpgMaxFutureDays =
       CServiceBroker::GetPVRManager().EpgContainer().GetFutureDaysToDisplay();
 
+  *m_ifc.pvr->toKodi = {};
   m_ifc.pvr->toKodi->kodiInstance = this;
   m_ifc.pvr->toKodi->TransferEpgEntry = cb_transfer_epg_entry;
   m_ifc.pvr->toKodi->TransferChannelEntry = cb_transfer_channel_entry;
@@ -517,8 +523,7 @@ void CPVRClient::ResetProperties()
   m_ifc.pvr->toKodi->EpgEventStateChange = cb_epg_event_state_change;
   m_ifc.pvr->toKodi->GetCodecByName = cb_get_codec_by_name;
 
-  // Clear function addresses to have NULL if not set by addon
-  memset(m_ifc.pvr->toAddon, 0, sizeof(KodiToAddonFuncTable_PVR));
+  *m_ifc.pvr->toAddon = {};
 }
 
 ADDON_STATUS CPVRClient::Create()
