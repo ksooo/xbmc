@@ -499,7 +499,7 @@ void CGUIWindowPVRSearchBase::SetSearchFilter(
   m_searchfilter = searchFilter;
 }
 
-std::string CGUIWindowPVRTVSearch::GetRootPath() const
+std::string CGUIWindowPVRTVSearch::GetRootPath()
 {
   return CPVREpgSearchPath::PATH_TV_SEARCH;
 }
@@ -516,7 +516,7 @@ std::string CGUIWindowPVRTVSearch::GetDirectoryPath()
              : CPVREpgSearchPath::PATH_TV_SEARCH;
 }
 
-std::string CGUIWindowPVRRadioSearch::GetRootPath() const
+std::string CGUIWindowPVRRadioSearch::GetRootPath()
 {
   return CPVREpgSearchPath::PATH_RADIO_SEARCH;
 }
