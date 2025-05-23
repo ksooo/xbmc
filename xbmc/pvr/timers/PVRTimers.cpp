@@ -141,7 +141,28 @@ void CPVRTimers::Start()
 {
   Stop();
 
-  CServiceBroker::GetPVRManager().Events().Subscribe(this, &CPVRTimers::Notify);
+  CServiceBroker::GetPVRManager().Events().Subscribe(
+      this,
+      [this](const PVREvent& event)
+      {
+        switch (event)
+        {
+          using enum PVREvent;
+
+          case EpgContainer:
+            CServiceBroker::GetPVRManager().TriggerTimersUpdate();
+            break;
+          case Epg:
+          case EpgItemUpdate:
+          {
+            std::unique_lock lock(m_critSection);
+            m_bReminderRulesUpdatePending = true;
+            break;
+          }
+          default:
+            break;
+        }
+      });
   Create();
 }
 
@@ -1302,27 +1323,6 @@ std::shared_ptr<CPVRTimerInfoTag> CPVRTimers::GetTimerRule(
   }
 
   return {};
-}
-
-void CPVRTimers::Notify(const PVREvent& event)
-{
-  switch (event)
-  {
-    using enum PVREvent;
-
-    case EpgContainer:
-      CServiceBroker::GetPVRManager().TriggerTimersUpdate();
-      break;
-    case Epg:
-    case EpgItemUpdate:
-    {
-      std::unique_lock lock(m_critSection);
-      m_bReminderRulesUpdatePending = true;
-      break;
-    }
-    default:
-      break;
-  }
 }
 
 CDateTime CPVRTimers::GetNextEventTime() const
