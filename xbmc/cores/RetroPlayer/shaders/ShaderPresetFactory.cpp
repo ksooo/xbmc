@@ -27,7 +27,17 @@ CShaderPresetFactory::CShaderPresetFactory(ADDON::CAddonMgr& addons) : m_addons(
 {
   UpdateAddons();
 
-  m_addons.Events().Subscribe(this, &CShaderPresetFactory::OnEvent);
+  m_addons.Events().Subscribe(this,
+                              [this](const ADDON::AddonEvent& event)
+                              {
+                                if (typeid(event) == typeid(ADDON::AddonEvents::Enabled) ||
+                                    typeid(event) == typeid(ADDON::AddonEvents::Disabled) ||
+                                    typeid(event) == typeid(ADDON::AddonEvents::UnInstalled) ||
+                                    typeid(event) == typeid(ADDON::AddonEvents::ReInstalled))
+                                {
+                                  UpdateAddons();
+                                }
+                              });
 }
 
 CShaderPresetFactory::~CShaderPresetFactory()
@@ -84,17 +94,6 @@ bool CShaderPresetFactory::CanLoadPreset(const std::string& presetPath)
     bSuccess = (m_loaders.find(extension) != m_loaders.end());
 
   return bSuccess;
-}
-
-void CShaderPresetFactory::OnEvent(const ADDON::AddonEvent& event)
-{
-  if (typeid(event) == typeid(ADDON::AddonEvents::Enabled) ||
-      typeid(event) == typeid(ADDON::AddonEvents::Disabled) ||
-      typeid(event) == typeid(ADDON::AddonEvents::UnInstalled) ||
-      typeid(event) == typeid(ADDON::AddonEvents::ReInstalled))
-  {
-    UpdateAddons();
-  }
 }
 
 void CShaderPresetFactory::UpdateAddons()
