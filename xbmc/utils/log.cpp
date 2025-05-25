@@ -243,8 +243,7 @@ bool CLog::CanLogComponent(uint32_t component) const
 
 void CLog::SettingOptionsLoggingComponentsFiller(const SettingConstPtr& setting,
                                                  std::vector<IntegerSettingOption>& list,
-                                                 int& current,
-                                                 void* data)
+                                                 int& current)
 {
   for (const auto& [id, names] : componentMap)
   {
