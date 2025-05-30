@@ -606,7 +606,7 @@ bool CLangInfo::UseLocaleCollation()
   return m_collationtype == 2;
 }
 
-void CLangInfo::LoadTokens(const TiXmlNode* pTokens, std::set<std::string>& vecTokens)
+void CLangInfo::LoadTokens(const TiXmlNode* pTokens, std::set<std::string, std::less<>>& vecTokens)
 {
   if (pTokens && !pTokens->NoChildren())
   {

@@ -198,7 +198,7 @@ public:
   static std::string GetLanguageInfoPath(const std::string &language);
   bool UseLocaleCollation();
 
-  static void LoadTokens(const TiXmlNode* pTokens, std::set<std::string>& vecTokens);
+  static void LoadTokens(const TiXmlNode* pTokens, std::set<std::string, std::less<>>& vecTokens);
 
   static void SettingOptionsLanguageNamesFiller(const std::shared_ptr<const CSetting>& setting,
                                                 std::vector<StringSettingOption>& list,
