@@ -272,19 +272,18 @@ std::string CDatabase::PrepareSQL(std::string strStmt, ...) const
   return strResult;
 }
 
-std::string CDatabase::GetSingleValue(const std::string& query,
-                                      const std::unique_ptr<Dataset>& ds) const
+std::string CDatabase::GetSingleValue(const std::string& query, Dataset& ds) const
 {
   std::string ret;
   try
   {
-    if (!m_pDB || !ds)
+    if (!m_pDB)
       return ret;
 
-    if (ds->query(query) && ds->num_rows() > 0)
-      ret = ds->fv(0).get_asString();
+    if (ds.query(query) && ds.num_rows() > 0)
+      ret = ds.fv(0).get_asString();
 
-    ds->close();
+    ds.close();
   }
   catch (...)
   {
@@ -304,26 +303,26 @@ std::string CDatabase::GetSingleValue(const std::string& strTable,
   if (!strOrderBy.empty())
     query += " ORDER BY " + strOrderBy;
   query += " LIMIT 1";
-  return GetSingleValue(query, m_pDS);
+  return GetSingleValue(query, *m_pDS);
 }
 
 std::string CDatabase::GetSingleValue(const std::string& query) const
 {
-  return GetSingleValue(query, m_pDS);
+  return GetSingleValue(query, *m_pDS);
 }
 
-int CDatabase::GetSingleValueInt(const std::string& query, const std::unique_ptr<Dataset>& ds) const
+int CDatabase::GetSingleValueInt(const std::string& query, Dataset& ds) const
 {
   int ret = 0;
   try
   {
-    if (!m_pDB || !ds)
+    if (!m_pDB)
       return ret;
 
-    if (ds->query(query) && ds->num_rows() > 0)
-      ret = ds->fv(0).get_asInt();
+    if (ds.query(query) && ds.num_rows() > 0)
+      ret = ds.fv(0).get_asInt();
 
-    ds->close();
+    ds.close();
   }
   catch (...)
   {
@@ -343,7 +342,7 @@ int CDatabase::GetSingleValueInt(const std::string& strTable,
 
 int CDatabase::GetSingleValueInt(const std::string& query) const
 {
-  return GetSingleValueInt(query, m_pDS);
+  return GetSingleValueInt(query, *m_pDS);
 }
 
 bool CDatabase::DeleteValues(const std::string& strTable, const Filter& filter /* = Filter() */)
