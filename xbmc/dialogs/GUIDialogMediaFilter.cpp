@@ -742,9 +742,9 @@ PLAYLIST::CSmartPlaylistRule* CGUIDialogMediaFilter::AddRule(
     Field field,
     CDatabaseQueryRule::SEARCH_OPERATOR ruleOperator /* = CDatabaseQueryRule::OPERATOR_CONTAINS */)
 {
-  PLAYLIST::CSmartPlaylistRule rule;
-  rule.m_field = field;
-  rule.m_operator = ruleOperator;
+  const auto rule{std::make_shared<PLAYLIST::CSmartPlaylistRule>()};
+  rule->m_field = field;
+  rule->m_operator = ruleOperator;
 
   m_filter->m_ruleCombination.AddRule(rule);
   return static_cast<PLAYLIST::CSmartPlaylistRule*>(

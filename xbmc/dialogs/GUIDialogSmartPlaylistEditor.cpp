@@ -609,8 +609,8 @@ void CGUIDialogSmartPlaylistEditor::OnRuleRemove(int item)
 
 void CGUIDialogSmartPlaylistEditor::OnRuleAdd()
 {
-  PLAYLIST::CSmartPlaylistRule rule;
-  if (CGUIDialogSmartPlaylistRule::EditRule(rule,m_playlist.GetType()))
+  const auto rule{std::make_shared<PLAYLIST::CSmartPlaylistRule>()};
+  if (CGUIDialogSmartPlaylistRule::EditRule(*rule, m_playlist.GetType()))
     m_playlist.m_ruleCombination.AddRule(rule);
   UpdateButtons();
 }

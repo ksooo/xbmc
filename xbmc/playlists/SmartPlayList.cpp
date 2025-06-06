@@ -1149,17 +1149,20 @@ std::string CSmartPlaylistRuleCombination::GetWhereClause(const CDatabase &db, c
   std::string rule;
 
   // translate the combinations into SQL
-  for (CDatabaseQueryRuleCombinations::const_iterator it = m_combinations.begin(); it != m_combinations.end(); ++it)
+  const CDatabaseQueryRuleCombinations& combinations = GetCombinations();
+  for (CDatabaseQueryRuleCombinations::const_iterator it = combinations.cbegin();
+       it != combinations.cend(); ++it)
   {
-    if (it != m_combinations.begin())
-      rule += m_type == CombinationAnd ? " AND " : " OR ";
+    if (it != combinations.cbegin())
+      rule += GetType() == CombinationAnd ? " AND " : " OR ";
     std::shared_ptr<CSmartPlaylistRuleCombination> combo = std::static_pointer_cast<CSmartPlaylistRuleCombination>(*it);
     if (combo)
       rule += "(" + combo->GetWhereClause(db, strType, referencedPlaylists) + ")";
   }
 
   // translate the rules into SQL
-  for (CDatabaseQueryRules::const_iterator it = m_rules.begin(); it != m_rules.end(); ++it)
+  const CDatabaseQueryRules& rules = GetRules();
+  for (CDatabaseQueryRules::const_iterator it = rules.cbegin(); it != rules.cend(); ++it)
   {
     // don't include playlists that are meant to be displayed
     // as a virtual folders in the SQL WHERE clause
@@ -1167,7 +1170,7 @@ std::string CSmartPlaylistRuleCombination::GetWhereClause(const CDatabase &db, c
       continue;
 
     if (!rule.empty())
-      rule += m_type == CombinationAnd ? " AND " : " OR ";
+      rule += GetType() == CombinationAnd ? " AND " : " OR ";
     rule += "(";
     std::string currentRule;
     if ((*it)->m_field == FieldPlaylist)
@@ -1200,7 +1203,7 @@ std::string CSmartPlaylistRuleCombination::GetWhereClause(const CDatabase &db, c
       currentRule = (*it)->GetWhereClause(db, strType);
     // if we don't get a rule, we add '1' or '0' so the query is still valid and doesn't fail
     if (currentRule.empty())
-      currentRule = m_type == CombinationAnd ? "'1'" : "'0'";
+      currentRule = GetType() == CombinationAnd ? "'1'" : "'0'";
     rule += currentRule;
     rule += ")";
   }
@@ -1210,14 +1213,17 @@ std::string CSmartPlaylistRuleCombination::GetWhereClause(const CDatabase &db, c
 
 void CSmartPlaylistRuleCombination::GetVirtualFolders(const std::string& strType, std::vector<std::string> &virtualFolders) const
 {
-  for (CDatabaseQueryRuleCombinations::const_iterator it = m_combinations.begin(); it != m_combinations.end(); ++it)
+  const CDatabaseQueryRuleCombinations& combinations = GetCombinations();
+  for (CDatabaseQueryRuleCombinations::const_iterator it = combinations.cbegin();
+       it != combinations.cend(); ++it)
   {
     std::shared_ptr<CSmartPlaylistRuleCombination> combo = std::static_pointer_cast<CSmartPlaylistRuleCombination>(*it);
     if (combo)
       combo->GetVirtualFolders(strType, virtualFolders);
   }
 
-  for (CDatabaseQueryRules::const_iterator it = m_rules.begin(); it != m_rules.end(); ++it)
+  const CDatabaseQueryRules& rules = GetRules();
+  for (CDatabaseQueryRules::const_iterator it = rules.cbegin(); it != rules.cend(); ++it)
   {
     if (((*it)->m_field != FieldVirtualFolder && (*it)->m_field != FieldPlaylist) || (*it)->m_operator != CDatabaseQueryRule::OPERATOR_EQUALS)
       continue;
@@ -1239,12 +1245,6 @@ void CSmartPlaylistRuleCombination::GetVirtualFolders(const std::string& strType
         playlist.GetVirtualFolders(virtualFolders);
     }
   }
-}
-
-void CSmartPlaylistRuleCombination::AddRule(const CSmartPlaylistRule &rule)
-{
-  std::shared_ptr<CSmartPlaylistRule> ptr(new CSmartPlaylistRule(rule));
-  m_rules.push_back(ptr);
 }
 
 CSmartPlaylist::CSmartPlaylist()
@@ -1421,8 +1421,8 @@ bool CSmartPlaylist::LoadFromXML(const TiXmlNode *root, const std::string &encod
   const TiXmlNode *ruleNode = root->FirstChild("rule");
   while (ruleNode)
   {
-    CSmartPlaylistRule rule;
-    if (rule.Load(ruleNode, encoding))
+    const auto rule{std::make_shared<CSmartPlaylistRule>()};
+    if (rule->Load(ruleNode, encoding))
       m_ruleCombination.AddRule(rule);
 
     ruleNode = ruleNode->NextSibling("rule");
