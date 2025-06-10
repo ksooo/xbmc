@@ -326,8 +326,9 @@ std::string CUtil::GetTitleFromPath(const CURL& url, bool bIsFolder /* = false *
   {
     CRSSDirectory dir;
     CFileItemList items;
-    if(dir.GetDirectory(url, items) && !items.m_strTitle.empty())
-      return items.m_strTitle;
+    const std::string& title{items.GetTitle()};
+    if (dir.GetDirectory(url, items) && !title.empty())
+      return title;
   }
 
   // Shoutcast
