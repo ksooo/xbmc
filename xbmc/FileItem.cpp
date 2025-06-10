@@ -360,10 +360,10 @@ CFileItem::CFileItem(const CMediaSource& share) : m_strPath(share.strPath)
   if (!share.strStatus.empty())
     label = StringUtils::Format("{} ({})", share.strName, share.strStatus);
   SetLabel(label);
-  m_iLockMode = share.m_iLockMode;
-  m_strLockCode = share.m_strLockCode;
-  m_iHasLock = share.m_iHasLock;
-  m_iBadPwdCount = share.m_iBadPwdCount;
+  m_iLockMode = share.GetLockMode();
+  m_strLockCode = share.GetLockCode();
+  m_lockState = share.GetLockState();
+  m_iBadPwdCount = share.GetBadPwdCount();
   m_iDriveType = share.m_iDriveType;
   SetArt("thumb", share.m_strThumbnailImage);
   SetLabelPreformatted(true);
@@ -482,7 +482,7 @@ CFileItem& CFileItem::operator=(const CFileItem& item)
   m_idepth = item.m_idepth;
   m_iLockMode = item.m_iLockMode;
   m_strLockCode = item.m_strLockCode;
-  m_iHasLock = item.m_iHasLock;
+  m_lockState = item.m_lockState;
   m_iBadPwdCount = item.m_iBadPwdCount;
   m_bCanQueue=item.m_bCanQueue;
   m_mimetype = item.m_mimetype;
@@ -541,7 +541,7 @@ void CFileItem::Reset()
   m_idepth = 1;
   m_iLockMode = LockMode::EVERYONE;
   m_iBadPwdCount = 0;
-  m_iHasLock = LOCK_STATE_NO_LOCK;
+  m_lockState = LOCK_STATE_NO_LOCK;
   m_specialSort = SortSpecialNone;
   m_doContentLookup = true;
 
