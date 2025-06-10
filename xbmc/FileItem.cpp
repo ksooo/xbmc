@@ -357,10 +357,7 @@ CFileItem::CFileItem(const CMediaSource& share) : m_strPath(share.strPath)
   if (!share.strStatus.empty())
     label = StringUtils::Format("{} ({})", share.strName, share.strStatus);
   SetLabel(label);
-  m_iLockMode = share.GetLockMode();
-  m_strLockCode = share.GetLockCode();
-  m_lockState = share.GetLockState();
-  m_iBadPwdCount = share.GetBadPwdCount();
+  m_lockInfo = share.GetLockInfo();
   m_iDriveType = share.m_iDriveType;
   SetArt("thumb", share.m_strThumbnailImage);
   SetLabelPreformatted(true);
@@ -478,10 +475,7 @@ CFileItem& CFileItem::operator=(const CFileItem& item)
   m_strTitle = item.m_strTitle;
   m_iprogramCount = item.m_iprogramCount;
   m_idepth = item.m_idepth;
-  m_iLockMode = item.m_iLockMode;
-  m_strLockCode = item.m_strLockCode;
-  m_lockState = item.m_lockState;
-  m_iBadPwdCount = item.m_iBadPwdCount;
+  m_lockInfo = item.m_lockInfo;
   m_bCanQueue=item.m_bCanQueue;
   m_mimetype = item.m_mimetype;
   m_extrainfo = item.m_extrainfo;
@@ -506,7 +500,6 @@ void CFileItem::Reset()
   m_strPath.clear();
   m_strDynPath.clear();
   m_dateTime.Reset();
-  m_strLockCode.clear();
   m_mimetype.clear();
   delete m_musicInfoTag;
   m_musicInfoTag = nullptr;
@@ -537,9 +530,7 @@ void CFileItem::Reset()
   m_lEndOffset = 0;
   m_iprogramCount = 0;
   m_idepth = 1;
-  m_iLockMode = LockMode::EVERYONE;
-  m_iBadPwdCount = 0;
-  m_lockState = LOCK_STATE_NO_LOCK;
+  m_lockInfo = {};
   m_specialSort = SortSpecialNone;
   m_doContentLookup = true;
 
@@ -567,10 +558,9 @@ void CFileItem::Archive(CArchive& ar)
     ar << m_lStartOffset;
     ar << m_lStartPartNumber;
     ar << m_lEndOffset;
-    ar << static_cast<int>(m_iLockMode);
-    ar << m_strLockCode;
-    ar << m_iBadPwdCount;
-
+    ar << static_cast<int>(m_lockInfo.GetMode());
+    ar << m_lockInfo.GetCode();
+    ar << m_lockInfo.GetBadPasswordCount();
     ar << m_bCanQueue;
     ar << m_mimetype;
     ar << m_extrainfo;
@@ -627,10 +617,12 @@ void CFileItem::Archive(CArchive& ar)
     ar >> m_lEndOffset;
     int temp;
     ar >> temp;
-    m_iLockMode = static_cast<LockMode>(temp);
-    ar >> m_strLockCode;
-    ar >> m_iBadPwdCount;
-
+    m_lockInfo.SetMode(static_cast<LockMode>(temp));
+    std::string tempstr;
+    ar >> tempstr;
+    m_lockInfo.SetCode(tempstr);
+    ar >> temp;
+    m_lockInfo.SetBadPasswordCount(temp);
     ar >> m_bCanQueue;
     ar >> m_mimetype;
     ar >> m_extrainfo;

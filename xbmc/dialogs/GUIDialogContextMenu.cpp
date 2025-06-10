@@ -255,26 +255,29 @@ void CGUIDialogContextMenu::GetContextButtons(const std::string &type, const CFi
     if (!GetDefaultShareNameByType(type).empty())
       buttons.Add(CONTEXT_BUTTON_CLEAR_DEFAULT, 13403); // Clear Default
   }
+
+  const KODI::UTILS::CLockInfo& lockInfo{share->GetLockInfo()};
+
   if (share && LockMode::EVERYONE != CServiceBroker::GetSettingsComponent()
                                          ->GetProfileManager()
                                          ->GetMasterProfile()
                                          .getLockMode())
   {
-    if (share->GetLockState() == LOCK_STATE_NO_LOCK && (CServiceBroker::GetSettingsComponent()
-                                                            ->GetProfileManager()
-                                                            ->GetCurrentProfile()
-                                                            .canWriteSources() ||
-                                                        g_passwordManager.bMasterUser))
+    if (lockInfo.GetState() == LOCK_STATE_NO_LOCK && (CServiceBroker::GetSettingsComponent()
+                                                          ->GetProfileManager()
+                                                          ->GetCurrentProfile()
+                                                          .canWriteSources() ||
+                                                      g_passwordManager.bMasterUser))
       buttons.Add(CONTEXT_BUTTON_ADD_LOCK, 12332);
-    else if (share->GetLockState() == LOCK_STATE_LOCK_BUT_UNLOCKED)
+    else if (lockInfo.GetState() == LOCK_STATE_LOCK_BUT_UNLOCKED)
       buttons.Add(CONTEXT_BUTTON_REMOVE_LOCK, 12335);
-    else if (share->GetLockState() == LOCK_STATE_LOCKED)
+    else if (lockInfo.GetState() == LOCK_STATE_LOCKED)
     {
       buttons.Add(CONTEXT_BUTTON_REMOVE_LOCK, 12335);
 
       bool maxRetryExceeded = false;
       if (CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES) != 0)
-        maxRetryExceeded = (share->GetBadPwdCount() >=
+        maxRetryExceeded = (lockInfo.GetBadPasswordCount() >=
                             CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
                                 CSettings::SETTING_MASTERLOCK_MAXRETRIES));
 
@@ -285,7 +288,7 @@ void CGUIDialogContextMenu::GetContextButtons(const std::string &type, const CFi
     }
   }
   if (share && !g_passwordManager.bMasterUser &&
-      item->GetLockState() == LOCK_STATE_LOCK_BUT_UNLOCKED)
+      lockInfo.GetState() == LOCK_STATE_LOCK_BUT_UNLOCKED)
     buttons.Add(CONTEXT_BUTTON_REACTIVATE_LOCK, 12353);
 }
 
@@ -446,8 +449,9 @@ bool CGUIDialogContextMenu::OnContextButton(const std::string &type, const CFile
       if (!g_passwordManager.IsMasterLockUnlocked(true))
         return false;
 
+      KODI::UTILS::CLockInfo& lockInfo{share->GetLockInfo()};
       std::string strNewPW;
-      LockMode newLockMode{share->GetLockMode()};
+      LockMode newLockMode{lockInfo.GetMode()};
       std::string strNewLockMode;
       if (CGUIDialogLockSettings::ShowAndGetLock(newLockMode, strNewPW))
         strNewLockMode = std::to_string(static_cast<int>(newLockMode));
@@ -455,8 +459,8 @@ bool CGUIDialogContextMenu::OnContextButton(const std::string &type, const CFile
       if (!CGUIDialogLockSettings::ShowAndGetLock(newLockMode, strNewPW))
         return false;
       // password entry and re-entry succeeded, write out the lock data
-      share->SetLockState(LOCK_STATE_LOCKED);
-      share->SetLockMode(newLockMode);
+      lockInfo.SetState(LOCK_STATE_LOCKED);
+      lockInfo.SetMode(newLockMode);
       CMediaSourceSettings::GetInstance().UpdateSource(type, share->strName, "lockcode", strNewPW);
       CMediaSourceSettings::GetInstance().UpdateSource(type, share->strName, "lockmode",
                                                        strNewLockMode);
@@ -492,7 +496,8 @@ bool CGUIDialogContextMenu::OnContextButton(const std::string &type, const CFile
       if (!CGUIDialogYesNo::ShowAndGetInput(CVariant{12335}, CVariant{750}))
         return false;
 
-      share->SetLockState(LOCK_STATE_NO_LOCK);
+      KODI::UTILS::CLockInfo& lockInfo{share->GetLockInfo()};
+      lockInfo.SetState(LOCK_STATE_NO_LOCK);
       CMediaSourceSettings::GetInstance().UpdateSource(type, share->strName, "lockmode", "0");
       CMediaSourceSettings::GetInstance().UpdateSource(type, share->strName, "lockcode", "0");
       CMediaSourceSettings::GetInstance().UpdateSource(type, share->strName, "badpwdcount", "0");
@@ -510,7 +515,7 @@ bool CGUIDialogContextMenu::OnContextButton(const std::string &type, const CFile
     {
       bool maxRetryExceeded = false;
       if (CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES) != 0)
-        maxRetryExceeded = (share->GetBadPwdCount() >=
+        maxRetryExceeded = (share->GetLockInfo().GetBadPasswordCount() >=
                             CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
                                 CSettings::SETTING_MASTERLOCK_MAXRETRIES));
       if (!maxRetryExceeded)
@@ -530,15 +535,16 @@ bool CGUIDialogContextMenu::OnContextButton(const std::string &type, const CFile
       if (!g_passwordManager.IsMasterLockUnlocked(true))
         return false;
 
+      KODI::UTILS::CLockInfo& lockInfo{share->GetLockInfo()};
       std::string strNewPW;
-      LockMode newLockMode{share->GetLockMode()};
+      LockMode newLockMode{lockInfo.GetMode()};
       std::string strNewLockMode;
       if (CGUIDialogLockSettings::ShowAndGetLock(newLockMode, strNewPW))
         strNewLockMode = std::to_string(static_cast<int>(newLockMode));
       else
         return false;
       // password ReSet and re-entry succeeded, write out the lock data
-      share->SetLockMode(newLockMode);
+      lockInfo.SetMode(newLockMode);
       CMediaSourceSettings::GetInstance().UpdateSource(type, share->strName, "lockcode", strNewPW);
       CMediaSourceSettings::GetInstance().UpdateSource(type, share->strName, "lockmode", strNewLockMode);
       CMediaSourceSettings::GetInstance().UpdateSource(type, share->strName, "badpwdcount", "0");
