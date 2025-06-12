@@ -490,8 +490,8 @@ CFileItem& CFileItem::operator=(const CFileItem& item)
 void CFileItem::Reset()
 {
   // CGUIListItem members...
-  m_strLabel2.clear();
   SetLabel("");
+  SetLabel2("");
   FreeIcons();
   m_overlayIcon = ICON_OVERLAY_NONE;
   m_bSelected = false;
@@ -1603,7 +1603,7 @@ void CFileItem::SetFromAlbum(const CAlbum &album)
   if (!album.strAlbum.empty())
     SetLabel(album.strAlbum);
   SetFolder(true);
-  m_strLabel2 = album.GetAlbumArtistString();
+  SetLabel2(album.GetAlbumArtistString());
   GetMusicInfoTag()->SetAlbum(album);
 
   if (album.art.empty())
