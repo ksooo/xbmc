@@ -496,6 +496,7 @@ void CFileItem::Reset()
   SetOverlayImage(ICON_OVERLAY_NONE);
   Select(false);
   SetFolder(false);
+  SetCurrentItem(1);
 
   m_strDVDLabel.clear();
   m_strTitle.clear();
