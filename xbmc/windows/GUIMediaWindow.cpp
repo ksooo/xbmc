@@ -687,7 +687,7 @@ void CGUIMediaWindow::FormatItemLabels(CFileItemList &items, const LABEL_MASKS &
     if (pItem->IsLabelPreformatted())
       continue;
 
-    if (pItem->m_bIsFolder)
+    if (pItem->IsFolder())
       folderFormatter.FormatLabels(pItem.get());
     else
       fileFormatter.FormatLabels(pItem.get());
@@ -787,7 +787,7 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
   {
     CFileItemPtr pItem(new CFileItem(".."));
     pItem->SetPath(strParentPath);
-    pItem->m_bIsFolder = true;
+    pItem->SetFolder(true);
     pItem->SetIsShareOrDrive(false);
     items.AddFront(pItem, 0);
   }
@@ -916,7 +916,7 @@ bool CGUIMediaWindow::Update(const std::string &strDirectory, bool updateFilterP
     pItem->SetArt("icon", "DefaultAddSource.png");
     pItem->SetLabel(strLabel);
     pItem->SetLabelPreformatted(true);
-    pItem->m_bIsFolder = true;
+    pItem->SetFolder(true);
     pItem->SetSpecialSort(CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_addSourceOnTop ?
                                              SortSpecialOnTop : SortSpecialOnBottom);
     m_vecItems->Add(pItem);
@@ -1044,14 +1044,14 @@ bool CGUIMediaWindow::OnClick(int iItem, const std::string &player)
     return true;
   }
 
-  if (!pItem->m_bIsFolder && pItem->IsFileFolder(FileFolderType::MASK_ONCLICK))
+  if (!pItem->IsFolder() && pItem->IsFileFolder(FileFolderType::MASK_ONCLICK))
   {
     XFILE::IFileDirectory *pFileDirectory = nullptr;
     pFileDirectory = XFILE::CFileDirectoryFactory::Create(pItem->GetURL(), pItem.get(), "");
     if(pFileDirectory)
-      pItem->m_bIsFolder = true;
-    else if(pItem->m_bIsFolder)
-      pItem->m_bIsFolder = false;
+      pItem->SetFolder(true);
+    else if (pItem->IsFolder())
+      pItem->SetFolder(false);
     delete pFileDirectory;
   }
 
@@ -1072,7 +1072,7 @@ bool CGUIMediaWindow::OnClick(int iItem, const std::string &player)
     }
   }
 
-  if (pItem->m_bIsFolder)
+  if (pItem->IsFolder())
   {
     if (pItem->IsShareOrDrive())
     {
@@ -1536,7 +1536,7 @@ bool CGUIMediaWindow::OnPlayAndQueueMedia(const CFileItemPtr& item, const std::s
     playlist.Copy(*m_vecItems, true);
     playlist.erase(std::remove_if(playlist.begin(), playlist.end(),
                                   [](const std::shared_ptr<CFileItem>& i)
-                                  { return i->IsZIP() || i->IsRAR() || i->m_bIsFolder; }),
+                                  { return i->IsZIP() || i->IsRAR() || i->IsFolder(); }),
                    playlist.end());
 
     // Chosen item
@@ -1618,7 +1618,7 @@ void CGUIMediaWindow::UpdateFileList()
     for (int i = 0; i < m_vecItems->Size(); i++)
     {
       CFileItemPtr pItem = m_vecItems->Get(i);
-      if (pItem->m_bIsFolder)
+      if (pItem->IsFolder())
         continue;
 
       if (!PLAYLIST::IsPlayList(*pItem) && !pItem->IsZIP() && !pItem->IsRAR())
@@ -1638,7 +1638,7 @@ void CGUIMediaWindow::OnDeleteItem(int iItem)
   CFileItemPtr item = m_vecItems->Get(iItem);
 
   if (PLAYLIST::IsPlayList(*item))
-    item->m_bIsFolder = false;
+    item->SetFolder(false);
 
   const std::shared_ptr<CProfileManager> profileManager = CServiceBroker::GetSettingsComponent()->GetProfileManager();
 
@@ -1955,7 +1955,7 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
     CFileItemPtr pItem = m_vecItems->Get(index);
     // if the item is a folder we need to copy the path of
     // the filtered item to be able to keep the applied filters
-    if (pItem->m_bIsFolder)
+    if (pItem->IsFolder())
     {
       CURL itemUrl(pItem->GetPath());
       if (!filterOption.empty())
@@ -1972,7 +1972,7 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
     // to be able to select the same item as before we need to adjust
     // the path of the item i.e. add or remove the "filter=" URL option
     // but that's only necessary for folder items
-    if (currentItem.get() && currentItem->m_bIsFolder)
+    if (currentItem.get() && currentItem->IsFolder())
     {
       CURL curUrl(currentItemPath), newUrl(m_strFilterPath);
       if (newUrl.HasOption("filter"))
@@ -1991,7 +1991,7 @@ void CGUIMediaWindow::OnFilterItems(const std::string &filter)
   {
     CFileItemPtr pItem(new CFileItem(".."));
     pItem->SetPath(m_history.GetParentPath());
-    pItem->m_bIsFolder = true;
+    pItem->SetFolder(true);
     pItem->SetIsShareOrDrive(false);
     m_vecItems->AddFront(pItem, 0);
   }
