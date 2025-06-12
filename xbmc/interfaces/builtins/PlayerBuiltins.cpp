@@ -517,7 +517,7 @@ int PlayOrQueueMedia(const std::vector<std::string>& params,
   for (unsigned int i = 1 ; i < params.size() ; i++)
   {
     if (StringUtils::EqualsNoCase(params[i], "isdir"))
-      item.m_bIsFolder = true;
+      item.SetFolder(true);
     else if (params[i] == "1") // set fullscreen or windowed
       CMediaSettings::GetInstance().SetMediaStartWindowed(true);
     else if (StringUtils::EqualsNoCase(params[i], "resume"))
@@ -555,7 +555,7 @@ int PlayOrQueueMedia(const std::vector<std::string>& params,
     }
   }
 
-  if (!item.m_bIsFolder && item.IsPlugin())
+  if (!item.IsFolder() && item.IsPlugin())
     item.SetProperty("IsPlayable", true);
 
   if (forcePlay && askToResume)
@@ -573,7 +573,7 @@ int PlayOrQueueMedia(const std::vector<std::string>& params,
     }
   }
 
-  if (!forcePlay /* queue */ || item.m_bIsFolder || PLAYLIST::IsPlayList(item))
+  if (!forcePlay /* queue */ || item.IsFolder() || PLAYLIST::IsPlayList(item))
   {
     CFileItemList items;
     GetItemsForPlayList(std::make_shared<CFileItem>(item), items);

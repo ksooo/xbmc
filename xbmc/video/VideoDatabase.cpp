@@ -6916,7 +6916,7 @@ bool CVideoDatabase::GetPlayCounts(const std::string &strPath, CFileItemList &it
     {
       for (auto& item : items)
       {
-        if (!item || item->m_bIsFolder || !item->GetProperty("IsPlayable").asBoolean())
+        if (!item || item->IsFolder() || !item->GetProperty("IsPlayable").asBoolean())
           continue;
 
         std::string path, filename;
@@ -7493,7 +7493,7 @@ bool CVideoDatabase::GetNavCommon(const std::string& strBaseDir,
         itemUrl.AppendPath(path);
         pItem->SetPath(itemUrl.ToString());
 
-        pItem->m_bIsFolder = true;
+        pItem->SetFolder(true);
         if (idContent == VideoDbContentType::MOVIES || idContent == VideoDbContentType::MUSICVIDEOS)
           pItem->GetVideoInfoTag()->SetPlayCount(i.second.second);
         if (!items.Contains(pItem->GetPath()))
@@ -7516,7 +7516,7 @@ bool CVideoDatabase::GetNavCommon(const std::string& strBaseDir,
         itemUrl.AppendPath(path);
         pItem->SetPath(itemUrl.ToString());
 
-        pItem->m_bIsFolder = true;
+        pItem->SetFolder(true);
         pItem->SetLabelPreformatted(true);
         if (idContent == VideoDbContentType::MOVIES || idContent == VideoDbContentType::MUSICVIDEOS)
         { // fv(3) is the number of videos watched, fv(2) is the total number.  We set the playcount
@@ -7719,7 +7719,7 @@ bool CVideoDatabase::GetMusicVideoAlbumsNav(const std::string& strBaseDir, CFile
       }
       itemUrl.AppendPath(path);
       pItem->SetPath(itemUrl.ToString());
-      pItem->m_bIsFolder = isAlbum;
+      pItem->SetFolder(isAlbum);
       pItem->SetLabelPreformatted(true);
 
       if (!items.Contains(pItem->GetPath()))
@@ -7741,7 +7741,7 @@ bool CVideoDatabase::GetMusicVideoAlbumsNav(const std::string& strBaseDir, CFile
     {
       CVideoInfoTag details;
 
-      if (items[i]->m_bIsFolder)
+      if (items[i]->IsFolder())
       {
         details.SetPath(items[i]->GetPath());
         details.m_strAlbum = idData.front().first;
@@ -8036,7 +8036,7 @@ bool CVideoDatabase::GetPeopleNav(const std::string& strBaseDir,
         itemUrl.AppendPath(path);
         pItem->SetPath(itemUrl.ToString());
 
-        pItem->m_bIsFolder=true;
+        pItem->SetFolder(true);
         pItem->GetVideoInfoTag()->SetPlayCount(i.second.playcount);
         pItem->GetVideoInfoTag()->m_strPictureURL.ParseFromData(i.second.thumb);
         pItem->GetVideoInfoTag()->m_iDbId = i.first;
@@ -8064,7 +8064,7 @@ bool CVideoDatabase::GetPeopleNav(const std::string& strBaseDir,
           itemUrl.AppendPath(path);
           pItem->SetPath(itemUrl.ToString());
 
-          pItem->m_bIsFolder=true;
+          pItem->SetFolder(true);
           pItem->GetVideoInfoTag()->m_strPictureURL.ParseFromData(m_pDS->fv(2).get_asString());
           pItem->GetVideoInfoTag()->m_iDbId = m_pDS->fv(0).get_asInt();
           pItem->GetVideoInfoTag()->m_type = type;
@@ -8222,7 +8222,7 @@ bool CVideoDatabase::GetYearsNav(const std::string& strBaseDir,
         itemUrl.AppendPath(path);
         pItem->SetPath(itemUrl.ToString());
 
-        pItem->m_bIsFolder=true;
+        pItem->SetFolder(true);
         if (idContent == VideoDbContentType::MOVIES || idContent == VideoDbContentType::MUSICVIDEOS)
           pItem->GetVideoInfoTag()->SetPlayCount(i.second.second);
         items.Add(pItem);
@@ -8258,7 +8258,7 @@ bool CVideoDatabase::GetYearsNav(const std::string& strBaseDir,
         itemUrl.AppendPath(path);
         pItem->SetPath(itemUrl.ToString());
 
-        pItem->m_bIsFolder=true;
+        pItem->SetFolder(true);
         if (idContent == VideoDbContentType::MOVIES || idContent == VideoDbContentType::MUSICVIDEOS)
         {
           // fv(2) is the number of videos watched, fv(1) is the total number.  We set the playcount
@@ -8396,7 +8396,7 @@ bool CVideoDatabase::GetSeasonsByWhere(const std::string& strBaseDir, const Filt
         itemUrl.AppendPath(strDir);
         pItem->SetPath(itemUrl.ToString());
 
-        pItem->m_bIsFolder = true;
+        pItem->SetFolder(true);
         pItem->GetVideoInfoTag()->m_strTitle = strLabel;
         if (!name.empty())
           pItem->GetVideoInfoTag()->m_strSortTitle = name;
@@ -8748,7 +8748,7 @@ bool CVideoDatabase::GetMoviesByWhere(const std::string& strBaseDir, const Filte
             static std::string hybridFolderPath{
                 std::to_string(static_cast<int>(VideoAssetType::VERSIONSANDEXTRASFOLDER)) + "/"};
             item->SetProperty("IsHybridFolder", true);
-            item->m_bIsFolder = true;
+            item->SetFolder(true);
             itemUrl.AppendPath(hybridFolderPath);
           }
         }
@@ -9514,7 +9514,7 @@ void CVideoDatabase::GetMovieGenresByName(const std::string& strSearch, CFileIte
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
       pItem->SetPath("videodb://movies/genres/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9558,7 +9558,7 @@ void CVideoDatabase::GetMovieCountriesByName(const std::string& strSearch, CFile
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
       pItem->SetPath("videodb://movies/genres/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9601,7 +9601,7 @@ void CVideoDatabase::GetTvShowGenresByName(const std::string& strSearch, CFileIt
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
       pItem->SetPath("videodb://tvshows/genres/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9644,7 +9644,7 @@ void CVideoDatabase::GetMovieActorsByName(const std::string& strSearch, CFileIte
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
       pItem->SetPath("videodb://movies/actors/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9687,7 +9687,7 @@ void CVideoDatabase::GetTvShowsActorsByName(const std::string& strSearch, CFileI
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
       pItem->SetPath("videodb://tvshows/actors/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9733,7 +9733,7 @@ void CVideoDatabase::GetMusicVideoArtistsByName(const std::string& strSearch, CF
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
       pItem->SetPath("videodb://musicvideos/artists/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9776,7 +9776,7 @@ void CVideoDatabase::GetMusicVideoGenresByName(const std::string& strSearch, CFi
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
       std::string strDir = StringUtils::Format("{}/", m_pDS->fv(0).get_asInt());
       pItem->SetPath("videodb://musicvideos/genres/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9834,7 +9834,7 @@ void CVideoDatabase::GetMusicVideoAlbumsByName(const std::string& strSearch, CFi
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(0).get_asString()));
       std::string strDir = std::to_string(m_pDS->fv(1).get_asInt());
       pItem->SetPath("videodb://musicvideos/titles/"+ strDir);
-      pItem->m_bIsFolder=false;
+      pItem->SetFolder(false);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -9879,7 +9879,7 @@ void CVideoDatabase::GetMusicVideosByAlbum(const std::string& strSearch, CFileIt
           StringUtils::Format("3/2/{}", m_pDS->fv("musicvideo.idMVideo").get_asInt());
 
       pItem->SetPath("videodb://"+ strDir);
-      pItem->m_bIsFolder=false;
+      pItem->SetFolder(false);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -10127,7 +10127,7 @@ void CVideoDatabase::GetMoviesByName(const std::string& strSearch, CFileItemList
       else
         path = StringUtils::Format("videodb://movies/sets/{}/{}", setId, movieId);
       pItem->SetPath(path);
-      pItem->m_bIsFolder=false;
+      pItem->SetFolder(false);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -10172,7 +10172,7 @@ void CVideoDatabase::GetTvShowsByName(const std::string& strSearch, CFileItemLis
           StringUtils::Format("tvshows/titles/{}/", m_pDS->fv("tvshow.idShow").get_asInt());
 
       pItem->SetPath("videodb://"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       pItem->GetVideoInfoTag()->m_iDbId = m_pDS->fv("tvshow.idShow").get_asInt();
       items.Add(pItem);
       m_pDS->next();
@@ -10218,7 +10218,7 @@ void CVideoDatabase::GetEpisodesByName(const std::string& strSearch, CFileItemLi
                                              m_pDS->fv("episode.idShow").get_asInt(),
                                              m_pDS->fv(2).get_asInt(), m_pDS->fv(0).get_asInt());
       pItem->SetPath(path);
-      pItem->m_bIsFolder=false;
+      pItem->SetFolder(false);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -10267,7 +10267,7 @@ void CVideoDatabase::GetMusicVideosByName(const std::string& strSearch, CFileIte
           StringUtils::Format("3/2/{}", m_pDS->fv("musicvideo.idMVideo").get_asInt());
 
       pItem->SetPath("videodb://"+ strDir);
-      pItem->m_bIsFolder=false;
+      pItem->SetFolder(false);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -10319,7 +10319,7 @@ void CVideoDatabase::GetEpisodesByPlot(const std::string& strSearch, CFileItemLi
                                              m_pDS->fv("episode.idShow").get_asInt(),
                                              m_pDS->fv(2).get_asInt(), m_pDS->fv(0).get_asInt());
       pItem->SetPath(path);
-      pItem->m_bIsFolder=false;
+      pItem->SetFolder(false);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -10364,7 +10364,7 @@ void CVideoDatabase::GetMoviesByPlot(const std::string& strSearch, CFileItemList
       std::string path =
           StringUtils::Format("videodb://movies/titles/{}", m_pDS->fv(0).get_asInt());
       pItem->SetPath(path);
-      pItem->m_bIsFolder=false;
+      pItem->SetFolder(false);
 
       items.Add(pItem);
       m_pDS->next();
@@ -10411,7 +10411,7 @@ void CVideoDatabase::GetMovieDirectorsByName(const std::string& strSearch, CFile
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
 
       pItem->SetPath("videodb://movies/directors/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -10456,7 +10456,7 @@ void CVideoDatabase::GetTvShowsDirectorsByName(const std::string& strSearch, CFi
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
 
       pItem->SetPath("videodb://tvshows/directors/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }
@@ -10501,7 +10501,7 @@ void CVideoDatabase::GetMusicVideoDirectorsByName(const std::string& strSearch, 
       CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
 
       pItem->SetPath("videodb://musicvideos/albums/"+ strDir);
-      pItem->m_bIsFolder=true;
+      pItem->SetFolder(true);
       items.Add(pItem);
       m_pDS->next();
     }

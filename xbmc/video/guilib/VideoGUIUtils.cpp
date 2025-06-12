@@ -144,7 +144,7 @@ void CAsyncGetItemsForPlaylist::GetItemsForPlaylist(const std::shared_ptr<CFileI
   if (item->IsParentFolder() || !item->CanQueue() || item->IsRAR() || item->IsZIP())
     return;
 
-  if (item->m_bIsFolder)
+  if (item->IsFolder())
   {
     if (!item->IsPlugin())
     {
@@ -188,7 +188,7 @@ void CAsyncGetItemsForPlaylist::GetItemsForPlaylist(const std::shared_ptr<CFileI
         if (i->IsLabelPreformatted())
           continue;
 
-        if (i->m_bIsFolder)
+        if (i->IsFolder())
           folderFormatter.FormatLabels(i.get());
         else
           fileFormatter.FormatLabels(i.get());
@@ -276,7 +276,7 @@ void CAsyncGetItemsForPlaylist::GetItemsForPlaylist(const std::shared_ptr<CFileI
     bool fetchedPlayCounts = false;
     for (const auto& i : items)
     {
-      if (i->m_bIsFolder)
+      if (i->IsFolder())
       {
         std::string path = i->GetPath();
         URIUtils::RemoveSlashAtEnd(path);
@@ -408,7 +408,7 @@ void PlayItem(
     item->SetCanQueue(true);
   }
 
-  if (item->m_bIsFolder && !item->IsPlugin())
+  if (item->IsFolder() && !item->IsPlugin())
   {
     AddItemToPlayListAndPlay(item, nullptr, player, mode);
   }
@@ -541,7 +541,7 @@ bool IsItemPlayable(const CFileItem& item)
     return true;
 
   // Include Live TV
-  if (!item.m_bIsFolder && (item.IsLiveTV() || item.IsEPG()))
+  if (!item.IsFolder() && (item.IsLiveTV() || item.IsEPG()))
     return true;
 
   // Exclude all music library items
@@ -577,7 +577,7 @@ bool IsItemPlayable(const CFileItem& item)
         StringUtils::StartsWith(item.GetPath(), StringUtils::Format("{}/mixed/", path)))
       return true;
 
-    if (!item.m_bIsFolder && !item.HasVideoInfoTag())
+    if (!item.IsFolder() && !item.HasVideoInfoTag())
     {
       // Unknown location. Type cannot be determined for non-folder items.
       return false;
@@ -587,7 +587,7 @@ bool IsItemPlayable(const CFileItem& item)
   if (IsNonExistingUserPartyModePlaylist(item))
     return false;
 
-  if (item.m_bIsFolder &&
+  if (item.IsFolder() &&
       (IsVideoDb(item) || StringUtils::StartsWithNoCase(item.GetPath(), "library://video/")))
   {
     // Exclude top level nodes - eg can't play 'genres' just a specific genre etc
@@ -610,12 +610,12 @@ bool IsItemPlayable(const CFileItem& item)
   {
     return true;
   }
-  else if ((!item.m_bIsFolder && IsVideo(item) && !IsEmptyVideoItem(item)) || item.IsDVD() ||
+  else if ((!item.IsFolder() && IsVideo(item) && !IsEmptyVideoItem(item)) || item.IsDVD() ||
            MUSIC::IsCDDA(item))
   {
     return true;
   }
-  else if (item.m_bIsFolder && !item.IsPlugin() && !item.IsScript())
+  else if (item.IsFolder() && !item.IsPlugin() && !item.IsScript())
   {
     // Not a video-specific folder (like file:// or nfs://). Allow play if context is Video window.
     if (CServiceBroker::GetGUI()->GetWindowManager().GetActiveWindow() == WINDOW_VIDEO_NAV &&
