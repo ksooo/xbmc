@@ -493,7 +493,7 @@ void CFileItem::Reset()
   SetLabel("");
   SetLabel2("");
   FreeIcons();
-  m_overlayIcon = ICON_OVERLAY_NONE;
+  SetOverlayImage(ICON_OVERLAY_NONE);
   m_bSelected = false;
   SetFolder(false);
 
