@@ -497,6 +497,7 @@ void CFileItem::Reset()
   Select(false);
   SetFolder(false);
   SetCurrentItem(1);
+  ClearProperties();
 
   m_strDVDLabel.clear();
   m_strTitle.clear();
@@ -519,7 +520,6 @@ void CFileItem::Reset()
   delete m_gameInfoTag;
   m_gameInfoTag = nullptr;
   m_extrainfo.clear();
-  ClearProperties();
   m_eventLogEntry.reset();
   m_bLabelPreformatted = false;
   m_bIsAlbum = false;
@@ -653,6 +653,7 @@ void CFileItem::Archive(CArchive& ar)
 
 void CFileItem::Serialize(CVariant& value) const
 {
+  //! @todo Why is this commented out? The implementation exists but will never be called.
   //CGUIListItem::Serialize(value["CGUIListItem"]);
 
   value["strPath"] = m_strPath;
@@ -676,10 +677,12 @@ void CFileItem::Serialize(CVariant& value) const
   if (m_gameInfoTag)
     (*m_gameInfoTag).Serialize(value["gameInfoTag"]);
 
-  if (!m_mapProperties.empty())
+  //! @todo Why is property map the only CGUIListItem property which gets serialized?
+  //! Why is this implemented here and not in CGUIListItem?
+  if (HasProperties())
   {
     auto& customProperties = value["customproperties"];
-    for (const auto& [propname, propval] : m_mapProperties)
+    for (const auto& [propname, propval] : GetProperties())
       customProperties[propname] = propval;
   }
 }
