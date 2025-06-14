@@ -212,7 +212,7 @@ void CAnnouncementManager::DoAnnounce(AnnouncementFlag flag,
         std::string videoInfoTagPath(item->GetVideoInfoTag()->m_strFileNameAndPath);
         if (StringUtils::StartsWith(videoInfoTagPath, "removable://"))
           path = videoInfoTagPath;
-        if (videodatabase.LoadVideoInfo(path, *item->GetVideoInfoTag(), VideoDbDetailsNone))
+        if (videodatabase.LoadVideoInfo(path, *item->GetVideoInfoTag()))
           id = item->GetVideoInfoTag()->m_iDbId;
 
         videodatabase.Close();
