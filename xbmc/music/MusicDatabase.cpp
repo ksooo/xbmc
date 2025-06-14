@@ -13321,7 +13321,7 @@ bool CMusicDatabase::GetFilter(CDbUrl& musicUrl, Filter& filter, SortDescription
     if (!xsp.LoadFromJson(option->second.asString()))
       return false;
 
-    std::set<std::string> playlists;
+    std::set<std::string, std::less<>> playlists;
     std::string xspWhere;
     xspWhere = xsp.GetWhereClause(*this, playlists);
     hasRoleRules = xsp.GetType() == "artists" &&
@@ -13907,7 +13907,7 @@ bool CMusicDatabase::GetFilter(CDbUrl& musicUrl, Filter& filter, SortDescription
     // check if the filter playlist matches the item type
     if (xspFilter.GetType() == type)
     {
-      std::set<std::string> playlists;
+      std::set<std::string, std::less<>> playlists;
       filter.AppendWhere(xspFilter.GetWhereClause(*this, playlists));
     }
     // remove the filter if it doesn't match the item type
