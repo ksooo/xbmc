@@ -1163,7 +1163,7 @@ std::vector<CMusicAlbumInfo> CScraper::FindAlbum(CCurlFile &fcurl,
           ali.SetRelevance(static_cast<float>(std::atof(pxeRel->FirstChild()->Value())) / flScale);
         }
 
-        vcali.emplace_back(std::move(ali));
+        vcali.emplace_back(ali);
       }
     }
   }

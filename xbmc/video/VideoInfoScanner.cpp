@@ -667,7 +667,7 @@ CVideoInfoScanner::~CVideoInfoScanner()
     return setUpdated;
   }
 
-  bool CVideoInfoScanner::RetrieveVideoInfo(CFileItemList& items,
+  bool CVideoInfoScanner::RetrieveVideoInfo(const CFileItemList& items,
                                             bool bDirNames,
                                             ContentType content,
                                             bool useLocal,
@@ -1167,10 +1167,10 @@ CVideoInfoScanner::~CVideoInfoScanner()
           loader.GetArtwork(showInfo);
         }
         GetSeasonThumbs(showInfo, seasonArt, CVideoThumbLoader::GetArtTypes(MediaTypeSeason), useLocal && !item->IsPlugin());
-        for (auto i = seasonArt.begin(); i != seasonArt.end(); ++i)
+        for (const auto& [name, art] : seasonArt)
         {
-          int seasonID = m_database.AddSeason(showID, i->first);
-          m_database.SetArtForItem(seasonID, MediaTypeSeason, i->second);
+          int seasonID = m_database.AddSeason(showID, name);
+          m_database.SetArtForItem(seasonID, MediaTypeSeason, art);
         }
       }
     }

@@ -842,7 +842,8 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
         {
           buttons.Add(CONTEXT_BUTTON_SCAN, 13349);
         }
-        if (node == NodeType::ACTOR && !dir.IsAllItem(item->GetPath()) && item->IsFolder())
+        if (node == NodeType::ACTOR && !CVideoDatabaseDirectory::IsAllItem(item->GetPath()) &&
+            item->IsFolder())
         {
           buttons.Add(CONTEXT_BUTTON_SET_ART, 13511); // Choose art
         }
