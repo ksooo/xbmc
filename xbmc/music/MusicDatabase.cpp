@@ -1720,7 +1720,7 @@ int CMusicDatabase::AddGenre(std::string& strGenre)
                           strGenre.c_str());
       m_pDS->exec(strSQL);
 
-      const int idGenre = static_cast<int>(m_pDS->lastinsertid());
+      const auto idGenre = static_cast<int>(m_pDS->lastinsertid());
       m_genreCache.try_emplace(strGenre, idGenre);
       return idGenre;
     }
