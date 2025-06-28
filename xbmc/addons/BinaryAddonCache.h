@@ -34,7 +34,7 @@ public:
   void GetInstalledAddons(VECADDONS& addons, AddonType type);
   AddonPtr GetAddonInstance(const std::string& strId, AddonType type);
 
-protected:
+private:
   void Update();
 
   CCriticalSection m_critSection;

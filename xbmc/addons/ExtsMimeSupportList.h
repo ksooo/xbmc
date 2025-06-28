@@ -24,9 +24,7 @@ class CAddonMgr;
 class CAddonInfo;
 }
 
-namespace KODI
-{
-namespace ADDONS
+namespace KODI::ADDONS
 {
 
 /*!
@@ -40,8 +38,8 @@ namespace ADDONS
 class CExtsMimeSupportList : public KODI::ADDONS::IAddonSupportList
 {
 public:
-  CExtsMimeSupportList(ADDON::CAddonMgr& addonMgr);
-  ~CExtsMimeSupportList();
+  explicit CExtsMimeSupportList(ADDON::CAddonMgr& addonMgr);
+  ~CExtsMimeSupportList() override;
 
   /*!
    * @brief Filter selection values.
@@ -98,12 +96,12 @@ public:
     // List of supported file extensions by addon
     // First: Extension name
     // Second: With @ref SupportValue defined content
-    std::map<std::string, SupportValue> m_supportedExtensions;
+    std::map<std::string, SupportValue, std::less<>> m_supportedExtensions;
 
     // List of supported mimetypes by addon
     // First: Mimetype name
     // Second: With @ref SupportValue defined content
-    std::map<std::string, SupportValue> m_supportedMimetypes;
+    std::map<std::string, SupportValue, std::less<>> m_supportedMimetypes;
   };
 
   /*!
@@ -168,7 +166,7 @@ public:
   std::vector<KODI::ADDONS::AddonSupportEntry> GetSupportedExtsAndMimeTypes(
       const std::string& addonId) override;
 
-protected:
+private:
   void Update(const std::string& id);
 
   static SupportValues ScanAddonProperties(ADDON::AddonType type,
@@ -180,5 +178,4 @@ protected:
   ADDON::CAddonMgr& m_addonMgr;
 };
 
-} /* namespace ADDONS */
-} /* namespace KODI */
+} // namespace KODI::ADDONS
