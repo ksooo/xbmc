@@ -752,8 +752,8 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
     if (!GetDirectoryItems(pathToUrl, dirItems, UseFileDirectories()))
       return false;
 
-    if (GetID() == WINDOW_VIDEO_NAV)
-      dirItems.ReplaceBlurayFiles();
+//    if (GetID() == WINDOW_VIDEO_NAV)
+//      dirItems.ReplaceBlurayFiles();
 
     // assign fetched directory items
     items.Assign(dirItems);
