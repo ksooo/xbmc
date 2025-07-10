@@ -11,6 +11,7 @@
 #include "ShaderTypes.h"
 #include "utils/Geometry.h"
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -38,6 +39,11 @@ public:
   virtual bool ReadPresetFile(const std::string& presetPath) = 0;
 
   /*!
+   * \brief Coordinates of the 4 corners of the output viewport/window
+   */
+  using ViewportCoordinates = std::array<CPoint, 4>;
+
+  /*!
    * \brief Updates state if needed and renderes the preset to the target texture
    *
    * \param dest Coordinates of the 4 corners of the output viewport/window
@@ -46,7 +52,7 @@ public:
    *
    * \return Returns false if updating or rendering failed, true if both succeeded
    */
-  virtual bool RenderUpdate(const CPoint dest[],
+  virtual bool RenderUpdate(const ViewportCoordinates& dest,
                             IShaderTexture& source,
                             IShaderTexture& target) = 0;
 

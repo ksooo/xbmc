@@ -42,7 +42,7 @@ bool CShaderPreset::ReadPresetFile(const std::string& presetPath)
   return CServiceBroker::GetGameServices().VideoShaders().LoadPreset(presetPath, *this);
 }
 
-bool CShaderPreset::RenderUpdate(const CPoint dest[],
+bool CShaderPreset::RenderUpdate(const ViewportCoordinates& dest,
                                  IShaderTexture& source,
                                  IShaderTexture& target)
 {
@@ -59,7 +59,7 @@ bool CShaderPreset::RenderUpdate(const CPoint dest[],
 
   PrepareParameters(dest, source, target);
 
-  const unsigned int numPasses = static_cast<unsigned int>(m_pShaders.size());
+  const auto numPasses = static_cast<unsigned int>(m_pShaders.size());
 
   // Apply all passes except the last one (which needs to be applied to the backbuffer)
   IShaderTexture* sourceTexture = &source;
@@ -175,7 +175,7 @@ void CShaderPreset::UpdateMVPs()
     videoShader->UpdateMVP();
 }
 
-void CShaderPreset::PrepareParameters(const CPoint dest[],
+void CShaderPreset::PrepareParameters(const ViewportCoordinates& dest,
                                       IShaderTexture& source,
                                       IShaderTexture& target)
 {
@@ -185,7 +185,7 @@ void CShaderPreset::PrepareParameters(const CPoint dest[],
       m_dest[i] = dest[i];
   }
 
-  const unsigned int numPasses = static_cast<unsigned int>(m_pShaders.size());
+  const auto numPasses = static_cast<unsigned int>(m_pShaders.size());
 
   // Prepare parameters for all shader passes
   for (unsigned int shaderIdx = 0; shaderIdx < numPasses; ++shaderIdx)

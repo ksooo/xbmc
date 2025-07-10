@@ -40,7 +40,9 @@ public:
 
   // Implementation of IShaderPreset
   bool ReadPresetFile(const std::string& presetPath) override;
-  bool RenderUpdate(const CPoint dest[], IShaderTexture& source, IShaderTexture& target) override;
+  bool RenderUpdate(const ViewportCoordinates& dest,
+                    IShaderTexture& source,
+                    IShaderTexture& target) override;
   void SetSpeed(double speed) override { m_speed = speed; }
   void SetVideoSize(unsigned int videoWidth, unsigned int videoHeight) override;
   bool SetShaderPreset(const std::string& shaderPresetPath) override;
@@ -60,7 +62,9 @@ protected:
   bool Update();
   void UpdateViewPort(CRect viewPort);
   void UpdateMVPs();
-  void PrepareParameters(const CPoint dest[], IShaderTexture& source, IShaderTexture& target);
+  void PrepareParameters(const ViewportCoordinates& dest,
+                         IShaderTexture& source,
+                         IShaderTexture& target);
   void DisposeShaders();
   bool HasPathFailed(const std::string& path) const;
   ShaderParameterMap GetShaderParameters(const std::vector<ShaderParameter>& parameters,
