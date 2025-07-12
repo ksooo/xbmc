@@ -1411,7 +1411,7 @@ protected:
                         int max,
                         const T& offsets,
                         CSetInfoTag& details,
-                        int idxOffset);
+                        int idxOffset) const;
 
   template<typename T>
   std::string GetValueString(const CVideoInfoTag& details,

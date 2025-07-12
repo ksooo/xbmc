@@ -64,7 +64,7 @@ namespace KODI::VIDEO
      \param set CSetInfoTag to add to the database.
      \return true if successful, false otherwise.
      */
-    bool AddSet(CSetInfoTag* set);
+    bool AddSet(const CSetInfoTag& set);
 
     /*! \brief Add an item to the database.
      \param pItem item to add to the database.

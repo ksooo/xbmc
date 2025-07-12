@@ -4587,7 +4587,7 @@ void CVideoDatabase::GetDetailsFromDB(const dbiplus::sql_record* const record,
                                       int max,
                                       const T& offsets,
                                       CSetInfoTag& details,
-                                      int idxOffset)
+                                      int idxOffset) const
 {
   for (int i = min + 1; i < max; i++)
   {
@@ -4599,6 +4599,9 @@ void CVideoDatabase::GetDetailsFromDB(const dbiplus::sql_record* const record,
         break;
       case VIDEODB_TYPE_UNUSED: // Skip the unused field to avoid populating unused data
         continue;
+      default:
+        CLog::LogF(LOGERROR, "Unhandled VIDEODB_TYPE value ({})", offsets[i].type);
+        break;
     }
   }
 }
@@ -4895,7 +4898,7 @@ CSetInfoTag CVideoDatabase::GetDetailsForSet(const dbiplus::sql_record* const re
 {
   CSetInfoTag details;
 
-  if (record == NULL)
+  if (!record)
     return details;
 
   int idSet = record->at(0).get_asInt();
@@ -11495,40 +11498,37 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
             std::erase_if(artwork, [](const auto& art) { return !URIUtils::IsRemote(art.second); });
             set.SetArt(artwork);
           }
-          set.Save(pMain, "set", singleFile);
+          set.Save(pMain, "set");
 
           // write set.nfo
           if (!singleFile && CUtil::SupportsWriteFileOperations(itemPath))
           {
             const std::string nfoFile{URIUtils::AddFileToFolder(itemPath, "set.nfo")};
-            if (overwrite || !CFile::Exists(nfoFile, false))
+            if ((overwrite || !CFile::Exists(nfoFile, false)) && !xmlDoc.SaveFile(nfoFile))
             {
-              if (!xmlDoc.SaveFile(nfoFile))
-              {
-                CLog::LogF(LOGERROR, "Set nfo export failed! ('{}')", nfoFile);
-                CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Error,
-                                                      g_localizeStrings.Get(20302),
-                                                      CURL::GetRedacted(nfoFile));
-                iFailCount++;
-              }
+              CLog::LogF(LOGERROR, "Set nfo export failed! ('{}')", nfoFile);
+              CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Error,
+                                                    g_localizeStrings.Get(20302),
+                                                    CURL::GetRedacted(nfoFile));
+              iFailCount++;
             }
           }
           if (!singleFile)
           {
             xmlDoc.Clear();
-            TiXmlDeclaration decl("1.0", "UTF-8", "yes");
-            xmlDoc.InsertEndChild(decl);
+            TiXmlDeclaration decl1("1.0", "UTF-8", "yes");
+            xmlDoc.InsertEndChild(decl1);
           }
 
           // Write images to MSIF
           if (images)
           {
-            KODI::ART::Artwork artwork;
-            GetArtForItem(m_pDS->fv("idSet").get_asInt(), MediaTypeVideoCollection, artwork);
-            for (const auto& art : artwork)
+            KODI::ART::Artwork aw;
+            GetArtForItem(m_pDS->fv("idSet").get_asInt(), MediaTypeVideoCollection, aw);
+            for (const auto& [arttype, arturl] : aw)
             {
-              std::string savedThumb = URIUtils::AddFileToFolder(itemPath, art.first);
-              CServiceBroker::GetTextureCache()->Export(art.second, savedThumb, overwrite);
+              const std::string savedThumb = URIUtils::AddFileToFolder(itemPath, arttype);
+              CServiceBroker::GetTextureCache()->Export(arturl, savedThumb, overwrite);
             }
           }
         }
@@ -12116,7 +12116,7 @@ void CVideoDatabase::ImportFromXML(const std::string &path)
       {
         CSetInfoTag info;
         info.Load(movie);
-        scanner.AddSet(&info);
+        scanner.AddSet(info);
         currentTitle = info.GetTitle();
         current++;
       }
