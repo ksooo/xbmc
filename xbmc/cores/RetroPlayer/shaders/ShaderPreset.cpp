@@ -57,7 +57,7 @@ bool CShaderPreset::RenderUpdate(const ViewportCoordinates& dest,
   if (!Update())
     return false;
 
-  PrepareParameters(dest, source, target);
+  PrepareParameters(dest, source);
 
   const auto numPasses = static_cast<unsigned int>(m_pShaders.size());
 
@@ -175,9 +175,7 @@ void CShaderPreset::UpdateMVPs()
     videoShader->UpdateMVP();
 }
 
-void CShaderPreset::PrepareParameters(const ViewportCoordinates& dest,
-                                      IShaderTexture& source,
-                                      IShaderTexture& target)
+void CShaderPreset::PrepareParameters(const ViewportCoordinates& dest, IShaderTexture& source)
 {
   if (m_dest[0] != dest[0] || m_dest[1] != dest[1] || m_dest[2] != dest[2] || m_dest[3] != dest[3])
   {

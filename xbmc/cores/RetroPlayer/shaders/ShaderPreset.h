@@ -62,9 +62,7 @@ protected:
   bool Update();
   void UpdateViewPort(CRect viewPort);
   void UpdateMVPs();
-  void PrepareParameters(const ViewportCoordinates& dest,
-                         IShaderTexture& source,
-                         IShaderTexture& target);
+  void PrepareParameters(const ViewportCoordinates& dest, IShaderTexture& source);
   void DisposeShaders();
   bool HasPathFailed(const std::string& path) const;
   ShaderParameterMap GetShaderParameters(const std::vector<ShaderParameter>& parameters,
