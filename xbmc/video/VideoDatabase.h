@@ -1367,8 +1367,8 @@ protected:
 
   CVideoInfoTag GetDetailsForMovie(dbiplus::Dataset& pDS, int getDetails = VideoDbDetailsNone);
   CVideoInfoTag GetDetailsForMovie(const dbiplus::sql_record* const record, int getDetails = VideoDbDetailsNone);
-  CSetInfoTag GetDetailsForSet(dbiplus::Dataset& pDS);
-  CSetInfoTag GetDetailsForSet(const dbiplus::sql_record* const record);
+  CSetInfoTag GetDetailsForSet(dbiplus::Dataset& pDS) const;
+  CSetInfoTag GetDetailsForSet(const dbiplus::sql_record* const record) const;
   CVideoInfoTag GetDetailsForTvShow(dbiplus::Dataset& pDS,
                                     int getDetails = VideoDbDetailsNone,
                                     CFileItem* item = nullptr);

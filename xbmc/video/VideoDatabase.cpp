@@ -4889,12 +4889,12 @@ CVideoInfoTag CVideoDatabase::GetDetailsForMovie(const dbiplus::sql_record* cons
   return details;
 }
 
-CSetInfoTag CVideoDatabase::GetDetailsForSet(dbiplus::Dataset& pDS)
+CSetInfoTag CVideoDatabase::GetDetailsForSet(dbiplus::Dataset& pDS) const
 {
   return GetDetailsForSet(pDS.get_sql_record());
 }
 
-CSetInfoTag CVideoDatabase::GetDetailsForSet(const dbiplus::sql_record* const record)
+CSetInfoTag CVideoDatabase::GetDetailsForSet(const dbiplus::sql_record* const record) const
 {
   CSetInfoTag details;
 
