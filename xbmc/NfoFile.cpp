@@ -27,9 +27,7 @@
 using namespace XFILE;
 using namespace ADDON;
 
-CInfoScanner::InfoType CNfoFile::Create(const std::string& strPath,
-                                        const ScraperPtr& info,
-                                        int episode)
+CInfoScanner::InfoType CNfoFile::Create(const std::string& strPath, const ScraperPtr& info)
 {
   m_info = info; // assume we can use these settings
   m_type = ScraperTypeFromContent(info->Content());

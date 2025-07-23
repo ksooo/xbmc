@@ -3888,8 +3888,8 @@ void CVideoDatabase::GetEpisodesByFileId(int idFile, std::vector<CVideoInfoTag>&
 
 bool CVideoDatabase::GetEpisodeMap(int idShow,
                                    EpisodeFileMap& fileMap,
-                                   std::unique_ptr<Dataset>& pDS,
-                                   int idFile /* = -1 */)
+                                   const std::unique_ptr<Dataset>& pDS,
+                                   int idFile /* = -1 */) const
 {
   try
   {
@@ -11841,14 +11841,14 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
       for (const auto& [file, episodeInformation] : fileMap)
       {
         pDS->goto_rec(episodeInformation.index);
-        CFileItem item(file, false);
+        CFileItem fileItem(file, false);
 
-        if (!singleFile && (!CUtil::SupportsWriteFileOperations(file) || !item.Exists(false)))
+        if (!singleFile && (!CUtil::SupportsWriteFileOperations(file) || !fileItem.Exists(false)))
           break;
 
         CVideoInfoTag episode{GetDetailsForEpisode(*pDS, VideoDbDetailsAll)};
-        ART::Artwork artwork;
-        GetArtForItem(episode.m_iDbId, MediaTypeEpisode, artwork);
+        ART::Artwork episodeArtwork;
+        GetArtForItem(episode.m_iDbId, MediaTypeEpisode, episodeArtwork);
 
         if (!singleFile)
         {
@@ -11861,18 +11861,18 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
           {
             // If multiple episode file then nfo and art will have SxxEyy appended
             nfoFile = URIUtils::ReplaceExtension(
-                ART::GetTBNFile(item, episode.m_iSeason, episode.m_iEpisode), ".nfo");
-            item.SetDynPath(nfoFile);
+                ART::GetTBNFile(fileItem, episode.m_iSeason, episode.m_iEpisode), ".nfo");
+            fileItem.SetDynPath(nfoFile);
 
             // Art name is derived in GetLocalArt() which in turn calls GetTBNFile()
             // Need to set season/episode in VideoInfoTag
-            item.SetProperty("is_multi_episode", true);
-            CVideoInfoTag* tag{item.GetVideoInfoTag()};
+            fileItem.SetProperty("is_multi_episode", true);
+            CVideoInfoTag* tag{fileItem.GetVideoInfoTag()};
             tag->m_iSeason = episode.m_iSeason;
             tag->m_iEpisode = episode.m_iEpisode;
           }
           else
-            nfoFile = URIUtils::ReplaceExtension(ART::GetTBNFile(item), ".nfo");
+            nfoFile = URIUtils::ReplaceExtension(ART::GetTBNFile(fileItem), ".nfo");
 
           if (overwrite || !CFile::Exists(nfoFile, false))
           {
@@ -11897,10 +11897,10 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
         {
           // Single XML
           // Include art (if present) in XML and save
-          if (!artwork.empty())
+          if (!episodeArtwork.empty())
           {
             TiXmlElement additionalNode("art");
-            for (const auto& [artType, artPath] : artwork)
+            for (const auto& [artType, artPath] : episodeArtwork)
               XMLUtils::SetString(&additionalNode, artType.c_str(), artPath);
             episode.Save(pMain->LastChild(), "episodedetails", true, &additionalNode);
           }
@@ -11910,11 +11910,11 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
           // Arbitrary name for art
           const std::string epName{
               StringUtils::Format("s{:02}e{:02}.avi", episode.m_iSeason, episode.m_iEpisode)};
-          item.SetPath(URIUtils::AddFileToFolder(showDir, epName));
+          fileItem.SetPath(URIUtils::AddFileToFolder(showDir, epName));
         }
 
         // Write art/actor images
-        ExportArt(item, artwork, overwrite);
+        ExportArt(fileItem, episodeArtwork, overwrite);
         if (actorThumbs)
           ExportActorThumbs(actorsDir, singlePath, episode, !singleFile, overwrite, tvshowDir);
       }
@@ -11980,7 +11980,9 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
         CVariant{647}, CVariant{StringUtils::Format(g_localizeStrings.Get(15011), iFailCount)});
 }
 
-void CVideoDatabase::ExportArt(const CFileItem& item, const ART::Artwork& artwork, bool overwrite)
+void CVideoDatabase::ExportArt(const CFileItem& item,
+                               const ART::Artwork& artwork,
+                               bool overwrite) const
 {
   for (const auto& [artType, artPath] : artwork)
   {

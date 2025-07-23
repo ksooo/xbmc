@@ -30,7 +30,7 @@ class CNfoFile
 public:
   virtual ~CNfoFile() { Close(); }
 
-  CInfoScanner::InfoType Create(const std::string&, const ADDON::ScraperPtr&, int episode = -1);
+  CInfoScanner::InfoType Create(const std::string&, const ADDON::ScraperPtr&);
 
   template<class T>
   bool GetDetails(T& details, const char* document = nullptr, bool prioritise = false)

@@ -48,7 +48,7 @@ CInfoScanner::InfoType CVideoTagLoaderNFO::Load(CVideoInfoTag& tag,
   CNfoFile nfoReader;
   CInfoScanner::InfoType result = CInfoScanner::InfoType::NONE;
   if (m_info && m_info->Content() == ADDON::ContentType::TVSHOWS && !m_item.IsFolder())
-    result = nfoReader.Create(m_path, m_info, m_item.GetVideoInfoTag()->m_iEpisode);
+    result = nfoReader.Create(m_path, m_info);
   else if (m_info)
     result = nfoReader.Create(m_path, m_info);
 
@@ -195,7 +195,7 @@ std::string CVideoTagLoaderNFO::FindNFO(const CFileItem& item,
     const std::string strPath{item.IsFolder() ? item.GetPath()
                                               : URIUtils::GetDirectory(item.GetPath())};
     CFileItemList items;
-    if (CDirectory::GetDirectory(strPath, items, ".nfo", DIR_FLAG_DEFAULTS) && items.Size() > 0)
+    if (CDirectory::GetDirectory(strPath, items, ".nfo", DIR_FLAG_DEFAULTS) && !items.IsEmpty())
     {
       const CVideoInfoTag* tag{item.GetVideoInfoTag()};
       auto nfoItems{items | std::views::filter(
