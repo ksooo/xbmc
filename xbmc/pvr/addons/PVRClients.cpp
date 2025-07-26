@@ -160,6 +160,8 @@ void CPVRClients::UpdateClients(const std::string& changedAddonId /* = "" */)
   std::vector<int> clientsToDestroy; // client id
 
   {
+    std::vector<int> validClientIds;
+
     std::unique_lock lock(m_critSection);
     for (const auto& [addon, addonStatus] : addonsWithStatus)
     {
@@ -170,6 +172,8 @@ void CPVRClients::UpdateClients(const std::string& changedAddonId /* = "" */)
       {
         const CPVRClientUID clientUID(addon->ID(), instanceId);
         const int clientId = clientUID.GetUID();
+
+        validClientIds.emplace_back(clientId);
 
         const UpdateClientAction action{
             GetUpdateClientAction(addon, instanceId, clientId, instanceEnabled)};
@@ -208,6 +212,18 @@ void CPVRClients::UpdateClients(const std::string& changedAddonId /* = "" */)
           default:
             break;
         }
+      }
+    }
+
+    // Check for instanciated clients which are not valid (this might happen on profile switch,
+    // as client ids are only unique within the same profile) and schedule them for destruction.
+    for (const auto& [clientId, addon] : m_clientMap)
+    {
+      if (std::ranges::find(validClientIds, clientId) == validClientIds.cend())
+      {
+        CLog::Log(LOGINFO, "Destroying invalid PVR client: addonId={}, instanceId={}, clientId={}",
+                  addon->ID(), addon->InstanceId(), clientId);
+        clientsToDestroy.emplace_back(clientId);
       }
     }
   }
