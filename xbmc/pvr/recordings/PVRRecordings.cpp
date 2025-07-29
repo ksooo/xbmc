@@ -56,8 +56,8 @@ bool CPVRRecordings::UpdateFromClients(const std::vector<std::shared_ptr<CPVRCli
   // remove recordings that were deleted at the backend
   for (auto it = m_recordings.cbegin(); it != m_recordings.cend();)
   {
-    if ((*it).second->IsDirty() &&
-        std::ranges::find(failedClients, (*it).second->ClientID()) == failedClients.cend())
+    if ((*it).second->IsDirty() && std::find(failedClients.begin(), failedClients.end(),
+                                             (*it).second->ClientID()) == failedClients.cend())
       it = m_recordings.erase(it);
     else
       ++it;
@@ -134,7 +134,8 @@ std::vector<std::shared_ptr<CPVRRecording>> CPVRRecordings::GetAll() const
   std::vector<std::shared_ptr<CPVRRecording>> recordings;
 
   std::unique_lock lock(m_critSection);
-  std::ranges::copy(std::views::values(m_recordings), std::back_inserter(recordings));
+  std::transform(m_recordings.cbegin(), m_recordings.cend(), std::back_inserter(recordings),
+                 [](const auto& recordingEntry) { return recordingEntry.second; });
 
   return recordings;
 }
@@ -142,8 +143,9 @@ std::vector<std::shared_ptr<CPVRRecording>> CPVRRecordings::GetAll() const
 std::shared_ptr<CPVRRecording> CPVRRecordings::GetById(unsigned int iId) const
 {
   std::unique_lock lock(m_critSection);
-  const auto it = std::ranges::find_if(m_recordings, [iId](const auto& recording)
-                                       { return recording.second->RecordingID() == iId; });
+  const auto it =
+      std::find_if(m_recordings.begin(), m_recordings.end(),
+                   [iId](const auto& recording) { return recording.second->RecordingID() == iId; });
   return it != m_recordings.cend() ? (*it).second : std::shared_ptr<CPVRRecording>();
 }
 
@@ -198,10 +200,9 @@ bool MatchProvider(const std::shared_ptr<CPVRRecording>& recording,
 bool CPVRRecordings::HasRecordingForProvider(bool isRadio, int clientId, int providerId) const
 {
   std::unique_lock lock(m_critSection);
-  return std::ranges::any_of(m_recordings,
-                             [isRadio, clientId, providerId](const auto& entry) {
-                               return MatchProvider(entry.second, isRadio, clientId, providerId);
-                             });
+  return std::any_of(m_recordings.begin(), m_recordings.end(),
+                     [isRadio, clientId, providerId](const auto& entry)
+                     { return MatchProvider(entry.second, isRadio, clientId, providerId); });
 }
 
 unsigned int CPVRRecordings::GetRecordingCountByProvider(bool isRadio,
@@ -209,8 +210,8 @@ unsigned int CPVRRecordings::GetRecordingCountByProvider(bool isRadio,
                                                          int providerId) const
 {
   std::unique_lock lock(m_critSection);
-  auto recs =
-      std::ranges::count_if(m_recordings, [isRadio, clientId, providerId](const auto& entry)
+  auto recs = std::count_if(m_recordings.begin(), m_recordings.end(),
+                            [isRadio, clientId, providerId](const auto& entry)
                             { return MatchProvider(entry.second, isRadio, clientId, providerId); });
   return static_cast<unsigned int>(recs);
 }

@@ -12063,12 +12063,12 @@ std::string CGUIInfoManager::GetSkinVariableString(int info,
 
 bool CGUIInfoManager::ConditionsChangedValues(const std::map<INFO::InfoPtr, bool>& map) const
 {
-  return std::ranges::any_of(map,
-                             [](const auto& entry)
-                             {
-                               const auto& [info, value] = entry;
-                               return info->Get(INFO::DEFAULT_CONTEXT) != value;
-                             });
+  return std::any_of(map.begin(), map.end(),
+                     [](const auto& entry)
+                     {
+                       const auto& [info, value] = entry;
+                       return info->Get(INFO::DEFAULT_CONTEXT) != value;
+                     });
 }
 
 int CGUIInfoManager::GetMessageMask()

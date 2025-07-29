@@ -30,7 +30,6 @@
 #include "utils/IPlatformLog.h"
 #include "utils/logtypes.h"
 
-#include <source_location>
 #include <string>
 #include <vector>
 
@@ -131,11 +130,9 @@ public:
                                        fmt::make_format_args(args...));
   }
 
-#define LogF(level, format, ...) \
-  Log((level), ("{}: " format), std::source_location::current().function_name(), ##__VA_ARGS__)
+#define LogF(level, format, ...) Log((level), ("{}: " format), __func__, ##__VA_ARGS__)
 #define LogFC(level, component, format, ...) \
-  Log((level), (component), ("{}: " format), std::source_location::current().function_name(), \
-      ##__VA_ARGS__)
+  Log((level), (component), ("{}: " format), __func__, ##__VA_ARGS__)
 
 private:
   static CLog& GetInstance();

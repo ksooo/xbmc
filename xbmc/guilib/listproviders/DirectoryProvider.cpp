@@ -595,10 +595,12 @@ bool CDirectoryProvider::OnEventPublished(Topic topic /*= Topic::UNSPECIFIED*/)
       break;
     case Topic::VIDEO_LIBRARY:
       // We don't need to do anything if there are no fitting items.
-      return std::ranges::find(m_itemTypes, InfoTagType::VIDEO) == m_itemTypes.cend();
+      return std::find(m_itemTypes.begin(), m_itemTypes.end(), InfoTagType::VIDEO) ==
+             m_itemTypes.cend();
     case Topic::AUDIO_LIBRARY:
       // We don't need to do anything if there are no fitting items.
-      return std::ranges::find(m_itemTypes, InfoTagType::AUDIO) == m_itemTypes.cend();
+      return std::find(m_itemTypes.begin(), m_itemTypes.end(), InfoTagType::AUDIO) ==
+             m_itemTypes.cend();
   }
   m_updateState = UpdateState::INVALIDATED;
   return true;

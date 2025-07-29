@@ -251,7 +251,8 @@ void CSkinInfo::Start()
   {
     // find the closest resolution
     const RESOLUTION_INFO& target = CServiceBroker::GetWinSystem()->GetGfxContext().GetResInfo();
-    const RESOLUTION_INFO& res = *std::ranges::min_element(m_resolutions, closestRes(target));
+    const RESOLUTION_INFO& res =
+        *std::min_element(m_resolutions.begin(), m_resolutions.end(), closestRes(target));
     m_currentAspect = res.strId;
   }
 }
@@ -274,7 +275,7 @@ std::string CSkinInfo::GetSkinPath(const std::string& strFile,
 
   // find the closest resolution
   const RESOLUTION_INFO &target = CServiceBroker::GetWinSystem()->GetGfxContext().GetResInfo();
-  *res = *std::ranges::min_element(m_resolutions, closestRes(target));
+  *res = *std::min_element(m_resolutions.begin(), m_resolutions.end(), closestRes(target));
 
   std::string strPath = URIUtils::AddFileToFolder(strPathToUse, res->strMode, strFile);
   if (CFileUtils::Exists(strPath))
@@ -494,7 +495,7 @@ void CSkinInfo::SettingOptionsSkinColorsFiller(const SettingConstPtr& setting,
       vecColors.push_back(pItem->GetLabel().substr(0, pItem->GetLabel().size() - 4));
     }
   }
-  std::ranges::sort(vecColors, sortstringbyname());
+  std::sort(vecColors.begin(), vecColors.end(), sortstringbyname());
   for (const auto& color : vecColors)
     list.emplace_back(color, color);
 

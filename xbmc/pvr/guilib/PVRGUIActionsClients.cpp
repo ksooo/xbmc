@@ -36,11 +36,11 @@ bool CPVRGUIActionsClients::ProcessSettingsMenuHooks() const
   const CPVRClientMap clients = CServiceBroker::GetPVRManager().Clients()->GetCreatedClients();
 
   std::vector<std::pair<std::shared_ptr<CPVRClient>, CPVRClientMenuHook>> settingsHooks;
-  for (const auto& client : std::views::values(clients))
+  for (const auto& client : clients)
   {
-    const auto hooks = client->GetMenuHooks()->GetSettingsHooks();
-    std::ranges::transform(hooks, std::back_inserter(settingsHooks),
-                           [&client](const auto& hook) { return std::make_pair(client, hook); });
+    const auto hooks = client.second->GetMenuHooks()->GetSettingsHooks();
+    std::transform(hooks.begin(), hooks.end(), std::back_inserter(settingsHooks),
+                   [&client](const auto& hook) { return std::make_pair(client.second, hook); });
   }
 
   if (settingsHooks.empty())

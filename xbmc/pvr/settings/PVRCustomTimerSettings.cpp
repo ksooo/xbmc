@@ -180,9 +180,8 @@ bool CPVRCustomTimerSettings::IntSettingDefinitionsFiller(const std::string& set
   }
 
   const std::vector<SettingIntValue>& values{def->GetIntDefinition().GetValues()};
-  std::ranges::transform(values, std::back_inserter(list),
-                         [](const auto& value)
-                         { return IntegerSettingOption(value.first, value.second); });
+  std::transform(values.begin(), values.end(), std::back_inserter(list),
+                 [](const auto& value) { return IntegerSettingOption(value.first, value.second); });
 
   const auto it2{m_customProps.find(def->GetId())};
   if (it2 != m_customProps.cend())
@@ -205,9 +204,8 @@ bool CPVRCustomTimerSettings::StringSettingDefinitionsFiller(const std::string& 
   }
 
   const std::vector<SettingStringValue>& values{def->GetStringDefinition().GetValues()};
-  std::ranges::transform(values, std::back_inserter(list),
-                         [](const auto& value)
-                         { return StringSettingOption(value.first, value.second); });
+  std::transform(values.begin(), values.end(), std::back_inserter(list),
+                 [](const auto& value) { return StringSettingOption(value.first, value.second); });
 
   const auto it2{m_customProps.find(def->GetId())};
   if (it2 != m_customProps.cend())
@@ -248,8 +246,8 @@ bool CPVRCustomTimerSettings::IsSettingSupportedForTimerType(const std::string& 
 std::shared_ptr<const CPVRTimerSettingDefinition> CPVRCustomTimerSettings::GetSettingDefintion(
     const std::string& settingId) const
 {
-  const auto it{std::ranges::find_if(m_customSettingDefs, [&settingId](const auto& entry)
-                                     { return entry.first == settingId; })};
+  const auto it{std::find_if(m_customSettingDefs.begin(), m_customSettingDefs.end(),
+                             [&settingId](const auto& entry) { return entry.first == settingId; })};
   if (it == m_customSettingDefs.cend())
     return {};
 

@@ -100,8 +100,8 @@ AddonPtr CBinaryAddonCache::GetAddonInstance(const std::string& strId, AddonType
   if (it != m_addons.end())
   {
     const VECADDONS& addons = it->second;
-    const auto itAddon =
-        std::ranges::find_if(addons, [&strId](const AddonPtr& a) { return a->ID() == strId; });
+    const auto itAddon = std::find_if(addons.begin(), addons.end(),
+                                      [&strId](const AddonPtr& a) { return a->ID() == strId; });
 
     if (itAddon != addons.end())
       addon = *itAddon;

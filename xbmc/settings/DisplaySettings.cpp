@@ -579,8 +579,8 @@ void CDisplaySettings::UpdateCalibrations()
 
   // Add new (unique) resolutions
   for (ResolutionInfos::const_iterator res(m_resolutions.cbegin() + RES_CUSTOM); res != m_resolutions.cend(); ++res)
-    if (std::ranges::find_if(m_calibrations, [&](const RESOLUTION_INFO& info)
-                             { return StringUtils::EqualsNoCase(res->strMode, info.strMode); }) ==
+    if (std::find_if(m_calibrations.begin(), m_calibrations.end(), [&](const RESOLUTION_INFO& info)
+                     { return StringUtils::EqualsNoCase(res->strMode, info.strMode); }) ==
         m_calibrations.cend())
       m_calibrations.emplace_back(*res);
 
@@ -727,8 +727,8 @@ void CDisplaySettings::SettingOptionsModesFiller(const std::shared_ptr<const CSe
     }
   }
 
-  std::ranges::sort(list, [](const StringSettingOption& i, const StringSettingOption& j)
-                    { return (i.value > j.value); });
+  std::sort(list.begin(), list.end(), [](const StringSettingOption& i, const StringSettingOption& j)
+            { return (i.value > j.value); });
 }
 
 void CDisplaySettings::SettingOptionsRefreshChangeDelaysFiller(
@@ -810,9 +810,9 @@ void CDisplaySettings::SettingOptionsResolutionsFiller(const SettingConstPtr& se
     // ids are unique, so try to find a match by id first. Then resort to best matching resolution.
     if (!info.strId.empty())
     {
-      const auto it = std::ranges::find_if(
-          resolutionInfos, [&info](const std::pair<RESOLUTION, RESOLUTION_INFO>& resItem)
-          { return info.strId == resItem.second.strId; });
+      const auto it = std::find_if(resolutionInfos.begin(), resolutionInfos.end(),
+                                   [&info](const std::pair<RESOLUTION, RESOLUTION_INFO>& resItem)
+                                   { return info.strId == resItem.second.strId; });
       current =
           it != resolutionInfos.end()
               ? it->first

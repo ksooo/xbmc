@@ -1389,8 +1389,9 @@ void RemoveShortPlaylists(std::vector<PlaylistInfo>& playlists)
                                                       ->GetAdvancedSettings()
                                                       ->m_minimumEpisodePlaylistDuration *
                                                   1000};
-  if (std::ranges::any_of(playlists, [&minimumDuration](const PlaylistInfo& playlist)
-                          { return playlist.duration >= minimumDuration; }))
+  if (std::any_of(playlists.begin(), playlists.end(),
+                  [&minimumDuration](const PlaylistInfo& playlist)
+                  { return playlist.duration >= minimumDuration; }))
   {
     std::erase_if(playlists, [&minimumDuration](const PlaylistInfo& playlist)
                   { return playlist.duration < minimumDuration; });
@@ -1399,21 +1400,21 @@ void RemoveShortPlaylists(std::vector<PlaylistInfo>& playlists)
 
 void SortPlaylists(std::vector<PlaylistInfo>& playlists, SortTitles sort, int mainPlaylist)
 {
-  std::ranges::sort(playlists,
-                    [&sort](const PlaylistInfo& i, const PlaylistInfo& j)
-                    {
-                      if (sort == SortTitles::SORT_TITLES_MOVIE)
-                      {
-                        if (i.duration == j.duration)
-                          return i.playlist < j.playlist;
-                        return i.duration > j.duration;
-                      }
-                      return i.playlist < j.playlist;
-                    });
+  std::sort(playlists.begin(), playlists.end(),
+            [&sort](const PlaylistInfo& i, const PlaylistInfo& j)
+            {
+              if (sort == SortTitles::SORT_TITLES_MOVIE)
+              {
+                if (i.duration == j.duration)
+                  return i.playlist < j.playlist;
+                return i.duration > j.duration;
+              }
+              return i.playlist < j.playlist;
+            });
 
   const auto& pivot{
-      std::ranges::find_if(playlists, [&mainPlaylist](const PlaylistInfo& title)
-                           { return title.playlist == static_cast<unsigned int>(mainPlaylist); })};
+      std::find_if(playlists.begin(), playlists.end(), [&mainPlaylist](const PlaylistInfo& title)
+                   { return title.playlist == static_cast<unsigned int>(mainPlaylist); })};
   if (pivot != playlists.end())
     std::rotate(playlists.begin(), pivot, pivot + 1);
 }
@@ -1491,7 +1492,9 @@ bool GetPlaylists(const CURL& url,
     return false;
 
   // Now we have curated playlists, find longest (for main title derivation)
-  const auto& it{std::ranges::max_element(playlists, {}, &PlaylistInfo::duration)};
+  const auto it{std::max_element(playlists.begin(), playlists.end(),
+                                 [](const auto& a, const auto& b)
+                                 { return a.duration < b.duration; })};
   const std::chrono::milliseconds maxDuration{it->duration};
   const unsigned int maxPlaylist{it->playlist};
 
@@ -1552,8 +1555,13 @@ void ProcessPlaylist(PlaylistMap& playlists, PlaylistInfo& titleInfo, ClipMap& c
   }
 
   // Get languages
-  const std::string langs{fmt::format(
-      "{}", fmt::join(titleInfo.audioStreams | std::views::transform(&DiscStreamInfo::lang), ","))};
+  std::string langs;
+  for (const auto& langInfo : titleInfo.audioStreams)
+  {
+    langs += langInfo.lang;
+    langs += ",";
+  }
+
   info.languages = langs;
   titleInfo.languages = langs;
 
@@ -1769,9 +1777,9 @@ bool CBlurayDirectory::GetDirectory(const CURL& url, CFileItemList& items)
       episode = std::stoi(regex.GetMatch(3));
 
       // Check desired episode is on disc
-      const auto& it{
-          std::ranges::find_if(episodesOnDisc, [&season, &episode](const CVideoInfoTag& e)
-                               { return e.m_iSeason == season && e.m_iEpisode == episode; })};
+      const auto& it{std::find_if(episodesOnDisc.begin(), episodesOnDisc.end(),
+                                  [&season, &episode](const CVideoInfoTag& e)
+                                  { return e.m_iSeason == season && e.m_iEpisode == episode; })};
       if (it == episodesOnDisc.end())
         return false; // Episode not on disc
       episodeIndex = static_cast<int>(std::distance(episodesOnDisc.begin(), it));

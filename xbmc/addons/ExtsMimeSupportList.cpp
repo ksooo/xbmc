@@ -60,8 +60,9 @@ void CExtsMimeSupportList::Update(const std::string& id)
   {
     std::unique_lock lock(m_critSection);
 
-    const auto itAddon = std::ranges::find_if(m_supportedList, [&id](const SupportValues& addon)
-                                              { return addon.m_addonInfo->ID() == id; });
+    const auto itAddon =
+        std::find_if(m_supportedList.begin(), m_supportedList.end(),
+                     [&id](const SupportValues& addon) { return addon.m_addonInfo->ID() == id; });
 
     if (itAddon != m_supportedList.end())
     {
@@ -183,9 +184,9 @@ bool CExtsMimeSupportList::IsExtensionSupported(const std::string& ext)
 
   for (const auto& entry : m_supportedList)
   {
-    const auto it = std::ranges::find_if(entry.m_supportedExtensions,
-                                         [&ext](const std::pair<std::string, SupportValue>& v)
-                                         { return v.first == ext; });
+    const auto it = std::find_if(
+        entry.m_supportedExtensions.begin(), entry.m_supportedExtensions.end(),
+        [&ext](const std::pair<std::string, SupportValue>& v) { return v.first == ext; });
     if (it != entry.m_supportedExtensions.end())
       return true;
   }
@@ -202,9 +203,9 @@ std::vector<std::pair<AddonType, std::shared_ptr<ADDON::CAddonInfo>>> CExtsMimeS
 
   for (const auto& entry : m_supportedList)
   {
-    const auto it = std::ranges::find_if(entry.m_supportedExtensions,
-                                         [&ext](const std::pair<std::string, SupportValue>& v)
-                                         { return v.first == ext; });
+    const auto it = std::find_if(
+        entry.m_supportedExtensions.begin(), entry.m_supportedExtensions.end(),
+        [&ext](const std::pair<std::string, SupportValue>& v) { return v.first == ext; });
     if (it != entry.m_supportedExtensions.end() &&
         (select == FilterSelect::all || (select == FilterSelect::hasTags && entry.m_hasTags) ||
          (select == FilterSelect::hasTracks && entry.m_hasTracks)))
@@ -221,9 +222,9 @@ bool CExtsMimeSupportList::IsMimetypeSupported(const std::string& mimetype)
   for (const auto& entry : m_supportedList)
   {
 
-    const auto it = std::ranges::find_if(entry.m_supportedMimetypes,
-                                         [&mimetype](const std::pair<std::string, SupportValue>& v)
-                                         { return v.first == mimetype; });
+    const auto it = std::find_if(
+        entry.m_supportedMimetypes.begin(), entry.m_supportedMimetypes.end(),
+        [&mimetype](const std::pair<std::string, SupportValue>& v) { return v.first == mimetype; });
     if (it != entry.m_supportedMimetypes.end())
       return true;
   }
@@ -240,9 +241,9 @@ std::vector<std::pair<AddonType, std::shared_ptr<CAddonInfo>>> CExtsMimeSupportL
 
   for (const auto& entry : m_supportedList)
   {
-    const auto it = std::ranges::find_if(entry.m_supportedMimetypes,
-                                         [&mimetype](const std::pair<std::string, SupportValue>& v)
-                                         { return v.first == mimetype; });
+    const auto it = std::find_if(
+        entry.m_supportedMimetypes.begin(), entry.m_supportedMimetypes.end(),
+        [&mimetype](const std::pair<std::string, SupportValue>& v) { return v.first == mimetype; });
     if (it != entry.m_supportedMimetypes.end() &&
         (select == FilterSelect::all || (select == FilterSelect::hasTags && entry.m_hasTags) ||
          (select == FilterSelect::hasTracks && entry.m_hasTracks)))
@@ -257,8 +258,9 @@ std::vector<AddonSupportEntry> CExtsMimeSupportList::GetSupportedExtsAndMimeType
 {
   std::vector<AddonSupportEntry> list;
 
-  const auto it = std::ranges::find_if(m_supportedList, [&addonId](const SupportValues& v)
-                                       { return v.m_addonInfo->ID() == addonId; });
+  const auto it =
+      std::find_if(m_supportedList.begin(), m_supportedList.end(),
+                   [&addonId](const SupportValues& v) { return v.m_addonInfo->ID() == addonId; });
   if (it == m_supportedList.end())
     return list;
 

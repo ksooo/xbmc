@@ -405,8 +405,10 @@ void CAddonDatabase::SyncInstalled(const std::set<std::string, std::less<>>& ids
 
     std::set<std::string, std::less<>> added;
     std::set<std::string, std::less<>> removed;
-    std::ranges::set_difference(ids, db, std::inserter(added, added.end()));
-    std::ranges::set_difference(db, ids, std::inserter(removed, removed.end()));
+    std::set_difference(ids.begin(), ids.end(), db.begin(), db.end(),
+                        std::inserter(added, added.end()));
+    std::set_difference(db.begin(), db.end(), ids.begin(), ids.end(),
+                        std::inserter(removed, removed.end()));
 
     for (const auto& id : added)
       CLog::Log(LOGDEBUG, "CAddonDatabase: {} has been installed.", id);
@@ -1262,7 +1264,7 @@ bool IsAddonImageChecked(const std::string& addonImage,
   if (addonImage.empty())
     return false;
 
-  return std::ranges::find(imagesToCheck, addonImage) != imagesToCheck.end();
+  return std::find(imagesToCheck.begin(), imagesToCheck.end(), addonImage) != imagesToCheck.end();
 }
 } // namespace
 

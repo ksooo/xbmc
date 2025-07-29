@@ -201,7 +201,7 @@ void CGUIDialogContentSettings::OnSettingAction(const std::shared_ptr<const CSet
       labels.emplace_back(ADDON::TranslateContent(ContentType::MUSICVIDEOS, true),
                           ContentType::MUSICVIDEOS);
     }
-    std::ranges::sort(labels);
+    std::sort(labels.begin(), labels.end());
 
     CGUIDialogSelect *dialog = CServiceBroker::GetGUI()->GetWindowManager().GetWindow<CGUIDialogSelect>(WINDOW_DIALOG_SELECT);
     if (dialog)

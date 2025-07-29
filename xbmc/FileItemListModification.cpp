@@ -31,14 +31,14 @@ CFileItemListModification& CFileItemListModification::GetInstance()
 
 bool CFileItemListModification::CanModify(const CFileItemList &items) const
 {
-  return std::ranges::any_of(m_modifiers,
-                             [&items](const auto& mod) { return mod->CanModify(items); });
+  return std::any_of(m_modifiers.begin(), m_modifiers.end(),
+                     [&items](const auto& mod) { return mod->CanModify(items); });
 }
 
 bool CFileItemListModification::Modify(CFileItemList &items) const
 {
   bool result = false;
-  std::ranges::for_each(m_modifiers,
-                        [&result, &items](const auto& mod) { result |= mod->Modify(items); });
+  std::for_each(m_modifiers.begin(), m_modifiers.end(),
+                [&result, &items](const auto& mod) { result |= mod->Modify(items); });
   return result;
 }

@@ -13178,7 +13178,7 @@ std::vector<std::string> CMusicDatabase::GetAvailableArtTypesForItem(int mediaId
     std::string artType = urlEntry.m_aspect;
     if (artType.empty())
       artType = "thumb";
-    if (std::ranges::find(result, artType) == result.end())
+    if (std::find(result.begin(), result.end(), artType) == result.end())
       result.push_back(artType);
   }
   return result;

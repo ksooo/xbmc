@@ -1074,10 +1074,8 @@ void CGUIDialogPVRChannelManager::SaveList()
 
 bool CGUIDialogPVRChannelManager::HasChangedItems() const
 {
-  return std::ranges::any_of(*m_channelItems,
-                             [](const auto& item) {
-                               return item && item->GetProperty(PROPERTY_ITEM_CHANGED).asBoolean();
-                             });
+  return std::any_of((*m_channelItems).begin(), (*m_channelItems).end(), [](const auto& item)
+                     { return item && item->GetProperty(PROPERTY_ITEM_CHANGED).asBoolean(); });
 }
 
 namespace

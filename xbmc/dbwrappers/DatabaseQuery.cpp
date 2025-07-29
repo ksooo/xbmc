@@ -585,7 +585,7 @@ void CDatabaseQueryRuleCombination::AddRule(const std::shared_ptr<CDatabaseQuery
 
 void CDatabaseQueryRuleCombination::RemoveRule(const std::shared_ptr<CDatabaseQueryRule>& rule)
 {
-  const auto it = std::ranges::find(m_rules, rule);
+  const auto it = std::find(m_rules.begin(), m_rules.end(), rule);
   if (it != m_rules.cend())
     m_rules.erase(it);
 }

@@ -15,31 +15,30 @@
 
 using namespace PVR;
 
-namespace
-{
-constexpr auto KeyProjection = &std::pair<std::string, std::string>::first;
-}
-
 std::string CPVRStreamProperties::GetStreamURL() const
 {
-  const auto it = std::ranges::find(*this, PVR_STREAM_PROPERTY_STREAMURL, KeyProjection);
+  const auto it = std::find_if(cbegin(), cend(), [](const auto& prop)
+                               { return prop.first == PVR_STREAM_PROPERTY_STREAMURL; });
   return it != cend() ? (*it).second : std::string();
 }
 
 std::string CPVRStreamProperties::GetStreamMimeType() const
 {
-  const auto it = std::ranges::find(*this, PVR_STREAM_PROPERTY_MIMETYPE, KeyProjection);
+  const auto it = std::find_if(cbegin(), cend(), [](const auto& prop)
+                               { return prop.first == PVR_STREAM_PROPERTY_MIMETYPE; });
   return it != cend() ? (*it).second : std::string();
 }
 
 bool CPVRStreamProperties::EPGPlaybackAsLive() const
 {
-  const auto it = std::ranges::find(*this, PVR_STREAM_PROPERTY_EPGPLAYBACKASLIVE, KeyProjection);
+  const auto it = std::find_if(cbegin(), cend(), [](const auto& prop)
+                               { return prop.first == PVR_STREAM_PROPERTY_EPGPLAYBACKASLIVE; });
   return it != cend() ? StringUtils::EqualsNoCase((*it).second, "true") : false;
 }
 
 bool CPVRStreamProperties::LivePlaybackAsEPG() const
 {
-  const auto it = std::ranges::find(*this, PVR_STREAM_PROPERTY_LIVEPLAYBACKASEPG, KeyProjection);
+  const auto it = std::find_if(cbegin(), cend(), [](const auto& prop)
+                               { return prop.first == PVR_STREAM_PROPERTY_LIVEPLAYBACKASEPG; });
   return it != cend() ? StringUtils::EqualsNoCase((*it).second, "true") : false;
 }

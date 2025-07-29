@@ -25,15 +25,15 @@
 template<typename TKey, typename TValue>
 bool CheckSettingOptionsValidity(const TValue& value, const std::vector<std::pair<TKey, TValue>>& options)
 {
-  return std::ranges::any_of(options,
-                             [&value](const auto& option) { return option.second == value; });
+  return std::any_of(options.begin(), options.end(),
+                     [&value](const auto& option) { return option.second == value; });
 }
 
 template<typename TKey, typename TValue>
 bool CheckSettingOptionsValidity(const TValue& value, const std::vector<TKey>& options)
 {
-  return std::ranges::any_of(options,
-                             [&value](const auto& option) { return option.value == value; });
+  return std::any_of(options.begin(), options.end(),
+                     [&value](const auto& option) { return option.value == value; });
 }
 
 bool DeserializeOptionsSort(const TiXmlElement* optionsElement, SettingOptionsSort& optionsSort)

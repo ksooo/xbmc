@@ -170,7 +170,8 @@ void CPVREpgContainer::Unload()
     std::unique_lock lock(m_critSection);
 
     // clear all epg tables and remove pointers to epg tables on channels
-    std::ranges::copy(std::views::values(m_epgIdToEpgMap), std::back_inserter(epgs));
+    std::transform(m_epgIdToEpgMap.cbegin(), m_epgIdToEpgMap.cend(), std::back_inserter(epgs),
+                   [](const auto& epgEntry) { return epgEntry.second; });
 
     m_epgIdToEpgMap.clear();
     m_channelUidToEpgMap.clear();
@@ -447,7 +448,8 @@ std::vector<std::shared_ptr<CPVREpg>> CPVREpgContainer::GetAllEpgs() const
   std::vector<std::shared_ptr<CPVREpg>> epgs;
 
   std::unique_lock lock(m_critSection);
-  std::ranges::copy(std::views::values(m_epgIdToEpgMap), std::back_inserter(epgs));
+  std::transform(m_epgIdToEpgMap.cbegin(), m_epgIdToEpgMap.cend(), std::back_inserter(epgs),
+                 [](const auto& epgEntry) { return epgEntry.second; });
 
   return epgs;
 }

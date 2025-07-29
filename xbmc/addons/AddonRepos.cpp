@@ -75,14 +75,16 @@ bool CAddonRepos::IsFromOfficialRepo(const std::shared_ptr<IAddon>& addon,
     return addon->Origin() == officialRepo.m_repoId;
   };
 
-  return addon->Origin() == ORIGIN_SYSTEM || std::ranges::any_of(s_officialRepoInfos, comparator);
+  return addon->Origin() == ORIGIN_SYSTEM ||
+         std::any_of(s_officialRepoInfos.begin(), s_officialRepoInfos.end(), comparator);
 }
 
 bool CAddonRepos::IsOfficialRepo(const std::string& repoId)
 {
   return repoId == ORIGIN_SYSTEM ||
-         std::ranges::any_of(s_officialRepoInfos, [&repoId](const RepoInfo& officialRepo)
-                             { return repoId == officialRepo.m_repoId; });
+         std::any_of(s_officialRepoInfos.begin(), s_officialRepoInfos.end(),
+                     [&repoId](const RepoInfo& officialRepo)
+                     { return repoId == officialRepo.m_repoId; });
 }
 
 bool CAddonRepos::LoadAddonsFromDatabase(const std::string& addonId,
@@ -387,8 +389,10 @@ void CAddonRepos::GetLatestAddonVersionsFromAllRepos(
     // content of official repos is stored in m_latestVersionsByRepo too
     // so we need to filter them out
 
-    if (std::ranges::none_of(s_officialRepoInfos, [&repoId](const ADDON::RepoInfo& officialRepo)
-                             { return repoId == officialRepo.m_repoId; }))
+    const auto r{repoId};
+    if (std::none_of(s_officialRepoInfos.begin(), s_officialRepoInfos.end(),
+                     [&r](const ADDON::RepoInfo& officialRepo)
+                     { return r == officialRepo.m_repoId; }))
     {
       for (const auto& [latestAddonId, latestAddon] : addons)
       {
@@ -501,9 +505,9 @@ void CAddonRepos::BuildCompatibleVersionsList(
     return (a->Version() > b->Version());
   };
 
-  std::ranges::sort(officialVersions, comparator);
-  std::ranges::sort(privateVersions, comparator);
+  std::sort(officialVersions.begin(), officialVersions.end(), comparator);
+  std::sort(privateVersions.begin(), privateVersions.end(), comparator);
 
   compatibleVersions = std::move(officialVersions);
-  std::ranges::move(privateVersions, std::back_inserter(compatibleVersions));
+  std::move(privateVersions.begin(), privateVersions.end(), std::back_inserter(compatibleVersions));
 }

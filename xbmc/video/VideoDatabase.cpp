@@ -3871,7 +3871,7 @@ void CVideoDatabase::GetEpisodesByFileId(int idFile, std::vector<CVideoInfoTag>&
       return;
 
     // Get episode details
-    for (const auto& episode : fileMap | std::views::values)
+    for (const auto& [_, episode] : fileMap)
     {
       m_pDS->goto_rec(episode.index);
       CVideoInfoTag tag{GetDetailsForEpisode(*m_pDS)};
@@ -4565,7 +4565,7 @@ void CVideoDatabase::GetSameVideoItems(const CFileItem& item, CFileItemList& ite
         int movieId = m_pDS->fv("idMovie").get_asInt();
 
         // add movieId if not already in itemIds
-        if (std::ranges::find(itemIds, movieId) == itemIds.end())
+        if (std::find(itemIds.begin(), itemIds.end(), movieId) == itemIds.end())
           itemIds.emplace_back(movieId);
 
         m_pDS->next();
@@ -5246,9 +5246,8 @@ void CVideoDatabase::GetCast(int media_id, const std::string &media_type, std::v
       info.strRole = m_pDS2->fv(1).get_asString();
 
       // ignore identical actors (since cast might already be prefilled)
-      if (std::ranges::none_of(
-              cast, [&info](const SActorInfo& actor)
-              { return actor.strName == info.strName && actor.strRole == info.strRole; }))
+      if (std::none_of(cast.begin(), cast.end(), [&info](const SActorInfo& actor)
+                       { return actor.strName == info.strName && actor.strRole == info.strRole; }))
       {
         info.order = m_pDS2->fv(2).get_asInt();
         info.thumbUrl.ParseFromData(m_pDS2->fv(3).get_asString());
@@ -5500,12 +5499,12 @@ bool CVideoDatabase::SetArtForItem(int mediaId,
                                    const MediaType& mediaType,
                                    const KODI::ART::Artwork& art)
 {
-  return std::ranges::all_of(art,
-                             [this, mediaId, &mediaType](const auto& artwork)
-                             {
-                               const auto [type, url] = artwork;
-                               return SetArtForItem(mediaId, mediaType, type, url);
-                             });
+  return std::all_of(art.begin(), art.end(),
+                     [this, mediaId, &mediaType](const auto& artwork)
+                     {
+                       const auto [type, url] = artwork;
+                       return SetArtForItem(mediaId, mediaType, type, url);
+                     });
 }
 
 bool CVideoDatabase::SetArtForItem(int mediaId,
@@ -5807,7 +5806,8 @@ std::vector<std::string> GetBasicItemAvailableArtTypes(int mediaId,
 
   //! @todo artwork: fanart stored separately, doesn't need to be
   tag.m_fanart.Unpack();
-  if (tag.m_fanart.GetNumFanarts() && std::ranges::find(result, "fanart") == result.cend())
+  if (tag.m_fanart.GetNumFanarts() &&
+      std::find(result.begin(), result.end(), "fanart") == result.cend())
     result.emplace_back("fanart");
 
   // all other images
@@ -5819,7 +5819,7 @@ std::vector<std::string> GetBasicItemAvailableArtTypes(int mediaId,
       artType = tag.m_type == MediaTypeEpisode ? "thumb" : "poster";
     if (urlEntry.m_type == CScraperUrl::UrlType::General && // exclude season artwork for TV shows
         !StringUtils::StartsWith(artType, "set.") && // exclude movie set artwork for movies
-        std::ranges::find(result, artType) == result.cend())
+        std::find(result.begin(), result.end(), artType) == result.cend())
     {
       result.emplace_back(std::move(artType));
     }
@@ -5843,7 +5843,7 @@ std::vector<std::string> GetSeasonAvailableArtTypes(int mediaId, CVideoDatabase&
     if (artType.empty())
       artType = "poster";
     if (urlEntry.m_type == CScraperUrl::UrlType::Season && urlEntry.m_season == tag.m_iSeason &&
-        std::ranges::find(result, artType) == result.cend())
+        std::find(result.begin(), result.end(), artType) == result.cend())
     {
       result.emplace_back(std::move(artType));
     }
@@ -5869,7 +5869,7 @@ std::vector<std::string> GetMovieSetAvailableArtTypes(int mediaId, CVideoDatabas
           continue;
 
         std::string artType = urlEntry.m_aspect.substr(4);
-        if (std::ranges::find(result, artType) == result.cend())
+        if (std::find(result.begin(), result.end(), artType) == result.cend())
           result.emplace_back(std::move(artType));
       }
     }
@@ -13602,12 +13602,12 @@ bool CVideoDatabase::SetVideoVersionDefaultArt(int dbId, int idFrom, const Media
   KODI::ART::Artwork art;
   if (GetArtForItem(idFrom, mediaType, art))
   {
-    return std::ranges::all_of(art,
-                               [this, dbId](const auto& artdetails)
-                               {
-                                 const auto& [arttype, arturl] = artdetails;
-                                 return SetArtForItem(dbId, MediaTypeVideoVersion, arttype, arturl);
-                               });
+    return std::all_of(art.begin(), art.end(),
+                       [this, dbId](const auto& artdetails)
+                       {
+                         const auto& [arttype, arturl] = artdetails;
+                         return SetArtForItem(dbId, MediaTypeVideoVersion, arttype, arturl);
+                       });
   }
   return false;
 }
@@ -13713,7 +13713,7 @@ std::vector<std::string> CVideoDatabase::GetUsedImages(
         if (imageFile.GetSpecialType() == "video" && !imageFile.GetOption("chapter").empty())
         {
           const auto& target = imageFile.GetTargetFile();
-          const auto quickFind = std::ranges::find(foundVideoFiles, target);
+          const auto quickFind = std::find(foundVideoFiles.begin(), foundVideoFiles.end(), target);
           if (quickFind != foundVideoFiles.end())
           {
             result.emplace_back(image);

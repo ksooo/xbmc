@@ -194,8 +194,8 @@ bool CImageDecoder::Decode(unsigned char* const pixels,
   if (!m_created || !m_ifc.imagedecoder->toAddon->decode)
     return false;
 
-  const auto it = std::ranges::find_if(KodiToAddonFormat,
-                                       [format](auto& p) { return std::get<0>(p) == format; });
+  const auto it = std::find_if(KodiToAddonFormat.begin(), KodiToAddonFormat.end(),
+                               [format](auto& p) { return std::get<0>(p) == format; });
   if (it == KodiToAddonFormat.end())
     return false;
 

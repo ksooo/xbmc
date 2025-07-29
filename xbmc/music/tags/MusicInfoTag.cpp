@@ -1270,7 +1270,7 @@ void CMusicInfoTag::AddArtistRole(const std::string& role, const std::vector<std
   {
     CMusicRole artistCredit{role, Trim(artist)};
     //Prevent duplicate entries
-    const auto credit = std::ranges::find(m_musicRoles, artistCredit);
+    const auto credit = std::find(m_musicRoles.begin(), m_musicRoles.end(), artistCredit);
     if (credit == m_musicRoles.end())
       m_musicRoles.emplace_back(artistCredit);
   }

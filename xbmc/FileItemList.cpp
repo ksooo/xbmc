@@ -100,7 +100,8 @@ bool CFileItemList::Contains(const std::string& fileName) const
     return m_map.contains(fname);
 
   // slow method...
-  return std::ranges::any_of(m_items, [&fname](const auto& pItem) { return pItem->IsPath(fname); });
+  return std::any_of(m_items.begin(), m_items.end(),
+                     [&fname](const auto& pItem) { return pItem->IsPath(fname); });
 }
 
 void CFileItemList::Clear()
@@ -123,7 +124,7 @@ void CFileItemList::ClearItems()
   std::unique_lock lock(m_lock);
   // make sure we free the memory of the items (these are GUIControls which may have allocated resources)
   FreeMemory();
-  std::ranges::for_each(m_items, [](const auto& item) { item->FreeMemory(); });
+  std::for_each(m_items.begin(), m_items.end(), [](const auto& item) { item->FreeMemory(); });
   m_items.clear();
   m_map.clear();
 }
@@ -172,8 +173,8 @@ void CFileItemList::AddFront(const CFileItemPtr& pItem, int itemPosition)
 void CFileItemList::Remove(const CFileItem* pItem)
 {
   std::unique_lock lock(m_lock);
-  const auto it =
-      std::ranges::find_if(m_items, [pItem](const auto& item) { return item.get() == pItem; });
+  const auto it = std::find_if(m_items.begin(), m_items.end(),
+                               [pItem](const auto& item) { return item.get() == pItem; });
   if (it != m_items.end())
   {
     m_items.erase(it);
@@ -211,7 +212,7 @@ void CFileItemList::Append(const CFileItemList& itemlist)
 {
   std::unique_lock lock(m_lock);
 
-  std::ranges::for_each(itemlist, [this](const auto& item) { Add(item); });
+  std::for_each(itemlist.begin(), itemlist.end(), [this](const auto& item) { Add(item); });
 }
 
 void CFileItemList::Assign(const CFileItemList& itemlist, bool append)
@@ -254,8 +255,8 @@ bool CFileItemList::Copy(const CFileItemList& items, bool copyItems /* = true */
   if (copyItems)
   {
     // make a copy of each item
-    std::ranges::for_each(items,
-                          [this](const auto& item) { Add(std::make_shared<CFileItem>(*item)); });
+    std::for_each(items.begin(), items.end(),
+                  [this](const auto& item) { Add(std::make_shared<CFileItem>(*item)); });
   }
 
   return true;
@@ -285,8 +286,8 @@ CFileItemPtr CFileItemList::Get(const std::string& strPath) const
   }
   // slow method...
   const std::string fname = m_ignoreURLOptions ? CURL(strPath).GetWithoutOptions() : strPath;
-  const auto it =
-      std::ranges::find_if(m_items, [&fname](const auto& pItem) { return pItem->IsPath(fname); });
+  const auto it = std::find_if(m_items.begin(), m_items.end(),
+                               [&fname](const auto& pItem) { return pItem->IsPath(fname); });
   return it != m_items.end() ? *it : CFileItemPtr();
 }
 
@@ -511,14 +512,15 @@ void CFileItemList::Archive(CArchive& ar)
 void CFileItemList::FillInDefaultIcons()
 {
   std::unique_lock lock(m_lock);
-  std::ranges::for_each(m_items, [](const auto& pItem) { ART::FillInDefaultIcon(*pItem); });
+  std::for_each(m_items.begin(), m_items.end(),
+                [](const auto& pItem) { ART::FillInDefaultIcon(*pItem); });
 }
 
 int CFileItemList::GetFolderCount() const
 {
   std::unique_lock lock(m_lock);
-  return static_cast<int>(
-      std::ranges::count_if(m_items, [](const auto& pItem) { return pItem->IsFolder(); }));
+  return static_cast<int>(std::count_if(m_items.begin(), m_items.end(),
+                                        [](const auto& pItem) { return pItem->IsFolder(); }));
 }
 
 int CFileItemList::GetObjectCount() const
@@ -535,15 +537,15 @@ int CFileItemList::GetObjectCount() const
 int CFileItemList::GetFileCount() const
 {
   std::unique_lock lock(m_lock);
-  return static_cast<int>(
-      std::ranges::count_if(m_items, [](const auto& pItem) { return !pItem->IsFolder(); }));
+  return static_cast<int>(std::count_if(m_items.begin(), m_items.end(),
+                                        [](const auto& pItem) { return !pItem->IsFolder(); }));
 }
 
 int CFileItemList::GetSelectedCount() const
 {
   std::unique_lock lock(m_lock);
-  return static_cast<int>(
-      std::ranges::count_if(m_items, [](const auto& pItem) { return pItem->IsSelected(); }));
+  return static_cast<int>(std::count_if(m_items.begin(), m_items.end(),
+                                        [](const auto& pItem) { return pItem->IsSelected(); }));
 }
 
 void CFileItemList::FilterCueItems()
@@ -625,9 +627,9 @@ void CFileItemList::FilterCueItems()
   // now delete the .CUE files.
   for (const auto& delItem : itemstodelete)
   {
-    const auto it = std::ranges::find_if(
-        m_items, [&delItem](const auto& pItem)
-        { return StringUtils::CompareNoCase(pItem->GetPath(), delItem) == 0; });
+    const auto it =
+        std::find_if(m_items.begin(), m_items.end(), [&delItem](const auto& pItem)
+                     { return StringUtils::CompareNoCase(pItem->GetPath(), delItem) == 0; });
     if (it != m_items.end())
       m_items.erase(it);
   }
@@ -637,7 +639,7 @@ void CFileItemList::FilterCueItems()
 void CFileItemList::RemoveExtensions()
 {
   std::unique_lock lock(m_lock);
-  std::ranges::for_each(m_items, [](auto& item) { item->RemoveExtension(); });
+  std::for_each(m_items.begin(), m_items.end(), [](auto& item) { item->RemoveExtension(); });
 }
 
 void CFileItemList::Stack(bool stackFiles /* = true */)
@@ -1058,8 +1060,8 @@ bool CFileItemList::UpdateItem(const CFileItem* item)
     return false;
 
   std::unique_lock lock(m_lock);
-  const auto it =
-      std::ranges::find_if(m_items, [&item](const auto& pItem) { return pItem->IsSamePath(item); });
+  const auto it = std::find_if(m_items.begin(), m_items.end(),
+                               [&item](const auto& pItem) { return pItem->IsSamePath(item); });
   if (it != m_items.end())
     (*it)->UpdateInfo(*item);
 

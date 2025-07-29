@@ -110,9 +110,9 @@ std::string CDirectoryHistory::GetParentPath(const std::string& currentPath /* =
   if (currentPath.empty())
     return m_vecPathHistory.back().GetPath(filter);
 
-  const auto it{std::ranges::find_if(std::views::reverse(m_vecPathHistory),
-                                     [&currentPath, filter](const CPathHistoryItem& path)
-                                     { return currentPath != path.GetPath(filter); })};
+  const auto it{std::find_if(m_vecPathHistory.rbegin(), m_vecPathHistory.rend(),
+                             [&currentPath, filter](const CPathHistoryItem& path)
+                             { return currentPath != path.GetPath(filter); })};
 
   return it != m_vecPathHistory.rend() ? it->GetPath(filter) : std::string{};
 }

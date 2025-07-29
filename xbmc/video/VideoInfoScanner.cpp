@@ -1116,9 +1116,9 @@ CVideoInfoScanner::~CVideoInfoScanner()
       KODI::ART::SeasonsArtwork seasonArt;
       m_database.GetTvShowSeasonArt(showID, seasonArt);
 
-      const bool updateSeasonArt{
-          alreadyHasArt ||
-          std::ranges::any_of(seasonArt, [](const auto& i) { return i.second.empty(); })};
+      const bool updateSeasonArt{alreadyHasArt ||
+                                 std::any_of(seasonArt.begin(), seasonArt.end(),
+                                             [](const auto& i) { return i.second.empty(); })};
       if (updateSeasonArt)
       {
         if (!alreadyHasArt && !item->IsPlugin() && scraper->ID() != "metadata.local")

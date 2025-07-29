@@ -133,8 +133,8 @@ bool CSettingUtils::FindIntInList(const std::shared_ptr<const CSettingList>& set
     return false;
 
   const SettingList& values = settingList->GetValue();
-  const auto matchingValue = std::ranges::find_if(
-      values, [value](const SettingPtr& setting)
-      { return std::static_pointer_cast<CSettingInt>(setting)->GetValue() == value; });
+  const auto matchingValue =
+      std::find_if(values.begin(), values.end(), [value](const SettingPtr& setting)
+                   { return std::static_pointer_cast<CSettingInt>(setting)->GetValue() == value; });
   return matchingValue != values.end();
 }

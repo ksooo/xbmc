@@ -251,8 +251,9 @@ PeripheralBusPtr CPeripherals::GetBusWithDevice(const std::string& strLocation) 
 {
   std::unique_lock lock(m_critSectionBusses);
 
-  const auto& bus = std::ranges::find_if(m_busses, [&strLocation](const PeripheralBusPtr& b)
-                                         { return b->HasPeripheral(strLocation); });
+  const auto& bus =
+      std::find_if(m_busses.begin(), m_busses.end(), [&strLocation](const PeripheralBusPtr& b)
+                   { return b->HasPeripheral(strLocation); });
   if (bus != m_busses.cend())
     return *bus;
 

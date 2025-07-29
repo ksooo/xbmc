@@ -50,7 +50,7 @@ CGUIInfoProviders::~CGUIInfoProviders()
 
 void CGUIInfoProviders::RegisterProvider(IGUIInfoProvider *provider, bool bAppend /* = true */)
 {
-  auto it = std::ranges::find(m_providers, provider);
+  auto it = std::find(m_providers.begin(), m_providers.end(), provider);
   if (it == m_providers.end())
   {
     if (bAppend)
@@ -62,7 +62,7 @@ void CGUIInfoProviders::RegisterProvider(IGUIInfoProvider *provider, bool bAppen
 
 void CGUIInfoProviders::UnregisterProvider(IGUIInfoProvider *provider)
 {
-  auto it = std::ranges::find(m_providers, provider);
+  auto it = std::find(m_providers.begin(), m_providers.end(), provider);
   if (it != m_providers.end())
     m_providers.erase(it);
 }

@@ -32,8 +32,8 @@ float CControllerActivity::GetActivation() const
   if (!m_mousePointers.empty() && m_activeMouseButtons.empty())
   {
     const bool anyPointerActive =
-        std::ranges::any_of(m_mousePointers, [](const auto& it)
-                            { return it.second.active && !it.second.timer.IsTimePast(); });
+        std::any_of(m_mousePointers.begin(), m_mousePointers.end(), [](const auto& it)
+                    { return it.second.active && !it.second.timer.IsTimePast(); });
     if (!anyPointerActive)
       return 0.0f;
   }

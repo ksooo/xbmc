@@ -198,26 +198,26 @@ std::string CVideoTagLoaderNFO::FindNFO(const CFileItem& item,
     if (CDirectory::GetDirectory(strPath, items, ".nfo", DIR_FLAG_DEFAULTS) && !items.IsEmpty())
     {
       const CVideoInfoTag* tag{item.GetVideoInfoTag()};
-      auto nfoItems{items | std::views::filter(
-                                [&tag](const auto& nfoItem)
-                                {
-                                  if (!nfoItem->IsNFO())
-                                    return false;
+      const auto it{std::find_if(items.begin(), items.end(),
+                                 [&tag](const auto& nfoItem)
+                                 {
+                                   if (!nfoItem->IsNFO())
+                                     return false;
 
-                                  if (tag && tag->m_iSeason >= 0 && tag->m_iEpisode >= 0)
-                                  {
-                                    std::string path{nfoItem->GetPath()};
-                                    const std::string extension{URIUtils::GetExtension(path)};
-                                    if (!extension.empty())
-                                      path.erase(path.size() - extension.size());
-                                    return path.ends_with(fmt::format(
-                                        "S{:02}E{:02}", tag->m_iSeason, tag->m_iEpisode));
-                                  }
+                                   if (tag && tag->m_iSeason >= 0 && tag->m_iEpisode >= 0)
+                                   {
+                                     std::string path{nfoItem->GetPath()};
+                                     const std::string extension{URIUtils::GetExtension(path)};
+                                     if (!extension.empty())
+                                       path.erase(path.size() - extension.size());
+                                     return path.ends_with(fmt::format(
+                                         "S{:02}E{:02}", tag->m_iSeason, tag->m_iEpisode));
+                                   }
 
-                                  return true;
-                                })};
-      if (std::ranges::distance(nfoItems) == 1)
-        return (*nfoItems.begin())->GetPath();
+                                   return true;
+                                 })};
+      if (it != items.end())
+        return (*it)->GetPath();
     }
   }
 

@@ -49,7 +49,10 @@ public:
   {
   }
 
-  auto operator<=>(const CPVRRecordingUid& other) const = default;
+  bool operator>(const CPVRRecordingUid& right) const;
+  bool operator<(const CPVRRecordingUid& right) const;
+  bool operator==(const CPVRRecordingUid& right) const;
+  bool operator!=(const CPVRRecordingUid& right) const;
 
 private:
   int m_iClientId{0}; /*!< ID of the backend */

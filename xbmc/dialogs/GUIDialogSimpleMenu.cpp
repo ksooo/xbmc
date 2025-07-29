@@ -138,11 +138,13 @@ bool CGUIDialogSimpleMenu::ShowPlaylistSelection(CFileItem& item)
       {
         // See if playlist already used
         const int newPlaylist{item_new->GetProperty("bluray_playlist").asInteger32(0)};
-        auto matchingPlaylists{
-            usedPlaylists | std::views::filter([newPlaylist](const CVideoDatabase::PlaylistInfo& p)
-                                               { return p.playlist == newPlaylist; })};
+        std::vector<CVideoDatabase::PlaylistInfo> matchingPlaylists;
+        std::copy_if(usedPlaylists.begin(), usedPlaylists.end(),
+                     std::back_inserter(matchingPlaylists),
+                     [newPlaylist](const CVideoDatabase::PlaylistInfo& p)
+                     { return p.playlist == newPlaylist; });
 
-        if (std::ranges::distance(matchingPlaylists) > 0)
+        if (!matchingPlaylists.empty())
         {
           // Warn that this playlist is already associated with an episode
           if (!CGUIDialogYesNo::ShowAndGetInput(CVariant{559}, CVariant{25015}))

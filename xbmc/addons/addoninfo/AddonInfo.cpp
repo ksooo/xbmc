@@ -156,8 +156,8 @@ AddonType CAddonInfo::TranslateSubContent(std::string_view content)
 
 AddonInstanceSupport CAddonInfo::InstanceSupportType(AddonType type)
 {
-  const auto it =
-      std::ranges::find_if(types, [type](const TypeMapping& entry) { return entry.type == type; });
+  const auto it = std::find_if(types.begin(), types.end(),
+                               [type](const TypeMapping& entry) { return entry.type == type; });
   if (it != types.end())
     return it->instance_support;
 
@@ -199,13 +199,12 @@ bool CAddonInfo::ProvidesSubContent(AddonType content, AddonType mainType) const
   if (content == AddonType::UNKNOWN)
     return false;
 
-  return std::ranges::any_of(m_types,
-                             [content, mainType](const auto& addonType)
-                             {
-                               return (mainType == AddonType::UNKNOWN ||
-                                       mainType == addonType.Type()) &&
-                                      addonType.ProvidesSubContent(content);
-                             });
+  return std::any_of(m_types.begin(), m_types.end(),
+                     [content, mainType](const auto& addonType)
+                     {
+                       return (mainType == AddonType::UNKNOWN || mainType == addonType.Type()) &&
+                              addonType.ProvidesSubContent(content);
+                     });
 }
 
 bool CAddonInfo::ProvidesSeveralSubContents() const
@@ -223,8 +222,9 @@ bool CAddonInfo::MeetsVersion(const CAddonVersion& versionMin, const CAddonVersi
 
 const CAddonVersion& CAddonInfo::DependencyMinVersion(const std::string& dependencyID) const
 {
-  auto it = std::ranges::find_if(m_dependencies, [&dependencyID](const DependencyInfo& other)
-                                 { return other.id == dependencyID; });
+  auto it = std::find_if(m_dependencies.begin(), m_dependencies.end(),
+                         [&dependencyID](const DependencyInfo& other)
+                         { return other.id == dependencyID; });
 
   if (it != m_dependencies.end())
     return it->versionMin;
@@ -235,8 +235,9 @@ const CAddonVersion& CAddonInfo::DependencyMinVersion(const std::string& depende
 
 const CAddonVersion& CAddonInfo::DependencyVersion(const std::string& dependencyID) const
 {
-  auto it = std::ranges::find_if(m_dependencies, [&dependencyID](const DependencyInfo& other)
-                                 { return other.id == dependencyID; });
+  auto it = std::find_if(m_dependencies.begin(), m_dependencies.end(),
+                         [&dependencyID](const DependencyInfo& other)
+                         { return other.id == dependencyID; });
 
   if (it != m_dependencies.end())
     return it->version;

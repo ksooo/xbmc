@@ -90,10 +90,10 @@ bool UTILS::DISCS::IsBlurayDiscImage(const CFileItem& item)
   CURL url("udf://");
   url.SetHostName(item.GetDynPath());
 
-  return std::ranges::any_of(blurayFiles,
-                             [&url](std::string_view file)
-                             {
-                               url.SetFileName(std::string(file));
-                               return XFILE::CFile::Exists(url.Get());
-                             });
+  return std::any_of(blurayFiles.begin(), blurayFiles.end(),
+                     [&url](std::string_view file)
+                     {
+                       url.SetFileName(std::string(file));
+                       return XFILE::CFile::Exists(url.Get());
+                     });
 }

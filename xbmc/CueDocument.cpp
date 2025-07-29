@@ -172,50 +172,49 @@ void CCueDocument::GetSongs(VECSONGS &songs)
   const auto separator =
       CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_musicItemSeparator;
 
-  std::ranges::transform(
-      m_tracks, std::back_inserter(songs),
-      [&artist = m_strArtist, &album = m_strAlbum, &replayGain = m_albumReplayGain,
-       disc = m_iDiscNumber, year = StringUtils::Format("{:04}", m_iYear),
-       artists = StringUtils::Split(m_strArtist, separator),
-       genres = StringUtils::Split(m_strGenre, separator)](const auto& track)
-      {
-        CSong aSong;
-        //Pass artist to MusicInfoTag object by setting artist description string only.
-        //Artist credits not used during loading from cue sheet.
-        if (track.strArtist.empty() && !artist.empty())
-          aSong.strArtistDesc = artist;
-        else
-          aSong.strArtistDesc = track.strArtist;
-        //Pass album artist to MusicInfoTag object by setting album artist vector.
-        aSong.SetAlbumArtist(artists);
-        aSong.strAlbum = album;
-        aSong.genre = genres;
-        aSong.strReleaseDate = year;
-        aSong.iTrack = track.iTrackNumber;
-        if (disc > 0)
-          aSong.iTrack |= disc << 16; // see CMusicInfoTag::GetDiscNumber()
-        if (track.strTitle.length() == 0) // No track information for this track!
-          aSong.strTitle = StringUtils::Format("Track {:2d}", track.iTrackNumber);
-        else
-          aSong.strTitle = track.strTitle;
-        aSong.strFileName = track.strFile;
-        aSong.iStartOffset = track.iStartTime;
-        aSong.iEndOffset = track.iEndTime;
-        if (aSong.iEndOffset)
-          // Convert offset in frames (75 per second) to duration in whole seconds with rounding
-          aSong.iDuration =
-              CUtil::ConvertMilliSecsToSecsIntRounded(aSong.iEndOffset - aSong.iStartOffset);
-        else
-          aSong.iDuration = 0;
+  std::transform(m_tracks.begin(), m_tracks.end(), std::back_inserter(songs),
+                 [&artist = m_strArtist, &album = m_strAlbum, &replayGain = m_albumReplayGain,
+                  disc = m_iDiscNumber, year = StringUtils::Format("{:04}", m_iYear),
+                  artists = StringUtils::Split(m_strArtist, separator),
+                  genres = StringUtils::Split(m_strGenre, separator)](const auto& track)
+                 {
+                   CSong aSong;
+                   //Pass artist to MusicInfoTag object by setting artist description string only.
+                   //Artist credits not used during loading from cue sheet.
+                   if (track.strArtist.empty() && !artist.empty())
+                     aSong.strArtistDesc = artist;
+                   else
+                     aSong.strArtistDesc = track.strArtist;
+                   //Pass album artist to MusicInfoTag object by setting album artist vector.
+                   aSong.SetAlbumArtist(artists);
+                   aSong.strAlbum = album;
+                   aSong.genre = genres;
+                   aSong.strReleaseDate = year;
+                   aSong.iTrack = track.iTrackNumber;
+                   if (disc > 0)
+                     aSong.iTrack |= disc << 16; // see CMusicInfoTag::GetDiscNumber()
+                   if (track.strTitle.length() == 0) // No track information for this track!
+                     aSong.strTitle = StringUtils::Format("Track {:2d}", track.iTrackNumber);
+                   else
+                     aSong.strTitle = track.strTitle;
+                   aSong.strFileName = track.strFile;
+                   aSong.iStartOffset = track.iStartTime;
+                   aSong.iEndOffset = track.iEndTime;
+                   if (aSong.iEndOffset)
+                     // Convert offset in frames (75 per second) to duration in whole seconds with rounding
+                     aSong.iDuration = CUtil::ConvertMilliSecsToSecsIntRounded(aSong.iEndOffset -
+                                                                               aSong.iStartOffset);
+                   else
+                     aSong.iDuration = 0;
 
-        if (replayGain.Valid())
-          aSong.replayGain.Set(ReplayGain::ALBUM, replayGain);
+                   if (replayGain.Valid())
+                     aSong.replayGain.Set(ReplayGain::ALBUM, replayGain);
 
-        if (track.replayGain.Valid())
-          aSong.replayGain.Set(ReplayGain::TRACK, track.replayGain);
+                   if (track.replayGain.Valid())
+                     aSong.replayGain.Set(ReplayGain::TRACK, track.replayGain);
 
-        return aSong;
-      });
+                   return aSong;
+                 });
 }
 
 void CCueDocument::UpdateMediaFile(const std::string& oldMediaFile, const std::string& mediaFile)
@@ -230,10 +229,10 @@ void CCueDocument::UpdateMediaFile(const std::string& oldMediaFile, const std::s
 void CCueDocument::GetMediaFiles(std::vector<std::string>& mediaFiles)
 {
   std::set<std::string, std::less<>> uniqueFiles;
-  std::ranges::transform(m_tracks, std::inserter(uniqueFiles, uniqueFiles.end()),
-                         [](const auto& track) { return track.strFile; });
+  std::transform(m_tracks.begin(), m_tracks.end(), std::inserter(uniqueFiles, uniqueFiles.end()),
+                 [](const auto& track) { return track.strFile; });
 
-  std::ranges::copy(uniqueFiles, std::back_inserter(mediaFiles));
+  std::copy(uniqueFiles.begin(), uniqueFiles.end(), std::back_inserter(mediaFiles));
 }
 
 bool CCueDocument::IsLoaded() const
@@ -465,8 +464,8 @@ bool CCueDocument::ResolvePath(std::string &strPath, const std::string &strBase)
   {
     CFileItemList items;
     CDirectory::GetDirectory(strDirectory, items, "", DIR_FLAG_DEFAULTS);
-    const auto it =
-        std::ranges::find_if(items, [&strPath](const auto& item) { return item->IsPath(strPath); });
+    const auto it = std::find_if(items.begin(), items.end(),
+                                 [&strPath](const auto& item) { return item->IsPath(strPath); });
     if (it == items.end())
       CLog::Log(LOGERROR, "Could not find '{}' referenced in cue, case sensitivity issue?",
                 strPath);

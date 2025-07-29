@@ -1413,8 +1413,8 @@ void CAdvancedSettings::AddSettingsFile(const std::string &filename)
 float CAdvancedSettings::GetLatencyTweak(float refreshrate, bool isHDREnabled) const
 {
   float delay{};
-  const auto& latency = std::ranges::find_if(
-      m_videoRefreshLatency, [refreshrate](const auto& param)
+  const auto& latency = std::find_if(
+      m_videoRefreshLatency.begin(), m_videoRefreshLatency.end(), [refreshrate](const auto& param)
       { return refreshrate >= param.refreshmin && refreshrate <= param.refreshmax; });
 
   if (latency != m_videoRefreshLatency.cend()) //refresh rate specific setting is found

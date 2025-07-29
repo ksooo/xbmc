@@ -105,9 +105,9 @@ std::shared_ptr<CPVRTimerType> CPVRTimerType::GetFirstAvailableType(
 std::shared_ptr<CPVRTimerType> CPVRTimerType::CreateFromIds(unsigned int iTypeId, int iClientId)
 {
   const std::vector<std::shared_ptr<CPVRTimerType>> types = GetAllTypes();
-  const auto it = std::ranges::find_if(
-      types, [iClientId, iTypeId](const auto& type)
-      { return type->GetClientId() == iClientId && type->GetTypeId() == iTypeId; });
+  const auto it =
+      std::find_if(types.begin(), types.end(), [iClientId, iTypeId](const auto& type)
+                   { return type->GetClientId() == iClientId && type->GetTypeId() == iTypeId; });
   if (it != types.cend())
     return (*it);
 
@@ -128,14 +128,13 @@ std::shared_ptr<CPVRTimerType> CPVRTimerType::CreateFromAttributes(uint64_t iMus
                                                                    int iClientId)
 {
   const std::vector<std::shared_ptr<CPVRTimerType>> types = GetAllTypes();
-  const auto it =
-      std::ranges::find_if(types,
-                           [iClientId, iMustHaveAttr, iMustNotHaveAttr](const auto& type)
-                           {
-                             return type->GetClientId() == iClientId &&
-                                    (type->GetAttributes() & iMustHaveAttr) == iMustHaveAttr &&
-                                    (type->GetAttributes() & iMustNotHaveAttr) == 0;
-                           });
+  const auto it = std::find_if(types.begin(), types.end(),
+                               [iClientId, iMustHaveAttr, iMustNotHaveAttr](const auto& type)
+                               {
+                                 return type->GetClientId() == iClientId &&
+                                        (type->GetAttributes() & iMustHaveAttr) == iMustHaveAttr &&
+                                        (type->GetAttributes() & iMustNotHaveAttr) == 0;
+                               });
   if (it != types.cend())
     return (*it);
 

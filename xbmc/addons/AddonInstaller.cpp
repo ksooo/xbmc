@@ -233,9 +233,9 @@ CAddonInstaller &CAddonInstaller::GetInstance()
 void CAddonInstaller::OnJobComplete(unsigned int jobID, bool success, CJob* job)
 {
   std::unique_lock lock(m_critSection);
-  const auto i =
-      std::ranges::find_if(m_downloadJobs, [jobID](const std::pair<std::string, CDownloadJob>& p)
-                           { return p.second.jobID == jobID; });
+  const auto i = std::find_if(m_downloadJobs.begin(), m_downloadJobs.end(),
+                              [jobID](const std::pair<std::string, CDownloadJob>& p)
+                              { return p.second.jobID == jobID; });
   if (i != m_downloadJobs.end())
     m_downloadJobs.erase(i);
   if (m_downloadJobs.empty())
@@ -250,9 +250,9 @@ void CAddonInstaller::OnJobComplete(unsigned int jobID, bool success, CJob* job)
 void CAddonInstaller::OnJobProgress(unsigned int jobID, unsigned int progress, unsigned int total, const CJob *job)
 {
   std::unique_lock lock(m_critSection);
-  const auto i =
-      std::ranges::find_if(m_downloadJobs, [jobID](const std::pair<std::string, CDownloadJob>& p)
-                           { return p.second.jobID == jobID; });
+  const auto i = std::find_if(m_downloadJobs.begin(), m_downloadJobs.end(),
+                              [jobID](const std::pair<std::string, CDownloadJob>& p)
+                              { return p.second.jobID == jobID; });
   if (i != m_downloadJobs.end())
   {
     // update job progress
@@ -592,7 +592,7 @@ bool CAddonInstaller::CheckDependencies(const AddonPtr &addon,
 
     // at this point we have our dep, or the dep is optional (and we don't have it) so check that it's OK as well
     //! @todo should we assume that installed deps are OK?
-    if (dep && std::ranges::find(preDeps, dep->ID()) == preDeps.end())
+    if (dep && std::find(preDeps.begin(), preDeps.end(), dep->ID()) == preDeps.end())
     {
       preDeps.push_back(dep->ID());
       if (!CheckDependencies(dep, preDeps, database, failedDep))
@@ -1037,8 +1037,8 @@ bool CAddonInstallJob::Install(const std::string &installFrom, const RepositoryP
   if (!deps.empty() && m_addon->HasType(AddonType::REPOSITORY))
   {
     bool notSystemAddon =
-        std::ranges::none_of(deps, [](const DependencyInfo& dep)
-                             { return CServiceBroker::GetAddonMgr().IsSystemAddon(dep.id); });
+        std::none_of(deps.begin(), deps.end(), [](const DependencyInfo& dep)
+                     { return CServiceBroker::GetAddonMgr().IsSystemAddon(dep.id); });
 
     if (notSystemAddon)
     {

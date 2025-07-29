@@ -225,7 +225,8 @@ std::string CDatabase::DatasetLayout::GetFields() const
 
 bool CDatabase::DatasetLayout::HasFilterFields() const
 {
-  return std::ranges::any_of(m_fields, [](const auto& field) { return field.fetch; });
+  return std::any_of(m_fields.begin(), m_fields.end(),
+                     [](const auto& field) { return field.fetch; });
 }
 
 CDatabase::CDatabase()

@@ -81,5 +81,6 @@ void CPVRClientCapabilities::InitRecordingsLifetimeValues()
 void CPVRClientCapabilities::GetRecordingsLifetimeValues(
     std::vector<std::pair<std::string, int>>& list) const
 {
-  std::ranges::copy(m_recordingsLifetimeValues, std::back_inserter(list));
+  std::copy(m_recordingsLifetimeValues.begin(), m_recordingsLifetimeValues.end(),
+            std::back_inserter(list));
 }

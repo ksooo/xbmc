@@ -229,7 +229,7 @@ bool CGUIDialogAddonSettings::ShowForMultipleInstances(const ADDON::AddonPtr& ad
   while (true)
   {
     std::vector<ADDON::AddonInstanceId> ids = addon->GetKnownInstanceIds();
-    std::ranges::sort(ids, [](const auto& a, const auto& b) { return a < b; });
+    std::sort(ids.begin(), ids.end(), [](const auto& a, const auto& b) { return a < b; });
 
     dialog->Reset();
     dialog->SetHeading(10012); // Add-on configurations and settings

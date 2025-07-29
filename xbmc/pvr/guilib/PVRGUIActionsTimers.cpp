@@ -421,8 +421,9 @@ PVRRECORD_INSTANTRECORDACTION InstantRecordingActionSelector::Select()
   if (m_pDlgSelect->IsConfirmed())
   {
     int iSelection = m_pDlgSelect->GetSelectedItem();
-    const auto it = std::ranges::find_if(m_actions, [iSelection](const auto& action)
-                                         { return action.second == iSelection; });
+    const auto it =
+        std::find_if(m_actions.begin(), m_actions.end(),
+                     [iSelection](const auto& action) { return action.second == iSelection; });
 
     if (it != m_actions.cend())
       eAction = (*it).first;

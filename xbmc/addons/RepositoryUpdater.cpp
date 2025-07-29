@@ -225,8 +225,9 @@ void CRepositoryUpdater::CheckForUpdates(const ADDON::RepositoryPtr& repo, bool 
     return;
   }
 
-  const auto job = std::ranges::find_if(m_jobs, [&repo](const CRepositoryUpdateJob* updateJob)
-                                        { return updateJob->GetAddon()->ID() == repo->ID(); });
+  const auto job =
+      std::find_if(m_jobs.begin(), m_jobs.end(), [&repo](const CRepositoryUpdateJob* updateJob)
+                   { return updateJob->GetAddon()->ID() == repo->ID(); });
 
   if (job == m_jobs.end())
   {
@@ -280,17 +281,17 @@ CDateTime CRepositoryUpdater::LastUpdated() const
   CAddonDatabase db;
   db.Open();
   std::vector<CDateTime> updateTimes;
-  std::ranges::transform(repos, std::back_inserter(updateTimes),
-                         [&](const AddonPtr& repo)
-                         {
-                           const auto updateData = db.GetRepoUpdateData(repo->ID());
-                           if (updateData.lastCheckedAt.IsValid() &&
-                               updateData.lastCheckedVersion == repo->Version())
-                             return updateData.lastCheckedAt;
-                           return CDateTime();
-                         });
+  std::transform(repos.begin(), repos.end(), std::back_inserter(updateTimes),
+                 [&](const AddonPtr& repo)
+                 {
+                   const auto updateData = db.GetRepoUpdateData(repo->ID());
+                   if (updateData.lastCheckedAt.IsValid() &&
+                       updateData.lastCheckedVersion == repo->Version())
+                     return updateData.lastCheckedAt;
+                   return CDateTime();
+                 });
 
-  return *std::ranges::min_element(updateTimes);
+  return *std::min_element(updateTimes.begin(), updateTimes.end());
 }
 
 CDateTime CRepositoryUpdater::ClosestNextCheck() const
@@ -302,17 +303,17 @@ CDateTime CRepositoryUpdater::ClosestNextCheck() const
   CAddonDatabase db;
   db.Open();
   std::vector<CDateTime> nextCheckTimes;
-  std::ranges::transform(repos, std::back_inserter(nextCheckTimes),
-                         [&](const AddonPtr& repo)
-                         {
-                           const auto updateData = db.GetRepoUpdateData(repo->ID());
-                           if (updateData.nextCheckAt.IsValid() &&
-                               updateData.lastCheckedVersion == repo->Version())
-                             return updateData.nextCheckAt;
-                           return CDateTime();
-                         });
+  std::transform(repos.begin(), repos.end(), std::back_inserter(nextCheckTimes),
+                 [&](const AddonPtr& repo)
+                 {
+                   const auto updateData = db.GetRepoUpdateData(repo->ID());
+                   if (updateData.nextCheckAt.IsValid() &&
+                       updateData.lastCheckedVersion == repo->Version())
+                     return updateData.nextCheckAt;
+                   return CDateTime();
+                 });
 
-  return *std::ranges::min_element(nextCheckTimes);
+  return *std::min_element(nextCheckTimes.begin(), nextCheckTimes.end());
 }
 
 void CRepositoryUpdater::ScheduleUpdate(UpdateScheduleType scheduleType)

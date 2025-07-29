@@ -109,8 +109,8 @@ bool CSettingGroup::Deserialize(const TiXmlNode *node, bool update /* = false */
     if (CSetting::DeserializeIdentification(settingElement, settingId, isReference))
     {
       const auto settingIt =
-          std::ranges::find_if(m_settings, [&settingId](const SettingPtr& setting)
-                               { return setting->GetId() == settingId; });
+          std::find_if(m_settings.begin(), m_settings.end(), [&settingId](const SettingPtr& setting)
+                       { return setting->GetId() == settingId; });
 
       SettingPtr setting;
       if (settingIt != m_settings.end())
@@ -169,11 +169,12 @@ SettingList CSettingGroup::GetSettings(SettingLevel level) const
 
 bool CSettingGroup::ContainsVisibleSettings(const SettingLevel level) const
 {
-  return std::ranges::any_of(m_settings,
-                             [&level](const SettingPtr& setting) {
-                               return setting->GetLevel() <= level &&
-                                      setting->MeetsRequirements() && setting->IsVisible();
-                             });
+  return std::any_of(m_settings.begin(), m_settings.end(),
+                     [&level](const SettingPtr& setting)
+                     {
+                       return setting->GetLevel() <= level && setting->MeetsRequirements() &&
+                              setting->IsVisible();
+                     });
 }
 
 void CSettingGroup::AddSetting(const SettingPtr& setting)
@@ -233,8 +234,9 @@ bool CSettingCategory::Deserialize(const TiXmlNode *node, bool update /* = false
     std::string groupId;
     if (CSettingGroup::DeserializeIdentification(groupNode, groupId))
     {
-      const auto groupIt = std::ranges::find_if(m_groups, [&groupId](const SettingGroupPtr& group)
-                                                { return group->GetId() == groupId; });
+      const auto groupIt =
+          std::find_if(m_groups.begin(), m_groups.end(), [&groupId](const SettingGroupPtr& group)
+                       { return group->GetId() == groupId; });
 
       SettingGroupPtr group;
       if (groupIt != m_groups.end())
@@ -314,9 +316,9 @@ bool CSettingSection::Deserialize(const TiXmlNode *node, bool update /* = false 
     std::string categoryId;
     if (CSettingCategory::DeserializeIdentification(categoryNode, categoryId))
     {
-      const auto categoryIt =
-          std::ranges::find_if(m_categories, [&categoryId](const SettingCategoryPtr& category)
-                               { return category->GetId() == categoryId; });
+      const auto categoryIt = std::find_if(m_categories.begin(), m_categories.end(),
+                                           [&categoryId](const SettingCategoryPtr& category)
+                                           { return category->GetId() == categoryId; });
 
       SettingCategoryPtr category;
       if (categoryIt != m_categories.end())

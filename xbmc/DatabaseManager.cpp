@@ -63,8 +63,8 @@ bool CDatabaseManager::Initialize()
   m_bIsUpgrading = false;
   m_connecting = false;
 
-  return std::ranges::all_of(m_dbStatus,
-                             [](const auto& db) { return db.second == DBStatus::READY; });
+  return std::all_of(m_dbStatus.begin(), m_dbStatus.end(),
+                     [](const auto& db) { return db.second == DBStatus::READY; });
 }
 
 bool CDatabaseManager::CanOpen(const std::string &name)

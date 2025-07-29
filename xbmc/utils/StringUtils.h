@@ -81,13 +81,13 @@ public:
   \return Formatted string
   */
   template<typename... Args>
-  static constexpr std::string Format(std::string_view format, Args&&... args)
+  static const std::string Format(std::string_view format, Args&&... args)
   {
     // coverity[fun_call_w_exception : FALSE]
     return fmt::format(fmt::runtime(format), EnumToInt(std::forward<Args>(args))...);
   }
   template<typename... Args>
-  static constexpr std::wstring Format(std::wstring_view format, Args&&... args)
+  static const std::wstring Format(std::wstring_view format, Args&&... args)
   {
     // coverity[fun_call_w_exception : FALSE]
     return fmt::format(fmt::runtime(format), EnumToInt(std::forward<Args>(args))...);

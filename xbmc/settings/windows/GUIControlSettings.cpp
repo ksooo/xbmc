@@ -176,11 +176,13 @@ bool GetIntegerOptions(const SettingConstPtr& setting,
   switch (pSettingInt->GetOptionsSort())
   {
     case SettingOptionsSort::Ascending:
-      std::ranges::sort(options, CompareSettingOptionAseconding<IntegerSettingOption>);
+      std::sort(options.begin(), options.end(),
+                CompareSettingOptionAseconding<IntegerSettingOption>);
       break;
 
     case SettingOptionsSort::Descending:
-      std::ranges::sort(options, CompareSettingOptionDeseconding<IntegerSettingOption>);
+      std::sort(options.begin(), options.end(),
+                CompareSettingOptionDeseconding<IntegerSettingOption>);
       break;
 
     case SettingOptionsSort::NoSorting:
@@ -262,11 +264,13 @@ bool GetStringOptions(const SettingConstPtr& setting,
   switch (pSettingString->GetOptionsSort())
   {
     case SettingOptionsSort::Ascending:
-      std::ranges::sort(options, CompareSettingOptionAseconding<StringSettingOption>);
+      std::sort(options.begin(), options.end(),
+                CompareSettingOptionAseconding<StringSettingOption>);
       break;
 
     case SettingOptionsSort::Descending:
-      std::ranges::sort(options, CompareSettingOptionDeseconding<StringSettingOption>);
+      std::sort(options.begin(), options.end(),
+                CompareSettingOptionDeseconding<StringSettingOption>);
       break;
 
     case SettingOptionsSort::NoSorting:
@@ -688,8 +692,8 @@ bool CGUIControlListSetting::OnClick()
     for (const auto& value : list)
     {
       const bool found =
-          std::ranges::any_of(options, [&value](const auto& p)
-                              { return p->GetProperty("value").asString() == value.asString(); });
+          std::any_of(options.begin(), options.end(), [&value](const auto& p)
+                      { return p->GetProperty("value").asString() == value.asString(); });
       if (!found)
       {
         const auto item = std::make_shared<CFileItem>(value.asString());

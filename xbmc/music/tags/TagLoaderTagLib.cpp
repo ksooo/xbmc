@@ -474,17 +474,14 @@ bool CTagLoaderTagLib::ParseTag(ID3v2::Tag* id3v2,
       }
     else if (it->first == "CHAP")
     {
-      constexpr auto toChapterFrame = [](auto* f) { return dynamic_cast<ID3v2::ChapterFrame*>(f); };
-
-      // Produce a view of ChapterFrame pointers.
-      auto chapterFrames = it->second // original FrameList
-                           | std::ranges::views::transform(toChapterFrame) // cast
-                           | std::ranges::views::filter([](auto* p) { return p; }); // keep non‑null
-
-      int chapNumber = 0;
-      for (const auto* chapFrame : chapterFrames)
+      unsigned int chapNumber = 0;
+      for (const auto* frame : it->second)
       {
         ChapterDetails& chapter = chapters[chapNumber];
+
+        const auto* chapFrame = dynamic_cast<const ID3v2::ChapterFrame*>(frame);
+        if (!chapFrame)
+          continue;
 
         // Title - music db will generate a localised "chapter xx" if no title here
         if (auto list = chapFrame->embeddedFrameList("TIT2"); !list.isEmpty())
@@ -495,7 +492,7 @@ bool CTagLoaderTagLib::ParseTag(ID3v2::Tag* id3v2,
         std::chrono::milliseconds endTimeMs(chapFrame->endTime());
 
         // Make sure the very last chapter runs to EOF
-        if (chapNumber == static_cast<int>(std::ranges::distance(chapterFrames) - 1))
+        if (chapNumber == it->second.size() - 1)
           endTimeMs = totalLenMs;
 
         chapter.startTimeMs = startTimeMs;

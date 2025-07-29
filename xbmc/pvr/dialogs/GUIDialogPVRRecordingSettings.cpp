@@ -205,8 +205,8 @@ void CGUIDialogPVRRecordingSettings::LifetimesFiller(const SettingConstPtr& sett
   {
     std::vector<std::pair<std::string, int>> values;
     client->GetClientCapabilities().GetRecordingsLifetimeValues(values);
-    std::ranges::transform(values, std::back_inserter(list), [](const auto& value)
-                           { return IntegerSettingOption(value.first, value.second); });
+    std::transform(values.begin(), values.end(), std::back_inserter(list), [](const auto& value)
+                   { return IntegerSettingOption(value.first, value.second); });
   }
 
   current = m_iLifetime;

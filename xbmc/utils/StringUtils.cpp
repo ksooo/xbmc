@@ -440,9 +440,9 @@ void StringUtils::ToCapitalize(std::wstring& str) noexcept
 
 bool StringUtils::EqualsNoCase(std::string_view str1, std::string_view str2) noexcept
 {
-  return std::ranges::equal(str1, str2,
-                            [](unsigned char c1, unsigned char c2)
-                            { return c1 == c2 || ::tolower(c1) == ::tolower(c2); });
+  return std::equal(str1.begin(), str1.end(), str2.begin(), str2.end(),
+                    [](unsigned char c1, unsigned char c2)
+                    { return c1 == c2 || ::tolower(c1) == ::tolower(c2); });
 }
 
 int StringUtils::CompareNoCase(std::string_view str1,
@@ -451,17 +451,17 @@ int StringUtils::CompareNoCase(std::string_view str1,
 {
   str1 = n ? str1.substr(0, std::min(n, str1.length())) : str1;
   str2 = n ? str2.substr(0, std::min(n, str2.length())) : str2;
-  auto diff = std::ranges::mismatch(str1, str2,
-                                    [](unsigned char c1, unsigned char c2)
-                                    { return c1 == c2 || ::tolower(c1) == ::tolower(c2); });
-  if (diff.in1 == str1.end() && diff.in2 == str2.end())
+  auto diff = std::mismatch(str1.begin(), str1.end(), str2.begin(), str2.end(),
+                            [](unsigned char c1, unsigned char c2)
+                            { return c1 == c2 || ::tolower(c1) == ::tolower(c2); });
+  if (diff.first == str1.end() && diff.second == str2.end())
     return 0;
-  if (diff.in1 == str1.end())
-    return '\0' - ::tolower(static_cast<unsigned char>(*diff.in2));
-  if (diff.in2 == str2.end())
-    return ::tolower(static_cast<unsigned char>(*diff.in1)) - '\0';
-  return ::tolower(static_cast<unsigned char>(*diff.in1)) -
-         ::tolower(static_cast<unsigned char>(*diff.in2));
+  if (diff.first == str1.end())
+    return '\0' - ::tolower(static_cast<unsigned char>(*diff.second));
+  if (diff.second == str2.end())
+    return ::tolower(static_cast<unsigned char>(*diff.first)) - '\0';
+  return ::tolower(static_cast<unsigned char>(*diff.first)) -
+         ::tolower(static_cast<unsigned char>(*diff.second));
 }
 
 std::string StringUtils::Left(std::string_view str, size_t count)
@@ -510,7 +510,8 @@ static int isspace_c(char c)
 
 std::string& StringUtils::TrimLeft(std::string& str) noexcept
 {
-  str.erase(str.begin(), std::ranges::find_if(str, [](char s) { return isspace_c(s) == 0; }));
+  str.erase(str.begin(),
+            std::find_if(str.begin(), str.end(), [](char s) { return isspace_c(s) == 0; }));
   return str;
 }
 
@@ -523,8 +524,7 @@ std::string& StringUtils::TrimLeft(std::string& str, std::string_view chars) noe
 
 std::string& StringUtils::TrimRight(std::string& str) noexcept
 {
-  str.erase(std::ranges::find_if(std::views::reverse(str), [](char s) { return isspace_c(s) == 0; })
-                .base(),
+  str.erase(std::find_if(str.rbegin(), str.rend(), [](char s) { return isspace_c(s) == 0; }).base(),
             str.end());
   return str;
 }
@@ -548,17 +548,35 @@ int StringUtils::ReturnDigits(std::string_view str) noexcept
 
 std::string& StringUtils::RemoveDuplicatedSpacesAndTabs(std::string& str) noexcept
 {
-  StringUtils::Replace(str, '\t', ' ');
-  const auto [first, last] =
-      std::ranges::unique(str, [](char a, char b) { return a == ' ' && b == ' '; });
-  str.erase(first, last);
+  std::string::iterator it = str.begin();
+  bool onSpace = false;
+  while (it != str.end())
+  {
+    if (*it == '\t')
+      *it = ' ';
+
+    if (*it == ' ')
+    {
+      if (onSpace)
+      {
+        it = str.erase(it);
+        continue;
+      }
+      else
+        onSpace = true;
+    }
+    else
+      onSpace = false;
+
+    ++it;
+  }
   return str;
 }
 
 bool StringUtils::IsSpecialCharacter(char c) noexcept
 {
   static constexpr std::string_view view(" .-_+,!'\"\t/\\*?#$%&@()[]{}");
-  return std::ranges::any_of(view, [c](char ch) { return ch == c; });
+  return std::any_of(view.begin(), view.end(), [c](char ch) { return ch == c; });
 }
 
 std::string StringUtils::ReplaceSpecialCharactersWithSpace(std::string_view str)

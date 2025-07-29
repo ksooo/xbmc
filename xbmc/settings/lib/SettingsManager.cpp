@@ -327,17 +327,17 @@ bool CSettingsManager::AddSetting(const std::shared_ptr<CSetting>& setting,
 
   // if the given setting has not been added to the group yet, do it now
   const SettingList& settings = group->GetSettings();
-  if (std::ranges::find(settings, setting) == settings.end())
+  if (std::find(settings.begin(), settings.end(), setting) == settings.end())
     group->AddSetting(setting);
 
   // if the given group has not been added to the category yet, do it now
   const SettingGroupList& groups = category->GetGroups();
-  if (std::ranges::find(groups, group) == groups.end())
+  if (std::find(groups.begin(), groups.end(), group) == groups.end())
     category->AddGroup(group);
 
   // if the given category has not been added to the section yet, do it now
   const SettingCategoryList& categories = section->GetCategories();
-  if (std::ranges::find(categories, category) == categories.end())
+  if (std::find(categories.begin(), categories.end(), category) == categories.end())
     section->AddCategory(category);
 
   // check if the given section exists and matches
@@ -423,7 +423,8 @@ void CSettingsManager::RegisterSettingsHandler(ISettingsHandler *settingsHandler
     return;
 
   std::unique_lock lock(m_critical);
-  if (std::ranges::find(m_settingsHandlers, settingsHandler) == m_settingsHandlers.end())
+  if (std::find(m_settingsHandlers.begin(), m_settingsHandlers.end(), settingsHandler) ==
+      m_settingsHandlers.end())
   {
     if (bFront)
       m_settingsHandlers.insert(m_settingsHandlers.begin(), settingsHandler);
@@ -438,7 +439,7 @@ void CSettingsManager::UnregisterSettingsHandler(ISettingsHandler *settingsHandl
     return;
 
   std::unique_lock lock(m_critical);
-  const auto it = std::ranges::find(m_settingsHandlers, settingsHandler);
+  const auto it = std::find(m_settingsHandlers.begin(), m_settingsHandlers.end(), settingsHandler);
   if (it != m_settingsHandlers.end())
     m_settingsHandlers.erase(it);
 }
@@ -1044,8 +1045,9 @@ void CSettingsManager::OnSettingsLoaded()
 bool CSettingsManager::OnSettingsSaving() const
 {
   std::shared_lock lock(m_critical);
-  return std::ranges::all_of(m_settingsHandlers, [](const auto& settingsHandler)
-                             { return settingsHandler->OnSettingsSaving(); });
+  return std::all_of(m_settingsHandlers.begin(), m_settingsHandlers.end(),
+                     [](const auto& settingsHandler)
+                     { return settingsHandler->OnSettingsSaving(); });
 }
 
 void CSettingsManager::OnSettingsSaved() const

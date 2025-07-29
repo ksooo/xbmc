@@ -163,13 +163,12 @@ void CGUIDialogPVRTimerSettings::SetTimer(const std::shared_ptr<CPVRTimerInfoTag
     if (m_timerType->SupportsAnyChannel())
     {
       // Select first matching "Any channel" entry.
-      const auto it =
-          std::ranges::find_if(m_channelEntries,
-                               [this](const auto& channel)
-                               {
-                                 return channel.second.channelUid == PVR_CHANNEL_INVALID_UID &&
-                                        channel.second.clientId == m_timerInfoTag->m_iClientId;
-                               });
+      const auto it = std::find_if(m_channelEntries.begin(), m_channelEntries.end(),
+                                   [this](const auto& channel)
+                                   {
+                                     return channel.second.channelUid == PVR_CHANNEL_INVALID_UID &&
+                                            channel.second.clientId == m_timerInfoTag->m_iClientId;
+                                   });
 
       if (it != m_channelEntries.cend())
       {
@@ -183,13 +182,12 @@ void CGUIDialogPVRTimerSettings::SetTimer(const std::shared_ptr<CPVRTimerInfoTag
     else if (m_bIsNewTimer)
     {
       // Select first matching regular (not "Any channel") entry.
-      const auto it =
-          std::ranges::find_if(m_channelEntries,
-                               [this](const auto& channel)
-                               {
-                                 return channel.second.channelUid != PVR_CHANNEL_INVALID_UID &&
-                                        channel.second.clientId == m_timerInfoTag->m_iClientId;
-                               });
+      const auto it = std::find_if(m_channelEntries.begin(), m_channelEntries.end(),
+                                   [this](const auto& channel)
+                                   {
+                                     return channel.second.channelUid != PVR_CHANNEL_INVALID_UID &&
+                                            channel.second.clientId == m_timerInfoTag->m_iClientId;
+                                   });
 
       if (it != m_channelEntries.cend())
       {
@@ -204,8 +202,8 @@ void CGUIDialogPVRTimerSettings::SetTimer(const std::shared_ptr<CPVRTimerInfoTag
   else
   {
     // Find matching channel entry
-    const auto it = std::ranges::find_if(
-        m_channelEntries,
+    const auto it = std::find_if(
+        m_channelEntries.begin(), m_channelEntries.end(),
         [this](const auto& channel)
         {
           return channel.second.channelUid == m_timerInfoTag->m_iClientChannelUid &&
@@ -1119,7 +1117,8 @@ void CGUIDialogPVRTimerSettings::ChannelsFiller(const SettingConstPtr& setting,
   }
 
   // Verify m_channel is still valid. Update if not.
-  if (foundCurrent && std::ranges::find(list, current, &IntegerSettingOption::value) == list.cend())
+  if (foundCurrent && std::find_if(list.begin(), list.end(), [&current](const auto& channel)
+                                   { return channel.value == current; }) == list.cend())
   {
     // Set m_channel and current to first valid channel in list
     const int first{list.front().value};
@@ -1186,8 +1185,8 @@ void CGUIDialogPVRTimerSettings::DupEpisodesFiller(const SettingConstPtr& settin
   list.clear();
 
   const std::vector<SettingIntValue>& values{m_timerType->GetPreventDuplicateEpisodesValues()};
-  std::ranges::transform(values, std::back_inserter(list), [](const auto& value)
-                         { return IntegerSettingOption(value.first, value.second); });
+  std::transform(values.begin(), values.end(), std::back_inserter(list),
+                 [](const auto& value) { return IntegerSettingOption(value.first, value.second); });
 
   current = m_iPreventDupEpisodes;
 }
@@ -1215,8 +1214,8 @@ void CGUIDialogPVRTimerSettings::PrioritiesFiller(const SettingConstPtr& setting
   list.clear();
 
   const std::vector<SettingIntValue>& values{m_timerType->GetPriorityValues()};
-  std::ranges::transform(values, std::back_inserter(list), [](const auto& value)
-                         { return IntegerSettingOption(value.first, value.second); });
+  std::transform(values.begin(), values.end(), std::back_inserter(list),
+                 [](const auto& value) { return IntegerSettingOption(value.first, value.second); });
 
   current = m_iPriority;
 
@@ -1243,8 +1242,8 @@ void CGUIDialogPVRTimerSettings::LifetimesFiller(const SettingConstPtr& setting,
   list.clear();
 
   const std::vector<SettingIntValue>& values{m_timerType->GetLifetimeValues()};
-  std::ranges::transform(values, std::back_inserter(list), [](const auto& value)
-                         { return IntegerSettingOption(value.first, value.second); });
+  std::transform(values.begin(), values.end(), std::back_inserter(list),
+                 [](const auto& value) { return IntegerSettingOption(value.first, value.second); });
 
   current = m_iLifetime;
 
@@ -1272,8 +1271,8 @@ void CGUIDialogPVRTimerSettings::MaxRecordingsFiller(const SettingConstPtr& sett
   list.clear();
 
   const std::vector<SettingIntValue>& values{m_timerType->GetMaxRecordingsValues()};
-  std::ranges::transform(values, std::back_inserter(list), [](const auto& value)
-                         { return IntegerSettingOption(value.first, value.second); });
+  std::transform(values.begin(), values.end(), std::back_inserter(list),
+                 [](const auto& value) { return IntegerSettingOption(value.first, value.second); });
 
   current = m_iMaxRecordings;
 
@@ -1300,8 +1299,8 @@ void CGUIDialogPVRTimerSettings::RecordingGroupFiller(const SettingConstPtr& set
   list.clear();
 
   const std::vector<SettingIntValue>& values{m_timerType->GetRecordingGroupValues()};
-  std::ranges::transform(values, std::back_inserter(list), [](const auto& value)
-                         { return IntegerSettingOption(value.first, value.second); });
+  std::transform(values.begin(), values.end(), std::back_inserter(list),
+                 [](const auto& value) { return IntegerSettingOption(value.first, value.second); });
 
   current = m_iRecordingGroup;
 }

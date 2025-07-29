@@ -75,8 +75,8 @@ int CPVRCachedImages::Cleanup(const std::vector<PVRImagePattern>& urlPatterns,
     const std::string textureURL =
         IMAGE_FILES::CImageFileURL(items[i]["url"].asString()).GetTargetFile();
 
-    if (std::ranges::none_of(urlsToCheck,
-                             [&textureURL](std::string_view url) { return url == textureURL; }))
+    if (std::none_of(urlsToCheck.begin(), urlsToCheck.end(),
+                     [&textureURL](std::string_view url) { return url == textureURL; }))
     {
       CLog::LogFC(LOGDEBUG, LOGPVR, "Removing stale cached image: '{}'", textureURL);
       CServiceBroker::GetTextureCache()->ClearCachedImage(items[i]["textureid"].asInteger());

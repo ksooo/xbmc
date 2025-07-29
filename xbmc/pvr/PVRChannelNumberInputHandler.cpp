@@ -106,7 +106,7 @@ void CPVRChannelNumberInputHandler::AppendChannelNumberCharacter(char cCharacter
     m_sortedChannelNumbers.clear();
     GetChannelNumbers(m_sortedChannelNumbers);
 
-    std::ranges::sort(m_sortedChannelNumbers);
+    std::sort(m_sortedChannelNumbers.begin(), m_sortedChannelNumbers.end());
   }
 
   m_inputBuffer.append(&cCharacter, 1);

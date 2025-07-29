@@ -55,8 +55,8 @@ bool CPVRChannelGroupFromClient::UpdateFromClients(
   }
   else
   {
-    const auto it = std::ranges::find_if(clients, [this](const auto& c)
-                                         { return c->GetID() == GetClientID(); });
+    const auto it = std::find_if(clients.begin(), clients.end(),
+                                 [this](const auto& c) { return c->GetID() == GetClientID(); });
     if (it == clients.cend())
       return true; // this group is not provided by one of the clients to get the group members for
 

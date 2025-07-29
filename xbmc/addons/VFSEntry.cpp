@@ -115,8 +115,8 @@ VFSEntryPtr CVFSAddonCache::GetAddonInstance(const std::string& strId)
 
   std::unique_lock lock(m_critSection);
 
-  const auto itAddon = std::ranges::find_if(m_addonsInstances, [&strId](const VFSEntryPtr& a)
-                                            { return a->ID() == strId; });
+  const auto itAddon = std::find_if(m_addonsInstances.begin(), m_addonsInstances.end(),
+                                    [&strId](const VFSEntryPtr& a) { return a->ID() == strId; });
 
   if (itAddon != m_addonsInstances.end())
     addon = *itAddon;
@@ -128,8 +128,8 @@ bool CVFSAddonCache::IsInUse(const std::string& id)
 {
   std::unique_lock lock(m_critSection);
 
-  const auto itAddon = std::ranges::find_if(m_addonsInstances, [&id](const VFSEntryPtr& addon)
-                                            { return addon->ID() == id; });
+  const auto itAddon = std::find_if(m_addonsInstances.begin(), m_addonsInstances.end(),
+                                    [&id](const VFSEntryPtr& addon) { return addon->ID() == id; });
   if (itAddon != m_addonsInstances.end() && (*itAddon).use_count() > 1)
     return true;
   return false;
@@ -143,8 +143,9 @@ void CVFSAddonCache::Update(const std::string& id)
   {
     std::unique_lock lock(m_critSection);
 
-    const auto itAddon = std::ranges::find_if(m_addonsInstances, [&id](const VFSEntryPtr& addon)
-                                              { return addon->ID() == id; });
+    const auto itAddon =
+        std::find_if(m_addonsInstances.begin(), m_addonsInstances.end(),
+                     [&id](const VFSEntryPtr& addon) { return addon->ID() == id; });
 
     if (itAddon != m_addonsInstances.end())
     {

@@ -2456,6 +2456,6 @@ std::string CUtil::GetHexString(const std::span<const uint8_t>& buf, int count)
 {
   std::stringstream ss;
   ss << std::hex << std::setw(count) << std::setfill('0');
-  std::ranges::for_each(buf, [&](auto x) { ss << static_cast<int>(x); });
+  std::for_each(buf.begin(), buf.end(), [&](auto x) { ss << static_cast<int>(x); });
   return std::move(ss).str();
 }

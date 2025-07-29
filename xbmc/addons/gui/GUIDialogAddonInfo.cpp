@@ -555,8 +555,9 @@ bool CGUIDialogAddonInfo::PromptIfDependency(int heading, int line2) const
   CServiceBroker::GetAddonMgr().GetAddons(addons);
   for (const auto& addon : addons)
   {
-    auto i = std::ranges::find_if(addon->GetDependencies(), [this](const DependencyInfo& other)
-                                  { return other.id == m_localAddon->ID(); });
+    auto i = std::find_if(addon->GetDependencies().begin(), addon->GetDependencies().end(),
+                          [this](const DependencyInfo& other)
+                          { return other.id == m_localAddon->ID(); });
     if (i != addon->GetDependencies().end() && !i->optional) // non-optional dependency
       deps.emplace_back(addon->Name());
   }
@@ -878,53 +879,54 @@ void CGUIDialogAddonInfo::BuildDependencyList()
     m_depsInstalledWithAvailable.emplace_back(dep, addonInstalled, addonAvailable);
   }
 
-  std::ranges::sort(
-      m_depsInstalledWithAvailable,
-      [](const auto& a, const auto& b)
-      {
-        // 1. "not installed/available" go to the bottom first
-        const bool depAInstalledOrAvailable = a.m_installed != nullptr || a.m_available != nullptr;
-        const bool depBInstalledOrAvailable = b.m_installed != nullptr || b.m_available != nullptr;
-
-        if (depAInstalledOrAvailable != depBInstalledOrAvailable)
-        {
-          return !depAInstalledOrAvailable;
-        }
-
-        // 2. then optional add-ons to top
-        if (a.m_depInfo.optional != b.m_depInfo.optional)
-        {
-          return a.m_depInfo.optional;
-        }
-
-        // 3. addon type asc, except scripts/modules at the bottom
-        const std::shared_ptr<IAddon>& depA = a.m_installed ? a.m_installed : a.m_available;
-        const std::shared_ptr<IAddon>& depB = b.m_installed ? b.m_installed : b.m_available;
-
-        if (depA && depB)
-        {
-          const AddonType typeA = depA->MainType();
-          const AddonType typeB = depB->MainType();
-          if (typeA != typeB)
-          {
-            if ((typeA == AddonType::SCRIPT_MODULE) == (typeB == AddonType::SCRIPT_MODULE))
+  std::sort(m_depsInstalledWithAvailable.begin(), m_depsInstalledWithAvailable.end(),
+            [](const auto& a, const auto& b)
             {
-              // both are scripts/modules or neither one is => sort by addon type asc
-              return typeA < typeB;
-            }
-            else
-            {
-              // At this point, either:
-              // A is script/module and B is not, or A is not script/module and B is.
-              // the script/module goes to the bottom
-              return typeA != AddonType::SCRIPT_MODULE;
-            }
-          }
-        }
+              // 1. "not installed/available" go to the bottom first
+              const bool depAInstalledOrAvailable =
+                  a.m_installed != nullptr || a.m_available != nullptr;
+              const bool depBInstalledOrAvailable =
+                  b.m_installed != nullptr || b.m_available != nullptr;
 
-        // 4. finally order by addon-id
-        return a.m_depInfo.id < b.m_depInfo.id;
-      });
+              if (depAInstalledOrAvailable != depBInstalledOrAvailable)
+              {
+                return !depAInstalledOrAvailable;
+              }
+
+              // 2. then optional add-ons to top
+              if (a.m_depInfo.optional != b.m_depInfo.optional)
+              {
+                return a.m_depInfo.optional;
+              }
+
+              // 3. addon type asc, except scripts/modules at the bottom
+              const std::shared_ptr<IAddon>& depA = a.m_installed ? a.m_installed : a.m_available;
+              const std::shared_ptr<IAddon>& depB = b.m_installed ? b.m_installed : b.m_available;
+
+              if (depA && depB)
+              {
+                const AddonType typeA = depA->MainType();
+                const AddonType typeB = depB->MainType();
+                if (typeA != typeB)
+                {
+                  if ((typeA == AddonType::SCRIPT_MODULE) == (typeB == AddonType::SCRIPT_MODULE))
+                  {
+                    // both are scripts/modules or neither one is => sort by addon type asc
+                    return typeA < typeB;
+                  }
+                  else
+                  {
+                    // At this point, either:
+                    // A is script/module and B is not, or A is not script/module and B is.
+                    // the script/module goes to the bottom
+                    return typeA != AddonType::SCRIPT_MODULE;
+                  }
+                }
+              }
+
+              // 4. finally order by addon-id
+              return a.m_depInfo.id < b.m_depInfo.id;
+            });
 }
 
 bool CInstalledWithAvailable::IsInstalledUpToDate() const

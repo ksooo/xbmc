@@ -1636,12 +1636,12 @@ bool CStrAccum::Append(const char* z, int n)
 
 size_t ci_find(std::string_view where, std::string_view what)
 {
-  const auto found = std::ranges::search(where, what, [](char l, char r)
-                                         { return std::tolower(l) == std::tolower(r); });
-  if (found.empty())
+  const auto loc = std::search(where.begin(), where.end(), what.begin(), what.end(),
+                               [](char l, char r) { return std::tolower(l) == std::tolower(r); });
+  if (loc == where.end())
     return std::string::npos;
   else
-    return std::distance(where.cbegin(), found.begin());
+    return loc - where.begin();
 }
 
 } // unnamed namespace

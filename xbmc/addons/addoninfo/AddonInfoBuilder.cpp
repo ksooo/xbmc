@@ -877,8 +877,9 @@ bool CAddonInfoBuilder::PlatformSupportsAddon(const AddonInfoPtr& addon)
 #endif
   };
 
-  return std::ranges::find_first_of(addon->m_platforms, supportedPlatforms) !=
-         addon->m_platforms.end();
+  return std::find_first_of(addon->m_platforms.begin(), addon->m_platforms.end(),
+                            supportedPlatforms.begin(),
+                            supportedPlatforms.end()) != addon->m_platforms.end();
 }
 
 }

@@ -89,7 +89,7 @@ void CGUIEPGGridContainerModel::Initialize(const CFileItemList& items,
 
   ////////////////////////////////////////////////////////////////////////
   // Create channel items
-  std::ranges::copy(items, std::back_inserter(m_channelItems));
+  std::copy(items.begin(), items.end(), std::back_inserter(m_channelItems));
 
   /* check for invalid start and end time */
   if (gridStart >= gridEnd)
@@ -205,8 +205,8 @@ std::shared_ptr<CFileItem> CGUIEPGGridContainerModel::GetEpgTags(const EpgTagsMa
   else
   {
     const auto it =
-        std::ranges::find_if(epgTags.tags, [this, iBlock](const auto& item)
-                             { return IsEventMemberOfBlock(item->GetEPGInfoTag(), iBlock); });
+        std::find_if(epgTags.tags.begin(), epgTags.tags.end(), [this, iBlock](const auto& item)
+                     { return IsEventMemberOfBlock(item->GetEPGInfoTag(), iBlock); });
     if (it != epgTags.tags.cend())
       result = (*it);
   }

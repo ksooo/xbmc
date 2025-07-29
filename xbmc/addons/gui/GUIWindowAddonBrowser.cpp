@@ -457,8 +457,8 @@ int CGUIWindowAddonBrowser::SelectAddonID(const std::vector<AddonType>& types,
 
   // get rid of any invalid addon types
   std::vector<AddonType> validTypes(types.size());
-  std::ranges::copy_if(types, validTypes.begin(),
-                       [](AddonType type) { return type != AddonType::UNKNOWN; });
+  std::copy_if(types.begin(), types.end(), validTypes.begin(),
+               [](AddonType type) { return type != AddonType::UNKNOWN; });
 
   if (validTypes.empty())
     return -1;

@@ -272,8 +272,8 @@ bool CSmartPlaylistRule::Validate(const std::string &input, void *data)
   // Split the input into multiple values and validate every value separately
   const std::vector<std::string> values{StringUtils::Split(input, RULE_VALUE_SEPARATOR)};
 
-  return (
-      std::ranges::all_of(values, [data, validator](const auto& s) { return validator(s, data); }));
+  return (std::all_of(values.begin(), values.end(),
+                      [data, validator](const auto& s) { return validator(s, data); }));
 }
 
 bool CSmartPlaylistRule::ValidateRating(const std::string &input, void *data)

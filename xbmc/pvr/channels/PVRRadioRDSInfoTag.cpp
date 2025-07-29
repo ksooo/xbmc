@@ -692,7 +692,7 @@ void CPVRRadioRDSInfoTag::Info::Clear()
 void CPVRRadioRDSInfoTag::Info::Add(const std::string& text)
 {
   std::string tmp{TrimAndToUTF8(text)};
-  if (std::ranges::find(m_data, tmp) != m_data.cend())
+  if (std::find(m_data.begin(), m_data.end(), tmp) != m_data.cend())
     return;
 
   if (m_data.size() >= m_maxSize)

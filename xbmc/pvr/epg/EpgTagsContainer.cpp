@@ -163,8 +163,9 @@ bool CPVREpgTagsContainer::UpdateEntries(const CPVREpgTagsContainer& tags)
       tag->SetChannelData(m_channelData);
       tag->SetEpgID(m_iEpgID);
 
-      const auto it = std::ranges::find_if(existingTags, [&tag](const auto& t)
-                                           { return t->StartAsUTC() == tag->StartAsUTC(); });
+      const auto t1{tag};
+      const auto it = std::find_if(existingTags.begin(), existingTags.end(), [&t1](const auto& t)
+                                   { return t->StartAsUTC() == t1->StartAsUTC(); });
 
       if (it != existingTags.cend())
       {
@@ -356,8 +357,8 @@ std::shared_ptr<CPVREpgInfoTag> CPVREpgTagsContainer::GetTag(unsigned int iUniqu
     return {};
 
   const auto it =
-      std::ranges::find_if(m_changedTags, [iUniqueBroadcastID](const auto& tag)
-                           { return tag.second->UniqueBroadcastID() == iUniqueBroadcastID; });
+      std::find_if(m_changedTags.begin(), m_changedTags.end(), [iUniqueBroadcastID](const auto& tag)
+                   { return tag.second->UniqueBroadcastID() == iUniqueBroadcastID; });
 
   if (it != m_changedTags.cend())
     return (*it).second;
@@ -373,8 +374,9 @@ std::shared_ptr<CPVREpgInfoTag> CPVREpgTagsContainer::GetTagByDatabaseID(int iDa
   if (iDatabaseID <= 0)
     return {};
 
-  const auto it = std::ranges::find_if(m_changedTags, [iDatabaseID](const auto& tag)
-                                       { return tag.second->DatabaseID() == iDatabaseID; });
+  const auto it =
+      std::find_if(m_changedTags.begin(), m_changedTags.end(), [iDatabaseID](const auto& tag)
+                   { return tag.second->DatabaseID() == iDatabaseID; });
 
   if (it != m_changedTags.cend())
     return (*it).second;
@@ -568,8 +570,8 @@ std::vector<std::shared_ptr<CPVREpgInfoTag>> CPVREpgTagsContainer::GetAllTags() 
     if (!m_changedTags.empty() && !m_database->HasTags(m_iEpgID))
     {
       // nothing in the db yet. take what we have in memory.
-      std::ranges::copy(std::views::values(m_changedTags), std::back_inserter(tags));
-
+      std::transform(m_changedTags.cbegin(), m_changedTags.cend(), std::back_inserter(tags),
+                     [](const auto& tag) { return tag.second; });
       FixOverlappingEvents(tags);
     }
     else

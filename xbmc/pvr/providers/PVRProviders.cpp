@@ -50,8 +50,8 @@ std::shared_ptr<CPVRProvider> CPVRProvidersContainer::GetByClient(int iClientId,
                                                                   int iUniqueId) const
 {
   std::unique_lock lock(m_critSection);
-  const auto it = std::ranges::find_if(
-      m_providers, [iClientId, iUniqueId](const auto& provider)
+  const auto it = std::find_if(
+      m_providers.begin(), m_providers.end(), [iClientId, iUniqueId](const auto& provider)
       { return provider->GetClientId() == iClientId && provider->GetUniqueId() == iUniqueId; });
   return it != m_providers.cend() ? (*it) : std::shared_ptr<CPVRProvider>();
 }
@@ -249,10 +249,12 @@ bool CPVRProviders::UpdateClientEntries(const CPVRProvidersContainer& newProvide
     {
       const bool bIgnoreProvider =
           (provider->IsClientProvider() || // ignore add-on providers as they are a special case
-           std::ranges::any_of(failedClients, [&provider](const auto& failedClient)
-                               { return failedClient == provider->GetClientId(); }) ||
-           std::ranges::any_of(disabledClients, [&provider](const auto& disabledClient)
-                               { return disabledClient == provider->GetClientId(); }));
+           std::any_of(failedClients.begin(), failedClients.end(),
+                       [&provider](const auto& failedClient)
+                       { return failedClient == provider->GetClientId(); }) ||
+           std::any_of(disabledClients.begin(), disabledClients.end(),
+                       [&provider](const auto& disabledClient)
+                       { return disabledClient == provider->GetClientId(); }));
       if (bIgnoreProvider)
       {
         ++it;
@@ -362,8 +364,9 @@ bool CPVRProviders::PersistUserChanges(
 std::shared_ptr<CPVRProvider> CPVRProviders::GetById(int iProviderId) const
 {
   std::unique_lock lock(m_critSection);
-  const auto it = std::ranges::find_if(m_providers, [iProviderId](const auto& provider)
-                                       { return provider->GetDatabaseId() == iProviderId; });
+  const auto it =
+      std::find_if(m_providers.begin(), m_providers.end(), [iProviderId](const auto& provider)
+                   { return provider->GetDatabaseId() == iProviderId; });
   return it != m_providers.cend() ? (*it) : std::shared_ptr<CPVRProvider>();
 }
 

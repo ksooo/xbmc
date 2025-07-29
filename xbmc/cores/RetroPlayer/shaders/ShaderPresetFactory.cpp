@@ -111,9 +111,10 @@ void CShaderPresetFactory::UpdateAddons()
   auto oldAddons = std::move(m_shaderAddons);
   for (auto& [addonId, shaderAddon] : oldAddons)
   {
+    const auto a = addonId;
     const bool bIsDisabled =
-        std::ranges::find_if(addonInfo, [&addonId](const AddonInfoPtr& addon)
-                             { return addonId == addon->ID(); }) == addonInfo.end();
+        std::find_if(addonInfo.begin(), addonInfo.end(), [&a](const AddonInfoPtr& addon)
+                     { return a == addon->ID(); }) == addonInfo.end();
 
     if (bIsDisabled)
       UnregisterLoader(shaderAddon.get());

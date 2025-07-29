@@ -1198,7 +1198,7 @@ void CVideoInfoTag::ParseNative(const TiXmlElement* movie, bool prioritise)
   if (prioritise && iThumbCount && iThumbCount != m_strPictureURL.GetUrls().size())
   {
     auto thumbUrls = m_strPictureURL.GetUrls();
-    std::ranges::rotate(thumbUrls, thumbUrls.begin() + iThumbCount);
+    std::rotate(thumbUrls.begin(), thumbUrls.end(), thumbUrls.begin() + iThumbCount);
     m_strPictureURL.SetUrls(thumbUrls);
     m_strPictureURL.SetData(xmlAdd);
   }
@@ -1778,7 +1778,7 @@ std::string CVideoInfoTag::Trim(std::string&& value) const
 
 std::vector<std::string> CVideoInfoTag::Trim(std::vector<std::string>&& items) const
 {
-  std::ranges::for_each(items, [](std::string& str) { str = StringUtils::Trim(str); });
+  std::for_each(items.begin(), items.end(), [](std::string& str) { str = StringUtils::Trim(str); });
   return std::move(items);
 }
 

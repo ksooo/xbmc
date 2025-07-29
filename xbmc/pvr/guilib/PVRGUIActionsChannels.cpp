@@ -238,8 +238,9 @@ bool CPVRGUIActionsChannels::StartChannelScan(int clientId)
 
   if (clientId != PVR_CLIENT_INVALID_UID)
   {
-    const auto it = std::ranges::find_if(possibleScanClients, [clientId](const auto& client)
-                                         { return client->GetID() == clientId; });
+    const auto it =
+        std::find_if(possibleScanClients.begin(), possibleScanClients.end(),
+                     [clientId](const auto& client) { return client->GetID() == clientId; });
 
     if (it != possibleScanClients.cend())
       scanClient = (*it);
@@ -329,7 +330,7 @@ std::shared_ptr<CPVRChannelGroupMember> CPVRGUIActionsChannels::GetChannelGroupM
       WINDOW_RADIO_RECORDINGS, WINDOW_RADIO_TIMERS, WINDOW_RADIO_TIMER_RULES, WINDOW_RADIO_SEARCH,
   };
 
-  if (std::ranges::find(windowIDs, activeWindowID) == windowIDs.cend())
+  if (std::find(windowIDs.begin(), windowIDs.end(), activeWindowID) == windowIDs.cend())
   {
     const std::shared_ptr<const CPVRChannelGroup> group =
         CServiceBroker::GetPVRManager().PlaybackState()->GetActiveChannelGroup(channel->IsRadio());

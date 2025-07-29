@@ -46,8 +46,8 @@ CRepository::ResolveResult CRepository::ResolvePathAndHash(const AddonPtr& addon
   std::string const& path = addon->Path();
 
   const auto dirIt =
-      std::ranges::find_if(m_dirs, [&path](RepositoryDirInfo const& dir)
-                           { return URIUtils::PathHasParent(path, dir.datadir, true); });
+      std::find_if(m_dirs.begin(), m_dirs.end(), [&path](RepositoryDirInfo const& dir)
+                   { return URIUtils::PathHasParent(path, dir.datadir, true); });
   if (dirIt == m_dirs.end())
   {
     CLog::Log(LOGERROR, "Requested path {} not found in known repository directories", path);
@@ -278,7 +278,7 @@ CRepository::FetchStatus CRepository::FetchIfChanged(std::string_view oldChecksu
   {
     // Use smallest update interval out of all received (individual intervals per directory are
     // not possible)
-    recheckAfter = *std::ranges::min_element(recheckAfterTimes);
+    recheckAfter = *std::min_element(recheckAfterTimes.begin(), recheckAfterTimes.end());
     // If all directories have checksums and they match the last one, nothing has changed
     if (dirChecksums.size() == m_dirs.size() && oldChecksum == checksum)
       return FetchStatus::NOT_MODIFIED;

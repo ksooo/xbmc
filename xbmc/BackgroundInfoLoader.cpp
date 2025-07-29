@@ -99,7 +99,7 @@ void CBackgroundInfoLoader::Load(CFileItemList& items)
 
   std::unique_lock lock(m_lock);
 
-  std::ranges::copy(items, std::back_inserter(m_vecItems));
+  std::copy(items.begin(), items.end(), std::back_inserter(m_vecItems));
 
   m_pVecItems = &items;
   m_bStop = false;

@@ -54,8 +54,8 @@ std::vector<std::shared_ptr<CPVRChannelGroup>> CPVRChannelGroupAllChannelsSingle
     }
 
     // Create a group containing all channels for this client, if not yet existing.
-    const auto it = std::ranges::find_if(
-        allChannelGroups,
+    const auto it = std::find_if(
+        allChannelGroups.begin(), allChannelGroups.end(),
         [&client](const auto& group)
         {
           return (group->GroupType() == PVR_GROUP_TYPE_SYSTEM_ALL_CHANNELS_SINGLE_CLIENT) &&

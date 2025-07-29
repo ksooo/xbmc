@@ -151,8 +151,8 @@ void CPVRManagerJobQueue::Append(const std::string& type, const F& function)
   std::unique_lock lock(m_critSection);
 
   // check for another pending job of given type...
-  if (std::ranges::any_of(m_pendingUpdates, [&job](const auto& updateJob)
-                          { return updateJob->GetType() == job->GetType(); }))
+  if (std::any_of(m_pendingUpdates.begin(), m_pendingUpdates.end(),
+                  [&job](const auto& updateJob) { return updateJob->GetType() == job->GetType(); }))
   {
     return;
   }
@@ -784,8 +784,8 @@ void CPVRManager::UnloadComponents()
 
 bool CPVRManager::IsKnownClient(int clientID) const
 {
-  return std::ranges::any_of(m_knownClients, [clientID](const auto& client)
-                             { return client->GetID() == clientID; });
+  return std::any_of(m_knownClients.begin(), m_knownClients.end(),
+                     [clientID](const auto& client) { return client->GetID() == clientID; });
 }
 
 void CPVRManager::TriggerPlayChannelOnStartup()

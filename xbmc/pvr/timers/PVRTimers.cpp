@@ -69,8 +69,8 @@ std::shared_ptr<CPVRTimerInfoTag> CPVRTimersContainer::GetByClient(int iClientId
   std::unique_lock lock(m_critSection);
   for (const auto& [_, tags] : m_tags)
   {
-    const auto it = std::ranges::find_if(
-        tags, [iClientId, iClientIndex](const auto& timer)
+    const auto it = std::find_if(
+        tags.begin(), tags.end(), [iClientId, iClientIndex](const auto& timer)
         { return timer->ClientID() == iClientId && timer->ClientIndex() == iClientIndex; });
     if (it != tags.cend())
       return (*it);
@@ -214,8 +214,8 @@ bool CPVRTimers::IsRecording() const
 
   for (const auto& [_, tags] : m_tags)
   {
-    if (std::ranges::any_of(tags,
-                            [](const auto& timersEntry) { return timersEntry->IsRecording(); }))
+    if (std::any_of(tags.begin(), tags.end(),
+                    [](const auto& timersEntry) { return timersEntry->IsRecording(); }))
       return true;
   }
 
@@ -246,8 +246,8 @@ bool CPVRTimers::CheckAndAppendTimerNotification(
     bool bDeleted) const
 {
   // no notification on first update or if previous update failed for tag's client.
-  if (!m_bFirstUpdate &&
-      std::ranges::find(m_failedClients, tag->ClientID()) == m_failedClients.cend())
+  if (!m_bFirstUpdate && std::find(m_failedClients.begin(), m_failedClients.end(),
+                                   tag->ClientID()) == m_failedClients.cend())
   {
     const std::string strMessage =
         bDeleted ? tag->GetDeletedNotificationText() : tag->GetNotificationText();
@@ -359,8 +359,9 @@ bool CPVRTimers::UpdateEntries(const CPVRTimersContainer& timers,
         bool bIgnoreTimer = !timer->IsOwnedByClient();
         if (!bIgnoreTimer)
         {
-          bIgnoreTimer = std::ranges::any_of(failedClients, [&timer](const auto& failedClient)
-                                             { return failedClient == timer->ClientID(); });
+          bIgnoreTimer = std::any_of(failedClients.begin(), failedClients.end(),
+                                     [&timer](const auto& failedClient)
+                                     { return failedClient == timer->ClientID(); });
         }
 
         if (bIgnoreTimer)
@@ -480,8 +481,8 @@ std::vector<std::shared_ptr<CPVREpgInfoTag>> GetEpgTagsForTimerRule(
     if (epg)
     {
       const std::vector<std::shared_ptr<CPVREpgInfoTag>> tags = epg->GetTags();
-      std::ranges::copy_if(tags, std::back_inserter(matches),
-                           [&matcher](const auto& tag) { return matcher.Matches(tag); });
+      std::copy_if(tags.begin(), tags.end(), std::back_inserter(matches),
+                   [&matcher](const auto& tag) { return matcher.Matches(tag); });
     }
   }
   else
@@ -493,8 +494,8 @@ std::vector<std::shared_ptr<CPVREpgInfoTag>> GetEpgTagsForTimerRule(
     for (const auto& epg : epgs)
     {
       const std::vector<std::shared_ptr<CPVREpgInfoTag>> tags = epg->GetTags();
-      std::ranges::copy_if(tags, std::back_inserter(matches),
-                           [&matcher](const auto& tag) { return matcher.Matches(tag); });
+      std::copy_if(tags.begin(), tags.end(), std::back_inserter(matches),
+                   [&matcher](const auto& tag) { return matcher.Matches(tag); });
     }
   }
 
@@ -685,9 +686,10 @@ bool CPVRTimers::UpdateEntries(int iMaxNotificationDelay)
               if (it1 == m_tags.cend())
                 bCreate = true;
               else
-                bCreate = std::ranges::none_of(
-                    it1->second, [&timer](const std::shared_ptr<const CPVRTimerInfoTag>& tmr)
-                    { return tmr->ParentClientIndex() == timer->ClientIndex(); });
+                bCreate =
+                    std::none_of(it1->second.begin(), it1->second.end(),
+                                 [&timer](const std::shared_ptr<const CPVRTimerInfoTag>& tmr)
+                                 { return tmr->ParentClientIndex() == timer->ClientIndex(); });
               if (bCreate)
               {
                 const CDateTimeSpan duration = timer->EndAsUTC() - timer->StartAsUTC();
@@ -840,12 +842,12 @@ std::vector<std::shared_ptr<CPVRTimerInfoTag>> CPVRTimers::GetActiveTimers() con
 
   for (const auto& [_, tags] : m_tags)
   {
-    std::ranges::copy_if(tags, std::back_inserter(timers),
-                         [](const auto& timersEntry)
-                         {
-                           return timersEntry->IsActive() && !timersEntry->IsBroken() &&
-                                  !timersEntry->IsReminder() && !timersEntry->IsTimerRule();
-                         });
+    std::copy_if(tags.begin(), tags.end(), std::back_inserter(timers),
+                 [](const auto& timersEntry)
+                 {
+                   return timersEntry->IsActive() && !timersEntry->IsBroken() &&
+                          !timersEntry->IsReminder() && !timersEntry->IsTimerRule();
+                 });
   }
 
   return timers;
@@ -858,14 +860,13 @@ int CPVRTimers::AmountActiveTimers(const TimerKind& eKind) const
 
   for (const auto& [_, tags] : m_tags)
   {
-    iReturn += std::ranges::count_if(tags,
-                                     [this, &eKind](const auto& timersEntry)
-                                     {
-                                       return KindMatchesTag(eKind, timersEntry) &&
-                                              timersEntry->IsActive() && !timersEntry->IsBroken() &&
-                                              !timersEntry->IsReminder() &&
-                                              !timersEntry->IsTimerRule();
-                                     });
+    iReturn += std::count_if(tags.begin(), tags.end(),
+                             [this, &eKind](const auto& timersEntry)
+                             {
+                               return KindMatchesTag(eKind, timersEntry) &&
+                                      timersEntry->IsActive() && !timersEntry->IsBroken() &&
+                                      !timersEntry->IsReminder() && !timersEntry->IsTimerRule();
+                             });
   }
 
   return iReturn;
@@ -894,13 +895,13 @@ std::vector<std::shared_ptr<CPVRTimerInfoTag>> CPVRTimers::GetActiveRecordings(
 
   for (const auto& [_, tags] : m_tags)
   {
-    std::ranges::copy_if(tags, std::back_inserter(timers),
-                         [this, &eKind](const auto& timersEntry)
-                         {
-                           return KindMatchesTag(eKind, timersEntry) &&
-                                  timersEntry->IsRecording() && !timersEntry->IsTimerRule() &&
-                                  !timersEntry->IsBroken() && !timersEntry->IsReminder();
-                         });
+    std::copy_if(tags.begin(), tags.end(), std::back_inserter(timers),
+                 [this, &eKind](const auto& timersEntry)
+                 {
+                   return KindMatchesTag(eKind, timersEntry) && timersEntry->IsRecording() &&
+                          !timersEntry->IsTimerRule() && !timersEntry->IsBroken() &&
+                          !timersEntry->IsReminder();
+                 });
   }
 
   return timers;
@@ -928,14 +929,13 @@ int CPVRTimers::AmountActiveRecordings(const TimerKind& eKind) const
 
   for (const auto& [_, tags] : m_tags)
   {
-    iReturn +=
-        std::ranges::count_if(tags,
-                              [this, &eKind](const auto& timersEntry)
-                              {
-                                return KindMatchesTag(eKind, timersEntry) &&
-                                       timersEntry->IsRecording() && !timersEntry->IsTimerRule() &&
-                                       !timersEntry->IsBroken() && !timersEntry->IsReminder();
-                              });
+    iReturn += std::count_if(tags.begin(), tags.end(),
+                             [this, &eKind](const auto& timersEntry)
+                             {
+                               return KindMatchesTag(eKind, timersEntry) &&
+                                      timersEntry->IsRecording() && !timersEntry->IsTimerRule() &&
+                                      !timersEntry->IsBroken() && !timersEntry->IsReminder();
+                             });
   }
 
   return iReturn;
@@ -1224,13 +1224,13 @@ bool CPVRTimers::IsRecordingOnChannel(const CPVRChannel& channel) const
 
   for (const auto& [_, tags] : m_tags)
   {
-    if (std::ranges::any_of(tags,
-                            [&channel](const auto& timersEntry)
-                            {
-                              return timersEntry->IsRecording() &&
-                                     timersEntry->ClientChannelUID() == channel.UniqueID() &&
-                                     timersEntry->ClientID() == channel.ClientID();
-                            }))
+    if (std::any_of(tags.begin(), tags.end(),
+                    [&channel](const auto& timersEntry)
+                    {
+                      return timersEntry->IsRecording() &&
+                             timersEntry->ClientChannelUID() == channel.UniqueID() &&
+                             timersEntry->ClientID() == channel.ClientID();
+                    }))
       return true;
   }
 
@@ -1243,14 +1243,13 @@ std::shared_ptr<CPVRTimerInfoTag> CPVRTimers::GetActiveTimerForChannel(
   std::unique_lock lock(m_critSection);
   for (const auto& [_, tags] : m_tags)
   {
-    const auto it =
-        std::ranges::find_if(tags,
-                             [&channel](const auto& timersEntry)
-                             {
-                               return timersEntry->IsRecording() &&
-                                      timersEntry->ClientChannelUID() == channel->UniqueID() &&
-                                      timersEntry->ClientID() == channel->ClientID();
-                             });
+    const auto it = std::find_if(tags.begin(), tags.end(),
+                                 [&channel](const auto& timersEntry)
+                                 {
+                                   return timersEntry->IsRecording() &&
+                                          timersEntry->ClientChannelUID() == channel->UniqueID() &&
+                                          timersEntry->ClientID() == channel->ClientID();
+                                 });
     if (it != tags.cend())
       return (*it);
   }
@@ -1308,14 +1307,13 @@ std::shared_ptr<CPVRTimerInfoTag> CPVRTimers::GetTimerRule(
       std::unique_lock lock(m_critSection);
       for (const auto& [_, tags] : m_tags)
       {
-        const auto it =
-            std::ranges::find_if(tags,
-                                 [iClientId, iParentClientIndex](const auto& timersEntry)
-                                 {
-                                   return (timersEntry->ClientID() == PVR_CLIENT_INVALID_UID ||
-                                           timersEntry->ClientID() == iClientId) &&
-                                          timersEntry->ClientIndex() == iParentClientIndex;
-                                 });
+        const auto it = std::find_if(tags.begin(), tags.end(),
+                                     [iClientId, iParentClientIndex](const auto& timersEntry)
+                                     {
+                                       return (timersEntry->ClientID() == PVR_CLIENT_INVALID_UID ||
+                                               timersEntry->ClientID() == iClientId) &&
+                                              timersEntry->ClientIndex() == iParentClientIndex;
+                                     });
         if (it != tags.cend())
           return (*it);
       }
@@ -1389,7 +1387,7 @@ std::vector<std::shared_ptr<CPVRTimerInfoTag>> CPVRTimers::GetAll() const
   std::unique_lock lock(m_critSection);
   for (const auto& [_, tags] : m_tags)
   {
-    std::ranges::copy(tags, std::back_inserter(timers));
+    std::copy(tags.begin(), tags.end(), std::back_inserter(timers));
   }
 
   return timers;
@@ -1400,8 +1398,8 @@ std::shared_ptr<CPVRTimerInfoTag> CPVRTimers::GetById(unsigned int iTimerId) con
   std::unique_lock lock(m_critSection);
   for (const auto& [_, tags] : m_tags)
   {
-    const auto it = std::ranges::find_if(tags, [iTimerId](const auto& timersEntry)
-                                         { return timersEntry->TimerID() == iTimerId; });
+    const auto it = std::find_if(tags.begin(), tags.end(), [iTimerId](const auto& timersEntry)
+                                 { return timersEntry->TimerID() == iTimerId; });
     if (it != tags.cend())
       return (*it);
   }

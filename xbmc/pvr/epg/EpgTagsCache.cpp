@@ -82,8 +82,8 @@ bool CPVREpgTagsCache::Refresh()
   m_nowActiveTag.reset();
   m_nextStartingTag.reset();
 
-  const auto it = std::ranges::find_if(
-      m_changedTags, [&activeTime](const auto& tag)
+  const auto it = std::find_if(
+      m_changedTags.begin(), m_changedTags.end(), [&activeTime](const auto& tag)
       { return tag.second->StartAsUTC() <= activeTime && tag.second->EndAsUTC() > activeTime; });
 
   if (it != m_changedTags.cend())

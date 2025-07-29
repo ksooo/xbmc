@@ -166,24 +166,24 @@ bool CAddonMgr::HasAddons(AddonType type)
 {
   std::unique_lock lock(m_critSection);
 
-  return std::ranges::any_of(m_installedAddons,
-                             [this, type](const auto& addonInfo)
-                             {
-                               const auto& [_, info] = addonInfo;
-                               return info->HasType(type) && !IsAddonDisabled(info->ID());
-                             });
+  return std::any_of(m_installedAddons.begin(), m_installedAddons.end(),
+                     [this, type](const auto& addonInfo)
+                     {
+                       const auto& [_, info] = addonInfo;
+                       return info->HasType(type) && !IsAddonDisabled(info->ID());
+                     });
 }
 
 bool CAddonMgr::HasInstalledAddons(AddonType type)
 {
   std::unique_lock lock(m_critSection);
 
-  return std::ranges::any_of(m_installedAddons,
-                             [type](const auto& addonInfo)
-                             {
-                               const auto& [_, info] = addonInfo;
-                               return info->HasType(type);
-                             });
+  return std::any_of(m_installedAddons.begin(), m_installedAddons.end(),
+                     [type](const auto& addonInfo)
+                     {
+                       const auto& [_, info] = addonInfo;
+                       return info->HasType(type);
+                     });
 }
 
 void CAddonMgr::AddToUpdateableAddons(const AddonPtr& pAddon)
@@ -195,7 +195,7 @@ void CAddonMgr::AddToUpdateableAddons(const AddonPtr& pAddon)
 void CAddonMgr::RemoveFromUpdateableAddons(const AddonPtr& pAddon)
 {
   std::unique_lock lock(m_critSection);
-  const auto it = std::ranges::find(m_updateableAddons, pAddon);
+  const auto it = std::find(m_updateableAddons.begin(), m_updateableAddons.end(), pAddon);
   if (it != m_updateableAddons.end())
     m_updateableAddons.erase(it);
 }
@@ -215,7 +215,8 @@ struct AddonIdFinder
 bool CAddonMgr::ReloadSettings(const std::string& addonId, AddonInstanceId instanceId)
 {
   std::unique_lock lock(m_critSection);
-  const auto it = std::ranges::find_if(m_updateableAddons, AddonIdFinder(addonId));
+  const auto it =
+      std::find_if(m_updateableAddons.begin(), m_updateableAddons.end(), AddonIdFinder(addonId));
   if (it != m_updateableAddons.end())
     return (*it)->ReloadSettings(instanceId);
 
@@ -340,11 +341,11 @@ bool CAddonMgr::IsOrphaned(const std::shared_ptr<IAddon>& addon,
 
   const auto dependsOnCapturedAddon = [&addon](const std::shared_ptr<IAddon>& a)
   {
-    return std::ranges::any_of(a->GetDependencies(), [&addon](const DependencyInfo& dep)
-                               { return dep.id == addon->ID(); });
+    return std::any_of(a->GetDependencies().begin(), a->GetDependencies().end(),
+                       [&addon](const DependencyInfo& dep) { return dep.id == addon->ID(); });
   };
 
-  return std::ranges::none_of(allAddons, dependsOnCapturedAddon);
+  return std::none_of(allAddons.begin(), allAddons.end(), dependsOnCapturedAddon);
 }
 
 bool CAddonMgr::GetAddonsForUpdate(VECADDONS& addons) const
@@ -385,8 +386,8 @@ bool CAddonMgr::GetDisabledAddons(VECADDONS& addons, AddonType type) const
   VECADDONS all;
   if (GetInstalledAddons(all, type))
   {
-    std::ranges::copy_if(all, std::back_inserter(addons),
-                         [this](const AddonPtr& addon) { return IsAddonDisabled(addon->ID()); });
+    std::copy_if(all.begin(), all.end(), std::back_inserter(addons),
+                 [this](const AddonPtr& addon) { return IsAddonDisabled(addon->ID()); });
     return true;
   }
   return false;
@@ -582,8 +583,8 @@ void CAddonMgr::SortByDependencies(VECADDONS& updates) const
         auto comparator = [&dep](const std::shared_ptr<ADDON::IAddon>& a)
         { return a->ID() == dep.id; };
 
-        if ((std::ranges::any_of(updates, comparator)) &&
-            (!std::ranges::any_of(sorted, comparator)))
+        if ((std::any_of(updates.begin(), updates.end(), comparator)) &&
+            (!std::any_of(sorted.begin(), sorted.end(), comparator)))
         {
           addToSortedList = false;
           break;
@@ -813,7 +814,7 @@ void CAddonMgr::UpdateLastUsed(const std::string& id)
 
 static void ResolveDependencies(const std::string& addonId, std::vector<std::string>& needed, std::vector<std::string>& missing)
 {
-  if (std::ranges::find(needed, addonId) != needed.end())
+  if (std::find(needed.begin(), needed.end(), addonId) != needed.end())
     return;
 
   AddonPtr addon;
@@ -1040,13 +1041,14 @@ bool CAddonMgr::IsSystemAddon(const std::string& id)
 bool CAddonMgr::IsRequiredSystemAddon(const std::string& id)
 {
   std::unique_lock lock(m_critSection);
-  return std::ranges::find(m_systemAddons, id) != m_systemAddons.end();
+  return std::find(m_systemAddons.begin(), m_systemAddons.end(), id) != m_systemAddons.end();
 }
 
 bool CAddonMgr::IsOptionalSystemAddon(const std::string& id)
 {
   std::unique_lock lock(m_critSection);
-  return std::ranges::find(m_optionalSystemAddons, id) != m_optionalSystemAddons.end();
+  return std::find(m_optionalSystemAddons.begin(), m_optionalSystemAddons.end(), id) !=
+         m_optionalSystemAddons.end();
 }
 
 bool CAddonMgr::LoadAddonDescription(const std::string& directory, AddonPtr& addon) const
@@ -1158,8 +1160,9 @@ std::vector<DependencyInfo> CAddonMgr::GetDepsRecursive(const std::string& id,
         StringUtils::StartsWith(current_dep.id, "kodi."))
       continue;
 
-    const auto added_it = std::ranges::find_if(added, [&current_dep](const DependencyInfo& d)
-                                               { return d.id == current_dep.id; });
+    const auto added_it =
+        std::find_if(added.begin(), added.end(),
+                     [&current_dep](const DependencyInfo& d) { return d.id == current_dep.id; });
     if (added_it != added.end())
     {
       if (current_dep.version < added_it->version)
@@ -1219,8 +1222,9 @@ std::vector<AddonInfoPtr> CAddonMgr::GetAddonInfos(bool onlyEnabled,
     if (addon->MainType() == AddonType::UNKNOWN)
       continue;
 
+    const auto a = addon;
     const auto it =
-        std::ranges::find_if(types, [&addon](AddonType t) { return addon->HasType(t); });
+        std::find_if(types.begin(), types.end(), [&a](AddonType t) { return a->HasType(t); });
     if (it != types.end())
       infos.emplace_back(addon);
   }

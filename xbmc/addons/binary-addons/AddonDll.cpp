@@ -369,8 +369,9 @@ ADDON_STATUS CAddonDll::TransferSettings(AddonInstanceId instanceId)
     KODI_ADDON_INSTANCE_HDL instanceHandle{nullptr};
     if (instanceId != ADDON_SETTINGS_ID)
     {
-      const auto it = std::ranges::find_if(m_usedInstances, [instanceId](const auto& data)
-                                           { return data.second->info->number == instanceId; });
+      const auto it = std::find_if(m_usedInstances.begin(), m_usedInstances.end(),
+                                   [instanceId](const auto& data)
+                                   { return data.second->info->number == instanceId; });
       if (it == m_usedInstances.end())
         return ADDON_STATUS_UNKNOWN;
 

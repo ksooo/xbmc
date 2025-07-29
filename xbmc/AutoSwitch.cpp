@@ -110,7 +110,7 @@ bool CAutoSwitch::ByFolders(const CFileItemList& vecItems)
   if (vecItems.GetFolderCount() != vecItems.Size())
     return false;
 
-  return std::ranges::any_of(vecItems, hasThumb);
+  return std::any_of(vecItems.begin(), vecItems.end(), hasThumb);
 }
 
 /// \brief Auto Switch method based on the current directory \e not containing ALL files and \e atleast one non-default thumb
@@ -121,7 +121,7 @@ bool CAutoSwitch::ByFiles(bool bHideParentDirItems, const CFileItemList& vecItem
   if (vecItems.GetFolderCount() <= (bHideParentDirItems ? 0 : 1))
     return false;
 
-  return std::ranges::any_of(vecItems, hasThumb);
+  return std::any_of(vecItems.begin(), vecItems.end(), hasThumb);
 }
 
 /// \brief Auto Switch method based on the percentage of non-default thumbs \e in the current directory
@@ -133,7 +133,7 @@ bool CAutoSwitch::ByThumbPercent(bool bHideParentDirItems, int iPercent, const C
   if (numItems <= 0)
     return false;
 
-  const float numThumbs = std::ranges::count_if(vecItems, hasThumb);
+  const float numThumbs = std::count_if(vecItems.begin(), vecItems.end(), hasThumb);
   return numThumbs / numItems * 100.f > iPercent;
 }
 
@@ -159,23 +159,23 @@ bool CAutoSwitch::ByFolderThumbPercentage(bool hideParentDirItems, int percent, 
   if (fileCount > 0.25f * numItems)
     return false;
 
-  const int numThumbs = std::ranges::count_if(
-      vecItems, [](const auto& item) { return item->IsFolder() && item->HasArt("thumb"); });
+  const int numThumbs = std::count_if(vecItems.begin(), vecItems.end(), [](const auto& item)
+                                      { return item->IsFolder() && item->HasArt("thumb"); });
   return numThumbs >= 0.01f * percent * (numItems - fileCount);
 }
 
 float CAutoSwitch::MetadataPercentage(const CFileItemList &vecItems)
 {
   int total = vecItems.Size();
-  const float count =
-      std::ranges::count_if(vecItems,
-                            [&total](const auto& item)
-                            {
-                              if (item->IsParentFolder())
-                                --total;
+  const float count = std::count_if(vecItems.begin(), vecItems.end(),
+                                    [&total](const auto& item)
+                                    {
+                                      if (item->IsParentFolder())
+                                        --total;
 
-                              return item->HasMusicInfoTag() || item->HasVideoInfoTag() ||
-                                     item->HasPictureInfoTag() || item->HasProperty("Addon.ID");
-                            });
+                                      return item->HasMusicInfoTag() || item->HasVideoInfoTag() ||
+                                             item->HasPictureInfoTag() ||
+                                             item->HasProperty("Addon.ID");
+                                    });
   return total != 0 ? count / total : 0.0f;
 }

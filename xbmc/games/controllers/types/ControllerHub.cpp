@@ -59,15 +59,16 @@ void CControllerHub::SetPorts(PortVec ports)
 
 bool CControllerHub::IsControllerAccepted(const std::string& controllerId) const
 {
-  return std::ranges::any_of(m_ports, [&controllerId](const CPortNode& port)
-                             { return port.IsControllerAccepted(controllerId); });
+  return std::any_of(m_ports.begin(), m_ports.end(), [&controllerId](const CPortNode& port)
+                     { return port.IsControllerAccepted(controllerId); });
 }
 
 bool CControllerHub::IsControllerAccepted(const std::string& portAddress,
                                           const std::string& controllerId) const
 {
-  return std::ranges::any_of(m_ports, [&portAddress, &controllerId](const CPortNode& port)
-                             { return port.IsControllerAccepted(portAddress, controllerId); });
+  return std::any_of(m_ports.begin(), m_ports.end(),
+                     [&portAddress, &controllerId](const CPortNode& port)
+                     { return port.IsControllerAccepted(portAddress, controllerId); });
 }
 
 ControllerVector CControllerHub::GetControllers() const
