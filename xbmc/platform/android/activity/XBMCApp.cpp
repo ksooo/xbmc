@@ -1047,7 +1047,7 @@ bool CXBMCApp::StartActivity(const std::string& package,
       authority.append(".fileprovider");
       jniURI = CJNIFileProvider::getUriForFile(CXBMCApp::Get(), authority, CJNIFile(pathname));
 
-      CLog::LogF(LOGINFO, "Share using FileProvider: {}", jniURI.toString());
+      CLog::Log(LOGINFO, "Share using FileProvider: {}", jniURI.toString());
 
       // grant temporary permission to external app
       CJNIContext::grantUriPermission(package, jniURI, CJNIIntent::FLAG_GRANT_READ_URI_PERMISSION);
