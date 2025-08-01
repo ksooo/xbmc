@@ -40,5 +40,7 @@
 	<string>Used for speech recognition</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Used for intercepting media keys</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Used for shared databases, media sources</string>
 </dict>
 </plist>
