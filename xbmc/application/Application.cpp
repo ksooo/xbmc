@@ -3592,14 +3592,14 @@ void CApplication::UpdateLibraries()
   const std::shared_ptr<CSettings> settings = CServiceBroker::GetSettingsComponent()->GetSettings();
   if (settings->GetBool(CSettings::SETTING_VIDEOLIBRARY_UPDATEONSTARTUP))
   {
-    CLog::LogF(LOGINFO, "Starting video library startup scan");
+    CLog::Log(LOGINFO, "Starting video library startup scan");
     CVideoLibraryQueue::GetInstance().ScanLibrary(
         "", false, !settings->GetBool(CSettings::SETTING_VIDEOLIBRARY_BACKGROUNDUPDATE));
   }
 
   if (settings->GetBool(CSettings::SETTING_MUSICLIBRARY_UPDATEONSTARTUP))
   {
-    CLog::LogF(LOGINFO, "Starting music library startup scan");
+    CLog::Log(LOGINFO, "Starting music library startup scan");
     CMusicLibraryQueue::GetInstance().ScanLibrary(
         "", MUSIC_INFO::CMusicInfoScanner::SCAN_NORMAL,
         !settings->GetBool(CSettings::SETTING_MUSICLIBRARY_BACKGROUNDUPDATE));
