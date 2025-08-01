@@ -436,8 +436,8 @@ bool GUIFontManager::LoadFontsFromFile(const std::string& fontsetFilePath,
         if (StringUtils::EqualsNoCase(fontSet, idAttr))
         {
           // Found the requested fontset, so load the fonts and return
-          CLog::LogF(LOGINFO, "Loading <fontset> with name '{}' from '{}'", fontSet,
-                     fontsetFilePath);
+          CLog::Log(LOGINFO, "Loading <fontset> with name '{}' from '{}'", fontSet,
+                    fontsetFilePath);
           LoadFonts(fontsetElement->FirstChild("font"));
           return true;
         }

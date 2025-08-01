@@ -306,7 +306,7 @@ void CSkinInfo::LoadTimers()
       std::make_unique<CSkinTimerManager>(CServiceBroker::GetGUI()->GetInfoManager());
   const std::string timersPath =
       CSpecialProtocol::TranslatePathConvertCase(GetSkinPath("Timers.xml"));
-  CLog::LogF(LOGINFO, "Trying to load skin timers from {}", timersPath);
+  CLog::Log(LOGINFO, "Loading skin timers from {}", timersPath);
   m_skinTimerManager->LoadTimers(timersPath);
 }
 
