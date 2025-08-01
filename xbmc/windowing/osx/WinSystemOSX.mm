@@ -1084,7 +1084,7 @@ void CWinSystemOSX::FillInVideoModes()
     NSString* const dispName = screenNameForDisplay(disp);
     res.guiInsets = GetScreenEdgeInsets(disp);
 
-    CLog::LogF(LOGINFO, "Display {} has name {}", disp, dispName.UTF8String);
+    CLog::Log(LOGINFO, "Display {} has name {}", disp, dispName.UTF8String);
 
     if (!displayModes)
       continue;
