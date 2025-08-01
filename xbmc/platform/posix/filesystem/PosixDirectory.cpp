@@ -251,7 +251,7 @@ std::string CPosixDirectory::ResolveMountPoint(const std::string& file) const
         }
       }
 
-      CLog::LogF(LOGINFO, "No mount point for device '{}' found", bdDeviceSv);
+      CLog::Log(LOGINFO, "No mount point for device '{}' found", bdDeviceSv);
     }
     else
       CLog::LogF(LOGWARNING, "Failed to open mount table");
