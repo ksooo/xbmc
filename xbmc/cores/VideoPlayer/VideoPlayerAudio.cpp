@@ -142,7 +142,7 @@ void CVideoPlayerAudio::OpenStream(CDVDStreamInfo& hints, std::unique_ptr<CDVDAu
     m_synctype = SYNC_RESAMPLE;
 
   if (m_synctype == SYNC_DISCON)
-    CLog::LogF(LOGINFO, "Allowing max Out-Of-Sync Value of {} ms", m_disconAdjustTimeMs);
+    CLog::Log(LOGINFO, "Allowing max Out-Of-Sync Value of {} ms", m_disconAdjustTimeMs);
 
   m_prevskipped = false;
 
