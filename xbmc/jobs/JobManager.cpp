@@ -288,12 +288,21 @@ bool CJobManager::OnJobProgress(unsigned int progress, unsigned int total, const
   const auto i = std::ranges::find_if(m_processing, JobFinder(job));
   if (i != m_processing.cend())
   {
-    CWorkItem item(*i);
-    lock.unlock(); // leave section prior to call
-    if (item.GetCallback())
+    const CWorkItem item{*i};
+    IJobCallback* cb{item.GetCallback()};
+    if (cb)
     {
-      item.GetCallback()->OnJobProgress(item.GetId(), progress, total, job);
-      return false;
+      lock.unlock(); // leave section prior to call
+      try
+      {
+        cb->OnJobProgress(item.GetId(), progress, total, job);
+        return false;
+      }
+      catch (...)
+      {
+        CLog::LogF(LOGERROR, "Error processing job {}", item.GetJob()->GetType());
+      }
+      lock.lock();
     }
   }
   return true; // couldn't find the job, or it's been cancelled
@@ -307,18 +316,21 @@ void CJobManager::OnJobComplete(bool success, CJob* job)
   if (i != m_processing.cend())
   {
     // tell any listeners we're done with the job, then delete it
-    CWorkItem item(*i);
-    lock.unlock();
-    try
+    CWorkItem item{*i};
+    IJobCallback* cb{item.GetCallback()};
+    if (cb)
     {
-      if (item.GetCallback())
-        item.GetCallback()->OnJobComplete(item.GetId(), success, item.GetJob());
+      lock.unlock(); // leave section prior to call
+      try
+      {
+        cb->OnJobComplete(item.GetId(), success, item.GetJob());
+      }
+      catch (...)
+      {
+        CLog::LogF(LOGERROR, "Error processing job {}", item.GetJob()->GetType());
+      }
+      lock.lock();
     }
-    catch (...)
-    {
-      CLog::LogF(LOGERROR, "Error processing job {}", item.GetJob()->GetType());
-    }
-    lock.lock();
     const auto j = std::ranges::find_if(m_processing, JobFinder(job));
     if (j != m_processing.cend())
       m_processing.erase(j);
