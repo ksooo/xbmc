@@ -77,7 +77,7 @@ public:
   CAddonVersion Version() const;
 
   ADDON_STATUS CreateInstance();
-  void DestroyInstance();
+  void DestroyInstance() const;
   const std::shared_ptr<CAddonDll>& Addon() const { return m_addon; }
   AddonInfoPtr GetAddonInfo() const { return m_addonInfo; }
 

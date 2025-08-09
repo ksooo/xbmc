@@ -124,7 +124,7 @@ ADDON_STATUS IAddonInstanceHandler::CreateInstance()
   return status;
 }
 
-void IAddonInstanceHandler::DestroyInstance()
+void IAddonInstanceHandler::DestroyInstance() const
 {
   std::unique_lock lock(m_cdSec);
   if (m_addon)

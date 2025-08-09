@@ -44,16 +44,20 @@ using namespace std::chrono_literals;
 
 #define FITS_INT(a) (((a) <= INT_MAX) && ((a) >= INT_MIN))
 
-static const auto proxyType2CUrlProxyType = std::unordered_map<XFILE::CCurlFile::ProxyType, int>{
+namespace
+{
+const auto proxyType2CUrlProxyType{std::unordered_map<XFILE::CCurlFile::ProxyType, int>{
     {CCurlFile::ProxyType::HTTP, CURLPROXY_HTTP},
     {CCurlFile::ProxyType::SOCKS4, CURLPROXY_SOCKS4},
     {CCurlFile::ProxyType::SOCKS4A, CURLPROXY_SOCKS4A},
     {CCurlFile::ProxyType::SOCKS5, CURLPROXY_SOCKS5},
     {CCurlFile::ProxyType::SOCKS5_REMOTE, CURLPROXY_SOCKS5_HOSTNAME},
     {CCurlFile::ProxyType::HTTPS, CURLPROXY_HTTPS},
-};
+}};
 
-static std::vector<uint8_t> cachedCaCertsBlob; // cached CA certs file
+std::vector<uint8_t> cachedCaCertsBlob; // cached CA certs file
+
+} // unnamed namespace
 
 #define FILLBUFFER_OK         0
 #define FILLBUFFER_NO_DATA    1

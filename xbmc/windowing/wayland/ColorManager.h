@@ -22,7 +22,7 @@ namespace KODI::WINDOWING::WAYLAND
 class CColorManager
 {
 public:
-  CColorManager(CConnection& connection);
+  explicit CColorManager(CConnection& connection);
 
   void SetSurface(const wayland::surface_t& surface);
   void UnsetSurface();
@@ -31,8 +31,8 @@ public:
   bool IsHDRDisplay() const;
   CHDRCapabilities GetDisplayHDRCapabilities() const;
 
-private:
 #ifdef HAS_WAYLAND_COLOR_MANAGEMENT
+private:
   void SetDisplayMetadata(wayland::image_description_creator_params_v1_t& descriptionCreator,
                           const VideoPicture* videoPicture);
   void SetLightMetadata(wayland::image_description_creator_params_v1_t& descriptionCreator,

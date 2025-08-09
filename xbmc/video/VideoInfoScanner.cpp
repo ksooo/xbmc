@@ -1705,7 +1705,8 @@ CVideoInfoScanner::~CVideoInfoScanner()
           {
             const std::string result{reg2.GetMatch(2)};
             const int last{std::stoi(result)};
-            const std::string prefix{StringUtils::ToLower(remainder.substr(0, 2))};
+            const std::string prefix{
+                StringUtils::ToLower(std::string_view(remainder).substr(0, 2))};
             const int next{(prefix == "-e" || prefix == "-s") && !disableEpisodeRanges
                                ? currentEpisode + 1
                                : last};
@@ -2121,7 +2122,7 @@ CVideoInfoScanner::~CVideoInfoScanner()
                                      bool bApplyToDir,
                                      bool useLocal,
                                      const std::string& actorArtPath,
-                                     UseRemoteArtWithLocalScraper useRemoteArt /* = yes */)
+                                     UseRemoteArtWithLocalScraper useRemoteArt /* = yes */) const
   {
     int artLevel = CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
         CSettings::SETTING_VIDEOLIBRARY_ARTWORK_LEVEL);

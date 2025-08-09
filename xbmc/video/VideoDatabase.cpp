@@ -3250,7 +3250,7 @@ int CVideoDatabase::SetDetailsForSeason(const CVideoInfoTag& details,
 int CVideoDatabase::SetFileForMedia(const std::string& fileAndPath,
                                     VideoDbContentType type,
                                     int mediaId,
-                                    FileRecord oldFile)
+                                    const FileRecord& oldFile)
 {
   if ((mediaId < 0 && type != VideoDbContentType::UNKNOWN) || oldFile.m_idFile < 0)
     return -1;
@@ -3925,7 +3925,7 @@ void CVideoDatabase::GetEpisodesByFileId(int idFile, std::vector<CVideoInfoTag>&
 
     // Generate map of episodes in each file (finding base file for bluray://) of show
     EpisodeFileMap fileMap;
-    if (!GetEpisodeMap(idShow, fileMap, m_pDS, idFile))
+    if (!GetEpisodeMap(idShow, fileMap, *m_pDS, idFile))
       return;
 
     // Get episode details
@@ -3946,7 +3946,7 @@ void CVideoDatabase::GetEpisodesByFileId(int idFile, std::vector<CVideoInfoTag>&
 
 bool CVideoDatabase::GetEpisodeMap(int idShow,
                                    EpisodeFileMap& fileMap,
-                                   const std::unique_ptr<Dataset>& pDS,
+                                   dbiplus::Dataset& pDS,
                                    int idFile /* = -1 */) const
 {
   try
@@ -3958,30 +3958,30 @@ bool CVideoDatabase::GetEpisodeMap(int idShow,
         "where episode_view.idShow = %i "
         "order by cast(episode_view.c%02d as integer), cast(episode_view.c%02d as integer)",
         CStreamDetail::VIDEO, idShow, VIDEODB_ID_EPISODE_SEASON, VIDEODB_ID_EPISODE_EPISODE)};
-    pDS->query(sql);
+    pDS.query(sql);
 
     // Generate map of episodes in each file (finding base file for bluray://) of show
     int index{1};
     std::string episodeFile{};
-    while (!pDS->eof())
+    while (!pDS.eof())
     {
       EpisodeInformation episodeInformation;
-      const std::string file{URIUtils::AddFileToFolder(pDS->fv("strPath").get_asString(),
-                                                       pDS->fv("strFileName").get_asString())};
+      const std::string file{URIUtils::AddFileToFolder(pDS.fv("strPath").get_asString(),
+                                                       pDS.fv("strFileName").get_asString())};
       const std::string baseFile{URIUtils::IsBlurayPath(file) ? URIUtils::GetDiscFile(file) : file};
       // Different scrapers put duration in different places
-      const unsigned int streamDetailsDuration{pDS->fv("duration").get_asUInt()};
+      const unsigned int streamDetailsDuration{pDS.fv("duration").get_asUInt()};
       const unsigned int episodeViewDuration{
-          pDS->fv(StringUtils::Format("c{:02}", VIDEODB_ID_EPISODE_RUNTIME).c_str()).get_asUInt()};
+          pDS.fv(StringUtils::Format("c{:02}", VIDEODB_ID_EPISODE_RUNTIME).c_str()).get_asUInt()};
       episodeInformation.duration =
           episodeViewDuration > 0 ? episodeViewDuration : streamDetailsDuration;
       episodeInformation.index = index;
 
       fileMap.insert({baseFile, episodeInformation});
-      if (idFile > 0 && episodeFile.empty() && pDS->fv("idFile").get_asInt() == idFile)
+      if (idFile > 0 && episodeFile.empty() && pDS.fv("idFile").get_asInt() == idFile)
         episodeFile = baseFile;
 
-      pDS->next();
+      pDS.next();
       index++;
     }
 
@@ -12008,7 +12008,7 @@ void CVideoDatabase::ExportToXML(const std::string &path, bool singleFile /* = t
 
       // Generate map of episodes in each file (finding base file for bluray://)
       EpisodeFileMap fileMap;
-      if (!GetEpisodeMap(tvshow.m_iDbId, fileMap, pDS))
+      if (!GetEpisodeMap(tvshow.m_iDbId, fileMap, *pDS))
       {
         CLog::Log(LOGERROR, "Failed to generate episode map for TV show ID {}", tvshow.m_iDbId);
         continue; // Skip processing for this TV show
