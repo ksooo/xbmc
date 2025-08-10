@@ -8,9 +8,8 @@
 
 #pragma once
 
-#include "addons/IAddon.h"
+#include "WeatherManager.h"
 #include "jobs/Job.h"
-#include "weather/WeatherManager.h"
 
 #include <map>
 #include <string>
@@ -24,8 +23,6 @@ public:
 
   const CWeatherInfo &GetInfo() const;
 private:
-  bool UpdateData(const ADDON::AddonPtr& addon);
-
   static std::string ConstructPath(std::string in);
   void LocalizeOverview(std::string &str);
   void LocalizeOverviewToken(std::string &str);
