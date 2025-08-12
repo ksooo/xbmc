@@ -61,6 +61,13 @@ public:
   ~CWeatherManager() override;
 
   /*!
+   \brief Retrieve the value for the given weather property
+   \param property the name of the property
+   \return the property value
+   */
+  std::string GetProperty(const std::string& property);
+
+  /*!
    \brief Retrieve the city name for the specified location from the settings
    \param iLocation the location index (can be in the range [1..MAXLOCATION])
    \return the city name (without the accompanying region area code)
