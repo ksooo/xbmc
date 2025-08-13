@@ -122,7 +122,7 @@
 					<right>400</right>
 					<top>164</top>
 					<align>right</align>
-					<label>$LOCALIZE[402] $INFO[Weather.Data(Current.FeelsLike)]$INFO[System.TemperatureUnits][CR]$INFO[Weather.Data(Current.Condition)]</label>
+					<label>$LOCALIZE[402] $INFO[Weather.Data(Current.FeelsLike)][CR]$INFO[Weather.Data(Current.Condition)]</label>
 					<font>font14</font>
 					<width>630</width>
 				</control>

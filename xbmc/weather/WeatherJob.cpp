@@ -103,6 +103,11 @@ const WeatherInfo& CWeatherJob::GetInfo() const
   return m_info;
 }
 
+const CWeatherManager::WeatherInfoV2& CWeatherJob::GetInfoV2() const
+{
+  return m_infoV2;
+}
+
 void CWeatherJob::LocalizeOverviewToken(std::string& token)
 {
   // This routine is case-insensitive.
@@ -190,7 +195,60 @@ void FormatTemperature(std::string& text, double temp)
   const CTemperature temperature{CTemperature::CreateFromCelsius(temp)};
   text = StringUtils::Format("{:.0f}", temperature.To(g_langInfo.GetTemperatureUnit()));
 }
+
+std::string FormatTemperatureV2(const std::string& temperature)
+{
+  if (temperature.empty())
+    return {};
+
+  // Convert from celsius to system temperature unit and append resp. unit of measurement.
+  const CTemperature t{CTemperature::CreateFromCelsius(std::strtod(temperature.c_str(), nullptr))};
+  return StringUtils::Format("{:.0f}{}", t.To(g_langInfo.GetTemperatureUnit()),
+                             g_langInfo.GetTemperatureUnitString());
+}
+
+std::string FormatWindV2(const std::string& direction, const std::string& wind)
+{
+  if (direction == "CALM")
+  {
+    return g_localizeStrings.Get(1410); // Calm
+  }
+  else
+  {
+    if (wind.empty())
+      return {};
+
+    const CSpeed speed{CSpeed::CreateFromKilometresPerHour(std::strtod(wind.c_str(), nullptr))};
+    if (direction.empty())
+    {
+      return StringUtils::Format("{} {}", speed.To(g_langInfo.GetSpeedUnit()),
+                                 g_langInfo.GetSpeedUnitString());
+    }
+    else
+    {
+      return StringUtils::Format(g_localizeStrings.Get(434), // From {direction} at {speed} {unit}
+                                 direction, static_cast<int>(speed.To(g_langInfo.GetSpeedUnit())),
+                                 g_langInfo.GetSpeedUnitString());
+    }
+  }
+}
+
+std::string FormatPercentageV2(const std::string& percentage)
+{
+  if (percentage.empty())
+    return {};
+
+  if (StringUtils::EndsWith(percentage, "%")) // Some add-ons return value including unit
+    return percentage;
+
+  return StringUtils::Format("{}%", percentage);
+}
 } // unnamed namespace
+
+void CWeatherJob::SetPropertyV2(CGUIWindow* window, const std::string& prop)
+{
+  m_infoV2.try_emplace(prop, window->GetProperty(prop).asString());
+}
 
 void CWeatherJob::SetFromProperties()
 {
@@ -201,60 +259,221 @@ void CWeatherJob::SetFromProperties()
   CGUIWindow* window = CServiceBroker::GetGUI()->GetWindowManager().GetWindow(WINDOW_WEATHER);
   if (window)
   {
+    std::string prop;
+    std::string str;
+
     const CDateTime time{CDateTime::GetCurrentDateTime()};
     m_info.lastUpdateTime = time.GetAsLocalizedDateTime(false, false);
-    m_info.currentConditions = window->GetProperty("Current.Condition").asString();
-    m_info.currentIcon = ConstructPath(window->GetProperty("Current.OutlookIcon").asString());
+
+    prop = "Current.Condition";
+    m_info.currentConditions = window->GetProperty(prop).asString();
     LocalizeOverview(m_info.currentConditions);
-    FormatTemperature(
-        m_info.currentTemperature,
-        std::strtod(window->GetProperty("Current.Temperature").asString().c_str(), nullptr));
-    FormatTemperature(
-        m_info.currentFeelsLike,
-        std::strtod(window->GetProperty("Current.FeelsLike").asString().c_str(), nullptr));
-    m_info.currentUVIndex = window->GetProperty("Current.UVIndex").asString();
+    m_infoV2.try_emplace(prop, m_info.currentConditions);
+
+    prop = "Current.OutlookIcon";
+    m_info.currentIcon = ConstructPath(window->GetProperty(prop).asString());
+    m_infoV2.try_emplace(prop, m_info.currentIcon);
+    m_infoV2.try_emplace("Current.ConditionIcon", m_info.currentIcon); // See spec.
+
+    SetPropertyV2(window, "Current.FanartCode");
+
+    prop = "Current.Temperature";
+    str = window->GetProperty(prop).asString();
+    FormatTemperature(m_info.currentTemperature, std::strtod(str.c_str(), nullptr));
+    m_infoV2.try_emplace(prop, FormatTemperatureV2(str));
+
+    prop = "Current.FeelsLike";
+    str = window->GetProperty(prop).asString();
+    FormatTemperature(m_info.currentFeelsLike, std::strtod(str.c_str(), nullptr));
+    m_infoV2.try_emplace(prop, FormatTemperatureV2(str));
+
+    prop = "Current.UVIndex";
+    m_info.currentUVIndex = window->GetProperty(prop).asString();
     LocalizeOverview(m_info.currentUVIndex);
-    const CSpeed speed{CSpeed::CreateFromKilometresPerHour(
-        std::strtod(window->GetProperty("Current.Wind").asString().c_str(), nullptr))};
+    m_infoV2.try_emplace(prop, m_info.currentUVIndex);
+
+    prop = "Current.Wind";
+    str = window->GetProperty(prop).asString();
+    const CSpeed speed{CSpeed::CreateFromKilometresPerHour(std::strtod(str.c_str(), nullptr))};
     std::string direction = window->GetProperty("Current.WindDirection").asString();
+    LocalizeOverviewToken(direction);
     if (direction == "CALM")
+    {
       m_info.currentWind = g_localizeStrings.Get(1410);
+    }
     else
     {
-      LocalizeOverviewToken(direction);
       m_info.currentWind = StringUtils::Format(
           g_localizeStrings.Get(434), direction,
           static_cast<int>(speed.To(g_langInfo.GetSpeedUnit())), g_langInfo.GetSpeedUnitString());
     }
+    m_infoV2.try_emplace(prop, FormatWindV2(direction, str));
+
+    prop = "Current.WindSpeed";
     const std::string windspeed{
         StringUtils::Format("{} {}", static_cast<int>(speed.To(g_langInfo.GetSpeedUnit())),
                             g_langInfo.GetSpeedUnitString())};
-    window->SetProperty("Current.WindSpeed", windspeed);
-    FormatTemperature(
-        m_info.currentDewPoint,
-        std::strtod(window->GetProperty("Current.DewPoint").asString().c_str(), nullptr));
-    if (window->GetProperty("Current.Humidity").asString().empty())
+    window->SetProperty(prop, windspeed);
+    m_infoV2.try_emplace(prop, windspeed);
+
+    prop = "Current.DewPoint";
+    str = window->GetProperty(prop).asString();
+    FormatTemperature(m_info.currentDewPoint, std::strtod(str.c_str(), nullptr));
+    m_infoV2.try_emplace(prop, FormatTemperatureV2(str));
+
+    prop = "Current.Humidity";
+    str = window->GetProperty(prop).asString();
+    if (str.empty())
       m_info.currentHumidity.clear();
     else
-      m_info.currentHumidity =
-          StringUtils::Format("{}%", window->GetProperty("Current.Humidity").asString());
-    m_info.location = window->GetProperty("Current.Location").asString();
+      m_info.currentHumidity = StringUtils::Format("{}%", str);
+    m_infoV2.try_emplace(prop, FormatPercentageV2(str));
+
+    prop = "Current.Location";
+    m_info.location = window->GetProperty(prop).asString();
+    m_infoV2.try_emplace(prop, m_info.location);
+
     for (unsigned int i = 0; i < WeatherInfo::NUM_DAYS; ++i)
     {
       std::string strDay = StringUtils::Format("Day{}.Title", i);
       m_info.forecast[i].m_day = window->GetProperty(strDay).asString();
       LocalizeOverviewToken(m_info.forecast[i].m_day);
+      m_infoV2.try_emplace(strDay, m_info.forecast[i].m_day);
+
       strDay = StringUtils::Format("Day{}.HighTemp", i);
-      FormatTemperature(m_info.forecast[i].m_high,
-                        std::strtod(window->GetProperty(strDay).asString().c_str(), nullptr));
+      std::string str{window->GetProperty(strDay).asString()};
+      FormatTemperature(m_info.forecast[i].m_high, std::strtod(str.c_str(), nullptr));
+      m_infoV2.try_emplace(strDay, FormatTemperatureV2(str));
+
       strDay = StringUtils::Format("Day{}.LowTemp", i);
-      FormatTemperature(m_info.forecast[i].m_low,
-                        std::strtod(window->GetProperty(strDay).asString().c_str(), nullptr));
+      str = window->GetProperty(strDay).asString();
+      FormatTemperature(m_info.forecast[i].m_low, std::strtod(str.c_str(), nullptr));
+      m_infoV2.try_emplace(strDay, FormatTemperatureV2(str));
+
       strDay = StringUtils::Format("Day{}.OutlookIcon", i);
       m_info.forecast[i].m_icon = ConstructPath(window->GetProperty(strDay).asString());
+      m_infoV2.try_emplace(strDay, m_info.forecast[i].m_icon);
+
       strDay = StringUtils::Format("Day{}.Outlook", i);
       m_info.forecast[i].m_overview = window->GetProperty(strDay).asString();
       LocalizeOverview(m_info.forecast[i].m_overview);
+      m_infoV2.try_emplace(strDay, m_info.forecast[i].m_overview);
+
+      SetPropertyV2(window, StringUtils::Format("Day{}.FanartCode", i));
+    }
+
+    prop = "Current.Precipitation";
+    str = window->GetProperty(prop).asString();
+    m_infoV2.try_emplace(prop, FormatPercentageV2(str));
+
+    prop = "Current.Cloudiness";
+    str = window->GetProperty(prop).asString();
+    m_infoV2.try_emplace(prop, FormatPercentageV2(str));
+
+    int idx{1};
+    while (true)
+    {
+      prop = StringUtils::Format("Hourly.{}.Time", idx);
+      str = window->GetProperty(prop).asString();
+      if (str.empty())
+        break; // no time value, assume no data for this index
+
+      m_infoV2.try_emplace(prop, str);
+
+      SetPropertyV2(window, StringUtils::Format("Hourly.{}.LongDate", idx));
+      SetPropertyV2(window, StringUtils::Format("Hourly.{}.ShortDate", idx));
+
+      prop = StringUtils::Format("Hourly.{}.Outlook", idx);
+      str = window->GetProperty(prop).asString();
+      LocalizeOverview(str);
+      m_infoV2.try_emplace(prop, str);
+
+      SetPropertyV2(window, StringUtils::Format("Hourly.{}.OutlookIcon", idx));
+
+      prop = StringUtils::Format("Hourly.{}.WindSpeed", idx);
+      str = window->GetProperty(prop).asString();
+      const CSpeed speed{CSpeed::CreateFromKilometresPerHour(std::strtod(str.c_str(), nullptr))};
+      std::string direction{
+          window->GetProperty(StringUtils::Format("Hourly.{}.WindDirection", idx)).asString()};
+      LocalizeOverviewToken(direction);
+      m_infoV2.try_emplace(prop, FormatWindV2(direction, str));
+
+      prop = StringUtils::Format("Hourly.{}.Humidity", idx);
+      str = window->GetProperty(prop).asString();
+      m_infoV2.try_emplace(prop, FormatPercentageV2(str));
+
+      prop = StringUtils::Format("Hourly.{}.Temperature", idx);
+      str = window->GetProperty(prop).asString();
+      m_infoV2.try_emplace(prop, FormatTemperatureV2(str));
+
+      prop = StringUtils::Format("Hourly.{}.DewPoint", idx);
+      str = window->GetProperty(prop).asString();
+      m_infoV2.try_emplace(prop, FormatTemperatureV2(str));
+
+      prop = StringUtils::Format("Hourly.{}.FeelsLike", idx);
+      str = window->GetProperty(prop).asString();
+      m_infoV2.try_emplace(prop, FormatTemperatureV2(str));
+
+      prop = StringUtils::Format("Hourly.{}.Precipitation", idx);
+      str = window->GetProperty(prop).asString();
+      m_infoV2.try_emplace(prop, FormatPercentageV2(str));
+
+      SetPropertyV2(window, StringUtils::Format("Hourly.{}.Pressure", idx));
+      SetPropertyV2(window, StringUtils::Format("Hourly.{}.FanartCode", idx));
+
+      idx++;
+    }
+
+    idx = 1;
+    while (true)
+    {
+      prop = StringUtils::Format("Daily.{}.ShortDate", idx);
+      str = window->GetProperty(prop).asString();
+      if (str.empty())
+        break; // no date value, assume no data for this index
+
+      m_infoV2.try_emplace(prop, str);
+
+      SetPropertyV2(window, StringUtils::Format("Daily.{}.ShortDay", idx));
+
+      prop = StringUtils::Format("Daily.{}.HighTemperature", idx);
+      str = window->GetProperty(prop).asString();
+      m_infoV2.try_emplace(prop, FormatTemperatureV2(str));
+
+      prop = StringUtils::Format("Daily.{}.LowTemperature", idx);
+      str = window->GetProperty(prop).asString();
+      m_infoV2.try_emplace(prop, FormatTemperatureV2(str));
+
+      prop = StringUtils::Format("Daily.{}.Outlook", idx);
+      str = window->GetProperty(prop).asString();
+      LocalizeOverview(str);
+      m_infoV2.try_emplace(prop, str);
+
+      SetPropertyV2(window, StringUtils::Format("Daily.{}.OutlookIcon", idx));
+
+      prop = StringUtils::Format("Daily.{}.WindSpeed", idx);
+      str = window->GetProperty(prop).asString();
+      const CSpeed speed{CSpeed::CreateFromKilometresPerHour(std::strtod(str.c_str(), nullptr))};
+      std::string direction{
+          window->GetProperty(StringUtils::Format("Daily.{}.WindDirection", idx)).asString()};
+      LocalizeOverviewToken(direction);
+      m_infoV2.try_emplace(prop, FormatWindV2(direction, str));
+
+      prop = StringUtils::Format("Daily.{}.Precipitation", idx);
+      str = window->GetProperty(prop).asString();
+      m_infoV2.try_emplace(prop, FormatPercentageV2(str));
+
+      SetPropertyV2(window, StringUtils::Format("Daily.{}.FanartCode", idx));
+
+      idx++;
+    }
+
+    SetPropertyV2(window, "Locations");
+
+    const int locations{std::atoi(str.c_str())};
+    for (int i = 1; i <= locations; ++i)
+    {
+      SetPropertyV2(window, StringUtils::Format("Location{}", i));
     }
   }
 }

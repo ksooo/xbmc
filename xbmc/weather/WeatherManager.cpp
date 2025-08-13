@@ -8,7 +8,6 @@
 
 #include "WeatherManager.h"
 
-#include "LangInfo.h"
 #include "ServiceBroker.h"
 #include "WeatherJob.h"
 #include "addons/AddonManager.h"
@@ -16,6 +15,7 @@
 #include "addons/gui/GUIDialogAddonSettings.h"
 #include "guilib/GUIComponent.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/LocalizeStrings.h"
 #include "guilib/WindowIDs.h"
 #include "settings/Settings.h"
 #include "settings/SettingsComponent.h"
@@ -24,7 +24,6 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
-#include "utils/XMLUtils.h"
 
 using namespace ADDON;
 
@@ -47,38 +46,24 @@ CWeatherManager::~CWeatherManager()
   settings->GetSettingsManager()->UnregisterCallback(this);
 }
 
-std::string CWeatherManager::GetProperty(const std::string& property)
+std::string CWeatherManager::GetProperty(const std::string& property) const
 {
-  const std::string prop{StringUtils::ToLower(property)};
-  if (prop == "conditions")
-  {
-    return GetInfo(WEATHER_LABEL_CURRENT_COND);
-  }
-  else if (prop == "temperature")
-  {
-    return StringUtils::Format("{}{}", GetInfo(WEATHER_LABEL_CURRENT_TEMP),
-                               g_langInfo.GetTemperatureUnitString());
-  }
-  else if (prop == "location")
-  {
-    return GetInfo(WEATHER_LABEL_LOCATION);
-  }
-  else if (prop == "fanartcode")
-  {
-    std::string value{URIUtils::GetFileName(GetInfo(WEATHER_IMAGE_CURRENT_ICON))};
-    URIUtils::RemoveExtension(value);
-    return value;
-  }
-  else if (prop == "conditionsicon")
-  {
-    return GetInfo(WEATHER_IMAGE_CURRENT_ICON);
-  }
+  std::unique_lock lock(m_critSection);
 
+  // Check whether this is a patched property and return respective patched value.
+  const auto it{m_infoV2.find(property)};
+  if (it != m_infoV2.cend())
+    return (*it).second;
+
+  // Fetch the value from respective weather window property and store.
   const CGUIWindow* window{CServiceBroker::GetGUI()->GetWindowManager().GetWindow(WINDOW_WEATHER)};
   if (window)
   {
-    return window->GetProperty(property).asString();
+    const std::string val{window->GetProperty(property).asString()};
+    m_infoV2.try_emplace(property, val);
+    return val;
   }
+
   return {};
 }
 
@@ -120,19 +105,14 @@ std::string CWeatherManager::TranslateInfo(int info) const
 
 std::string CWeatherManager::GetLocation(int iLocation) const
 {
-  const CGUIWindow* window{CServiceBroker::GetGUI()->GetWindowManager().GetWindow(WINDOW_WEATHER)};
-  if (window)
-  {
-    const std::string setting{StringUtils::Format("Location{}", iLocation)};
-    return window->GetProperty(setting).asString();
-  }
-  return "";
+  return GetProperty(StringUtils::Format("Location{}", iLocation));
 }
 
 void CWeatherManager::Reset()
 {
   std::unique_lock lock(m_critSection);
   m_info = {};
+  m_infoV2 = {};
 }
 
 bool CWeatherManager::IsFetched()
@@ -178,6 +158,7 @@ void CWeatherManager::OnJobComplete(unsigned int jobID, bool success, CJob* job)
 {
   std::unique_lock lock(m_critSection);
   m_info = static_cast<CWeatherJob*>(job)->GetInfo();
+  m_infoV2 = static_cast<CWeatherJob*>(job)->GetInfoV2();
   CInfoLoader::OnJobComplete(jobID, success, job);
 }
 

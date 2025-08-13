@@ -9,7 +9,6 @@
 #include "GUIWindowWeather.h"
 
 #include "GUIUserMessages.h"
-#include "LangInfo.h"
 #include "ServiceBroker.h"
 #include "guilib/WindowIDs.h"
 #include "utils/StringUtils.h"
@@ -125,14 +124,15 @@ void CGUIWindowWeather::UpdateLocations()
   if (!IsActive())
     return;
 
-  m_maxLocation = static_cast<unsigned int>(
-      std::strtol(GetProperty("Locations").asString().c_str(), nullptr, 10));
-  if (m_maxLocation < 1)
+  CWeatherManager& wmgr{CServiceBroker::GetWeatherManager()};
+
+  const long locations{std::strtol(wmgr.GetProperty("Locations").c_str(), nullptr, 10)};
+  if (locations < 1)
     return;
 
-  CWeatherManager& wmgr{CServiceBroker::GetWeatherManager()};
-  unsigned int iCurWeather{static_cast<unsigned int>(wmgr.GetArea())};
+  m_maxLocation = static_cast<unsigned int>(locations);
 
+  unsigned int iCurWeather{static_cast<unsigned int>(wmgr.GetArea())};
   if (iCurWeather > m_maxLocation)
   {
     wmgr.SetArea(m_maxLocation);
@@ -179,17 +179,14 @@ void CGUIWindowWeather::UpdateButtons()
   SET_CONTROL_LABEL(WEATHER_LABEL_LOCATION, wmgr.GetLocation(wmgr.GetArea()));
   SET_CONTROL_LABEL(CONTROL_LABELUPDATED, wmgr.GetLastUpdateTime());
 
-  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_COND, wmgr.GetInfo(WEATHER_LABEL_CURRENT_COND));
-  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_TEMP, wmgr.GetInfo(WEATHER_LABEL_CURRENT_TEMP) +
-                                                    g_langInfo.GetTemperatureUnitString());
-  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_FEEL, wmgr.GetInfo(WEATHER_LABEL_CURRENT_FEEL) +
-                                                    g_langInfo.GetTemperatureUnitString());
-  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_UVID, wmgr.GetInfo(WEATHER_LABEL_CURRENT_UVID));
-  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_WIND, wmgr.GetInfo(WEATHER_LABEL_CURRENT_WIND));
-  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_DEWP, wmgr.GetInfo(WEATHER_LABEL_CURRENT_DEWP) +
-                                                    g_langInfo.GetTemperatureUnitString());
-  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_HUMI, wmgr.GetInfo(WEATHER_LABEL_CURRENT_HUMI));
-  SET_CONTROL_FILENAME(WEATHER_IMAGE_CURRENT_ICON, wmgr.GetInfo(WEATHER_IMAGE_CURRENT_ICON));
+  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_COND, wmgr.GetProperty("Current.Condition"));
+  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_TEMP, wmgr.GetProperty("Current.Temperature"));
+  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_FEEL, wmgr.GetProperty("Current.FeelsLike"));
+  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_UVID, wmgr.GetProperty("Current.UVIndex"));
+  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_WIND, wmgr.GetProperty("Current.Wind"));
+  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_DEWP, wmgr.GetProperty("Current.DewPoint"));
+  SET_CONTROL_LABEL(WEATHER_LABEL_CURRENT_HUMI, wmgr.GetProperty("Current.Humidity"));
+  SET_CONTROL_FILENAME(WEATHER_IMAGE_CURRENT_ICON, wmgr.GetProperty("Current.OutlookIcon"));
 
   //static labels
   SET_CONTROL_LABEL(CONTROL_STATICTEMP, 401); //Temperature
@@ -201,13 +198,16 @@ void CGUIWindowWeather::UpdateButtons()
 
   for (unsigned int i = 0; i < WeatherInfo::NUM_DAYS; ++i)
   {
-    SET_CONTROL_LABEL(CONTROL_LABELD0DAY + (i * 10), wmgr.GetForecast(i).m_day);
+    SET_CONTROL_LABEL(CONTROL_LABELD0DAY + (i * 10),
+                      wmgr.GetProperty(StringUtils::Format("Day{}.Title", i)));
     SET_CONTROL_LABEL(CONTROL_LABELD0HI + (i * 10),
-                      wmgr.GetForecast(i).m_high + g_langInfo.GetTemperatureUnitString());
+                      wmgr.GetProperty(StringUtils::Format("Day{}.HighTemp", i)));
     SET_CONTROL_LABEL(CONTROL_LABELD0LOW + (i * 10),
-                      wmgr.GetForecast(i).m_low + g_langInfo.GetTemperatureUnitString());
-    SET_CONTROL_LABEL(CONTROL_LABELD0GEN + (i * 10), wmgr.GetForecast(i).m_overview);
-    SET_CONTROL_FILENAME(CONTROL_IMAGED0IMG + (i * 10), wmgr.GetForecast(i).m_icon);
+                      wmgr.GetProperty(StringUtils::Format("Day{}.LowTemp", i)));
+    SET_CONTROL_LABEL(CONTROL_LABELD0GEN + (i * 10),
+                      wmgr.GetProperty(StringUtils::Format("Day{}.Outlook", i)));
+    SET_CONTROL_FILENAME(CONTROL_IMAGED0IMG + (i * 10),
+                         wmgr.GetProperty(StringUtils::Format("Day{}.OutlookIcon", i)));
   }
 }
 

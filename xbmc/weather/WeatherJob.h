@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+class CGUIWindow;
+
 class CWeatherJob : public CJob
 {
 public:
@@ -24,6 +26,7 @@ public:
   bool DoWork() override;
 
   const WeatherInfo& GetInfo() const;
+  const CWeatherManager::WeatherInfoV2& GetInfoV2() const;
 
 private:
   void LocalizeOverview(std::string& str);
@@ -31,6 +34,7 @@ private:
   void LoadLocalizedToken();
 
   void SetFromProperties();
+  void SetPropertyV2(CGUIWindow* window, const std::string& prop);
 
   struct CaseInsensitiveCompare
   {
@@ -46,5 +50,6 @@ private:
   std::map<std::string, int, CaseInsensitiveCompare> m_localizedTokens;
 
   WeatherInfo m_info;
+  CWeatherManager::WeatherInfoV2 m_infoV2;
   int m_location{-1};
 };

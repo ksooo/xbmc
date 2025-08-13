@@ -12,9 +12,12 @@
 #include "threads/CriticalSection.h"
 #include "utils/InfoLoader.h"
 
+#include <algorithm>
 #include <array>
+#include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 
 constexpr unsigned int WEATHER_LABEL_LOCATION = 10;
 constexpr unsigned int WEATHER_IMAGE_CURRENT_ICON = 21;
@@ -65,7 +68,7 @@ public:
    \param property the name of the property
    \return the property value
    */
-  std::string GetProperty(const std::string& property);
+  std::string GetProperty(const std::string& property) const;
 
   /*!
    \brief Retrieve the city name for the specified location from the settings
@@ -92,6 +95,19 @@ public:
    */
   int GetArea() const;
 
+  struct CaseInsensitiveWeatherCompare
+  {
+    using is_transparent = void; // Enables heterogeneous operations.
+
+    bool operator()(const std::string_view& lhs, const std::string_view& rhs) const
+    {
+      return std::ranges::lexicographical_compare(lhs, rhs, [](char l, char r)
+                                                  { return std::tolower(l) < std::tolower(r); });
+    }
+  };
+
+  using WeatherInfoV2 = std::map<std::string, std::string, CaseInsensitiveWeatherCompare>;
+
 protected:
   CJob* GetJob() const override;
   std::string TranslateInfo(int info) const override;
@@ -104,4 +120,5 @@ protected:
 private:
   mutable CCriticalSection m_critSection;
   WeatherInfo m_info;
+  mutable WeatherInfoV2 m_infoV2;
 };
