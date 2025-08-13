@@ -26,6 +26,7 @@
 #include "utils/URIUtils.h"
 #include "utils/XTimeUtils.h"
 #include "utils/log.h"
+#include "weather/WeatherPropertyHelper.h"
 
 using namespace ADDON;
 using namespace std::chrono_literals;
@@ -71,7 +72,11 @@ bool CWeatherJob::DoWork()
 
     CLog::Log(LOGINFO, "WEATHER: Successfully downloaded weather");
 
+    const CDateTime time{CDateTime::GetCurrentDateTime()};
+    m_info.lastUpdateTime = time.GetAsLocalizedDateTime(false, false);
+
     SetFromProperties();
+    SetFromPropertiesV2();
 
     // and send a message that we're done
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_WEATHER_FETCHED);
@@ -86,6 +91,11 @@ bool CWeatherJob::DoWork()
 const WeatherInfo& CWeatherJob::GetInfo() const
 {
   return m_info;
+}
+
+const CWeatherManager::WeatherInfoV2& CWeatherJob::GetInfoV2() const
+{
+  return m_infoV2;
 }
 
 namespace
@@ -110,8 +120,6 @@ void CWeatherJob::SetFromProperties()
   CGUIWindow* window = CServiceBroker::GetGUI()->GetWindowManager().GetWindow(WINDOW_WEATHER);
   if (window)
   {
-    const CDateTime time{CDateTime::GetCurrentDateTime()};
-    m_info.lastUpdateTime = time.GetAsLocalizedDateTime(false, false);
     m_info.currentConditions = window->GetProperty("Current.Condition").asString();
     m_info.currentIcon = ConstructPath(window->GetProperty("Current.OutlookIcon").asString());
     m_localizer.LocalizeOverview(m_info.currentConditions);
@@ -165,5 +173,146 @@ void CWeatherJob::SetFromProperties()
       m_info.forecast[i].m_overview = window->GetProperty(strDay).asString();
       m_localizer.LocalizeOverview(m_info.forecast[i].m_overview);
     }
+  }
+}
+
+void CWeatherJob::SetFromPropertiesV2()
+{
+  CGUIWindow* window = CServiceBroker::GetGUI()->GetWindowManager().GetWindow(WINDOW_WEATHER);
+  if (!window)
+    return;
+
+  const CWeatherPropertyHelper props{*window, m_localizer};
+
+  // Data for current conditions
+
+  m_infoV2.insert(props.GetProperty("Current.Location"));
+  m_infoV2.insert(props.GetProperty("Current.Condition"));
+  m_infoV2.insert(props.GetProperty("Current.Temperature"));
+  m_infoV2.insert(props.GetProperty("Current.FeelsLike"));
+  m_infoV2.insert(props.GetProperty("Current.DewPoint"));
+  m_infoV2.insert(props.GetProperty("Current.Humidity"));
+  m_infoV2.insert(props.GetProperty("Current.Precipitation"));
+  m_infoV2.insert(props.GetProperty("Current.Cloudiness"));
+  m_infoV2.insert(props.GetProperty("Current.UVIndex"));
+
+  {
+    const auto& [iconProp, iconValue] = props.GetProperty("Current.OutlookIcon");
+    m_infoV2.try_emplace(iconProp, iconValue);
+    m_infoV2.try_emplace("Current.ConditionIcon", iconValue); // See spec.
+
+    // If not provided by the add-on, create fanart code from outlook icon file name.
+    const auto& [fanartCodeProp, fanartCodeValue] = props.GetProperty("Current.FanartCode");
+    m_infoV2.try_emplace(fanartCodeProp,
+                         CWeatherPropertyHelper::FormatFanartCode(fanartCodeValue, iconValue));
+  }
+
+  {
+    const auto& [directionProp, directionValue] = props.GetProperty("Current.WindDirection");
+    m_infoV2.try_emplace(directionProp, directionValue);
+
+    // Special casing: Combine window props Current.Wind and Current.WindDirection values, store
+    // the result in Current.Wind, store orignal value of Current.Wind in Current.WindSpeed.
+    // See spec.
+    const auto& [windProp, speedValue] = props.GetProperty("Current.Wind");
+    const CSpeed speed{
+        CSpeed::CreateFromKilometresPerHour(std::strtod(speedValue.c_str(), nullptr))};
+    m_infoV2.try_emplace(windProp, CWeatherPropertyHelper::FormatWind(directionValue, speed));
+    m_infoV2.try_emplace("Current.WindSpeed", CWeatherPropertyHelper::FormatWind("", speed));
+  }
+
+  // Data for days of week
+
+  for (unsigned int i = 0; i < WeatherInfo::NUM_DAYS; ++i)
+  {
+    m_infoV2.insert(props.GetDayProperty(i, "Title"));
+    m_infoV2.insert(props.GetDayProperty(i, "Outlook"));
+    m_infoV2.insert(props.GetDayProperty(i, "HighTemp"));
+    m_infoV2.insert(props.GetDayProperty(i, "LowTemp"));
+
+    {
+      const auto& [iconProp, iconValue] = props.GetDayProperty(i, "OutlookIcon");
+      m_infoV2.try_emplace(iconProp, iconValue);
+
+      // If not provided by the add-on, create fanart code from outlook icon file name.
+      const auto& [fanartCodeProp, fanartCodeValue] = props.GetDayProperty(i, "FanartCode");
+      m_infoV2.try_emplace(fanartCodeProp,
+                           CWeatherPropertyHelper::FormatFanartCode(fanartCodeValue, iconValue));
+    }
+  }
+
+  // Hourly data
+
+  int idx{1};
+  while (true)
+  {
+    if (!props.HasHourlyProperties(idx))
+      break; // done, no more data
+
+    m_infoV2.insert(props.GetHourlyProperty(idx, "Time"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "LongDate"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "ShortDate"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "Outlook"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "Temperature"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "DewPoint"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "FeelsLike"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "Humidity"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "Precipitation"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "Pressure"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "WindSpeed"));
+    m_infoV2.insert(props.GetHourlyProperty(idx, "WindDirection"));
+
+    {
+      const auto& [iconProp, iconValue] = props.GetHourlyProperty(idx, "OutlookIcon");
+      m_infoV2.try_emplace(iconProp, iconValue);
+
+      // If not provided by the add-on, create fanart code from outlook icon file name.
+      const auto& [fanartCodeProp, fanartCodeValue] = props.GetHourlyProperty(idx, "FanartCode");
+      m_infoV2.try_emplace(fanartCodeProp,
+                           CWeatherPropertyHelper::FormatFanartCode(fanartCodeValue, iconValue));
+    }
+
+    idx++;
+  }
+
+  // Daily data
+
+  idx = 1;
+  while (true)
+  {
+    if (!props.HasDailyProperties(idx))
+      break; // done, no more data
+
+    m_infoV2.insert(props.GetDailyProperty(idx, "ShortDate"));
+    m_infoV2.insert(props.GetDailyProperty(idx, "ShortDay"));
+    m_infoV2.insert(props.GetDailyProperty(idx, "Outlook"));
+    m_infoV2.insert(props.GetDailyProperty(idx, "HighTemperature"));
+    m_infoV2.insert(props.GetDailyProperty(idx, "LowTemperature"));
+    m_infoV2.insert(props.GetDailyProperty(idx, "Precipitation"));
+    m_infoV2.insert(props.GetDailyProperty(idx, "WindSpeed"));
+    m_infoV2.insert(props.GetDailyProperty(idx, "WindDirection"));
+
+    {
+      const auto& [iconProp, iconValue] = props.GetDailyProperty(idx, "OutlookIcon");
+      m_infoV2.try_emplace(iconProp, iconValue);
+
+      // If not provided by the add-on, create fanart code from outlook icon file name.
+      const auto& [fanartCodeProp, fanartCodeValue] = props.GetDailyProperty(idx, "FanartCode");
+      m_infoV2.try_emplace(fanartCodeProp,
+                           CWeatherPropertyHelper::FormatFanartCode(fanartCodeValue, iconValue));
+    }
+
+    idx++;
+  }
+
+  // Locations
+
+  const auto& [prop, value] = props.GetProperty("Locations");
+  m_infoV2.try_emplace(prop, value);
+
+  const int locations{std::atoi(value.c_str())};
+  for (int i = 1; i <= locations; ++i)
+  {
+    m_infoV2.insert(props.GetProperty(StringUtils::Format("Location{}", i)));
   }
 }
