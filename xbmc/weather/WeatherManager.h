@@ -9,6 +9,7 @@
 #pragma once
 
 #include "settings/lib/ISettingCallback.h"
+#include "threads/CriticalSection.h"
 #include "utils/InfoLoader.h"
 
 #include <array>
@@ -66,7 +67,7 @@ public:
    */
   std::string GetLocation(int iLocation) const;
 
-  const std::string& GetLastUpdateTime() const { return m_info.lastUpdateTime; }
+  const std::string& GetLastUpdateTime() const;
   const ForecastDay& GetForecast(int day) const;
   bool IsFetched();
   void Reset();
@@ -94,5 +95,6 @@ protected:
   void OnSettingAction(const std::shared_ptr<const CSetting>& setting) override;
 
 private:
+  mutable CCriticalSection m_critSection;
   WeatherInfo m_info;
 };

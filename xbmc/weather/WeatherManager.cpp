@@ -57,6 +57,7 @@ std::string CWeatherManager::BusyInfo(int info) const
 
 std::string CWeatherManager::TranslateInfo(int info) const
 {
+  std::unique_lock lock(m_critSection);
   switch (info)
   {
     case WEATHER_LABEL_CURRENT_COND:
@@ -95,6 +96,7 @@ std::string CWeatherManager::GetLocation(int iLocation) const
 
 void CWeatherManager::Reset()
 {
+  std::unique_lock lock(m_critSection);
   m_info = {};
 }
 
@@ -102,12 +104,21 @@ bool CWeatherManager::IsFetched()
 {
   // call GetInfo() to make sure that we actually start up
   GetInfo(0);
+
+  std::unique_lock lock(m_critSection);
   return !m_info.lastUpdateTime.empty();
 }
 
 const ForecastDay& CWeatherManager::GetForecast(int day) const
 {
+  std::unique_lock lock(m_critSection);
   return m_info.forecast[day];
+}
+
+const std::string& CWeatherManager::GetLastUpdateTime() const
+{
+  std::unique_lock lock(m_critSection);
+  return m_info.lastUpdateTime;
 }
 
 void CWeatherManager::SetArea(int iLocation) const
@@ -130,6 +141,7 @@ CJob* CWeatherManager::GetJob() const
 
 void CWeatherManager::OnJobComplete(unsigned int jobID, bool success, CJob* job)
 {
+  std::unique_lock lock(m_critSection);
   m_info = static_cast<CWeatherJob*>(job)->GetInfo();
   CInfoLoader::OnJobComplete(jobID, success, job);
 }
