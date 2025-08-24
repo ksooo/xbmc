@@ -24,11 +24,6 @@ public:
   CURL() = default;
   explicit CURL(std::string strURL);
 
-  bool operator==(const CURL& url) const;
-  // explicit equals operator for std::string comparison
-  friend bool operator==(const CURL& url, const std::string& str);
-  friend bool operator==(const std::string& str, const CURL& url);
-
   void Reset();
   void Parse(std::string strURL);
   void SetFileName(std::string strFileName);
@@ -165,7 +160,7 @@ public:
   void SetProtocolOption(const std::string &key, const std::string &value);
   void RemoveProtocolOption(const std::string &key);
 
-protected:
+private:
   int m_iPort = 0;
   std::string m_strHostName;
   std::string m_strShareName;
