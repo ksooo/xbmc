@@ -10,6 +10,7 @@
 
 #include "Album.h"
 #include "Artist.h"
+#include "DatabaseTypes.h"
 #include "FileItem.h"
 #include "FileItemList.h"
 #include "GUIInfoManager.h"
@@ -115,7 +116,11 @@ void AnnounceUpdate(const std::string& content, int id, bool added = false)
 }
 } // unnamed namespace
 
-CMusicDatabase::CMusicDatabase() = default;
+CMusicDatabase::CMusicDatabase()
+  : CDatabase(
+        KODI::DATABASE::TYPE_MUSIC, "MyMusic", 83 /* schema version */, 32 /* min schema version */)
+{
+}
 
 CMusicDatabase::~CMusicDatabase()
 {
@@ -9476,11 +9481,6 @@ void CMusicDatabase::UpdateTables(int version)
   // After all updates, store the original db version.
   // This indicates the version of tag processing that was used to populate db
   SetMusicTagScanVersion(version);
-}
-
-int CMusicDatabase::GetSchemaVersion() const
-{
-  return 83;
 }
 
 int CMusicDatabase::GetMusicNeedsTagScan()

@@ -228,8 +228,15 @@ bool CDatabase::DatasetLayout::HasFilterFields() const
   return std::ranges::any_of(m_fields, [](const auto& field) { return field.fetch; });
 }
 
-CDatabase::CDatabase()
-  : m_profileManager(*CServiceBroker::GetSettingsComponent()->GetProfileManager())
+CDatabase::CDatabase(const std::string& dbType,
+                     const std::string& dbBaseName,
+                     unsigned int schemaVersion,
+                     unsigned int minSchemaVersion)
+  : m_profileManager(*CServiceBroker::GetSettingsComponent()->GetProfileManager()),
+    m_type(dbType),
+    m_baseName(dbBaseName),
+    m_schemaVersion(schemaVersion),
+    m_minSchemaVersion(minSchemaVersion)
 {
 }
 
@@ -828,8 +835,7 @@ bool CDatabase::CreateDatabase()
 
 void CDatabase::UpdateVersionNumber()
 {
-  std::string strSQL = PrepareSQL("UPDATE version SET idVersion=%i\n", GetSchemaVersion());
-  m_pDS->exec(strSQL);
+  m_pDS->exec(PrepareSQL("UPDATE version SET idVersion=%i\n", GetSchemaVersion()));
 }
 
 bool CDatabase::BuildSQL(std::string_view strQuery, const Filter& filter, std::string& strSQL) const

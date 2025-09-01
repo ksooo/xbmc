@@ -8,6 +8,7 @@
 
 #include "AddonDatabase.h"
 
+#include "DatabaseTypes.h"
 #include "XBDateTime.h"
 #include "addons/AddonBuilder.h"
 #include "addons/addoninfo/AddonInfo.h"
@@ -189,23 +190,17 @@ void CAddonDatabaseSerializer::DeserializeExtensions(const CVariant& variant,
   return;
 }
 
-CAddonDatabase::CAddonDatabase() = default;
+CAddonDatabase::CAddonDatabase()
+  : CDatabase(
+        KODI::DATABASE::TYPE_ADDONS, "Addons", 33 /* schema version */, 21 /* min schema version */)
+{
+}
 
 CAddonDatabase::~CAddonDatabase() = default;
 
 bool CAddonDatabase::Open()
 {
   return CDatabase::Open();
-}
-
-int CAddonDatabase::GetMinSchemaVersion() const
-{
-  return 21;
-}
-
-int CAddonDatabase::GetSchemaVersion() const
-{
-  return 33;
 }
 
 void CAddonDatabase::CreateTables()

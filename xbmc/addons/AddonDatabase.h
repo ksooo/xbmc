@@ -63,6 +63,7 @@ class CAddonDatabase : public CDatabase
 public:
   CAddonDatabase();
   ~CAddonDatabase() override;
+
   bool Open() override;
 
   /*! \brief Get an addon with a specific version and repository. */
@@ -242,9 +243,6 @@ protected:
   void CreateTables() override;
   void CreateAnalytics() override;
   void UpdateTables(int version) override;
-  int GetMinSchemaVersion() const override;
-  int GetSchemaVersion() const override;
-  const char *GetBaseDBName() const override { return "Addons"; }
 
   bool GetAddon(int id, ADDON::AddonPtr& addon);
   void DeleteRepository(const std::string& id);

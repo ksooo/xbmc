@@ -1568,10 +1568,7 @@ private:
 
   bool GetSeasonInfo(int idSeason, CVideoInfoTag& details, bool allDetails, CFileItem* item);
 
-  int GetMinSchemaVersion() const override { return 75; }
-  int GetSchemaVersion() const override;
   virtual int GetExportVersion() const { return 1; }
-  const char* GetBaseDBName() const override { return "MyVideos"; }
 
   void ConstructPath(std::string& strDest,
                      const std::string& strPath,

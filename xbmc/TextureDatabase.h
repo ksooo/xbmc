@@ -40,6 +40,7 @@ class CTextureDatabase : public CDatabase, public IDatabaseQueryRuleFactory
 public:
   CTextureDatabase();
   ~CTextureDatabase() override;
+
   bool Open() override;
 
   bool GetCachedTexture(const std::string &originalURL, CTextureDetails &details);
@@ -114,6 +115,4 @@ protected:
   void CreateTables() override;
   void CreateAnalytics() override;
   void UpdateTables(int version) override;
-  int GetSchemaVersion() const override { return 14; }
-  const char* GetBaseDBName() const override { return "Textures"; }
 };

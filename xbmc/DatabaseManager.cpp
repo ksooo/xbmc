@@ -39,9 +39,9 @@ bool CDatabaseManager::Initialize()
 {
   std::unique_lock lock(m_section);
 
-  m_dbStatus.clear();
+  m_dbDetails.clear();
 
-  CLog::Log(LOGDEBUG, "{}, updating databases...", __FUNCTION__);
+  CLog::LogF(LOGDEBUG, "Updating databases...");
 
   const std::shared_ptr<CAdvancedSettings> advancedSettings = CServiceBroker::GetSettingsComponent()->GetAdvancedSettings();
 
@@ -58,22 +58,33 @@ bool CDatabaseManager::Initialize()
   { CPVRDatabase db; UpdateDatabase(db, &advancedSettings->m_databaseTV); }
   { CPVREpgDatabase db; UpdateDatabase(db, &advancedSettings->m_databaseEpg); }
 
-  CLog::Log(LOGDEBUG, "{}, updating databases... DONE", __FUNCTION__);
+  CLog::LogF(LOGDEBUG, "Updating databases... DONE");
 
   m_bIsUpgrading = false;
   m_connecting = false;
 
-  return std::ranges::all_of(m_dbStatus,
-                             [](const auto& db) { return db.second == DBStatus::READY; });
+  return std::ranges::all_of(m_dbDetails, [](const auto& db)
+                             { return db.second.m_dbStatus == DBStatus::READY; });
 }
 
 bool CDatabaseManager::CanOpen(const std::string &name)
 {
   std::unique_lock lock(m_section);
-  const auto i = m_dbStatus.find(name);
-  if (i != m_dbStatus.end())
-    return i->second == DBStatus::READY;
+  const auto i = m_dbDetails.find(name);
+  if (i != m_dbDetails.cend())
+    return i->second.m_dbStatus == DBStatus::READY;
   return false; // db isn't even attempted to update yet
+}
+
+std::string CDatabaseManager::GetFullDatabaseNameByType(const std::string& dbType) const
+{
+  std::unique_lock lock(m_section);
+  const auto it{std::ranges::find_if(m_dbDetails, [&dbType](const auto& db)
+                                     { return db.second.m_dbType == dbType; })};
+  if (it != m_dbDetails.cend())
+    return (*it).second.m_dbFullName;
+
+  return {};
 }
 
 void CDatabaseManager::UpdateDatabase(CDatabase &db, DatabaseSettings *settings)
@@ -91,7 +102,7 @@ bool CDatabaseManager::Update(CDatabase &db, const DatabaseSettings &settings)
   DatabaseSettings dbSettings = settings;
   db.InitSettings(dbSettings);
 
-  int version = db.GetSchemaVersion();
+  unsigned int version{db.GetSchemaVersion()};
   std::string latestDb = dbSettings.name;
   latestDb += std::to_string(version);
 
@@ -144,7 +155,10 @@ bool CDatabaseManager::Update(CDatabase &db, const DatabaseSettings &settings)
 
       // yay - we have a copy of our db, now do our worst with it
       if (UpdateVersion(db, latestDb))
+      {
+        UpdateDetails(db.GetBaseDBName(), db.GetType(), latestDb);
         return true;
+      }
 
       // update failed - loop around and see if we have another one available
       db.Close();
@@ -165,7 +179,7 @@ bool CDatabaseManager::Update(CDatabase &db, const DatabaseSettings &settings)
 
 bool CDatabaseManager::UpdateVersion(CDatabase &db, const std::string &dbName)
 {
-  int version = db.GetDBVersion();
+  const unsigned int version{static_cast<unsigned int>(db.GetDBVersion())};
   bool bReturn = false;
 
   if (version < db.GetMinSchemaVersion())
@@ -238,10 +252,21 @@ bool CDatabaseManager::UpdateVersion(CDatabase &db, const std::string &dbName)
   return bReturn;
 }
 
+void CDatabaseManager::UpdateDetails(const std::string& name,
+                                     const std::string& dbType,
+                                     const std::string& fullName)
+{
+  std::unique_lock lock(m_section);
+  auto& entry{m_dbDetails[name]};
+  entry.m_dbType = dbType;
+  entry.m_dbFullName = fullName;
+}
+
 void CDatabaseManager::UpdateStatus(const std::string& name, DBStatus status)
 {
   std::unique_lock lock(m_section);
-  m_dbStatus[name] = status;
+  auto& entry{m_dbDetails[name]};
+  entry.m_dbStatus = status;
 }
 
 void CDatabaseManager::LocalizationChanged()
@@ -253,7 +278,6 @@ void CDatabaseManager::LocalizationChanged()
   if (videodb.Open())
   {
     videodb.UpdateVideoVersionTypeTable();
-    CLog::Log(LOGDEBUG, "{}, Video version type table updated for new language settings",
-              __FUNCTION__);
+    CLog::LogF(LOGDEBUG, "Video version type table updated for new language settings");
   }
 }

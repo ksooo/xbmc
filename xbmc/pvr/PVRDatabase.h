@@ -37,7 +37,7 @@ namespace PVR
     /*!
      * @brief Create a new instance of the PVR database.
      */
-    CPVRDatabase() = default;
+    CPVRDatabase();
     ~CPVRDatabase() override = default;
 
     /*!
@@ -60,18 +60,6 @@ namespace PVR
      * @brief Unlock the database.
      */
     void Unlock();
-
-    /*!
-     * @brief Get the minimal database version that is required to operate correctly.
-     * @return The minimal database version.
-     */
-    int GetSchemaVersion() const override { return 47; }
-
-    /*!
-     * @brief Get the default sqlite database filename.
-     * @return The default filename.
-     */
-    const char* GetBaseDBName() const override { return "TV"; }
 
     /*! @name Client methods */
     //@{
@@ -332,7 +320,6 @@ namespace PVR
      * @param version The version to update the database from.
      */
     void UpdateTables(int version) override;
-    int GetMinSchemaVersion() const override { return 11; }
 
     int GetGroups(CPVRChannelGroups& results, const std::string& query) const;
 

@@ -96,14 +96,23 @@ public:
     std::string where;
   };
 
-  CDatabase();
+  CDatabase(const std::string& dbType,
+            const std::string& dbBaseName,
+            unsigned int schemaVersion,
+            unsigned int minSchemaVersion);
   virtual ~CDatabase(void);
+
+  const std::string& GetType() const { return m_type; }
+  const std::string& GetBaseDBName() const { return m_baseName; }
+  unsigned int GetSchemaVersion() const { return m_schemaVersion; }
+  unsigned int GetMinSchemaVersion() const { return m_minSchemaVersion; }
+
   bool IsOpen() const;
+  bool Open(const DatabaseSettings& db);
   virtual void Close();
+
   bool Compress(bool bForce = true);
   void Interrupt();
-
-  bool Open(const DatabaseSettings& db);
 
   void BeginTransaction();
   virtual bool CommitTransaction();
@@ -293,15 +302,6 @@ protected:
    */
   virtual void UpdateTables(int version) {}
 
-  /* \brief The minimum schema version that we support updating from.
-   */
-  virtual int GetMinSchemaVersion() const { return 0; }
-
-  /* \brief The current schema version.
-   */
-  virtual int GetSchemaVersion() const = 0;
-  virtual const char* GetBaseDBName() const = 0;
-
   int GetDBVersion();
 
   bool BuildSQL(std::string_view strQuery, const Filter& filter, std::string& strSQL) const;
@@ -316,8 +316,15 @@ protected:
   const CProfileManager& m_profileManager;
 
 private:
+  CDatabase() = delete;
+
   void InitSettings(DatabaseSettings& dbSettings);
   void UpdateVersionNumber();
+
+  const std::string m_type;
+  const std::string m_baseName;
+  const unsigned int m_schemaVersion{0};
+  const unsigned int m_minSchemaVersion{0};
 
   bool m_bMultiInsert{
       false}; /*!< True if there are any queries in the insert queue, false otherwise */

@@ -8,6 +8,7 @@
 
 #include "EpgDatabase.h"
 
+#include "DatabaseTypes.h"
 #include "ServiceBroker.h"
 #include "dbwrappers/dataset.h"
 #include "pvr/epg/Epg.h"
@@ -28,6 +29,11 @@
 
 using namespace dbiplus;
 using namespace PVR;
+
+CPVREpgDatabase::CPVREpgDatabase()
+  : CDatabase(KODI::DATABASE::TYPE_EPG, "Epg", 20 /* schema version */, 4 /* min schema version */)
+{
+}
 
 bool CPVREpgDatabase::Open()
 {

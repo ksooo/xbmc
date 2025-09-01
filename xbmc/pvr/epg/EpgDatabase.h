@@ -34,7 +34,7 @@ namespace PVR
     /*!
      * @brief Create a new instance of the EPG database.
      */
-    CPVREpgDatabase() = default;
+    CPVREpgDatabase();
 
     /*!
      * @brief Destroy this instance.
@@ -61,18 +61,6 @@ namespace PVR
      * @brief Unlock the database.
      */
     void Unlock();
-
-    /*!
-     * @brief Get the minimal database version that is required to operate correctly.
-     * @return The minimal database version.
-     */
-    int GetSchemaVersion() const override { return 20; }
-
-    /*!
-     * @brief Get the default sqlite database filename.
-     * @return The default filename.
-     */
-    const char* GetBaseDBName() const override { return "Epg"; }
 
     /*! @name EPG methods */
     //@{
@@ -376,8 +364,6 @@ namespace PVR
      * @param version The version to update the database from.
      */
     void UpdateTables(int version) override;
-
-    int GetMinSchemaVersion() const override { return 4; }
 
     std::shared_ptr<CPVREpgInfoTag> CreateEpgTag(dbiplus::Dataset& ds) const;
 

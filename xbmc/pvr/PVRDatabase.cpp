@@ -8,6 +8,7 @@
 
 #include "PVRDatabase.h"
 
+#include "DatabaseTypes.h"
 #include "ServiceBroker.h"
 #include "addons/AddonManager.h"
 #include "addons/addoninfo/AddonInfo.h"
@@ -114,6 +115,11 @@ std::string GetClientIdsSQL(const std::vector<std::shared_ptr<CPVRClient>>& clie
 }
 
 } // unnamed namespace
+
+CPVRDatabase::CPVRDatabase()
+  : CDatabase(KODI::DATABASE::TYPE_TV, "TV", 47 /* schema version */, 11 /* min schema version */)
+{
+}
 
 bool CPVRDatabase::Open()
 {

@@ -8,6 +8,7 @@
 
 #include "VideoDatabase.h"
 
+#include "DatabaseTypes.h"
 #include "FileItem.h"
 #include "FileItemList.h"
 #include "GUIInfoManager.h"
@@ -80,7 +81,13 @@ using namespace KODI::GUILIB;
 using namespace KODI::VIDEO;
 
 //********************************************************************************************************************************
-CVideoDatabase::CVideoDatabase() = default;
+CVideoDatabase::CVideoDatabase()
+  : CDatabase(KODI::DATABASE::TYPE_VIDEOS,
+              "MyVideos",
+              137 /* schema version */,
+              75 /* min schema version */)
+{
+}
 
 //********************************************************************************************************************************
 CVideoDatabase::~CVideoDatabase() = default;
@@ -7204,11 +7211,6 @@ void CVideoDatabase::UpdateTables(int iVersion)
     // Copy current set title for existing sets
     m_pDS->exec("UPDATE sets SET strOriginalSet = strSet");
   }
-}
-
-int CVideoDatabase::GetSchemaVersion() const
-{
-  return 137;
 }
 
 bool CVideoDatabase::LookupByFolders(const std::string &path, bool shows)
