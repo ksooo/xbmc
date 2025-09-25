@@ -99,17 +99,38 @@
 - (void)windowDidMiniaturize:(NSNotification*)aNotification
 {
   g_application.m_AppFocused = false;
+  
+  // Disable GUI rendering when window is miniaturized to reduce CPU usage
+  std::shared_ptr<CAppInboundProtocol> appPort = CServiceBroker::GetAppPort();
+  if (appPort)
+  {
+    appPort->SetRenderGUI(false);
+  }
 }
 
 - (void)windowDidDeminiaturize:(NSNotification*)aNotification
 {
   g_application.m_AppFocused = true;
+  
+  // Re-enable GUI rendering when window is deminiaturized
+  std::shared_ptr<CAppInboundProtocol> appPort = CServiceBroker::GetAppPort();
+  if (appPort)
+  {
+    appPort->SetRenderGUI(true);
+  }
 }
 
 - (void)windowDidBecomeKey:(NSNotification*)aNotification
 {
   g_application.m_AppFocused = true;
   CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::GUI, "WindowFocused");
+
+  // Re-enable GUI rendering when window regains focus
+  std::shared_ptr<CAppInboundProtocol> appPort = CServiceBroker::GetAppPort();
+  if (appPort)
+  {
+    appPort->SetRenderGUI(true);
+  }
 
   auto winSystem = dynamic_cast<CWinSystemOSX*>(CServiceBroker::GetWinSystem());
   if (winSystem)
@@ -122,6 +143,13 @@
 {
   g_application.m_AppFocused = false;
   CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::GUI, "WindowUnfocused");
+
+  // Disable GUI rendering when window loses focus to reduce CPU usage
+  std::shared_ptr<CAppInboundProtocol> appPort = CServiceBroker::GetAppPort();
+  if (appPort)
+  {
+    appPort->SetRenderGUI(false);
+  }
 
   auto winSystem = dynamic_cast<CWinSystemOSX*>(CServiceBroker::GetWinSystem());
   if (winSystem)
@@ -141,6 +169,13 @@
 - (void)windowDidExpose:(NSNotification*)aNotification
 {
   g_application.m_AppFocused = true;
+  
+  // Re-enable GUI rendering when window is exposed
+  std::shared_ptr<CAppInboundProtocol> appPort = CServiceBroker::GetAppPort();
+  if (appPort)
+  {
+    appPort->SetRenderGUI(true);
+  }
 }
 
 - (void)windowDidMove:(NSNotification*)aNotification
