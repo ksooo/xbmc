@@ -491,7 +491,6 @@ case $host in
 
         platform_cflags="${platform_cflags} -ftree-vectorize -pipe -Wno-trigraphs -fpascal-strings"
         platform_cflags="${platform_cflags} -Wreturn-type -Wunused-variable -fmessage-length=0 -gdwarf-2"
-        platform_cflags="${platform_cflags} -fconstexpr-steps=1048576 -fconstexpr-depth=512"
         optimize_flags="-O3"
         platform_ldflags="${platform_ldflags} -L$use_sdk_path/usr/lib"
       ;;
