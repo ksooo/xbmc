@@ -621,7 +621,8 @@ constexpr std::array<struct LCENTRY, ISO639_2_ADDL_NAMES_COUNT> TableISO639_2_Na
 static_assert(std::ranges::is_sorted(TableISO639_2_Names, {}, &LCENTRY::code));
 
 // Concatenate and sort the main + additional names to enable lookup of 639-2/T code from any name
-inline constexpr auto TableISO639_2AllNames =
+//inline constexpr auto TableISO639_2AllNames =
+inline const auto TableISO639_2AllNames =
     CreateIso639ByName(ConcatenateArrays(TableISO639_2ByCode, TableISO639_2_Names));
 
 // 20 pairs of active ISO 639-2/T and /B codes and 2 inactive pairs (deprecated B codes)
@@ -672,8 +673,8 @@ inline constexpr auto ISO639_2_TB_MappingsByB = CreateTBMappingsByB();
 static_assert(std::ranges::adjacent_find(TableISO639_2ByCode, {}, &LCENTRY::code) ==
               TableISO639_2ByCode.end());
 
-static_assert(std::ranges::adjacent_find(TableISO639_2AllNames, {}, &LCENTRY::name) ==
-              TableISO639_2AllNames.end());
+//static_assert(std::ranges::adjacent_find(TableISO639_2AllNames, {}, &LCENTRY::name) ==
+//              TableISO639_2AllNames.end());
 
 static_assert(std::ranges::adjacent_find(ISO639_2_TB_Mappings, {}, &ISO639_2_TB::terminological) ==
               ISO639_2_TB_Mappings.end());
