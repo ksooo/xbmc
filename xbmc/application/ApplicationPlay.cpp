@@ -309,7 +309,7 @@ void CApplicationPlay::DetermineFullScreen()
 }
 
 CApplicationPlay::GatherPlaybackDetailsResult CApplicationPlay::GatherPlaybackDetails(
-    const CFileItem& item, const std::string& player, bool restart)
+    const CFileItem& item, std::string_view player, bool restart)
 {
   m_item = item;
   m_player = player;

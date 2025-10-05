@@ -12,6 +12,7 @@
 #include "cores/IPlayer.h"
 
 #include <string>
+#include <string_view>
 
 class CApplicationStackHelper;
 
@@ -42,7 +43,7 @@ public:
    * \return the result
    */
   GatherPlaybackDetailsResult GatherPlaybackDetails(const CFileItem& item,
-                                                    const std::string& player,
+                                                    std::string_view player,
                                                     bool restart);
 
   /*!
