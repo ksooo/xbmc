@@ -7,6 +7,7 @@
 	<controls>
 		<include>DefaultBackground</include>
 		<control type="group">
+			<visible>!Container.IsUpdating + Integer.IsGreater(Container.NumItems,0)</visible>
 			<animation effect="fade" start="100" end="0" time="200" tween="sine" condition="$EXP[infodialog_active]">Conditional</animation>
 			<include>View_50_List</include>
 			<include>View_51_Poster</include>
@@ -79,6 +80,8 @@
 					</control>
 				</control>
 			</control>
+		</control>
+		<control type="group">
 			<include content="TopBar">
 				<param name="breadcrumbs_label" value="$VAR[BreadcrumbsVideoVar]" />
 			</include>
