@@ -217,5 +217,5 @@ protected:
    \sa Update
    */
   std::string m_strFilterPath;
-  bool m_backgroundLoad = false;
+  bool m_backgroundLoad{true};
 };
