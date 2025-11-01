@@ -1680,8 +1680,8 @@ void CGUIMediaWindow::OnRenameItem(int iItem)
 
 void CGUIMediaWindow::OnInitWindow()
 {
-  // initial fetch is done unthreaded to ensure the items are setup prior to skin animations kicking off
-  m_backgroundLoad = false;
+//  if (m_guiState)
+//    m_viewControl.SetCurrentView(m_guiState->GetViewAsControl());
 
   // the start directory may change during Refresh
   bool updateStartDirectory = URIUtils::PathEquals(m_vecItems->GetPath(), m_startDirectory, true);
@@ -1708,8 +1708,6 @@ void CGUIMediaWindow::OnInitWindow()
     // reset the history based on the path of the items
     SetHistoryForPath(m_startDirectory);
   }
-
-  m_backgroundLoad = true;
 
   CGUIWindow::OnInitWindow();
 }
