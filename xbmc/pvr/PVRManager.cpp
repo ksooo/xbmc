@@ -518,14 +518,16 @@ void CPVRManager::Process()
   {
     if (IsSleeping())
     {
+      m_sleepConfirmed.Set();
       CThread::Sleep(1s);
       continue;
     }
 
     // In case any new client connected, load from db and fetch data update from new client(s)
-    UpdateComponents(ManagerState::STATE_STARTED);
+    if (IsAwake())
+      UpdateComponents(ManagerState::STATE_STARTED);
 
-    if (cachedImagesCleanupTimeout.IsTimePast())
+    if (IsAwake() && cachedImagesCleanupTimeout.IsTimePast())
     {
       // We don't know for sure what to delete if there are not (yet) connected clients
       if (m_addons->HasIgnoredClients())
@@ -541,7 +543,7 @@ void CPVRManager::Process()
     }
 
     /* first startup */
-    if (m_bFirstStart)
+    if (IsAwake() && m_bFirstStart)
     {
       {
         std::unique_lock lock(m_critSection);
@@ -555,13 +557,14 @@ void CPVRManager::Process()
       TriggerPlayChannelOnStartup();
     }
 
-    if (m_addons->AnyClientSupportingRecordingsSize())
+    if (IsAwake() && m_addons->AnyClientSupportingRecordingsSize())
       TriggerRecordingsSizeInProgressUpdate();
 
     /* execute the next pending jobs if there are any */
     try
     {
-      m_pendingUpdates->ExecutePendingJobs();
+      if (IsAwake())
+        m_pendingUpdates->ExecutePendingJobs();
     }
     catch (...)
     {
@@ -571,7 +574,7 @@ void CPVRManager::Process()
       bRestart = true;
     }
 
-    if (IsStarted() && !bRestart)
+    if (IsAwake() && IsStarted() && !bRestart)
       m_pendingUpdates->WaitForJobs(1000);
   }
 
@@ -626,7 +629,13 @@ void CPVRManager::OnSleep()
 
   SetWakeupCommand();
 
+  // Sync with worker thread on the new state.
+  m_sleepConfirmed.Reset();
   CPowerState::OnSleep();
+  if (!m_sleepConfirmed.Wait(3s))
+    CLog::LogF(LOGERROR, "Timeout waiting for power state transition to 'sleep' confirmation!");
+
+  m_guiInfo->OnSleep();
   m_epgContainer->OnSleep();
   m_timers->OnSleep();
   m_addons->OnSleep();
@@ -637,6 +646,7 @@ void CPVRManager::OnWake()
   m_addons->OnWake();
   m_timers->OnWake();
   m_epgContainer->OnWake();
+  m_guiInfo->OnWake();
   CPowerState::OnWake();
 
   PublishEvent(PVREvent::SystemWake);
