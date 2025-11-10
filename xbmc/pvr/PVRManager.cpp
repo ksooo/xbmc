@@ -629,25 +629,38 @@ void CPVRManager::OnSleep()
 
   SetWakeupCommand();
 
+  CLog::Log(LOGINFO, "##### OnSleep: Before CPowerState::OnSleep()");
+
   // Sync with worker thread on the new state.
   m_sleepConfirmed.Reset();
   CPowerState::OnSleep();
   if (!m_sleepConfirmed.Wait(3s))
     CLog::LogF(LOGERROR, "Timeout waiting for power state transition to 'sleep' confirmation!");
 
+  CLog::Log(LOGINFO, "##### OnSleep: After CPowerState::OnSleep(), next m_guiInfo->OnSleep()");
   m_guiInfo->OnSleep();
+  CLog::Log(LOGINFO, "##### OnSleep: After m_guiInfo->OnSleep(), next m_epgContainer->OnSleep()");
   m_epgContainer->OnSleep();
+  CLog::Log(LOGINFO, "##### OnSleep: After m_epgContainer->OnSleep(), next m_timers->OnSleep()");
   m_timers->OnSleep();
+  CLog::Log(LOGINFO, "##### OnSleep: After m_timers->OnSleep(), next m_addons->OnSleep()");
   m_addons->OnSleep();
+  CLog::Log(LOGINFO, "##### OnSleep: After m_addons->OnSleep()");
 }
 
 void CPVRManager::OnWake()
 {
+  CLog::Log(LOGINFO, "##### OnWake: Before m_addons->OnWake()");
   m_addons->OnWake();
+  CLog::Log(LOGINFO, "##### OnWake: After m_addons->OnWake(), next m_timers->OnWake");
   m_timers->OnWake();
+  CLog::Log(LOGINFO, "##### OnWake: After m_timers->OnWake, next m_epgContainer->OnWake()");
   m_epgContainer->OnWake();
+  CLog::Log(LOGINFO, "##### OnWake: After m_epgContainer->OnWake(), next m_guiInfo->OnWake()");
   m_guiInfo->OnWake();
+  CLog::Log(LOGINFO, "##### OnWake: After m_guiInfo->OnWake(), next CPowerState::OnWake()");
   CPowerState::OnWake();
+  CLog::Log(LOGINFO, "##### OnWake: After CPowerState::OnWake()");
 
   PublishEvent(PVREvent::SystemWake);
 
