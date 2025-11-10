@@ -181,6 +181,8 @@ bool CPVRTimers::UpdateFromClients(const std::vector<std::shared_ptr<CPVRClient>
 
 void CPVRTimers::Process()
 {
+  CLog::LogF(LOGINFO, "+++++ thread start");
+
   auto& mgr = CServiceBroker::GetPVRManager();
   mgr.Events().Subscribe(this,
                          [this, &mgr](const PVREvent& event)
@@ -217,6 +219,8 @@ void CPVRTimers::Process()
   }
 
   mgr.Events().Unsubscribe(this);
+
+  CLog::LogF(LOGINFO, "+++++ thread end");
 }
 
 bool CPVRTimers::IsRecording() const

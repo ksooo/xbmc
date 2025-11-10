@@ -143,6 +143,8 @@ void CPVRGUIInfo::OnWake()
 
 void CPVRGUIInfo::Process()
 {
+  CLog::LogF(LOGINFO, "+++++ thread start");
+
   auto toggleIntervalMs = std::chrono::milliseconds(
       CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_iPVRInfoToggleInterval);
   XbmcThreads::EndTime<> cacheTimer(toggleIntervalMs);
@@ -223,6 +225,8 @@ void CPVRGUIInfo::Process()
   channels.GetChannelNavigator().Unsubscribe(this);
   channels.Events().Unsubscribe(this);
   mgr.Events().Unsubscribe(this);
+
+  CLog::LogF(LOGINFO, "+++++ thread end");
 }
 
 void CPVRGUIInfo::UpdateQualityData()

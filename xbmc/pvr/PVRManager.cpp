@@ -518,8 +518,11 @@ void CPVRManager::Process()
   {
     if (IsSleeping())
     {
+      CLog::Log(LOGINFO, "+++++ Setting sleep confirmed event");
       m_sleepConfirmedEvent.Set();
+      CLog::Log(LOGINFO, "+++++ Waiting for wake event...");
       m_wakeEvent.Wait();
+      CLog::Log(LOGINFO, "+++++ Continue after wake event");
     }
 
     // In case any new client connected, load from db and fetch data update from new client(s)
@@ -628,6 +631,8 @@ void CPVRManager::OnSleep()
 
   SetWakeupCommand();
 
+  CLog::Log(LOGINFO, "##### OnSleep: Before CPowerState::OnSleep()");
+
   // Sync with worker thread on the new state.
   m_wakeEvent.Reset();
   m_sleepConfirmedEvent.Reset();
@@ -635,20 +640,31 @@ void CPVRManager::OnSleep()
   if (!m_sleepConfirmedEvent.Wait(5s))
     CLog::LogF(LOGWARNING, "Timeout waiting for power state transition to 'sleep' confirmation!");
 
+  CLog::Log(LOGINFO, "##### OnSleep: After CPowerState::OnSleep(), next m_guiInfo->OnSleep()");
   m_guiInfo->OnSleep();
+  CLog::Log(LOGINFO, "##### OnSleep: After m_guiInfo->OnSleep(), next m_epgContainer->OnSleep()");
   m_epgContainer->OnSleep();
+  CLog::Log(LOGINFO, "##### OnSleep: After m_epgContainer->OnSleep(), next m_timers->OnSleep()");
   m_timers->OnSleep();
+  CLog::Log(LOGINFO, "##### OnSleep: After m_timers->OnSleep(), next m_addons->OnSleep()");
   m_addons->OnSleep();
+  CLog::Log(LOGINFO, "##### OnSleep: After m_addons->OnSleep()");
 }
 
 void CPVRManager::OnWake()
 {
+  CLog::Log(LOGINFO, "##### OnWake: Before m_addons->OnWake()");
   m_addons->OnWake();
+  CLog::Log(LOGINFO, "##### OnWake: After m_addons->OnWake(), next m_timers->OnWake");
   m_timers->OnWake();
+  CLog::Log(LOGINFO, "##### OnWake: After m_timers->OnWake, next m_epgContainer->OnWake()");
   m_epgContainer->OnWake();
+  CLog::Log(LOGINFO, "##### OnWake: After m_epgContainer->OnWake(), next m_guiInfo->OnWake()");
   m_guiInfo->OnWake();
+  CLog::Log(LOGINFO, "##### OnWake: After m_guiInfo->OnWake(), next CPowerState::OnWake()");
   CPowerState::OnWake();
   m_wakeEvent.Set(); // wake the worker thread
+  CLog::Log(LOGINFO, "##### OnWake: After CPowerState::OnWake()");
 
   PublishEvent(PVREvent::SystemWake);
 

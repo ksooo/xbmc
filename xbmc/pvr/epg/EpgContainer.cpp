@@ -309,6 +309,8 @@ bool CPVREpgContainer::PersistAll(unsigned int iMaxTimeslice) const
 
 void CPVREpgContainer::Process()
 {
+  CLog::LogF(LOGINFO, "+++++ thread start");
+
   time_t iNow = 0;
   time_t iLastSave = 0;
 
@@ -450,6 +452,8 @@ void CPVREpgContainer::Process()
     PersistAll(std::numeric_limits<unsigned int>::max());
     CLog::Log(LOGINFO, "EPG Container: Persisting events done");
   }
+
+  CLog::LogF(LOGINFO, "+++++ thread end");
 }
 
 std::vector<std::shared_ptr<CPVREpg>> CPVREpgContainer::GetAllEpgs() const
