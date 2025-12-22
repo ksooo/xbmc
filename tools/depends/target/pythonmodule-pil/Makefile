@@ -74,18 +74,20 @@ else ifeq ($(OS),darwin_embedded)
 endif
 
 .installed-$(PLATFORM): $(PLATFORM) $(PILPATHLIB)
-	cd $(PLATFORM); $(NATIVEPREFIX)/bin/python3 setup.py build_py build_ext $(BUILD_OPTS) install --install-lib $(PILPATH) bdist_egg
+	cd $(PLATFORM); $(NATIVEPREFIX)/bin/python3 setup.py build_ext $(BUILD_OPTS) install --install-lib $(PILPATH)
 ifeq ($(OS),android)
-	unzip -o $(PLATFORM)/dist/pillow-*.egg -d $(PILPATHLIB)
+	cd $(PILPATHLIB) && unzip -o ../pillow-*.egg
 	cd $(PILPATHLIB)/PIL && \
           sed $(SED_FLAG) -e 's/import sys/import os, sys /' \
                           -e '/__file__/ s/_imaging/lib_imaging/g' \
                           -e 's/pkg_resources.resource_filename(__name__,/os.path.join(os.environ["KODI_ANDROID_LIBS"], /' \
                               _imaging*.py
+	cd $(PILPATH) && rm -rf pillow-*.egg
 else ifeq ($(OS),darwin_embedded)
-	unzip -o $(PLATFORM)/dist/pillow-*.egg -d $(PILPATHLIB)
+	cd $(PILPATHLIB) && unzip -o ../pillow-*.egg
+	cd $(PILPATH) && rm -rf pillow-*.egg
 else ifeq ($(TARGET_PLATFORM),webos)
-	unzip -o $(PLATFORM)/dist/pillow-*.egg -d $(PILPATH)
+	cd $(PILPATH) && unzip -o $(PILPATH)/pillow-*.egg && rm -f $(PILPATH)/pillow-*.egg
 endif
 	touch $@
 
