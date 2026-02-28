@@ -15,8 +15,7 @@
 
 #ifdef _WIN32 // windows
 #ifndef _SSIZE_T_DEFINED
-#include <BaseTsd.h>
-typedef SSIZE_T ssize_t;
+typedef intptr_t ssize_t;
 #define _SSIZE_T_DEFINED
 #endif // !_SSIZE_T_DEFINED
 
