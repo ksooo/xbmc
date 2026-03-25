@@ -361,11 +361,16 @@ std::vector<std::string> CWinSystemGbm::GetConnectedOutputs()
 
 bool CWinSystemGbm::SetVideoOutput(const VideoPicture* videoPicture)
 {
-  // Scaffolding: in this commit just flips m_gui_plane / m_video_plane role
-  // identity. Format and modifier are read from the current surface and pass
-  // through tautologically -- the current plane already supports them. A
-  // follow-on (#28030) will recreate the GBM surface at a different
-  // bit depth and pick a matching plane for real.
+  // Base: flip the gui/video plane role for the single shared output
+  // plane on GBM. videoPicture set means a video is starting and the
+  // output plane should be tracked as the video plane; nullptr means
+  // playback ended and the plane reverts to the gui role.
+  //
+  // Format and modifier come from whichever plane is currently active.
+  // EGL backends override this and rebuild the GBM/EGL output surface
+  // at the target bit depth before chaining here, so by the time we
+  // run the active plane's cached format reflects the post-rebuild
+  // surface (e.g. AR30 for 10-bit content).
   CDRMPlane* current = m_DRM->GetGuiPlane() ? m_DRM->GetGuiPlane() : m_DRM->GetVideoPlane();
   if (!current)
     return false;

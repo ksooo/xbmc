@@ -10,6 +10,7 @@
 
 #include "OptionalsReg.h"
 #include "cores/VideoPlayer/DVDCodecs/DVDFactoryCodec.h"
+#include "cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodec.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
 #include "utils/log.h"
 
@@ -33,16 +34,9 @@ bool CWinSystemGbmEGLContext::InitWindowSystemEGL(EGLint renderableType, EGLint 
     return false;
   }
 
-  // InitWindowSystemEGL runs only at boot for GUI init, so the output
-  // surface is always the gui surface here.
-  auto guiformats = m_DRM->GetOutputFormats();
-  if (!std::ranges::any_of(guiformats,
-                           [&](struct outputformat format)
-                           {
-                             return format.active &&
-                                    m_eglContext.ChooseConfig(renderableType, format.drm, false,
-                                                              format.alpha);
-                           }))
+  m_renderableType = renderableType;
+
+  if (!ChooseEGLConfig(renderableType))
   {
     return false;
   }
@@ -72,6 +66,35 @@ bool CWinSystemGbmEGLContext::InitWindowSystemEGL(EGLint renderableType, EGLint 
   }
 
   return true;
+}
+
+bool CWinSystemGbmEGLContext::ChooseEGLConfig(EGLint renderableType, int bitDepth)
+{
+  // Pick the highest active output format whose bpp is in range for the
+  // requested bit depth. Policy: when bitDepth > 8, accept only entries
+  // with bpp >= 10 and bpp <= bitDepth (do not silently fall back to 8).
+  // When bitDepth <= 8, accept entries with bpp <= 8.
+  auto outputformats = m_DRM->GetOutputFormats();
+
+  std::vector<outputformat> candidates;
+  std::ranges::copy_if(outputformats, std::back_inserter(candidates),
+                       [bitDepth](const outputformat& format)
+                       {
+                         if (!format.active)
+                           return false;
+                         if (bitDepth > 8)
+                           return format.bpp >= 10 && format.bpp <= bitDepth;
+                         return format.bpp <= 8;
+                       });
+  std::ranges::sort(candidates, std::greater<>{}, &outputformat::bpp);
+
+  for (const auto& format : candidates)
+  {
+    if (m_eglContext.ChooseConfig(renderableType, format.drm, false, format.alpha))
+      return true;
+  }
+
+  return false;
 }
 
 bool CWinSystemGbmEGLContext::CreateNewWindow(const std::string& name,
@@ -163,6 +186,93 @@ bool CWinSystemGbmEGLContext::DestroyWindow()
 
   CLog::Log(LOGDEBUG, "CWinSystemGbmEGLContext::{} - deinitialized GBM", __FUNCTION__);
   return true;
+}
+
+bool CWinSystemGbmEGLContext::SetVideoOutput(const VideoPicture* videoPicture)
+{
+  // Override: the base only flips the gui/video plane role. On EGL
+  // backends we additionally rebuild the GBM and EGL output surface
+  // to a wider format (e.g. AR24 -> AR30) when the video needs more
+  // than 8-bit through the single output plane, then chain to the
+  // base so plane-role tracking sees the new format. The EGL context
+  // survives across the rebuild -- no shader recompile, no modeset.
+  const int bitDepth = videoPicture ? videoPicture->colorBits : 8;
+
+  // Pick an EGL config matching the target bit depth, then rebuild
+  // the surface only if that pick changed the native visual ID.
+  uint32_t currentFormat = m_eglContext.GetConfigAttrib(EGL_NATIVE_VISUAL_ID);
+
+  if (!ChooseEGLConfig(m_renderableType, bitDepth))
+  {
+    CLog::LogF(LOGERROR, "failed to choose EGL config for {}-bit", bitDepth);
+    return false;
+  }
+
+  uint32_t format = m_eglContext.GetConfigAttrib(EGL_NATIVE_VISUAL_ID);
+
+  if (format != currentFormat)
+  {
+    m_eglContext.DestroySurface();
+
+    std::vector<uint64_t> fallbackModifiers = {DRM_FORMAT_MOD_LINEAR};
+    std::vector<uint64_t>* modifiers = &fallbackModifiers;
+
+    for (auto& fmt : m_DRM->GetOutputFormats())
+    {
+      if (fmt.drm == format && fmt.active)
+      {
+        modifiers = &fmt.modifiers;
+        break;
+      }
+    }
+
+    if (!m_GBM->GetDevice().CreateSurface(m_nWidth, m_nHeight, format, modifiers->data(),
+                                          modifiers->size()))
+    {
+      CLog::LogF(LOGERROR, "failed to create GBM surface");
+      return false;
+    }
+
+    if (!m_eglContext.CreatePlatformSurface(
+            m_GBM->GetDevice().GetSurface().Get(),
+            reinterpret_cast<khronos_uintptr_t>(m_GBM->GetDevice().GetSurface().Get())))
+    {
+      return false;
+    }
+
+    if (!m_eglContext.BindContext())
+    {
+      return false;
+    }
+
+    if (!m_eglContext.TrySwapBuffers())
+    {
+      return false;
+    }
+
+    CLog::LogF(LOGINFO, "Output surface recreated at {}-bit", bitDepth);
+
+    // The chained base reads the active plane's cached format and
+    // modifier to decide which DRM plane satisfies the new role.
+    // After a surface rebuild that cache is stale, so refresh it
+    // from the just-locked GBM front buffer before chaining.
+    if (auto* plane = m_DRM->GetGuiPlane() ? m_DRM->GetGuiPlane() : m_DRM->GetVideoPlane())
+    {
+      if (struct gbm_bo* bo = m_GBM->GetDevice().GetSurface().LockFrontBuffer().Get())
+      {
+        plane->SetFormat(gbm_bo_get_format(bo));
+#if defined(HAS_GBM_MODIFIERS)
+        plane->SetModifier(gbm_bo_get_modifier(bo));
+#else
+        plane->SetModifier(DRM_FORMAT_MOD_LINEAR);
+#endif
+      }
+    }
+  }
+
+  // Dispatch to FindVideoPlane (videoPicture set) or FindGuiPlane
+  // using the now-current plane format.
+  return CWinSystemGbm::SetVideoOutput(videoPicture);
 }
 
 bool CWinSystemGbmEGLContext::DestroyWindowSystem()
