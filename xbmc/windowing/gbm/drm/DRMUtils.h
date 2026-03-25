@@ -125,8 +125,12 @@ private:
   std::vector<std::unique_ptr<CDRMConnector>> m_connectors;
   std::vector<std::unique_ptr<CDRMEncoder>> m_encoders;
   std::vector<std::unique_ptr<CDRMCrtc>> m_crtcs;
+  // 8-bit formats first: Direct-to-Plane needs full 8-bit alpha for GUI overlay.
+  // 10-bit formats are available for single-plane HDR rendering when requested.
   std::vector<outputformat> m_output_formats = {{DRM_FORMAT_ARGB8888, 8, 8, false, {}},
-                                                {DRM_FORMAT_XRGB8888, 8, 0, false, {}}};
+                                                {DRM_FORMAT_XRGB8888, 8, 0, false, {}},
+                                                {DRM_FORMAT_ARGB2101010, 10, 2, false, {}},
+                                                {DRM_FORMAT_XRGB2101010, 10, 0, false, {}}};
 };
 
 } // namespace GBM
