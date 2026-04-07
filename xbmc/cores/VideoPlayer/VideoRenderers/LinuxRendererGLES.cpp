@@ -163,7 +163,7 @@ bool CLinuxRendererGLES::Configure(const VideoPicture &picture, float fps, unsig
   }
 
   m_hdrFboActive =
-      m_passthroughHDR && CServiceBroker::GetWinSystem()->SetGuiCompositing(m_passthroughHDR);
+      m_passthroughHDR && CServiceBroker::GetWinSystem()->SetGuiCompositing(picture.color_transfer);
   if (m_passthroughHDR && !m_hdrFboActive)
     CLog::Log(LOGWARNING, "LinuxRendererGLES::Configure: HDR passthrough active but GUI "
                           "compositing not supported by windowing system");
