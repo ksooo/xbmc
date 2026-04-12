@@ -71,7 +71,6 @@ public:
   void TriggerUpdateResolution(float fps, int width, int height, std::string &stereomode);
   void SetViewMode(int iViewMode);
   void PreInit();
-  void ReInit();
   void UnInit();
   bool Flush(bool wait, bool saveBuffers);
   bool IsConfigured() const;
@@ -145,8 +144,6 @@ protected:
   void UpdateLatencyTweak();
   void CheckEnableClockSync();
 
-  void SetFPS(float fps);
-
   CBaseRenderer *m_pRenderer = nullptr;
   OVERLAY::CRenderer m_overlays;
   CDebugRenderer m_debugRenderer;
@@ -211,8 +208,7 @@ protected:
 
   VideoPicture m_picture{};
 
-  float m_fps{0.0f};
-  bool m_fpsAdjusted{false};
+  float m_fps = 0.0;
   unsigned int m_orientation = 0;
   int m_NumberBuffers = 0;
   int m_lateframes = -1;
