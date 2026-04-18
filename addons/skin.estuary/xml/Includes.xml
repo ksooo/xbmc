@@ -427,8 +427,8 @@
 					<param name="flag_label" value="$VAR[AudioPropertyFlagVar]" />
 				</include>
 				<include content="MediaFlag">
-					<param name="flag_visible" value="VideoPlayer.HasSubTitles + VideoPlayer.SubTitlesEnabled + !String.IsEmpty(VideoPlayer.SubtitleCodec)" />
-					<param name="flag_label" value="$VAR[SubtitleCodecVar]" />
+					<param name="flag_visible" value="VideoPlayer.SubtitlesEnabled + [!String.IsEmpty(VideoPlayer.SubtitleCodec) | !String.IsEmpty(VideoPlayer.SubtitlesLanguage)]" />
+					<param name="flag_label" value="$VAR[ActiveVideoPlayerSubtitleLanguage]" />
 				</include>
 			</control>
 			<control type="grouplist">
