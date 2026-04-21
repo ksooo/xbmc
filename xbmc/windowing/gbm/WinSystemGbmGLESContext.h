@@ -47,6 +47,7 @@ public:
   bool BeginGuiComposite() override;
   void EndGuiComposite() override;
   void CompositeGui() override;
+  bool IsHdrComposite() const override { return m_guiCompositing; }
 
 protected:
   void SetVSyncImpl(bool enable) override {}
