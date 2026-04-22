@@ -13,6 +13,7 @@
 #include "cores/VideoPlayer/DVDCodecs/DVDCodecs.h"
 #include "cores/VideoPlayer/DVDStreamInfo.h"
 #include "cores/VideoPlayer/Interface/DemuxCrypto.h"
+#include "cores/VideoPlayer/Interface/StreamInfo.h"
 #include "cores/VideoPlayer/Interface/TimingConstants.h"
 #include "utils/log.h"
 
@@ -67,6 +68,25 @@ AVPixelFormat ConvertToPixelFormat(const VIDEOCODEC_FORMAT videoFormat)
                  videoFormat);
       return AV_PIX_FMT_YUV420P;
   }
+}
+
+// Map internal to external (API) values; API values are stable.
+StreamHdrType ConvertHdrType(const VIDEOCODEC_HDR_TYPE type)
+{
+  switch (type)
+  {
+    case VIDEOCODEC_HDR_TYPE_HDR10:
+      return StreamHdrType::HDR_TYPE_HDR10;
+    case VIDEOCODEC_HDR_TYPE_DOLBYVISION:
+      return StreamHdrType::HDR_TYPE_DOLBYVISION;
+    case VIDEOCODEC_HDR_TYPE_HLG:
+      return StreamHdrType::HDR_TYPE_HLG;
+    case VIDEOCODEC_HDR_TYPE_HDR10PLUS:
+      return StreamHdrType::HDR_TYPE_HDR10PLUS;
+    case VIDEOCODEC_HDR_TYPE_NONE:
+      return StreamHdrType::HDR_TYPE_NONE;
+  }
+  return StreamHdrType::HDR_TYPE_NONE;
 }
 
 unsigned int GetColorBitsFromVideoFormat(const VIDEOCODEC_FORMAT videoFormat)
@@ -297,6 +317,7 @@ bool CAddonVideoCodec::CopyToInitData(VIDEOCODEC_INITDATA &initData, CDVDStreamI
   m_colorTransfer = hints.colorTransferCharacteristic;
   m_masteringMetadata = hints.masteringMetadata;
   m_contentLightMetadata = hints.contentLightMetadata;
+  m_hdrType = hints.hdrType;
 
   m_processInfo.SetVideoDimensions(hints.width, hints.height);
   m_processInfo.SetVideoDAR(m_displayAspect);
@@ -387,6 +408,15 @@ CDVDVideoCodec::VCReturn CAddonVideoCodec::GetPicture(VideoPicture* pVideoPictur
       pVideoPicture->lightMetadata = *m_contentLightMetadata;
       pVideoPicture->hasLightMetadata = true;
     }
+
+    // Seed from stream hints (matches DVDVideoCodecFFmpeg::GetPicture), then
+    // allow addon per-picture override for dynamic HDR signaling (e.g. an
+    // addon that detects HDR10+ metadata per-frame can raise the hdrType
+    // from HDR10 to HDR10PLUS).
+    pVideoPicture->hdrType =
+        (picture.hdrType != VIDEOCODEC_HDR_TYPE_NONE) ? ConvertHdrType(picture.hdrType) : m_hdrType;
+    pVideoPicture->hdrTypeAlt = ConvertHdrType(picture.hdrTypeAlt);
+    pVideoPicture->strDVELType = picture.strDVELType;
     pVideoPicture->iDuration = 0;
     pVideoPicture->iFrameType = 0;
     pVideoPicture->iRepeatPicture = 0;
