@@ -4058,7 +4058,9 @@ bool CVideoPlayer::OpenVideoStream(CDVDStreamInfo& hint, bool reset)
     float fFramesPerSecond = 0.0f;
     if (m_CurrentVideo.hint.fpsscale > 0.0f)
       fFramesPerSecond = static_cast<float>(m_CurrentVideo.hint.fpsrate) / static_cast<float>(m_CurrentVideo.hint.fpsscale);
-    m_Edl.ReadEditDecisionLists(m_item, fFramesPerSecond);
+    const std::chrono::milliseconds duration =
+        m_pDemuxer ? std::chrono::milliseconds(m_pDemuxer->GetStreamLength()) : 0ms;
+    m_Edl.ReadEditDecisionLists(m_item, fFramesPerSecond, duration);
     CServiceBroker::GetDataCacheCore().SetEditList(m_Edl.GetEditList());
     CServiceBroker::GetDataCacheCore().SetCuts(m_Edl.GetCutMarkers());
     CServiceBroker::GetDataCacheCore().SetSceneMarkers(m_Edl.GetSceneMarkers());

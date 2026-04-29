@@ -18,6 +18,9 @@
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
+#include <chrono>
+#include <cstdint>
+
 using namespace std::chrono_literals;
 using namespace EDL;
 
@@ -46,7 +49,9 @@ void CEdl::Clear()
   m_lastEditTime = std::nullopt;
 }
 
-bool CEdl::ReadEditDecisionLists(const CFileItem& fileItem, float fps)
+bool CEdl::ReadEditDecisionLists(const CFileItem& fileItem,
+                                 float fps,
+                                 std::chrono::milliseconds duration)
 {
   Clear();
 
@@ -58,7 +63,7 @@ bool CEdl::ReadEditDecisionLists(const CFileItem& fileItem, float fps)
     if (!parser->CanParse(fileItem))
       continue;
 
-    CEdlParserResult result = parser->Parse(fileItem, fps);
+    CEdlParserResult result = parser->Parse(fileItem, fps, duration);
     if (!result.IsEmpty())
       return ProcessParserResult(result);
   }

@@ -12,7 +12,7 @@
 #include "cores/Direction.h"
 #include "cores/EdlEdit.h"
 
-#include <cstdint>
+#include <chrono>
 #include <memory>
 #include <optional>
 #include <string>
@@ -25,7 +25,9 @@ class CEdl
 public:
   CEdl();
 
-  bool ReadEditDecisionLists(const CFileItem& fileItem, float fps);
+  bool ReadEditDecisionLists(const CFileItem& fileItem,
+                             float fps,
+                             std::chrono::milliseconds duration);
   void Clear();
 
   /*!
