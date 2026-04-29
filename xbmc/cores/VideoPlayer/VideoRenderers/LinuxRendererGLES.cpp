@@ -66,9 +66,6 @@ CLinuxRendererGLES::CLinuxRendererGLES()
     m_pixelStoreKey = GL_UNPACK_ROW_LENGTH_EXT;
   }
 #endif
-
-  if (m_renderSystem && m_renderSystem->IsExtSupported("GL_EXT_texture_norm16"))
-    m_hasTextureNorm16 = true;
 }
 
 CLinuxRendererGLES::~CLinuxRendererGLES()
@@ -1539,7 +1536,7 @@ bool CLinuxRendererGLES::CreateYV12Texture(int index)
   // Bit depth comes from libavutil's public pixdesc API, avoiding a parallel switch.
   const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(m_format);
   buf.m_srcTextureBits = desc ? desc->comp[0].depth : 8;
-  im.bpp = (m_hasTextureNorm16 && buf.m_srcTextureBits > 8) ? 2 : 1;
+  im.bpp = (buf.m_srcTextureBits > 8) ? 2 : 1;
 
   im.stride[0] = im.bpp * im.width;
   im.stride[1] = im.bpp * (im.width >> im.cshift_x);
