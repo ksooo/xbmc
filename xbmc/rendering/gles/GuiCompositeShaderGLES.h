@@ -10,12 +10,13 @@
 
 #include "guilib/Shader.h"
 
+#include <string>
 #include <vector>
 
 class CGuiCompositeShaderGLES : public Shaders::CGLSLShaderProgram
 {
 public:
-  CGuiCompositeShaderGLES();
+  explicit CGuiCompositeShaderGLES(const std::string& prefix);
   ~CGuiCompositeShaderGLES() override;
 
   void SetProjection(const GLfloat* proj) { m_proj = proj; }

@@ -40,10 +40,10 @@ float SRGBToLinear(float v)
 
 } // namespace
 
-CGuiCompositeShaderGLES::CGuiCompositeShaderGLES()
+CGuiCompositeShaderGLES::CGuiCompositeShaderGLES(const std::string& prefix)
 {
-  VertexShader()->LoadSource("gles_gui_composite.vert");
-  PixelShader()->LoadSource("gles_gui_composite.frag");
+  VertexShader()->LoadSource("gles_gui_composite.vert", prefix);
+  PixelShader()->LoadSource("gles_gui_composite.frag", prefix);
 }
 
 CGuiCompositeShaderGLES::~CGuiCompositeShaderGLES()

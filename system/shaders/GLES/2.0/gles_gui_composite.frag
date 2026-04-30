@@ -78,5 +78,12 @@ void main()
     );
   }
 
+  // Limited-range encoding at the BO write boundary. Canonical normalized
+  // ratios (bit-depth-agnostic in float space; BO write quantizes to the
+  // active surface bit depth).
+#ifdef KODI_LIMITED_RANGE
+  result = result * ((235.0 - 16.0) / 255.0) + (16.0 / 255.0);
+#endif
+
   gl_FragColor = vec4(result, gui.a);
 }
