@@ -107,47 +107,10 @@ StreamHdrType ConvertHdrType(const VIDEOCODEC_HDR_TYPE type)
 
 unsigned int GetColorBitsFromVideoFormat(const VIDEOCODEC_FORMAT videoFormat)
 {
-  switch (videoFormat)
-  {
-    case VIDEOCODEC_FORMAT_YV12:
-    case VIDEOCODEC_FORMAT_I420:
-    case VIDEOCODEC_FORMAT_YUV422P:
-    case VIDEOCODEC_FORMAT_YUV444P:
-      return 8;
-    case VIDEOCODEC_FORMAT_YUV420P9:
-    case VIDEOCODEC_FORMAT_YUV422P9:
-    case VIDEOCODEC_FORMAT_YUV444P9:
-      return 9;
-    case VIDEOCODEC_FORMAT_YUV420P10:
-    case VIDEOCODEC_FORMAT_YUV422P10:
-    case VIDEOCODEC_FORMAT_YUV444P10:
-      return 10;
-    case VIDEOCODEC_FORMAT_YUV420P12:
-    case VIDEOCODEC_FORMAT_YUV422P12:
-    case VIDEOCODEC_FORMAT_YUV444P12:
-      return 12;
-    case VIDEOCODEC_FORMAT_NV12:
-    case VIDEOCODEC_FORMAT_YUYV422:
-    case VIDEOCODEC_FORMAT_UYVY422:
-      return 8;
-    case VIDEOCODEC_FORMAT_P010:
-      return 10;
-    case VIDEOCODEC_FORMAT_XRGB8888:
-      return 8;
-    case VIDEOCODEC_FORMAT_XRGB2101010:
-      return 10;
-    case VIDEOCODEC_FORMAT_XRGB16161616:
-      return 12;
-    case VIDEOCODEC_FORMAT_XRGB16161616F:
-      return 16;
-    case VIDEOCODEC_FORMAT_UNKNOWN:
-      // Addon did not opt in to videoFormat; preserve pre-PR default.
-      return 8;
-    default:
-      CLog::LogF(LOGWARNING, "Video pixel format '{}' not valid, fallback to 8 bits color.",
-                 videoFormat);
-      return 8;
-  }
+  // Delegate format mapping to ConvertToPixelFormat; bit depth comes
+  // from libavutil's public pixdesc API, avoiding a parallel switch.
+  const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(ConvertToPixelFormat(videoFormat));
+  return desc ? desc->comp[0].depth : 8;
 }
 
 } // unnamed namespace
