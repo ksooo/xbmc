@@ -160,7 +160,7 @@ void CURL::Parse(std::string strURL1)
     sep = "?";
   else if (IsProtocolEqual(strProtocol2, "http") || IsProtocolEqual(strProtocol2, "https") ||
            IsProtocolEqual(strProtocol2, "plugin") || IsProtocolEqual(strProtocol2, "addons") ||
-           IsProtocolEqual(strProtocol2, "rtsp"))
+           IsProtocolEqual(strProtocol2, "rtsp") || IsProtocolEqual(strProtocol2, "nfs"))
     sep = "?;#|";
   else if (IsProtocolEqual(strProtocol2, "ftp") || IsProtocolEqual(strProtocol2, "ftps"))
     sep = "?;|";
