@@ -681,3 +681,33 @@ void CEdl::ParseEditsForEpisode(const CEdlParserResult& multiEpisodeResult,
   std::erase_if(m_vecSceneMarkers, [episodeStart, episodeEnd](const auto& marker)
                 { return marker <= episodeStart || marker >= episodeEnd; });
 }
+
+std::chrono::milliseconds CEdl::GetNextPlayableTime(std::chrono::milliseconds seekTime) const
+{
+  for (const EDL::Edit& edit : m_vecEdits)
+  {
+    // Edits are sorted - once seekTime is before this edit's start, no further edits apply
+    if (seekTime < edit.start)
+      break;
+
+    if (edit.action == Action::CUT && seekTime >= edit.start && seekTime < edit.end)
+      seekTime = edit.end;
+  }
+  return seekTime;
+}
+
+std::chrono::milliseconds CEdl::GetPrevPlayableTime(std::chrono::milliseconds seekTime) const
+{
+  for (int i = static_cast<int>(m_vecEdits.size()) - 1; i >= 0; --i)
+  {
+    const EDL::Edit& edit = m_vecEdits[i];
+
+    // Edits are sorted ascending - once seekTime is past this edit's end, all earlier ones are also behind
+    if (seekTime >= edit.end)
+      break;
+
+    if (edit.action == Action::CUT && seekTime >= edit.start && seekTime < edit.end)
+      seekTime = edit.start;
+  }
+  return seekTime;
+}

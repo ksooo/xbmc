@@ -156,6 +156,25 @@ public:
   std::optional<std::chrono::milliseconds> GetNextSceneMarker(Direction direction,
                                                               std::chrono::milliseconds clockTime);
 
+  /*!
+   * @brief Resolve the next playable time on the original media timeline.
+   * If the provided time lands inside an edit, or exactly on the start of an
+   * adjacent edit, advance to the end of that edit and keep walking until a
+   * playable point is reached.
+   * @param seekTime The candidate seek time on the original timeline
+   * @return The next playable time on the original timeline
+   */
+  std::chrono::milliseconds GetNextPlayableTime(std::chrono::milliseconds seekTime) const;
+
+  /*!
+   * @brief Resolve the previous playable time on the original media timeline.
+   * If the provided time lands inside an edit, retreat to the start of that edit
+   * and keep walking backward until a playable point is reached.
+   * @param seekTime The candidate seek time on the original timeline
+   * @return The previous playable time on the original timeline
+   */
+  std::chrono::milliseconds GetPrevPlayableTime(std::chrono::milliseconds seekTime) const;
+
 private:
   friend class TestParseEditsForEpisode;
 
