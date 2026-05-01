@@ -156,7 +156,7 @@ bool CEdl::AddEdit(const Edit& newEdit)
     return false;
   }
 
-  if (InEdit(edit.start) || InEdit(edit.end))
+  if (InEdit(edit.start) || InEdit(edit.end - 1ms))
   {
     CLog::LogF(LOGERROR, "Start or end is in an existing edit! [{} - {}], {}",
                StringUtils::MillisecondsToTimeString(edit.start),
@@ -332,7 +332,7 @@ std::chrono::milliseconds CEdl::GetTimeWithoutCuts(std::chrono::milliseconds see
       continue;
 
     // inside cut
-    if (seek >= edit.start && seek <= edit.end)
+    if (seek >= edit.start && seek < edit.end)
     {
       // decrease cut length by 1 ms to jump over the end boundary.
       cutTime += seek - edit.start - 1ms;
@@ -375,7 +375,7 @@ std::optional<std::unique_ptr<EDL::Edit>> CEdl::InEdit(std::chrono::milliseconds
     if (seekTime < m_vecEdits[i].start) // Early exit if not even up to the edit start time.
       return std::nullopt;
 
-    if (seekTime >= m_vecEdits[i].start && seekTime <= m_vecEdits[i].end) // Inside edit.
+    if (seekTime >= m_vecEdits[i].start && seekTime < m_vecEdits[i].end) // Inside edit.
       return std::make_unique<EDL::Edit>(m_vecEdits[i]);
   }
 
