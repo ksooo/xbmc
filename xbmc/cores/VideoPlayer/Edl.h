@@ -15,10 +15,10 @@
 #include <chrono>
 #include <memory>
 #include <optional>
-#include <string>
 #include <vector>
 
 class CFileItem;
+class TestParseEditsForEpisode;
 
 class CEdl
 {
@@ -157,6 +157,8 @@ public:
                                                               std::chrono::milliseconds clockTime);
 
 private:
+  friend class TestParseEditsForEpisode;
+
   // total cut time (edl cuts) in ms
   std::chrono::milliseconds m_totalCutTime;
   std::vector<EDL::Edit> m_vecEdits;
@@ -175,9 +177,13 @@ private:
   /*!
    * @brief Process the result from an EDL parser
    * @param result The parser result containing edits and scene markers
+   * @param multiEpisodeResult Optional multi-episode parser result.
+   * @param duration (Optional) The duration of the media item in ms (used for multi-episode parsing)
    * @return true if the result was processed successfully
    */
-  bool ProcessParserResult(const EDL::CEdlParserResult& result);
+  bool ProcessParserResult(const EDL::CEdlParserResult& result,
+                           const EDL::CEdlParserResult& multiEpisodeResult = {},
+                           std::chrono::milliseconds duration = std::chrono::milliseconds(0));
 
   /*!
    * @brief Adds an edit to the list of EDL edits
@@ -195,4 +201,12 @@ private:
    * (currently only for commercial breaks)
   */
   void AddSceneMarkersAtStartAndEndOfEdits();
+
+  /*!
+   * @brief Parse edits if this is a multi-episode file
+   * @param multiEpisodeResult The result from the multi-episode EDL parser, containing episode start/end edits
+   * @param duration The duration of the media item in ms (used for multi-episode parsing)
+  */
+  void ParseEditsForEpisode(const EDL::CEdlParserResult& multiEpisodeResult,
+                            std::chrono::milliseconds duration);
 };

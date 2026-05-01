@@ -9,6 +9,7 @@
 #include "Edl.h"
 
 #include "Edl/EdlParserFactory.h"
+#include "Edl/EdlParsers/MultipleEpisodeEdlParser.h"
 #include "FileItem.h"
 #include "ServiceBroker.h"
 #include "URL.h"
@@ -16,10 +17,15 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/SettingsComponent.h"
 #include "utils/StringUtils.h"
+#include "utils/URIUtils.h"
 #include "utils/log.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <ranges>
+#include <string>
+#include <vector>
 
 using namespace std::chrono_literals;
 using namespace EDL;
@@ -58,6 +64,13 @@ bool CEdl::ReadEditDecisionLists(const CFileItem& fileItem,
   CLog::LogF(LOGDEBUG, "Checking for edit decision lists (EDL) for: {}",
              CURL::GetRedacted(fileItem.GetDynPath()));
 
+  // Run the multi-episode parser independently so episode start/end can be
+  // applied to any edits found by the file-based parsers
+  CEdlParserResult multiEpisodeResult;
+  CMultipleEpisodeEdlParser multiEpParser;
+  if (URIUtils::IsLocalOrLAN(fileItem.GetDynPath()) && multiEpParser.CanParse(fileItem))
+    multiEpisodeResult = multiEpParser.Parse(fileItem, fps, duration);
+
   for (const auto& parser : CEdlParserFactory::GetEdlParsersForItem(fileItem))
   {
     if (!parser->CanParse(fileItem))
@@ -65,13 +78,19 @@ bool CEdl::ReadEditDecisionLists(const CFileItem& fileItem,
 
     CEdlParserResult result = parser->Parse(fileItem, fps, duration);
     if (!result.IsEmpty())
-      return ProcessParserResult(result);
+      return ProcessParserResult(result, multiEpisodeResult, duration);
   }
+
+  // No file-based EDL found; still apply multi-episode cuts alone if present
+  if (!multiEpisodeResult.IsEmpty())
+    return ProcessParserResult(multiEpisodeResult);
 
   return false;
 }
 
-bool CEdl::ProcessParserResult(const CEdlParserResult& result)
+bool CEdl::ProcessParserResult(const CEdlParserResult& result,
+                               const CEdlParserResult& multiEpisodeResult,
+                               std::chrono::milliseconds duration)
 {
   for (const auto& entry : result.GetSceneMarkers())
   {
@@ -102,6 +121,7 @@ bool CEdl::ProcessParserResult(const CEdlParserResult& result)
     }
   }
 
+  ParseEditsForEpisode(multiEpisodeResult, duration);
   MergeShortCommBreaks();
   AddSceneMarkersAtStartAndEndOfEdits();
   return true;
@@ -545,4 +565,119 @@ void CEdl::AddSceneMarkersAtStartAndEndOfEdits()
       AddSceneMarker(edit.end);
     }
   }
+}
+
+void CEdl::ParseEditsForEpisode(const CEdlParserResult& multiEpisodeResult,
+                                std::chrono::milliseconds duration)
+{
+  if (multiEpisodeResult.GetEdits().empty())
+    return;
+
+  const auto& multiEdits{multiEpisodeResult.GetEdits()};
+
+  // Derive the absolute episode window from the multi-episode cuts
+  const std::chrono::milliseconds episodeStart{
+      (!multiEdits.empty() && multiEdits.front().edit.start == 0ms) ? multiEdits.front().edit.end
+                                                                    : 0ms};
+  const std::chrono::milliseconds episodeEnd{
+      (!multiEdits.empty() && multiEdits.back().edit.start > 0ms)
+          ? multiEdits.back().edit.start
+          : (duration > 0ms ? duration : std::chrono::milliseconds::max())};
+
+  if (episodeStart >= episodeEnd)
+  {
+    CLog::LogF(LOGERROR,
+               "Invalid episode window derived from multi-episode cuts. Start: {}, End: {}",
+               StringUtils::MillisecondsToTimeString(episodeStart),
+               StringUtils::MillisecondsToTimeString(episodeEnd));
+    return;
+  }
+
+  // Erase file-based edits that fall entirely outside the episode window
+  std::erase_if(m_vecEdits,
+                [episodeStart, episodeEnd](const auto& edit)
+                {
+                  if (edit.end <= episodeStart || edit.start >= episodeEnd)
+                  {
+                    CLog::LogF(LOGDEBUG,
+                               "Removed EDL edit [{} - {} action {}] as it falls outside episode "
+                               "window [{} - {}]",
+                               StringUtils::MillisecondsToTimeString(edit.start),
+                               StringUtils::MillisecondsToTimeString(edit.end),
+                               ActionToString(edit.action),
+                               StringUtils::MillisecondsToTimeString(episodeStart),
+                               StringUtils::MillisecondsToTimeString(episodeEnd));
+                    return true;
+                  }
+                  return false;
+                });
+
+  // Clamp any edits that straddle an episode start/end
+  for (auto& edit : m_vecEdits)
+  {
+    const auto clampedStart{std::max(edit.start, episodeStart)};
+    const auto clampedEnd{std::min(edit.end, episodeEnd)};
+    if (clampedStart != edit.start || clampedEnd != edit.end)
+    {
+      CLog::LogF(LOGDEBUG, "Clamped EDL edit [{} - {} action {}] to episode window [{} - {}]",
+                 StringUtils::MillisecondsToTimeString(edit.start),
+                 StringUtils::MillisecondsToTimeString(edit.end), ActionToString(edit.action),
+                 StringUtils::MillisecondsToTimeString(episodeStart),
+                 StringUtils::MillisecondsToTimeString(episodeEnd));
+      edit.start = clampedStart;
+      edit.end = clampedEnd;
+    }
+  }
+
+  // Remove any edits that became invalid after clamping (start >= end)
+  std::erase_if(m_vecEdits, [](const auto& edit) { return edit.start >= edit.end; });
+
+  // m_totalCutTime is stale after erase_if removed CUT edits that were already
+  // accumulated by AddEdit()
+  m_totalCutTime = 0ms;
+  for (const auto& edit : m_vecEdits)
+  {
+    if (edit.action == Action::CUT)
+      m_totalCutTime += edit.end - edit.start;
+  }
+
+  // Add episode cuts
+  if (multiEdits.front().edit.start == 0ms)
+  {
+    if (!AddEdit(multiEdits.front().edit))
+    {
+      CLog::LogF(
+          LOGERROR,
+          "Failed to add multi-episode start cut [{} - {}]. Edit may overlap with existing edits.",
+          StringUtils::MillisecondsToTimeString(multiEdits.front().edit.start),
+          StringUtils::MillisecondsToTimeString(multiEdits.front().edit.end));
+    }
+    else
+    {
+      CLog::LogF(LOGDEBUG, "Added multi-episode start cut [{} - {}].",
+                 StringUtils::MillisecondsToTimeString(multiEdits.front().edit.start),
+                 StringUtils::MillisecondsToTimeString(multiEdits.front().edit.end));
+    }
+  }
+  if (multiEdits.back().edit.start > 0ms)
+  {
+    if (!AddEdit(multiEdits.back().edit))
+    {
+      CLog::LogF(
+          LOGERROR,
+          "Failed to add multi-episode end cut [{} - {}]. Edit may overlap with existing edits.",
+          StringUtils::MillisecondsToTimeString(multiEdits.back().edit.start),
+          StringUtils::MillisecondsToTimeString(multiEdits.back().edit.end));
+    }
+    else
+    {
+      CLog::LogF(LOGDEBUG, "Added multi-episode end cut [{} - {}].",
+                 StringUtils::MillisecondsToTimeString(multiEdits.back().edit.start),
+                 StringUtils::MillisecondsToTimeString(multiEdits.back().edit.end));
+    }
+  }
+
+  // Remove scene markers that fall outside the episode window
+  std::erase_if(m_vecSceneMarkers, [episodeStart, episodeEnd](const auto& marker)
+                { return marker <= episodeStart || marker >= episodeEnd; });
 }

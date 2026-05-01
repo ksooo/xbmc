@@ -2082,3 +2082,57 @@ TEST_P(GetFileOrFolderNameTester, TestValue)
 INSTANTIATE_TEST_SUITE_P(TestURIUtils,
                          GetFileOrFolderNameTester,
                          testing::ValuesIn(GetFileOrFolderNameTests));
+
+TEST_F(TestURIUtils, IsLocalOrLAN)
+{
+  // --- Local paths ---
+  // Bare path with no protocol = local HD
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN("/home/user/video.mkv"));
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN("C:\\Videos\\movie.mp4"));
+
+  // Explicit file:// protocol = local HD
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN("file:///home/user/video.mkv"));
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN("file://localhost/C:/Videos/movie.mp4"));
+
+  // resource:// is treated as local by IsHD
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN("resource://plugin.name/video.mkv"));
+
+  // stack:// of local files resolves to local
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN(
+      "stack:///home/user/video_part1.mkv , /home/user/video_part2.mkv"));
+
+  // --- LAN paths ---
+  // SMB shares on private subnet addresses are LAN
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN("smb://192.168.1.10/share/video.mkv"));
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN("smb://10.0.0.5/share/video.mkv"));
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN("smb://172.16.0.1/share/video.mkv"));
+
+  // UPnP is considered LAN by IsOnLAN
+  EXPECT_TRUE(URIUtils::IsLocalOrLAN("upnp://uuid/item"));
+
+  // --- Internet streams: always false regardless of IP ---
+  // HTTP/HTTPS - IsInternetStream takes priority even for private IPs
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("http://192.168.1.10/video.mkv"));
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("https://192.168.1.10/video.mkv"));
+
+  // Streaming protocols
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("rtmp://stream.example.com/live/video"));
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("rtsp://stream.example.com/video"));
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("mms://stream.example.com/video"));
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("rtp://239.0.0.1/video"));
+
+  // stack:// of internet streams is treated as an internet stream
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN(
+      "stack://http://stream.example.com/part1.mkv , http://stream.example.com/part2.mkv"));
+
+  // --- Remote/public internet paths ---
+  // Public internet SMB/NFS hosts are not LAN
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("smb://203.0.113.5/share/video.mkv"));
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("nfs://203.0.113.5/export/video.mkv"));
+
+  // Plugins are explicitly excluded by IsOnLAN
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("plugin://plugin.video.example/play/123"));
+
+  // videodb:// is a virtual path - not HD, not LAN, not an internet stream
+  EXPECT_FALSE(URIUtils::IsLocalOrLAN("videodb://tvshows/titles/1/1/42"));
+}
