@@ -20,6 +20,15 @@ extern "C"
 #endif /* __cplusplus */
 
   //============================================================================
+  /// @brief Changes since 2.1.0 (ABI 2.2.0)
+  /// - HDR signaling: VIDEOCODEC_HDR_TYPE enum and VIDEOCODEC_PICTURE
+  ///   hdrType / hdrTypeAlt / strDVELType fields
+  /// - More pixel formats: NV12, P010, YUYV422, UYVY422, YUV422P, YUV444P,
+  ///   packed XRGB8888 / XRGB2101010 / XRGB16161616 / XRGB16161616F
+  /// - Platform buffer API: VIDEOCODEC_PLATFORM_BUFFER,
+  ///   KODI_DRM_FRAME_DESCRIPTOR, get_frame_buffer_platform_handle
+
+  //============================================================================
   /// @ingroup cpp_kodi_addon_videocodec_Defs
   /// @brief Return values used by video decoder interface
   enum VIDEOCODEC_RETVAL

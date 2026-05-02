@@ -122,7 +122,7 @@ CAddonVideoCodec::CAddonVideoCodec(CProcessInfo& processInfo,
     IAddonInstanceHandler(
         ADDON_INSTANCE_VIDEOCODEC, addonInfo, ADDON::ADDON_INSTANCE_ID_UNUSED, parentInstance)
 {
-  m_ifc.videocodec = new AddonInstance_VideoCodec;
+  m_ifc.videocodec = new AddonInstance_VideoCodec();
   m_ifc.videocodec->props = new AddonProps_VideoCodec();
   m_ifc.videocodec->toAddon = new KodiToAddonFuncTable_VideoCodec();
   m_ifc.videocodec->toKodi = new AddonToKodiFuncTable_VideoCodec();
@@ -327,7 +327,7 @@ bool CAddonVideoCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
   m_formats[nformats++] = VIDEOCODEC_FORMAT_YV12;
   m_formats[nformats] = VIDEOCODEC_FORMAT_UNKNOWN;
 
-  VIDEOCODEC_INITDATA initData;
+  VIDEOCODEC_INITDATA initData{};
   if (!CopyToInitData(initData, hints))
     return false;
 
@@ -343,7 +343,7 @@ bool CAddonVideoCodec::Reconfigure(CDVDStreamInfo &hints)
   if (!m_ifc.videocodec->toAddon->reconfigure)
     return false;
 
-  VIDEOCODEC_INITDATA initData;
+  VIDEOCODEC_INITDATA initData{};
   if (!CopyToInitData(initData, hints))
     return false;
 
@@ -363,7 +363,7 @@ CDVDVideoCodec::VCReturn CAddonVideoCodec::GetPicture(VideoPicture* pVideoPictur
   if (!m_ifc.videocodec->toAddon->get_picture)
     return CDVDVideoCodec::VC_ERROR;
 
-  VIDEOCODEC_PICTURE picture;
+  VIDEOCODEC_PICTURE picture{};
   picture.flags = (m_codecFlags & DVD_CODEC_CTRL_DRAIN) ? VIDEOCODEC_PICTURE_FLAG_DRAIN
                                                         : VIDEOCODEC_PICTURE_FLAG_DROP;
 
@@ -493,21 +493,23 @@ void CAddonVideoCodec::Reset()
 
   CLog::Log(LOGDEBUG, "CAddonVideoCodec: Reset");
 
-  // Get the remaining pictures out of the external decoder
+  // Get the remaining pictures out of the external decoder. Re-zero the
+  // struct on every iteration so fields the addon does not write do not
+  // leak across drain calls.
   VIDEOCODEC_PICTURE picture;
-  picture.flags = VIDEOCODEC_PICTURE_FLAG_DRAIN;
-
   VIDEOCODEC_RETVAL ret;
-  while ((ret = m_ifc.videocodec->toAddon->get_picture(m_ifc.videocodec, &picture)) !=
-         VIDEOCODEC_RETVAL::VC_EOF)
+  do
   {
+    picture = {};
+    picture.flags = VIDEOCODEC_PICTURE_FLAG_DRAIN;
+    ret = m_ifc.videocodec->toAddon->get_picture(m_ifc.videocodec, &picture);
     if (ret == VIDEOCODEC_RETVAL::VC_PICTURE)
     {
       videoBuffer = static_cast<CVideoBuffer*>(picture.videoBufferHandle);
       if (videoBuffer)
         videoBuffer->Release();
     }
-  }
+  } while (ret != VIDEOCODEC_RETVAL::VC_EOF);
   if (m_ifc.videocodec->toAddon->reset)
     m_ifc.videocodec->toAddon->reset(m_ifc.videocodec);
 }

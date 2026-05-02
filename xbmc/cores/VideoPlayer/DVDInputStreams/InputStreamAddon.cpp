@@ -306,7 +306,7 @@ bool CInputStreamAddon::GetTimes(Times &times)
   if (!m_ifc.inputstream->toAddon->get_times)
     return false;
 
-  INPUTSTREAM_TIMES i_times;
+  INPUTSTREAM_TIMES i_times{};
 
   if (m_ifc.inputstream->toAddon->get_times(m_ifc.inputstream, &i_times))
   {
