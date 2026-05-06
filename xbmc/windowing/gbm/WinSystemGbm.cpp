@@ -102,8 +102,8 @@ const std::string CWinSystemGbm::GetName()
   auto gui_plane = m_DRM->GetGuiPlane();
   if (gui_plane == nullptr)
     return "gbm";
-  return "gbm (" + DRMHELPERS::FourCCToString(m_DRM->GetGuiPlane()->GetFormat()) + " " +
-         DRMHELPERS::ModifierToString(m_DRM->GetGuiPlane()->GetModifier()) + ")";
+  return "gbm (" + DRMHELPERS::FourCCToString(gui_plane->GetFormat()) + " " +
+         DRMHELPERS::ModifierToString(gui_plane->GetModifier()) + ")";
 }
 
 bool CWinSystemGbm::InitWindowSystem()
@@ -252,9 +252,22 @@ bool CWinSystemGbm::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool bl
   if (!std::dynamic_pointer_cast<CDRMAtomic>(m_DRM))
   {
     bo = m_GBM->GetDevice().GetSurface().LockFrontBuffer().Get();
+    if (!bo)
+    {
+      CLog::Log(LOGERROR, "CWinSystemGbm::{} - failed to lock front buffer", __FUNCTION__);
+      return false;
+    }
   }
 
   auto result = m_DRM->SetVideoMode(res, bo);
+
+  // For atomic DRM, SetVideoMode only queues the modeset (m_need_modeset).
+  // Commit it now so the kernel CRTC matches the new surface before any
+  // subsequent eglSwapBuffers; otherwise mesa logs a spurious
+  // EGL_BAD_SURFACE on the next frame while userspace surface and kernel
+  // CRTC are out of sync. Legacy DRM already committed in SetVideoMode.
+  if (result && std::dynamic_pointer_cast<CDRMAtomic>(m_DRM))
+    FlipPage(true, false, false);
 
   auto delay =
       std::chrono::milliseconds(CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
@@ -344,6 +357,21 @@ std::unique_ptr<CVideoSync> CWinSystemGbm::GetVideoSync(CVideoReferenceClock* cl
 std::vector<std::string> CWinSystemGbm::GetConnectedOutputs()
 {
   return m_DRM->GetConnectedConnectorNames();
+}
+
+bool CWinSystemGbm::SetVideoOutput(const VideoPicture* videoPicture)
+{
+  // Scaffolding: in this commit just flips m_gui_plane / m_video_plane role
+  // identity. Format and modifier are read from the current surface and pass
+  // through tautologically -- the current plane already supports them. A
+  // follow-on (#28030) will recreate the GBM surface at a different
+  // bit depth and pick a matching plane for real.
+  CDRMPlane* current = m_DRM->GetGuiPlane() ? m_DRM->GetGuiPlane() : m_DRM->GetVideoPlane();
+  if (!current)
+    return false;
+
+  return videoPicture ? m_DRM->FindVideoPlane(current->GetFormat(), current->GetModifier())
+                      : m_DRM->FindGuiPlane(current->GetFormat(), current->GetModifier());
 }
 
 bool CWinSystemGbm::SetHDR(const VideoPicture* videoPicture)

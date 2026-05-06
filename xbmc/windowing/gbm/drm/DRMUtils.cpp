@@ -158,25 +158,43 @@ bool CDRMUtils::FindPreferredMode()
 
 bool CDRMUtils::FindGuiPlane(uint32_t format, uint64_t modifier)
 {
-  const auto gui_format = std::ranges::find(m_gui_formats, format, &guiformat::drm);
+  const auto output_format = std::ranges::find(m_output_formats, format, &outputformat::drm);
 
-  if (gui_format == m_gui_formats.end())
+  if (output_format == m_output_formats.end())
   {
     CLog::LogF(LOGERROR, "Requested format {} for gui plane is not supported",
                DRMHELPERS::FourCCToString(format));
     return false;
   }
 
-  const PlaneType gui_type = HasQuirk(QUIRK_NEEDSPRIMARY) ? PLANE_TYPE_PRIMARY : PLANE_TYPE_ANY;
+  const PlaneType plane_type = HasQuirk(QUIRK_NEEDSPRIMARY) ? PLANE_TYPE_PRIMARY : PLANE_TYPE_ANY;
   const RESOLUTION_INFO res = GetCurrentMode();
 
   if (m_crtc && m_gui_plane &&
-      m_gui_plane->Check(res.iWidth, res.iHeight, format, modifier, m_crtc, gui_type))
+      m_gui_plane->Check(res.iWidth, res.iHeight, format, modifier, m_crtc, plane_type))
   {
     CLog::LogF(LOGINFO,
                "Using existing gui plane [{}x{}] id:{}, format:{}, modifier:{}, crtc id:{}",
                res.iWidth, res.iHeight, m_gui_plane->GetId(), DRMHELPERS::FourCCToString(format),
                DRMHELPERS::ModifierToString(modifier), m_crtc->GetId());
+    m_gui_plane->SetFormat(format);
+    m_gui_plane->SetModifier(modifier);
+    return true;
+  }
+
+  // This can only trigger during single-plane rendering, flip/flop between gui/video plane ownership
+  if (m_crtc && !m_gui_plane && m_video_plane &&
+      m_video_plane->Check(res.iWidth, res.iHeight, format, modifier, m_crtc, plane_type))
+  {
+    CLog::LogF(
+        LOGINFO,
+        "Adopting video plane as gui plane [{}x{}] id:{}, format:{}, modifier:{}, crtc id:{}",
+        res.iWidth, res.iHeight, m_video_plane->GetId(), DRMHELPERS::FourCCToString(format),
+        DRMHELPERS::ModifierToString(modifier), m_crtc->GetId());
+    m_gui_plane = m_video_plane;
+    m_gui_plane->SetFormat(format);
+    m_gui_plane->SetModifier(modifier);
+    m_video_plane = nullptr;
     return true;
   }
 
@@ -187,13 +205,14 @@ bool CDRMUtils::FindGuiPlane(uint32_t format, uint64_t modifier)
       if (m_video_plane && m_video_plane->GetId() == plane.get()->GetId())
         continue;
 
-      if (!plane->Check(res.iWidth, res.iHeight, format, modifier, crtc, gui_type))
+      if (!plane->Check(res.iWidth, res.iHeight, format, modifier, crtc, plane_type))
         continue;
 
       plane->SetFormat(format);
       plane->SetModifier(modifier);
       m_old_crtc = m_crtc;
       m_crtc = crtc;
+      m_video_plane = nullptr;
       m_gui_plane = plane.get();
       CLog::LogF(LOGINFO, "Using gui plane [{}x{}] id:{}, format:{}, modifier:{}, crtc id:{}",
                  res.iWidth, res.iHeight, m_gui_plane->GetId(), DRMHELPERS::FourCCToString(format),
@@ -208,6 +227,64 @@ bool CDRMUtils::FindGuiPlane(uint32_t format, uint64_t modifier)
   return false;
 }
 
+bool CDRMUtils::FindVideoPlane(uint32_t format, uint64_t modifier)
+{
+  const auto output_format = std::ranges::find(m_output_formats, format, &outputformat::drm);
+
+  if (output_format == m_output_formats.end())
+  {
+    CLog::LogF(LOGERROR, "Requested format {} for video plane is not supported",
+               DRMHELPERS::FourCCToString(format));
+    return false;
+  }
+
+  const PlaneType plane_type = HasQuirk(QUIRK_NEEDSPRIMARY) ? PLANE_TYPE_PRIMARY : PLANE_TYPE_ANY;
+  const RESOLUTION_INFO res = GetCurrentMode();
+
+  // Fast-path: the current gui plane already handles this format+modifier.
+  // Flip ownership from gui to video in place, no plane search needed.
+  if (m_crtc && m_gui_plane &&
+      m_gui_plane->Check(res.iWidth, res.iHeight, format, modifier, m_crtc, plane_type))
+  {
+    CLog::LogF(LOGINFO,
+               "Adopting gui plane as video plane [{}x{}] id:{}, format:{}, modifier:{}, "
+               "crtc id:{}",
+               res.iWidth, res.iHeight, m_gui_plane->GetId(), DRMHELPERS::FourCCToString(format),
+               DRMHELPERS::ModifierToString(modifier), m_crtc->GetId());
+    m_video_plane = m_gui_plane;
+    m_video_plane->SetFormat(format);
+    m_video_plane->SetModifier(modifier);
+    m_gui_plane = nullptr;
+    return true;
+  }
+
+  for (auto& crtc : m_encoder->GetPossibleCrtcs(m_crtcs, m_crtc))
+  {
+    for (auto& plane : m_planes)
+    {
+      if (!plane->Check(res.iWidth, res.iHeight, format, modifier, crtc, plane_type))
+        continue;
+
+      plane->SetFormat(format);
+      plane->SetModifier(modifier);
+      m_old_crtc = m_crtc;
+      m_crtc = crtc;
+      m_gui_plane = nullptr;
+      m_video_plane = plane.get();
+      CLog::LogF(LOGINFO, "Using video plane [{}x{}] id:{}, format:{}, modifier:{}, crtc id:{}",
+                 res.iWidth, res.iHeight, m_video_plane->GetId(),
+                 DRMHELPERS::FourCCToString(format), DRMHELPERS::ModifierToString(modifier),
+                 m_crtc->GetId());
+      return true;
+    }
+  }
+
+  CLog::LogF(LOGERROR, "Requested format {} and modifier {} for video plane is not supported",
+             DRMHELPERS::FourCCToString(format), DRMHELPERS::ModifierToString(modifier));
+
+  return false;
+}
+
 bool CDRMUtils::FindVideoAndGuiPlane(uint32_t format,
                                      uint64_t modifier,
                                      uint64_t width,
@@ -216,15 +293,15 @@ bool CDRMUtils::FindVideoAndGuiPlane(uint32_t format,
   if (m_gui_plane == nullptr)
     return false;
 
-  for (auto& gui_format : m_gui_formats)
+  for (auto& output_format : m_output_formats)
   {
-    if (gui_format.drm != m_gui_plane->GetFormat())
+    if (output_format.drm != m_gui_plane->GetFormat())
       continue;
-    if (!gui_format.alpha)
+    if (!output_format.alpha)
     {
       CLog::LogF(LOGWARNING,
                  "GUI plane format {} can not do alpha blending, "
-                 "video will be rendered through EGL import over the gui plane",
+                 "falling back to single-plane EGL import (GUI composited over video)",
                  DRMHELPERS::FourCCToString(m_gui_plane->GetFormat()));
       m_video_plane = nullptr;
       return false;
@@ -232,20 +309,24 @@ bool CDRMUtils::FindVideoAndGuiPlane(uint32_t format,
     break;
   }
 
-  const PlaneType gui_type = HasQuirk(QUIRK_NEEDSPRIMARY) ? PLANE_TYPE_PRIMARY : PLANE_TYPE_ANY;
+  const PlaneType plane_type = HasQuirk(QUIRK_NEEDSPRIMARY) ? PLANE_TYPE_PRIMARY : PLANE_TYPE_ANY;
   const RESOLUTION_INFO res = GetCurrentMode();
 
   // check if current config already satisfies
-  if (m_video_plane != nullptr &&
-      m_video_plane->Check(width, height, format, modifier, m_crtc, PLANE_TYPE_ANY))
-    return true;
+  if (m_video_plane != nullptr)
+  {
+    if (m_video_plane == m_gui_plane)
+      CLog::LogF(LOGERROR, "m_video_plane and m_gui_plane are identical");
+    else if (m_video_plane->Check(width, height, format, modifier, m_crtc, PLANE_TYPE_ANY))
+      return true;
+  }
 
   for (auto& crtc : m_encoder->GetPossibleCrtcs(m_crtcs, m_crtc))
   {
     for (auto& gui_plane : m_planes)
     {
       if (!gui_plane->Check(res.iWidth, res.iHeight, m_gui_plane->GetFormat(),
-                            m_gui_plane->GetModifier(), crtc, gui_type))
+                            m_gui_plane->GetModifier(), crtc, plane_type))
         continue;
 
       for (auto& video_plane : m_planes)
@@ -530,15 +611,15 @@ bool CDRMUtils::InitDrm()
     CLog::LogF(LOGINFO, "Successfully authorized drm magic");
   }
 
-  const PlaneType gui_type = HasQuirk(QUIRK_NEEDSPRIMARY) ? PLANE_TYPE_PRIMARY : PLANE_TYPE_ANY;
+  const PlaneType plane_type = HasQuirk(QUIRK_NEEDSPRIMARY) ? PLANE_TYPE_PRIMARY : PLANE_TYPE_ANY;
   const RESOLUTION_INFO res = GetCurrentMode();
 
   for (auto& plane : m_planes)
   {
-    for (auto& format : m_gui_formats)
+    for (auto& format : m_output_formats)
     {
       if (!plane->Check(res.iWidth, res.iHeight, format.drm, DRM_FORMAT_MOD_INVALID, nullptr,
-                        gui_type))
+                        plane_type))
         continue;
 
       if (!format.active)

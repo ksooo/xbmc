@@ -83,31 +83,45 @@ void CDRMAtomic::DrmAtomicCommit(int fb_id, int flags, bool rendered, bool video
       return;
   }
 
+  // In Direct-To-Plane (dual plane) mode m_gui_plane is the output
+  // (gui overlay on top of m_video_plane). In single-plane flip-flop mode
+  // FindVideoPlane has made m_video_plane the output and nulled m_gui_plane.
+  // Pick whichever is live.
+  CDRMPlane* outputPlane = m_gui_plane ? m_gui_plane : m_video_plane;
+
   if (rendered)
   {
-    AddProperty(m_gui_plane, "FB_ID", fb_id);
-    AddProperty(m_gui_plane, "CRTC_ID", m_crtc->GetCrtcId());
-    AddProperty(m_gui_plane, "SRC_X", 0);
-    AddProperty(m_gui_plane, "SRC_Y", 0);
-    AddProperty(m_gui_plane, "SRC_W", m_width << 16);
-    AddProperty(m_gui_plane, "SRC_H", m_height << 16);
-    AddProperty(m_gui_plane, "CRTC_X", 0);
-    AddProperty(m_gui_plane, "CRTC_Y", 0);
-    AddProperty(m_gui_plane, "CRTC_W", m_mode->hdisplay);
-    AddProperty(m_gui_plane, "CRTC_H", m_mode->vdisplay);
+    AddProperty(outputPlane, "FB_ID", fb_id);
+    AddProperty(outputPlane, "CRTC_ID", m_crtc->GetCrtcId());
+    AddProperty(outputPlane, "SRC_X", 0);
+    AddProperty(outputPlane, "SRC_Y", 0);
+    AddProperty(outputPlane, "SRC_W", m_width << 16);
+    AddProperty(outputPlane, "SRC_H", m_height << 16);
+    AddProperty(outputPlane, "CRTC_X", 0);
+    AddProperty(outputPlane, "CRTC_Y", 0);
+    AddProperty(outputPlane, "CRTC_W", m_mode->hdisplay);
+    AddProperty(outputPlane, "CRTC_H", m_mode->vdisplay);
 
     if (m_inFenceFd != -1)
     {
       AddProperty(m_crtc, "OUT_FENCE_PTR", reinterpret_cast<uint64_t>(&m_outFenceFd));
-      AddProperty(m_gui_plane, "IN_FENCE_FD", m_inFenceFd);
+      AddProperty(outputPlane, "IN_FENCE_FD", m_inFenceFd);
     }
   }
-  else if (videoLayer && !CServiceBroker::GetGUI()->GetWindowManager().HasVisibleControls() &&
+  else if (m_gui_plane && m_video_plane &&
+           !CServiceBroker::GetGUI()->GetWindowManager().HasVisibleControls() &&
            !HasQuirk(QUIRK_NEEDSPRIMARY))
   {
-    // disable gui plane when video layer is active and gui has no visible controls
-    //except when crtc requires at least one plane with primary type. in amdgpu such precondition
-    // is satisfied by selecting gui plane as primary, so disabling it will result commit failure
+    // Dual-plane (DRMPRIME D2P) mode with no visible GUI controls: disable
+    // the gui plane to save scanout bandwidth. The video plane is being
+    // populated by CVideoLayerBridgeDRMPRIME on the same atomic request.
+    // Skip when the crtc requires a primary plane (amdgpu QUIRK_NEEDSPRIMARY)
+    // -- in that case the gui plane is the primary and disabling it would
+    // fail the commit.
+    //
+    // Gating on (m_gui_plane && m_video_plane) precisely matches dual-plane
+    // mode and rejects single-plane flip-flop mode where m_gui_plane is null
+    // (FindVideoPlane has adopted it as the video output plane).
     AddProperty(m_gui_plane, "FB_ID", 0);
     AddProperty(m_gui_plane, "CRTC_ID", 0);
   }
@@ -129,7 +143,7 @@ void CDRMAtomic::DrmAtomicCommit(int fb_id, int flags, bool rendered, bool video
 
     // update the old atomic request with the new fb id to avoid tearing
     if (rendered)
-      AddProperty(m_gui_plane, "FB_ID", fb_id);
+      AddProperty(outputPlane, "FB_ID", fb_id);
   }
 
   ret = drmModeAtomicCommit(m_fd, m_req->Get(), flags, nullptr);
@@ -234,6 +248,8 @@ bool CDRMAtomic::SetActive(bool active)
 
 bool CDRMAtomic::AddProperty(CDRMObject* object, const char* name, uint64_t value)
 {
+  if (!object)
+    return false;
   return m_req->AddProperty(object, name, value);
 }
 
