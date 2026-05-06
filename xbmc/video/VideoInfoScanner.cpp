@@ -1027,9 +1027,19 @@ CVideoInfoScanner::~CVideoInfoScanner()
     int movieYear = -1; // hint that movie title was not found
     if (result == InfoType::TITLE)
     {
-      CVideoInfoTag* tag = pItem->GetVideoInfoTag();
-      movieTitle = tag->GetTitle();
-      movieYear = tag->GetYear(); // movieYear is expected to be >= 0
+      if (item.HasVideoInfoTag())
+      {
+        const CVideoInfoTag* tag = item.GetVideoInfoTag();
+        movieTitle = tag->GetTitle();
+        movieYear = tag->GetYear(); // movieYear is expected to be >= 0
+      }
+      else
+      {
+        CLog::Log(LOGWARNING,
+                  "VideoInfoScanner: RetrieveInfoForMovie/ReadInfoTag did not create a video info "
+                  "tag for {}",
+                  CURL::GetRedacted(item.GetDynPath()));
+      }
     }
 
     std::string identifierType;
