@@ -1595,8 +1595,13 @@ bool CLinuxRendererGLES::CreateYV12Texture(int index)
 
       if (im.bpp == 2)
       {
+#if defined(GL_R16_EXT)
         glTexImage2D(m_textureTarget, 0, GL_R16_EXT, plane.texwidth, plane.texheight, 0, GL_RED,
                      GL_UNSIGNED_SHORT, nullptr);
+#else
+        CLog::Log(LOGERROR, "GLES: GL_R16_EXT undefined; cannot render >8-bit YUV");
+        return false;
+#endif
       }
       else
       {
