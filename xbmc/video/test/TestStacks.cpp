@@ -173,6 +173,19 @@ TEST_F(TestStacks, TestMovieFilesStackFolderFilesDiscPart)
   }
 }
 
+TEST_F(TestStacks, TestMovieFilesStackFolderFilesDiscNPart)
+{
+  const std::string movieFolder =
+      XBMC_REF_FILE_PATH("xbmc/video/test/testdata/moviestack_discn_parts/Movie_(2001)");
+  CFileItemList items;
+  CDirectory::GetDirectory(movieFolder, items, "", DIR_FLAG_DEFAULTS);
+  // make sure items has 2 items (the two movie parts)
+  EXPECT_EQ(items.Size(), 2);
+  // attempt to stack -> should fail as parts are 'Disc n'
+  items.Stack();
+  EXPECT_EQ(items.Size(), 2);
+}
+
 TEST_F(TestStacks, TestConstructStackPath)
 {
   CFileItemList items;
