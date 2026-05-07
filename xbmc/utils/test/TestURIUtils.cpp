@@ -808,7 +808,7 @@ TEST_P(TestBasePath, GetBasePath)
 {
   const std::string& path{GetParam().path};
   const std::string& base{URIUtils::GetBasePath(path)};
-  EXPECT_EQ(base, GetParam().parent);
+  EXPECT_EQ(base, GetParam().base);
 }
 
 INSTANTIATE_TEST_SUITE_P(BasePath, TestBasePath, ValuesIn(Paths));
