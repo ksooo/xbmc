@@ -1945,7 +1945,7 @@ void CUtil::GetVideoBasePathAndFileName(const std::string& videoPath,
   else
   {
     videoFileName = URIUtils::ReplaceExtension(URIUtils::GetFileName(videoPath), "");
-    basePath = URIUtils::GetBasePath(videoPath);
+    basePath = URIUtils::GetParentPath(videoPath);
   }
 }
 
