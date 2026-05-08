@@ -21,6 +21,8 @@
 using namespace KODI;
 using namespace RETRO;
 
+// --- CRendererFactoryDMAOpenGL --------------------------------------------------
+
 std::string CRendererFactoryDMAOpenGL::RenderSystemName() const
 {
   return "DMAOpenGL";

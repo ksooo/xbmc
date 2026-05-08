@@ -118,12 +118,14 @@ private:
   unsigned int m_frameCountMod{0};
 
   GLuint m_shaderProgram{0};
+
   std::array<std::array<float, 3>, 4> m_VertexCoords;
   std::array<std::array<float, 3>, 4> m_colors;
   std::array<std::array<float, 2>, 4> m_TexCoords;
 
   UniformInputs m_uniformInputs;
   UniformFrameInputs m_uniformFrameInputs;
+
   std::vector<UniformFrameInputs> m_passesUniformFrameInputs;
 
   GLint m_FrameDirectionLoc{-1};

@@ -21,6 +21,8 @@
 using namespace KODI;
 using namespace RETRO;
 
+// --- CRendererFactoryDMAOpenGLES ------------------------------------------------
+
 std::string CRendererFactoryDMAOpenGLES::RenderSystemName() const
 {
   return "DMAOpenGLES";
