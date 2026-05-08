@@ -158,9 +158,9 @@ bool CShaderGL::Create(unsigned int passIdx,
   return true;
 }
 
-void CShaderGL::Render(IShaderTexture& source, IShaderTexture& target)
+void CShaderGL::Render(IShaderTexture& sourceTexture, IShaderTexture& targetTexture)
 {
-  auto& sourceGL = static_cast<CShaderTextureGL&>(source);
+  auto& sourceGL = static_cast<CShaderTextureGL&>(sourceTexture);
 
   glUseProgram(m_shaderProgram);
 

@@ -38,7 +38,7 @@ public:
               ShaderParameterMap shaderParameters,
               std::vector<std::shared_ptr<IShaderLut>> luts,
               unsigned int frameCountMod = 0) override;
-  void Render(IShaderTexture& source, IShaderTexture& target) override;
+  void Render(IShaderTexture& sourceTexture, IShaderTexture& targetTexture) override;
   void SetSizes(const float2& prevSize,
                 const float2& prevTextureSize,
                 const float2& nextSize) override;

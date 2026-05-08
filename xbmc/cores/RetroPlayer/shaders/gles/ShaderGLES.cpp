@@ -140,9 +140,9 @@ bool CShaderGLES::Create(unsigned int passIdx,
   return true;
 }
 
-void CShaderGLES::Render(IShaderTexture& source, IShaderTexture& target)
+void CShaderGLES::Render(IShaderTexture& sourceTexture, IShaderTexture& targetTexture)
 {
-  auto& sourceGL = static_cast<CShaderTextureGLES&>(source);
+  auto& sourceGL = static_cast<CShaderTextureGLES&>(sourceTexture);
 
   glUseProgram(m_shaderProgram);
 

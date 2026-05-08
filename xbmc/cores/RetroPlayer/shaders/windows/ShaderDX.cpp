@@ -77,23 +77,23 @@ bool CShaderDX::Create(unsigned int passIdx,
   return true;
 }
 
-void CShaderDX::Render(IShaderTexture& source, IShaderTexture& target)
+void CShaderDX::Render(IShaderTexture& sourceTexture, IShaderTexture& targetTexture)
 {
-  auto& sourceDX = static_cast<CShaderTextureDX&>(source);
+  auto& sourceDX = static_cast<CShaderTextureDX&>(sourceTexture);
 
   // Get source texture object
-  const CD3DTexture& sourceTexture = sourceDX.GetTexture();
+  const CD3DTexture& sourceD3dTexture = sourceDX.GetTexture();
 
   //! @todo Handle ref textures better
-  auto* targetDX = dynamic_cast<CShaderTextureDX*>(&target);
-  auto* targetDXRef = dynamic_cast<CShaderTextureDXRef*>(&target);
+  auto* targetDX = dynamic_cast<CShaderTextureDX*>(&targetTexture);
+  auto* targetDXRef = dynamic_cast<CShaderTextureDXRef*>(&targetTexture);
 
-  CD3DTexture& targetTexture =
+  CD3DTexture& targetD3dTexture =
       targetDX != nullptr ? targetDX->GetTexture() : targetDXRef->GetTexture();
 
   //! @todo Check for nullptr
-  SetShaderParameters(sourceTexture);
-  Execute({&targetTexture}, 4);
+  SetShaderParameters(sourceD3dTexture);
+  Execute({&targetD3dTexture}, 4);
 }
 
 void CShaderDX::SetSizes(const float2& prevSize,

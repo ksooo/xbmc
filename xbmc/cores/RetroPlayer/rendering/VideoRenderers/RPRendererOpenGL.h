@@ -71,8 +71,8 @@ protected:
 
   struct RenderBufferTextures
   {
-    std::shared_ptr<SHADER::CShaderTextureGLRef> source;
-    std::shared_ptr<SHADER::CShaderTextureGLRef> target;
+    std::shared_ptr<SHADER::CShaderTextureGLRef> sourceTexture;
+    std::shared_ptr<SHADER::CShaderTextureGLRef> targetTexture;
   };
 
   // Implementation of CRPBaseRenderer
