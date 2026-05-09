@@ -275,8 +275,8 @@ void CRPRendererOpenGLES::Render(uint8_t alpha)
     m_RBTexturesMap.emplace(renderBuffer, rbTextures);
   }
 
-  std::shared_ptr<SHADER::CShaderTextureGLESRef> source = rbTextures->source;
-  std::shared_ptr<SHADER::CShaderTextureGLESRef> target = rbTextures->target;
+  std::shared_ptr<SHADER::CShaderTextureGLESRef> sourceTexture = rbTextures->sourceTexture;
+  std::shared_ptr<SHADER::CShaderTextureGLESRef> targetTexture = rbTextures->targetTexture;
 
   Updateshaders();
 
@@ -287,14 +287,14 @@ void CRPRendererOpenGLES::Render(uint8_t alpha)
     if (m_shaderPreset->GetPasses()[0].filterType == SHADER::FilterType::LINEAR)
       filter = GL_LINEAR;
 
-    glBindTexture(m_textureTarget, source->GetTextureID());
+    glBindTexture(m_textureTarget, sourceTexture->GetTextureID());
     glTexParameteri(m_textureTarget, GL_TEXTURE_MAG_FILTER, filter);
     glTexParameteri(m_textureTarget, GL_TEXTURE_MIN_FILTER, filter);
     glTexParameteri(m_textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(m_textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     if (!m_shaderPreset->RenderUpdate(m_rotatedDestCoords, {m_fullDestWidth, m_fullDestHeight},
-                                      *source, *target))
+                                      *sourceTexture, *targetTexture))
     {
       m_bShadersNeedUpdate = false;
       m_bUseShaderPreset = false;
@@ -307,7 +307,7 @@ void CRPRendererOpenGLES::Render(uint8_t alpha)
     if (GetRenderSettings().VideoSettings().GetScalingMethod() == SCALINGMETHOD::LINEAR)
       filter = GL_LINEAR;
 
-    glBindTexture(m_textureTarget, source->GetTextureID());
+    glBindTexture(m_textureTarget, sourceTexture->GetTextureID());
     glTexParameteri(m_textureTarget, GL_TEXTURE_MAG_FILTER, filter);
     glTexParameteri(m_textureTarget, GL_TEXTURE_MIN_FILTER, filter);
     glTexParameteri(m_textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

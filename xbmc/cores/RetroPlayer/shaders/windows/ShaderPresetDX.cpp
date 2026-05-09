@@ -227,10 +227,12 @@ bool CShaderPresetDX::CreateSamplers()
   return true;
 }
 
-void CShaderPresetDX::RenderShader(IShader& shader, IShaderTexture& source, IShaderTexture& target)
+void CShaderPresetDX::RenderShader(IShader& shader,
+                                   IShaderTexture& sourceTexture,
+                                   IShaderTexture& targetTexture)
 {
-  const CRect newViewPort(0.f, 0.f, target.GetWidth(), target.GetHeight());
+  const CRect newViewPort(0.f, 0.f, targetTexture.GetWidth(), targetTexture.GetHeight());
   m_context.SetViewPort(newViewPort);
   m_context.SetScissors(newViewPort);
-  shader.Render(source, target);
+  shader.Render(sourceTexture, targetTexture);
 }

@@ -53,7 +53,7 @@ public:
    * \param source Source texture to pass to the shader as input
    * \param target Target texture to render the shader to
    */
-  virtual void Render(IShaderTexture& source, IShaderTexture& target) = 0;
+  virtual void Render(IShaderTexture& sourceTexture, IShaderTexture& targetTexture) = 0;
 
   /*!
    * \brief Sets the input and output sizes in pixels

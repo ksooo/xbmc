@@ -42,8 +42,8 @@ public:
   bool ReadPresetFile(const std::string& presetPath) override;
   bool RenderUpdate(const RETRO::ViewportCoordinates& dest,
                     const float2 fullDestSize,
-                    IShaderTexture& source,
-                    IShaderTexture& target) override;
+                    IShaderTexture& sourceTexture,
+                    IShaderTexture& targetTexture) override;
   void SetSpeed(double speed) override { m_speed = speed; }
   void SetVideoSize(unsigned int videoWidth, unsigned int videoHeight) override;
   bool SetShaderPreset(const std::string& shaderPresetPath) override;
@@ -57,13 +57,15 @@ protected:
   virtual bool CreateBuffers() = 0;
   virtual bool CreateShaderTextures() = 0;
   virtual bool CreateSamplers() = 0;
-  virtual void RenderShader(IShader& shader, IShaderTexture& source, IShaderTexture& target) = 0;
+  virtual void RenderShader(IShader& shader,
+                            IShaderTexture& sourceTexture,
+                            IShaderTexture& targetTexture) = 0;
 
   // Helper functions
   bool Update();
   void UpdateViewPort(CRect viewPort, const float2 fullDestSize);
   void UpdateMVPs();
-  void PrepareParameters(const RETRO::ViewportCoordinates& dest, IShaderTexture& source);
+  void PrepareParameters(const RETRO::ViewportCoordinates& dest, IShaderTexture& sourceTexture);
   void CalculateScaledSize(const KODI::SHADER::ShaderPass& pass,
                            const float2& prevSize,
                            float2& scaledSize);

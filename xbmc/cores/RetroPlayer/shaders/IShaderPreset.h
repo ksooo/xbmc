@@ -47,8 +47,8 @@ public:
    */
   virtual bool RenderUpdate(const RETRO::ViewportCoordinates& dest,
                             const float2 fullDestSize,
-                            IShaderTexture& source,
-                            IShaderTexture& target) = 0;
+                            IShaderTexture& sourceTexture,
+                            IShaderTexture& targetTexture) = 0;
 
   /*!
    * \brief Informs about the speed of playback

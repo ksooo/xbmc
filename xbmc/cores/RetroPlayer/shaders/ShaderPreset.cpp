@@ -41,8 +41,8 @@ bool CShaderPreset::ReadPresetFile(const std::string& presetPath)
 
 bool CShaderPreset::RenderUpdate(const RETRO::ViewportCoordinates& dest,
                                  const float2 fullDestSize,
-                                 IShaderTexture& source,
-                                 IShaderTexture& target)
+                                 IShaderTexture& sourceTexture,
+                                 IShaderTexture& targetTexture)
 {
   // Save the viewport
   CRect viewPort;
@@ -55,17 +55,17 @@ bool CShaderPreset::RenderUpdate(const RETRO::ViewportCoordinates& dest,
   if (!Update())
     return false;
 
-  PrepareParameters(dest, source);
+  PrepareParameters(dest, sourceTexture);
 
   // Apply all passes except the last one (which needs to be applied to the backbuffer)
-  IShaderTexture* sourceTexture = &source;
+  IShaderTexture* currentTexture = &sourceTexture;
   const auto numPasses = static_cast<unsigned int>(m_pShaders.size());
   for (unsigned shaderIdx = 0; shaderIdx + 1 < numPasses; ++shaderIdx)
   {
     IShader& shader = *m_pShaders[shaderIdx];
-    IShaderTexture& texture = *m_pShaderTextures[shaderIdx];
-    RenderShader(shader, *sourceTexture, texture);
-    sourceTexture = &texture;
+    IShaderTexture& nextTexture = *m_pShaderTextures[shaderIdx];
+    RenderShader(shader, *currentTexture, nextTexture);
+    currentTexture = &nextTexture;
   }
 
   // Restore our viewport
@@ -74,7 +74,7 @@ bool CShaderPreset::RenderUpdate(const RETRO::ViewportCoordinates& dest,
 
   // Apply the last pass and write to target (backbuffer) instead of the last texture
   IShader* lastShader = m_pShaders.back().get();
-  lastShader->Render(*sourceTexture, target);
+  lastShader->Render(*currentTexture, targetTexture);
 
   m_frameCount += static_cast<float>(m_speed);
   return true;
@@ -182,15 +182,15 @@ void CShaderPreset::UpdateMVPs()
 }
 
 void CShaderPreset::PrepareParameters(const RETRO::ViewportCoordinates& dest,
-                                      IShaderTexture& source)
+                                      IShaderTexture& sourceTexture)
 {
   // Prepare parameters for all shader passes
   const auto numPasses = static_cast<unsigned int>(m_pShaders.size());
   for (unsigned int shaderIdx = 0; shaderIdx < numPasses; ++shaderIdx)
   {
     std::unique_ptr<IShader>& videoShader = m_pShaders[shaderIdx];
-    videoShader->PrepareParameters(dest, m_fullDestSize, source, m_pShaderTextures, m_pShaders,
-                                   static_cast<uint64_t>(m_frameCount));
+    videoShader->PrepareParameters(dest, m_fullDestSize, sourceTexture, m_pShaderTextures,
+                                   m_pShaders, static_cast<uint64_t>(m_frameCount));
   }
 }
 

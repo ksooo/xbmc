@@ -140,9 +140,9 @@ bool CShaderGLES::Create(unsigned int passIdx,
   return true;
 }
 
-void CShaderGLES::Render(IShaderTexture& source, IShaderTexture& target)
+void CShaderGLES::Render(IShaderTexture& sourceTexture, IShaderTexture& targetTexture)
 {
-  auto& sourceGL = static_cast<CShaderTextureGLES&>(source);
+  auto& sourceGL = static_cast<CShaderTextureGLES&>(sourceTexture);
 
   glUseProgram(m_shaderProgram);
 
@@ -330,6 +330,7 @@ CShaderGLES::UniformInputs CShaderGLES::GetInputData(uint64_t frameCount) const
       // Time always flows forward
       1 // frame_direction
   };
+
   return input;
 }
 
@@ -341,6 +342,7 @@ CShaderGLES::UniformFrameInputs CShaderGLES::GetFrameInputData(GLuint texture) c
       texture, // texture
       m_passAlias // alias
   };
+
   return frameInput;
 }
 
@@ -397,7 +399,6 @@ void CShaderGLES::SetShaderParameters(CShaderTextureGLES& sourceTexture)
   for (unsigned int i = 0; i < m_passIdx + 1; ++i)
   {
     GLint paramLoc;
-
     std::string paramPass = i ? "Pass" + std::to_string(i) : "Orig";
     paramLoc = glGetUniformLocation(m_shaderProgram, (paramPass + "InputSize").c_str());
     glUniform2f(paramLoc, m_passesUniformFrameInputs[i].input_size.x,

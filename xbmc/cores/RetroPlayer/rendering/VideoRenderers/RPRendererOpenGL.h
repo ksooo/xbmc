@@ -33,7 +33,7 @@ class CRendererFactoryOpenGL : public IRendererFactory
 public:
   ~CRendererFactoryOpenGL() override = default;
 
-  // implementation of IRendererFactory
+  // Implementation of IRendererFactory
   std::string RenderSystemName() const override;
   CRPBaseRenderer* CreateRenderer(const CRenderSettings& settings,
                                   CRenderContext& context,
@@ -49,7 +49,7 @@ public:
                     std::shared_ptr<IRenderBufferPool> bufferPool);
   ~CRPRendererOpenGL() override;
 
-  // implementation of CRPBaseRenderer
+  // Implementation of CRPBaseRenderer
   bool Supports(RENDERFEATURE feature) const override;
   SCALINGMETHOD GetDefaultScalingMethod() const override { return SCALINGMETHOD::NEAREST; }
 
@@ -71,11 +71,11 @@ protected:
 
   struct RenderBufferTextures
   {
-    std::shared_ptr<SHADER::CShaderTextureGLRef> source;
-    std::shared_ptr<SHADER::CShaderTextureGLRef> target;
+    std::shared_ptr<SHADER::CShaderTextureGLRef> sourceTexture;
+    std::shared_ptr<SHADER::CShaderTextureGLRef> targetTexture;
   };
 
-  // implementation of CRPBaseRenderer
+  // Implementation of CRPBaseRenderer
   void RenderInternal(bool clear, uint8_t alpha) override;
   void FlushInternal() override;
 

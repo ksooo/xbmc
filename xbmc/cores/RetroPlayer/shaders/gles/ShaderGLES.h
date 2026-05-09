@@ -38,7 +38,7 @@ public:
               ShaderParameterMap shaderParameters,
               std::vector<std::shared_ptr<IShaderLut>> luts,
               unsigned int frameCountMod = 0) override;
-  void Render(IShaderTexture& source, IShaderTexture& target) override;
+  void Render(IShaderTexture& sourceTexture, IShaderTexture& targetTexture) override;
   void SetSizes(const float2& prevSize,
                 const float2& prevTextureSize,
                 const float2& nextSize) override;
@@ -118,12 +118,14 @@ private:
   unsigned int m_frameCountMod{0};
 
   GLuint m_shaderProgram{0};
+
   std::array<std::array<float, 3>, 4> m_VertexCoords;
   std::array<std::array<float, 3>, 4> m_colors;
   std::array<std::array<float, 2>, 4> m_TexCoords;
 
   UniformInputs m_uniformInputs;
   UniformFrameInputs m_uniformFrameInputs;
+
   std::vector<UniformFrameInputs> m_passesUniformFrameInputs;
 
   GLint m_FrameDirectionLoc{-1};

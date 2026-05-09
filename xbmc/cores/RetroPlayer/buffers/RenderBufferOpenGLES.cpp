@@ -14,14 +14,14 @@ using namespace KODI;
 using namespace RETRO;
 
 CRenderBufferOpenGLES::CRenderBufferOpenGLES(CRenderContext& context,
-                                             GLuint pixeltype,
-                                             GLuint internalformat,
-                                             GLuint pixelformat,
+                                             GLuint pixelType,
+                                             GLuint internalFormat,
+                                             GLuint pixelFormat,
                                              GLuint bpp)
   : m_context(context),
-    m_pixeltype(pixeltype),
-    m_internalformat(internalformat),
-    m_pixelformat(pixelformat),
+    m_pixelType(pixelType),
+    m_internalFormat(internalFormat),
+    m_pixelFormat(pixelFormat),
     m_bpp(bpp)
 {
 }
@@ -37,8 +37,8 @@ void CRenderBufferOpenGLES::CreateTexture()
 
   glBindTexture(m_textureTarget, m_textureId);
 
-  glTexImage2D(m_textureTarget, 0, m_internalformat, m_width, m_height, 0, m_pixelformat,
-               m_pixeltype, NULL);
+  glTexImage2D(m_textureTarget, 0, m_internalFormat, m_width, m_height, 0, m_pixelFormat,
+               m_pixelType, NULL);
 
   glTexParameteri(m_textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(m_textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -59,7 +59,7 @@ bool CRenderBufferOpenGLES::UploadTexture()
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, m_bpp);
 
-  if (m_bpp == 4 && m_pixelformat == GL_RGBA)
+  if (m_bpp == 4 && m_pixelFormat == GL_RGBA)
   {
     // XOR Swap RGBA -> BGRA
     // GLES 2.0 doesn't support strided textures (unless GL_UNPACK_ROW_LENGTH_EXT is supported)
@@ -68,14 +68,14 @@ bool CRenderBufferOpenGLES::UploadTexture()
     {
       for (int x = 0; x < stride; x += 4)
         std::swap(pixels[x], pixels[x + 2]);
-      glTexSubImage2D(m_textureTarget, 0, 0, y, m_width, 1, m_pixelformat, m_pixeltype, pixels);
+      glTexSubImage2D(m_textureTarget, 0, 0, y, m_width, 1, m_pixelFormat, m_pixelType, pixels);
     }
   }
   else if (m_context.IsExtSupported("GL_EXT_unpack_subimage"))
   {
 #ifdef GL_UNPACK_ROW_LENGTH_EXT
     glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, stride / m_bpp);
-    glTexSubImage2D(m_textureTarget, 0, 0, 0, m_width, m_height, m_pixelformat, m_pixeltype,
+    glTexSubImage2D(m_textureTarget, 0, 0, 0, m_width, m_height, m_pixelFormat, m_pixelType,
                     m_data.data());
     glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, 0);
 #endif
@@ -84,7 +84,7 @@ bool CRenderBufferOpenGLES::UploadTexture()
   {
     uint8_t* pixels = const_cast<uint8_t*>(m_data.data());
     for (unsigned int y = 0; y < m_height; ++y, pixels += stride)
-      glTexSubImage2D(m_textureTarget, 0, 0, y, m_width, 1, m_pixelformat, m_pixeltype, pixels);
+      glTexSubImage2D(m_textureTarget, 0, 0, y, m_width, 1, m_pixelFormat, m_pixelType, pixels);
   }
 
   glBindTexture(m_textureTarget, 0);

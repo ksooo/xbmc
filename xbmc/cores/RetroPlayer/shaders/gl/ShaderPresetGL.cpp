@@ -189,16 +189,18 @@ bool CShaderPresetGL::CreateShaderTextures()
   return true;
 }
 
-void CShaderPresetGL::RenderShader(IShader& shader, IShaderTexture& source, IShaderTexture& target)
+void CShaderPresetGL::RenderShader(IShader& shader,
+                                   IShaderTexture& sourceTexture,
+                                   IShaderTexture& targetTexture)
 {
-  if (static_cast<CShaderTextureGL&>(target).BindFBO())
+  if (static_cast<CShaderTextureGL&>(targetTexture).BindFBO())
   {
-    const CRect newViewPort(0.f, 0.f, target.GetWidth(), target.GetHeight());
+    const CRect newViewPort(0.f, 0.f, targetTexture.GetWidth(), targetTexture.GetHeight());
     glViewport((GLsizei)newViewPort.x1, (GLsizei)newViewPort.y1, (GLsizei)newViewPort.x2,
                (GLsizei)newViewPort.y2);
     glScissor((GLsizei)newViewPort.x1, (GLsizei)newViewPort.y1, (GLsizei)newViewPort.x2,
               (GLsizei)newViewPort.y2);
-    shader.Render(source, target);
-    static_cast<CShaderTextureGL&>(target).UnbindFBO();
+    shader.Render(sourceTexture, targetTexture);
+    static_cast<CShaderTextureGL&>(targetTexture).UnbindFBO();
   }
 }
