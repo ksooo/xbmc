@@ -209,7 +209,12 @@ bool CDVDInputStreamBluray::Open()
       URIUtils::RemoveSlashAtEnd(strPath);
     }
     root = strPath;
-    filename = URIUtils::GetFileName(m_item.GetPath());
+    // Use the resolved (dynamic) path so playlist selectors survive plugin
+    // resolution and library .strm playback. m_item.GetPath() returns the
+    // original library reference (e.g. .strm file) which has no .mpls
+    // extension, causing the MPLS title selector to be lost and playback
+    // to fall through to navigation/main-feature mode.
+    filename = URIUtils::GetFileName(m_item.GetDynPath());
   }
 
   // root should not have trailing slash
