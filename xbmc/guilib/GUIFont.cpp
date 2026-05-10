@@ -154,9 +154,7 @@ bool CGUIFont::UpdateScrollInfo(std::span<const character_t> text, CScrollInfo& 
 
   CScrollInfo old(scrollInfo);
 
-  // move along by the appropriate scroll amount
-  float scrollAmount =
-      fabs(scrollInfo.GetPixelsPerFrame() * winSystem->GetGfxContext().GetGUIScaleX());
+  float scrollAmount = fabs(scrollInfo.GetPixelsPerFrame());
 
   if (!scrollInfo.m_widthValid)
   {
