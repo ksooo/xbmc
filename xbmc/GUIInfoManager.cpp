@@ -7429,6 +7429,15 @@ constexpr std::array<InfoMap, 3> container_str = {{
 ///     <p><hr>
 ///     @skinning_v20 **[New Infolabel]** \link ListItem_HdrType `ListItem.HdrType`\endlink
 ///   }
+///   \table_row3{   <b>`ListItem.Property(HdrType.[n])`</b>,
+///                  \anchor ListItem_Property_HdrType
+///                  _string_,
+///     @return The HDR type of the numbered stream of the currently selected video or empty if not HDR. See \ref StreamHdrType for the list of possible values.
+///     @param n - the number of the videostream.
+///     <p><hr>
+///     @skinning_v20 **[New Infolabel]** \link ListItem_Property_HdrType `ListItem.Property(HdrType.[n])`\endlink
+///     <p>
+///   }
 ///   \table_row3{   <b>`ListItem.HdrDetail`</b>,
 ///                  \anchor ListItem_HdrDetail
 ///                  _string_,
