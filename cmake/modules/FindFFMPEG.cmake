@@ -457,14 +457,14 @@ else()
                                                    IMPORTED_LOCATION "${FFMPEG_${libname_UPPER}}"
                                                    INTERFACE_LINK_LIBRARIES "${${libname}_LDFLAGS}")
         endif()
-      endif()
 
-      if(FFMPEG_${libname_UPPER}_INCLUDE_DIRS)
-        set_target_properties(ffmpeg::${libname} PROPERTIES
-                                                 INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_${libname_UPPER}_INCLUDE_DIRS}")
-      else()
-        set_target_properties(ffmpeg::${libname} PROPERTIES
-                                                 INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_INCLUDE_DIRS}")
+        if(FFMPEG_${libname_UPPER}_INCLUDE_DIRS)
+          set_target_properties(ffmpeg::${libname} PROPERTIES
+                                                   INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_${libname_UPPER}_INCLUDE_DIRS}")
+        else()
+          set_target_properties(ffmpeg::${libname} PROPERTIES
+                                                   INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_INCLUDE_DIRS}")
+        endif()
       endif()
     endmacro()
 
