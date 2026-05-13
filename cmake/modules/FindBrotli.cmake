@@ -130,6 +130,10 @@ if(NOT TARGET LIBRARY::${CMAKE_FIND_PACKAGE_NAME})
     endif()
 
     ADD_MULTICONFIG_BUILDMACRO()
+
+    # Required for external searches. Not used internally
+    set(Brotli_FOUND ON CACHE BOOL "Brotli found")
+    mark_as_advanced(Brotli_FOUND)
   else()
     if(Brotli_FIND_REQUIRED)
       message(FATAL_ERROR "Brotli libraries were not found.")
