@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: KODI Main\n"
-"Report-Msgid-Bugs-To: translations@kodi.tv\n"
+"Report-Msgid-Bugs-To: https://github.com/xbmc/xbmc/issues/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: 2026-05-05 14:16+0000\n"
 "Last-Translator: Sveinn í Felli <sv1@fellsnet.is>\n"
@@ -221,9 +221,25 @@ msgctxt "#31046"
 msgid "Delete group"
 msgstr "Eyða hópi"
 
+msgctxt "#31047"
+msgid "Movie title format"
+msgstr ""
+
 msgctxt "#31048"
 msgid "Available"
 msgstr "Tiltækt"
+
+msgctxt "#31049"
+msgid "Original title"
+msgstr ""
+
+msgctxt "#31050"
+msgid "Original title (Localised title)"
+msgstr ""
+
+msgctxt "#31051"
+msgid "Localised title (Original title)"
+msgstr ""
 
 msgctxt "#31052"
 msgid "filtered"
