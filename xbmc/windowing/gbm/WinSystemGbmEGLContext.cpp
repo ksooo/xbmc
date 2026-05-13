@@ -197,8 +197,9 @@ bool CWinSystemGbmEGLContext::SetVideoOutput(const VideoPicture* videoPicture)
   // backends we additionally rebuild the GBM and EGL output surface
   // to a wider format (e.g. AR24 -> AR30) when the video needs more
   // than 8-bit through the single output plane, then chain to the
-  // base so plane-role tracking sees the new format. The EGL context
-  // survives across the rebuild -- no shader recompile, no modeset.
+  // base so plane-role tracking sees the new format. EGL context survives
+  // across the rebuild, no shader-rebuild. The next flip forces a modeset
+  // when needed (amdgpu), on other drivers it is a fast flip."
   const int bitDepth = videoPicture ? videoPicture->colorBits : 8;
 
   // Pick an EGL config matching the target bit depth, then rebuild
@@ -264,8 +265,9 @@ bool CWinSystemGbmEGLContext::SetVideoOutput(const VideoPicture* videoPicture)
 
     // The chained base reads the active plane's cached format and
     // modifier to decide which DRM plane satisfies the new role.
-    // After a surface rebuild that cache is stale, so refresh it
-    // from the just-locked GBM front buffer before chaining.
+    // After a surface rebuild that cache is stale, so refresh it from
+    // the new GBM front buffer (made available by TrySwapBuffers above)
+    // before chaining.
     if (auto* plane = m_DRM->GetGuiPlane() ? m_DRM->GetGuiPlane() : m_DRM->GetVideoPlane())
     {
       if (struct gbm_bo* bo = m_GBM->GetDevice().GetSurface().LockFrontBuffer().Get())
@@ -280,8 +282,9 @@ bool CWinSystemGbmEGLContext::SetVideoOutput(const VideoPicture* videoPicture)
     }
   }
 
-  // Dispatch to FindVideoPlane (videoPicture set) or FindGuiPlane
-  // using the now-current plane format.
+  // Chain to base for the fine-plane part: routes through FindVideoPlane
+  // if videoPicture set or FindGuiPlane if videoPicture was nullptr, using
+  // the now-current cached format/modifier on the active plane.
   return CWinSystemGbm::SetVideoOutput(videoPicture);
 }
 
