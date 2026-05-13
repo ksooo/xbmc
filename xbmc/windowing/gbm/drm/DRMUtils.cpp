@@ -297,7 +297,7 @@ bool CDRMUtils::FindVideoAndGuiPlane(uint32_t format,
   {
     if (output_format.drm != m_gui_plane->GetFormat())
       continue;
-    if (!output_format.alpha)
+    if (output_format.alpha < 8)
     {
       CLog::LogF(LOGWARNING,
                  "GUI plane format {} can not do alpha blending, "
