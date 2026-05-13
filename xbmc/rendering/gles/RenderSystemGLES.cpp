@@ -176,7 +176,8 @@ bool CRenderSystemGLES::BeginRender()
   if (!m_bRenderCreated)
     return false;
 
-  const bool useLimited = CServiceBroker::GetWinSystem()->UseLimitedColor();
+  const bool useLimited = CServiceBroker::GetWinSystem()->UseLimitedColor() &&
+                          !CServiceBroker::GetWinSystem()->IsHdrComposite();
   const bool usePQ = CServiceBroker::GetWinSystem()->GetGfxContext().IsTransferPQ();
 
   if (m_limitedColorRange != useLimited || m_transferPQ != usePQ)
@@ -445,7 +446,8 @@ void CRenderSystemGLES::SetDepthCulling(DepthCulling culling)
 void CRenderSystemGLES::InitialiseShaders()
 {
   std::string defines;
-  m_limitedColorRange = CServiceBroker::GetWinSystem()->UseLimitedColor();
+  m_limitedColorRange = CServiceBroker::GetWinSystem()->UseLimitedColor() &&
+                        !CServiceBroker::GetWinSystem()->IsHdrComposite();
   if (m_limitedColorRange)
   {
     defines += "#define KODI_LIMITED_RANGE 1\n";

@@ -247,6 +247,20 @@ public:
    */
   virtual bool SupportsVideoSuperResolution() { return false; }
 
+  // GUI compositing for HDR: render GUI to FBO, composite with tone mapping
+  // colorTransfer: AVCOL_TRC_SMPTE2084 (PQ) or AVCOL_TRC_ARIB_STD_B67 (HLG), 0 to disable
+  virtual bool SetGuiCompositing(int colorTransfer) { return false; }
+  virtual bool BeginGuiComposite() { return false; }
+  virtual void EndGuiComposite() {}
+  virtual void CompositeGui() {}
+
+  // True when GUI is rendered to an FBO that is then color-transformed
+  // (sRGB -> PQ/HLG) and composited against HDR video in that non-linear
+  // space. Alpha blending assumes linear light; blending non-linear values
+  // yields wrong transparency. When true, GUI draws select a compensated
+  // alpha blend (see CGUIFontTTFGLES::FirstBegin).
+  virtual bool IsHdrComposite() const { return false; }
+
   /*!
    * \brief Gets debug info from video renderer for use in "Debug Info OSD" (Alt + O)
    *
