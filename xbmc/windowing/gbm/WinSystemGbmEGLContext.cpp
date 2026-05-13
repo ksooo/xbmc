@@ -255,6 +255,13 @@ bool CWinSystemGbmEGLContext::SetVideoOutput(const VideoPicture* videoPicture)
 
     CLog::LogF(LOGINFO, "Output surface recreated at {}-bit", bitDepth);
 
+    // amdgpu disables the CRTC when RMFB removes a still-bound FB during
+    // surface destroy (primary-plane invariant). Force a full modeset on
+    // the next commit to re-enable the CRTC. No-op on drivers without the
+    // quirk (Intel, RPi, etc.) so they keep the fast-flip path.
+    if (m_DRM->HasQuirk(KODI::WINDOWING::GBM::QUIRK_NEEDSPRIMARY))
+      m_DRM->SetActive(true);
+
     // The chained base reads the active plane's cached format and
     // modifier to decide which DRM plane satisfies the new role.
     // After a surface rebuild that cache is stale, so refresh it
