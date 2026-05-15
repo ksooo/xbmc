@@ -793,7 +793,145 @@ const TestPathData Paths[] = {
      .base = "\\\\Server\\Movies\\"},
     {.path = "archive://%5c%5cServer%5cMovies%5cDisc%201%5cmovie.tar.gz/BDMV/index.bdmv",
      .parent = "\\\\Server\\Movies\\Disc 1\\",
-     .base = "\\\\Server\\Movies\\"}};
+     .base = "\\\\Server\\Movies\\"},
+    //
+    // Stack path tests
+    //
+    {.path = "stack:///home/user/movies/movie/movie_part1.mkv , "
+             "/home/user/movies/movie/movie_part2.mkv , "
+             "/home/user/movies/movie/movie_part3.mkv",
+     .parent = "/home/user/movies/movie/",
+     .base = "/home/user/movies/movie/"},
+    {.path = "stack:///home/user/movies/movie/disc 1/movie.mkv , "
+             "/home/user/movies/movie/disc 2/movie.mkv , "
+             "/home/user/movies/movie/disc 3/movie.mkv",
+     .parent = "/home/user/movies/movie/",
+     .base = "/home/user/movies/movie/"},
+    {.path = "stack://D:\\movies\\movie\\movie_part1.mkv , "
+             "D:\\movies\\movie\\movie_part2.mkv , "
+             "D:\\movies\\movie\\movie_part3.mkv",
+     .parent = "D:\\movies\\movie\\",
+     .base = "D:\\movies\\movie\\"},
+    {.path = "stack://D:\\movies\\movie\\disc 1\\movie.mkv , "
+             "D:\\movies\\movie\\disc 2\\movie.mkv , "
+             "D:\\movies\\movie\\disc 3\\movie.mkv",
+     .parent = "D:\\movies\\movie\\",
+     .base = "D:\\movies\\movie\\"},
+    {.path = "stack://\\\\Server\\Movies\\movie\\movie_part1.mkv , "
+             "\\\\Server\\Movies\\movie\\movie_part2.mkv , "
+             "\\\\Server\\Movies\\movie\\movie_part3.mkv",
+     .parent = "\\\\Server\\Movies\\movie\\",
+     .base = "\\\\Server\\Movies\\movie\\"},
+    {.path = "stack://\\\\Server\\Movies\\movie\\disc 1\\movie.mkv , "
+             "\\\\Server\\Movies\\movie\\disc 2\\movie.mkv , "
+             "\\\\Server\\Movies\\movie\\disc 3\\movie.mkv",
+     .parent = "\\\\Server\\Movies\\movie\\",
+     .base = "\\\\Server\\Movies\\movie\\"},
+    {.path = "stack://smb://server/movies/movie/movie_part1.mkv , "
+             "smb://server/movies/movie/movie_part2.mkv , "
+             "smb://server/movies/movie/movie_part3.mkv",
+     .parent = "smb://server/movies/movie/",
+     .base = "smb://server/movies/movie/"},
+    {.path = "stack://smb://server/movies/movie/disc 1/movie.mkv , "
+             "smb://server/movies/movie/disc 2/movie.mkv , "
+             "smb://server/movies/movie/disc 3/movie.mkv",
+     .parent = "smb://server/movies/movie/",
+     .base = "smb://server/movies/movie/"},
+    // Stack path tests with disc BDMV structures
+    {.path = "stack:///home/user/movies/movie/disc 1/BDMV/index.bdmv , "
+             "/home/user/movies/movie/disc 2/BDMV/index.bdmv , "
+             "/home/user/movies/movie/disc 3/BDMV/index.bdmv",
+     .parent = "/home/user/movies/movie/",
+     .base = "/home/user/movies/movie/"},
+    {.path = "stack://D:\\movies\\movie\\disc 1\\BDMV\\index.bdmv , "
+             "D:\\movies\\movie\\disc 2\\BDMV\\index.bdmv , "
+             "D:\\movies\\movie\\disc 3\\BDMV\\index.bdmv",
+     .parent = "D:\\movies\\movie\\",
+     .base = "D:\\movies\\movie\\"},
+    {.path = "stack://\\\\Server\\Movies\\movie\\disc 1\\BDMV\\index.bdmv , "
+             "\\\\Server\\Movies\\movie\\disc 2\\BDMV\\index.bdmv , "
+             "\\\\Server\\Movies\\movie\\disc 3\\BDMV\\index.bdmv",
+     .parent = "\\\\Server\\Movies\\movie\\",
+     .base = "\\\\Server\\Movies\\movie\\"},
+    {.path = "stack://smb://server/movies/movie/disc 1/BDMV/index.bdmv , "
+             "smb://server/movies/movie/disc 2/BDMV/index.bdmv , "
+             "smb://server/movies/movie/disc 3/BDMV/index.bdmv",
+     .parent = "smb://server/movies/movie/",
+     .base = "smb://server/movies/movie/"},
+    // Stack path tests with disc VIDEO_TS structures
+    {.path = "stack:///home/user/movies/movie/disc 1/video_ts/VIDEO_TS.IFO , "
+             "/home/user/movies/movie/disc 2/video_ts/VIDEO_TS.IFO , "
+             "/home/user/movies/movie/disc 3/video_ts/VIDEO_TS.IFO",
+     .parent = "/home/user/movies/movie/",
+     .base = "/home/user/movies/movie/"},
+    {.path = "stack://D:\\movies\\movie\\disc 1\\video_ts\\VIDEO_TS.IFO , "
+             "D:\\movies\\movie\\disc 2\\video_ts\\VIDEO_TS.IFO , "
+             "D:\\movies\\movie\\disc 3\\video_ts\\VIDEO_TS.IFO",
+     .parent = "D:\\movies\\movie\\",
+     .base = "D:\\movies\\movie\\"},
+    {.path = "stack://\\\\Server\\Movies\\movie\\disc 1\\video_ts\\VIDEO_TS.IFO , "
+             "\\\\Server\\Movies\\movie\\disc 2\\video_ts\\VIDEO_TS.IFO , "
+             "\\\\Server\\Movies\\movie\\disc 3\\video_ts\\VIDEO_TS.IFO",
+     .parent = "\\\\Server\\Movies\\movie\\",
+     .base = "\\\\Server\\Movies\\movie\\"},
+    {.path = "stack://smb://server/movies/movie/disc 1/video_ts/VIDEO_TS.IFO , "
+             "smb://server/movies/movie/disc 2/video_ts/VIDEO_TS.IFO , "
+             "smb://server/movies/movie/disc 3/video_ts/VIDEO_TS.IFO",
+     .parent = "smb://server/movies/movie/",
+     .base = "smb://server/movies/movie/"},
+    // Stack path tests with mixed folders
+    {.path = "stack://smb://server/movies/movie/disc 1/BDMV/index.bdmv , "
+             "smb://server/movies/movie/disc 2/VIDEO_TS/VIDEO_TS.IFO , "
+             "smb://server/movies/movie/disc 3/part a/movie.mkv , "
+             "smb://server/movies/movie/disc 3/part b/movie.mkv",
+     .parent = "smb://server/movies/movie/",
+     .base = "smb://server/movies/movie/"},
+    //
+    // The following tests are only specifically supported in GetParentPath()
+    //
+    // plugin:// path tests
+    // GetParentPath has dedicated handling that jumps to addon root in one step;
+    // GetBasePath falls through to GetDirectory which strips only the last component.
+    {.path = "plugin://addon.id/path/to/file.strm",
+     .parent = "plugin://addon.id/",
+     .base = "plugin://addon.id/path/to/"},
+    {.path = "plugin://addon.id/path/to/",
+     .parent = "plugin://addon.id/",
+     .base = "plugin://addon.id/path/to/"},
+    {.path = "plugin://addon.id/", .parent = "plugin://", .base = "plugin://addon.id/"},
+    // options stripped by GetParentPath; GetDirectory (in GetBasePath) ignores | and stops at last /
+    {.path = "plugin://addon.id/path/file.strm|option=val",
+     .parent = "plugin://addon.id/|option=val",
+     .base = "plugin://addon.id/path/|option=val"},
+    // single content_type option with empty filename → GetParentPath clears host too
+    {.path = "plugin://addon.id/?content_type=video",
+     .parent = "plugin://",
+     .base = "plugin://addon.id/"},
+    // special:// path tests
+    // For files: both agree (normal directory stripping).
+    // For directories: GetParentPath strips one level; GetBasePath returns the path unchanged.
+    {.path = "special://home/movies/movie.avi",
+     .parent = "special://home/movies/",
+     .base = "special://home/movies/"},
+    {.path = "special://home/subfolder/movies/",
+     .parent = "special://home/subfolder/",
+     .base = "special://home/subfolder/movies/"},
+    {.path = "special://home/movies/",
+     .parent = "special://home/",
+     .base = "special://home/movies/"},
+    // multipath:// path tests
+    // GetParentPath recurses into GetParentPath(GetFirstPath(...));
+    // GetBasePath falls through to GetDirectory of the raw multipath URL (returns itself).
+    {.path = "multipath://%2fpath1%2f/%2fpath2%2f/",
+     .parent = "/",
+     .base = "multipath://%2fpath1%2f/%2fpath2%2f/"},
+    {.path = "multipath://smb%3a%2f%2fserver%2fmovies%2f/smb%3a%2f%2fserver2%2fmovies%2f/",
+     .parent = "smb://server/",
+     .base = "multipath://smb%3a%2f%2fserver%2fmovies%2f/smb%3a%2f%2fserver2%2fmovies%2f/"},
+    // Bare hostname (no filename) tests
+    // GetParentPath clears hostname to reach protocol root;
+    // GetBasePath falls through to GetDirectory which keeps the trailing-slash path.
+    {.path = "ftp://server/", .parent = "ftp://", .base = "ftp://server/"}};
 
 TEST_P(TestParentPath, GetParentPath)
 {
@@ -808,7 +946,7 @@ TEST_P(TestBasePath, GetBasePath)
 {
   const std::string& path{GetParam().path};
   const std::string& base{URIUtils::GetBasePath(path)};
-  EXPECT_EQ(base, GetParam().parent);
+  EXPECT_EQ(base, GetParam().base);
 }
 
 INSTANTIATE_TEST_SUITE_P(BasePath, TestBasePath, ValuesIn(Paths));
