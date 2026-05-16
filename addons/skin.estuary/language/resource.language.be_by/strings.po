@@ -792,6 +792,21 @@ msgctxt "#31612"
 msgid "channels"
 msgstr ""
 
+#. Label to show the subtitle decoder name
+msgctxt "#31613"
+msgid "Subtitle decoder"
+msgstr ""
+
+#. Label to show the subtitle codec name
+msgctxt "#31614"
+msgid "Subtitle codec"
+msgstr ""
+
+#. Label to show the subtitle language
+msgctxt "#31615"
+msgid "Subtitle language"
+msgstr ""
+
 #~ msgctxt "#31025"
 #~ msgid "No favourites found. You can add any item from media views to this list by using the context menu."
 #~ msgstr "Спіс улюбёнага пусты. Вы можаце дадаць сюды медыяфайлы праз кантэкстнае меню."
