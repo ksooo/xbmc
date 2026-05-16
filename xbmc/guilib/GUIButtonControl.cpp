@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005-2018 Team Kodi
+ *  Copyright (C) 2005-2026 Team Kodi
  *  This file is part of Kodi - https://kodi.tv
  *
  *  SPDX-License-Identifier: GPL-2.0-or-later
@@ -13,6 +13,7 @@
 #include "input/actions/Action.h"
 #include "input/actions/ActionIDs.h"
 #include "input/mouse/MouseEvent.h"
+#include "utils/log.h"
 #include "windowing/WinSystem.h"
 
 using namespace KODI;
@@ -402,9 +403,18 @@ void CGUIButtonControl::PythonSetDisabledColor(KODI::UTILS::COLOR::Color disable
 void CGUIButtonControl::OnClick()
 {
   // Save values, as the click message may deactivate the window
-  int controlID = GetID();
-  int parentID = GetParentID();
-  CGUIAction clickActions = m_clickActions;
+  const int controlID = GetID();
+  const int parentID = GetParentID();
+  const CGUIAction clickActions = m_clickActions;
+
+  if (IsDisabled())
+  {
+    CLog::Log(LOGWARNING,
+              "Button control: Blocked an attempt to click a disabled button "
+              "(control {} window {})",
+              controlID, parentID);
+    return;
+  }
 
   // button selected, send a message
   CGUIMessage msg(GUI_MSG_CLICKED, controlID, parentID, 0);
