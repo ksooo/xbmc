@@ -11,24 +11,32 @@
 #include "cores/VideoPlayer/Edl/EdlParser.h"
 
 #include <chrono>
+#include <map>
+
+struct EpisodeInformation;
+using EpisodeFileMap = std::multimap<std::string, EpisodeInformation, std::less<>>;
 
 namespace EDL
 {
 
 /*!
- * @brief Parser for PVR EDL data
+ * @brief Parser for multi-episode files.
  *
- * Retrieves edit decision list data from PVR recordings and EPG items.
+ * Uses episode bookmarks from the video database to create EDL cuts for the episode being played.
  * This parser implements IEdlParser directly (not CEdlFileParserBase)
  * as it doesn't read from files.
  */
-class CPvrEdlParser : public IEdlParser
+class CMultipleEpisodeEdlParser : public IEdlParser
 {
 public:
   bool CanParse(const CFileItem& item) const override;
   CEdlParserResult Parse(const CFileItem& item,
                          float fps,
                          std::chrono::milliseconds duration) override;
+  static CEdlParserResult Process(const CFileItem& item,
+                                  float fps,
+                                  std::chrono::milliseconds duration,
+                                  const EpisodeFileMap& fileMap);
 };
 
 } // namespace EDL

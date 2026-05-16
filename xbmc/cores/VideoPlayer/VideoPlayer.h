@@ -470,6 +470,7 @@ protected:
   void HandlePlaySpeed();
   bool IsInMenuInternal() const;
   void SynchronizeDemuxer();
+  void QueueAutoSceneSkip(std::chrono::milliseconds seekTime);
   void CheckAutoSceneSkip();
   bool CheckContinuity(CCurrentStream& current, DemuxPacket* pPacket);
   bool CheckSceneSkip(const CCurrentStream& current);
