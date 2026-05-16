@@ -737,10 +737,12 @@
 		<value>$INFO[ListItem.Icon]</value>
 	</variable>
 	<variable name="ActiveVideoPlayerSubtitleLanguage">
-		<value condition="!VideoPlayer.HasSubtitles">$LOCALIZE[36623]</value>
-		<value condition="VideoPlayer.HasSubtitles + !VideoPlayer.SubtitlesEnabled">$LOCALIZE[1223]</value>
-		<value condition="VideoPlayer.HasSubtitles + VideoPlayer.SubtitlesEnabled + !String.IsEmpty(VideoPlayer.SubtitlesLanguage)">$INFO[VideoPlayer.SubtitlesLanguage]</value>
-		<value condition="VideoPlayer.HasSubtitles + VideoPlayer.SubtitlesEnabled + [String.IsEmpty(VideoPlayer.SubtitlesLanguage) | String.IsEqual(ListItem.AudioLanguage,und)]">$LOCALIZE[13205]</value>
+		<value condition="Window.IsActive(Custom_1101_SettingsDialog.xml) + !VideoPlayer.HasSubtitles">$LOCALIZE[36623]</value>
+		<value condition="Window.IsActive(Custom_1101_SettingsDialog.xml) + VideoPlayer.HasSubtitles + !VideoPlayer.SubtitlesEnabled">$LOCALIZE[1223]</value>
+        <value condition="Window.IsActive(Custom_1101_SettingsDialog.xml) + VideoPlayer.HasSubtitles + VideoPlayer.SubtitlesEnabled + [String.IsEmpty(VideoPlayer.SubtitlesLanguage) | String.IsEqual(VideoPlayer.SubtitlesLanguage,und)]">$LOCALIZE[13205]$VAR[SubtitleCodecVar, | ]</value>
+		<value condition="Window.IsActive(Custom_1101_SettingsDialog.xml) + VideoPlayer.HasSubtitles + VideoPlayer.SubtitlesEnabled + !String.IsEmpty(VideoPlayer.SubtitlesLanguage)">$INFO[VideoPlayer.SubtitlesLanguage]$VAR[SubtitleCodecVar, | ]</value>
+        <value condition="Window.IsActive(fullscreenvideo) + [String.IsEmpty(VideoPlayer.SubtitlesLanguage) | String.IsEqual(VideoPlayer.SubtitlesLanguage,und)] + !String.IsEmpty(VideoPlayer.SubtitleCodec)">$VAR[SubtitleCodecVar]</value>
+		<value condition="Window.IsActive(fullscreenvideo) + !String.IsEmpty(VideoPlayer.SubtitlesLanguage)">$INFO[VideoPlayer.SubtitlesLanguage]$VAR[SubtitleCodecVar, &#8226; ]</value>
 	</variable>
 	<variable name="ActiveVideoPlayerAudioLanguage">
 		<value condition="!String.IsEmpty(VideoPlayer.AudioLanguage)">$INFO[VideoPlayer.AudioLanguage]</value>
@@ -932,6 +934,27 @@
 		<value condition="Container.Content(albums) | Window.IsActive(10502)">$INFO[ListItem.MusicChannels(DefaultLayout)]</value>
 		<value>$INFO[ListItem.AudioChannels(DefaultLayout)]</value>
 	</variable>
+	<variable name="SubtitleCodecVar">
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, ass)">ASS</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, dvb_subtitle)">DVB-SUB</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, dvb_teletext)">DVB-Text</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, dvd_subtitle)">VobSub</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, hdmv_pgs_subtitle)">PGS</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, microdvd)">MicroDVD</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, mov_text)">Timed Text</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, mpl2)">MPL2</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, realtext)">RealText</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, sami)">SAMI</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, srt)">SubRip</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, ssa)">SSA</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, subrip)">Subrip</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, text)">Text</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, ttml)">TTML</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, vplayer)">VPlayer</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, webvtt)">WebVTT</value>
+		<value condition="Window.IsActive(fullscreenvideo) + String.IsEqual(VideoPlayer.SubtitleCodec, xsub)">XSUB</value>
+		<value condition="Window.IsActive(fullscreenvideo)">$INFO[VideoPlayer.SubtitleCodec]</value>
+	</variable>
 	<variable name="StreamCodecVar">
 		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),av1)">AV1</value>
 		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),avc1)">AVC-1</value>
@@ -999,6 +1022,24 @@
 		<value condition="Window.IsVisible(dialogselectaudio) + String.IsEqual(ListItem.Property(stream.codec),ac3)">Dolby Digital</value>
 		<value condition="Window.IsVisible(dialogselectaudio) + String.IsEqual(ListItem.Property(stream.codec),truehd_atmos)">Dolby TrueHD / Atmos</value>
 		<value condition="Window.IsVisible(dialogselectaudio) + String.IsEqual(ListItem.Property(stream.codec),truehd)">Dolby TrueHD</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),ass)">ASS</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),dvb_subtitle)">DVB-SUB</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),dvb_teletext)">DVB-Text</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),dvd_subtitle)">VobSub</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),hdmv_pgs_subtitle)">PGS</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),microdvd)">MicroDVD</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),mov_text)">Timed Text</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),mpl2)">MPL2</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),realtext)">RealText</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),sami)">SAMI</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),srt)">SubRip</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),ssa)">SSA</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),subrip)">Subrip</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),text)">Text</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),ttml)">TTML</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),vplayer)">VPlayer</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),webvtt)">WebVTT</value>
+		<value condition="Window.IsVisible(dialogselectvideo) + String.IsEqual(ListItem.Property(stream.codec),xsub)">XSUB</value>
 		<value>$INFO[ListItem.Property(stream.codec)]</value>
 	</variable>
 	<variable name="StreamChannelsVar">
@@ -1013,6 +1054,11 @@
 	</variable>
 	<variable name="StreamBitrateVar">
 		<value condition="!String.IsEqual(ListItem.Property(stream.bitrate),0)">$INFO[ListItem.Property(stream.bitrate)]</value>
+	</variable>
+	<variable name="SubtitleStreamDescriptionVar">
+		<value condition="!String.IsEmpty(ListItem.Property(stream.codecdesc))">$INFO[ListItem.Property(stream.codecdesc)]$INFO[ListItem.Property(stream.description), | ]</value>
+		<value condition="!String.IsEmpty(ListItem.Property(stream.codec))">$INFO[ListItem.Property(stream.codec)]$INFO[ListItem.Property(stream.description), | ]</value>
+		<value>$INFO[ListItem.Property(stream.description)]</value>
 	</variable>
 	<variable name="MediaInfoListLabelVar">
 		<value>$INFO[ListItem.Label]</value>

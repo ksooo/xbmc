@@ -983,3 +983,21 @@ msgstr ""
 msgctxt "#31612"
 msgid "channels"
 msgstr ""
+
+#: /xml/DialogPlayerProcessInfo.xml
+#. Label to show the subtitle decoder name
+msgctxt "#31613"
+msgid "Subtitle decoder"
+msgstr ""
+
+#: /xml/DialogPlayerProcessInfo.xml
+#. Label to show the subtitle codec name
+msgctxt "#31614"
+msgid "Subtitle codec"
+msgstr ""
+
+#: /xml/DialogPlayerProcessInfo.xml
+#. Label to show the subtitle language
+msgctxt "#31615"
+msgid "Subtitle language"
+msgstr ""
