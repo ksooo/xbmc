@@ -306,7 +306,11 @@ void CBaseRenderer::CalculateFrameAspectRatio(unsigned int desired_width, unsign
 
 void CBaseRenderer::ManageRenderArea()
 {
-  m_viewRect = CServiceBroker::GetWinSystem()->GetGfxContext().GetViewWindow();
+  const CRect newRect = CServiceBroker::GetWinSystem()->GetGfxContext().GetViewWindow();
+  if (newRect.Width() != m_viewRect.Width() || newRect.Height() != m_viewRect.Height())
+    CLog::Log(LOGDEBUG, "CBaseRenderer::ManageRenderArea: viewRect {:.0f}x{:.0f} -> {:.0f}x{:.0f}",
+              m_viewRect.Width(), m_viewRect.Height(), newRect.Width(), newRect.Height());
+  m_viewRect = newRect;
 
   m_sourceRect.x1 = 0.0f;
   m_sourceRect.y1 = 0.0f;

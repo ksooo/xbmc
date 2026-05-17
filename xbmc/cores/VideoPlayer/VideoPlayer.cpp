@@ -2283,11 +2283,10 @@ void CVideoPlayer::HandlePlaySpeed()
 
       if (!m_State.streamsReady)
       {
-        // For video, the fullscreen switch is handled synchronously in OpenStream
-        // so the renderer can configure with a valid viewport. This async fallback
-        // covers audio-only playback (visualisation window).
-        if (m_playerOptions.fullscreen &&
-            !CServiceBroker::GetWinSystem()->GetGfxContext().IsFullScreenVideo())
+        // Activate the fullscreen-video skin now that streams are ready, so
+        // video frames will fully paint the swap chain from the first frame
+        // the skin is visible.
+        if (m_playerOptions.fullscreen)
         {
           CServiceBroker::GetAppMessenger()->PostMsg(TMSG_SWITCHTOFULLSCREEN);
         }
@@ -3969,16 +3968,20 @@ bool CVideoPlayer::OpenStream(CCurrentStream& current, int64_t demuxerId, int iS
       break;
     case StreamType::VIDEO:
       res = OpenVideoStream(hint, reset);
-      // Activate fullscreen video window synchronously so the renderer
-      // configures with a valid viewport. Without this, GetViewWindow()
-      // returns 0x0 because m_bFullScreenVideo is not set until the async
-      // window activation in the streamsReady block below. m_HasVideo is
-      // set inside OpenVideoStream so SwitchToFullScreen's
-      // IsPlayingVideo() check will pass.
+      // Set the m_bFullScreenVideo flag now, before streamsReady, so the
+      // renderer's Configure() sees a valid viewport via GetViewWindow().
+      // The WINDOW_FULLSCREEN_VIDEO skin activation is deferred to
+      // HandlePlaySpeed after streamsReady.
       if (res && m_playerOptions.fullscreen &&
           !CServiceBroker::GetWinSystem()->GetGfxContext().IsFullScreenVideo())
       {
-        CServiceBroker::GetAppMessenger()->SendMsg(TMSG_SWITCHTOFULLSCREEN);
+        auto& gfx = CServiceBroker::GetWinSystem()->GetGfxContext();
+        gfx.SetFullScreenVideo(true);
+        const CRect view = gfx.GetViewWindow();
+        CLog::Log(LOGDEBUG,
+                  "CVideoPlayer::OpenStream: m_bFullScreenVideo set pre-Configure, "
+                  "viewport {:.0f}x{:.0f}",
+                  view.Width(), view.Height());
       }
       break;
     case StreamType::SUBTITLE:
