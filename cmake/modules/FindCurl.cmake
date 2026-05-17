@@ -50,7 +50,6 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
                    -DUSE_NGHTTP2=ON
                    -DUSE_LIBIDN2=OFF
                    -DCURL_USE_LIBSSH2=OFF
-                   -DCURL_USE_LIBPSL=OFF
                    -DCURL_USE_GSSAPI=OFF
                    -DCURL_CA_FALLBACK=ON
                    ${OPTIONAL_ARGS})
