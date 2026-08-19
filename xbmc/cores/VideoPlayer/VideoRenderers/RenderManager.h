@@ -24,6 +24,7 @@
 #include <deque>
 #include <list>
 #include <memory>
+#include <optional>
 
 #include "PlatformDefs.h"
 
@@ -81,6 +82,10 @@ public:
   void TriggerUpdateResolution(float fps, int width, int height, std::string &stereomode);
   void SetViewMode(int iViewMode);
   void PreInit();
+  /*! \brief Reset the per playback state. To be called when a new file is opened on an already
+   * running player, where PreInit() is not called again.
+   */
+  void ResetPlaybackState();
   void UnInit();
   bool Flush(bool wait, bool saveBuffers);
   bool IsConfigured() const;
@@ -228,6 +233,25 @@ protected:
   VideoPicture m_picture{};
 
   float m_fps = 0.0;
+
+  //! Video parameters the display mode was last adjusted for. Unset until the first adjustment
+  //! of the current playback was done.
+  struct AdjustedParams
+  {
+    float fps{0.0f};
+    unsigned int width{0};
+    unsigned int height{0};
+    bool stereo{false};
+
+    bool operator==(const AdjustedParams& other) const = default;
+
+    /*! \brief Check whether these parameters differ from other only by a marginally different
+     * framerate, e.g. 29.97 fps instead of 30.00 fps.
+     */
+    bool DiffersMarginallyFrom(const AdjustedParams& other) const;
+  };
+  std::optional<AdjustedParams> m_adjustedParams;
+
   unsigned int m_orientation = 0;
   int m_NumberBuffers = 0;
   int m_lateframes = -1;
