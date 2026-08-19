@@ -28,10 +28,29 @@
 #include "windowing/GraphicContext.h"
 #include "windowing/WinSystem.h"
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
 #include <mutex>
 
 using namespace std::chrono_literals;
+
+bool CRenderManager::AdjustedParams::DiffersMarginallyFrom(const AdjustedParams& other) const
+{
+  if (*this == other)
+    return false;
+
+  if (width != other.width || height != other.height || stereo != other.stereo)
+    return false;
+
+  if (fps <= 0.0f || other.fps <= 0.0f)
+    return false;
+
+  // Covers the 1000/1001 relation (23.976/24, 29.97/30, 59.94/60) with some margin, while
+  // staying well below any real framerate change - 24 and 25 already differ by more than 4%.
+  constexpr float maxDeviation{0.005f};
+  return std::abs(fps - other.fps) <= std::max(fps, other.fps) * maxDeviation;
+}
 
 void CRenderManager::CClockSync::Reset()
 {
@@ -362,6 +381,7 @@ void CRenderManager::PreInit()
 {
   {
     std::unique_lock lock(m_statelock);
+    m_adjustedParams.reset();
     if (m_renderState != STATE_UNCONFIGURED)
       return;
   }
@@ -391,6 +411,13 @@ void CRenderManager::PreInit()
   m_bRenderGUI = true;
 
   m_initEvent.Set();
+}
+
+void CRenderManager::ResetPlaybackState()
+{
+  std::unique_lock lock(m_statelock);
+  m_fps = 0.0f;
+  m_adjustedParams.reset();
 }
 
 void CRenderManager::UnInit()
@@ -795,7 +822,19 @@ void CRenderManager::UpdateResolution()
   {
     if (CServiceBroker::GetWinSystem()->GetGfxContext().IsFullScreenVideo() && CServiceBroker::GetWinSystem()->GetGfxContext().IsFullScreenRoot())
     {
-      if (CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(CSettings::SETTING_VIDEOPLAYER_ADJUSTREFRESHRATE) != ADJUST_REFRESHRATE_OFF && m_fps > 0.0f)
+      const int adjustMode{CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
+          CSettings::SETTING_VIDEOPLAYER_ADJUSTREFRESHRATE)};
+      const AdjustedParams params{m_fps, m_picture.iWidth, m_picture.iHeight,
+                                  !m_picture.stereoMode.empty()};
+
+      // Marginal framerate differences - e.g. 29.97 fps instead of 30.00 fps - originate from
+      // framerate hints that do not match the actual stream. They get corrected several seconds
+      // into playback by CDVDDemuxClient::ParsePacket or CVideoPlayerVideo::CalcFrameRate, and
+      // switching the display mode for them is not worth the black screen it causes.
+      const bool allowAdjust{adjustMode == ADJUST_REFRESHRATE_ALWAYS || !m_adjustedParams ||
+                             !m_adjustedParams->DiffersMarginallyFrom(params)};
+
+      if (adjustMode != ADJUST_REFRESHRATE_OFF && allowAdjust && m_fps > 0.0f)
       {
         RESOLUTION res = CResolutionUtils::ChooseBestResolution(
             m_fps, m_picture.iWidth, m_picture.iHeight, !m_picture.stereoMode.empty());
@@ -803,6 +842,8 @@ void CRenderManager::UpdateResolution()
         UpdateLatencyTweak();
         if (m_pRenderer)
           m_pRenderer->Update();
+
+        m_adjustedParams = params;
       }
       m_bTriggerUpdateResolution = false;
       m_playerPort->VideoParamsChange();

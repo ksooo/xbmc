@@ -3032,6 +3032,7 @@ void CVideoPlayer::HandleMessages()
 
       FlushBuffers(DVD_NOPTS_VALUE, true, true);
       m_renderManager.Flush(false, false);
+      m_renderManager.ResetPlaybackState();
       m_pDemuxer.reset();
       m_pSubtitleDemuxer.reset();
       m_subtitleDemuxerMap.clear();
