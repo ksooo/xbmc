@@ -15,6 +15,7 @@
 #include "ServiceBroker.h"
 #include "application/Application.h"
 #include "cores/VideoPlayer/Interface/TimingConstants.h"
+#include "dialogs/GUIDialogKaiToast.h"
 #include "messaging/ApplicationMessenger.h"
 #include "rendering/capture/CaptureBlit.h"
 #include "rendering/capture/CaptureMetadata.h"
@@ -34,6 +35,23 @@
 #include <mutex>
 
 using namespace std::chrono_literals;
+
+namespace
+{
+//! Debug aid: notify about display mode switches suppressed for a marginal framerate change,
+//! to be able to tell whether the suppression works as intended.
+void NotifySuppressedResolutionSwitch(RESOLUTION res, float fromFps, float toFps)
+{
+  const RESOLUTION current{CServiceBroker::GetWinSystem()->GetGfxContext().GetVideoResolution()};
+  if (res == current)
+    return; // nothing would have been switched anyway
+
+  CGUIDialogKaiToast::QueueNotification(
+      CGUIDialogKaiToast::Info, "Bildwiederholrate",
+      StringUtils::Format("Umschalten {:.3f} -> {:.3f} fps unterdrückt.", fromFps, toFps), 5000,
+      false);
+}
+} // unnamed namespace
 
 bool CRenderManager::AdjustedParams::DiffersMarginallyFrom(const AdjustedParams& other) const
 {
@@ -834,16 +852,22 @@ void CRenderManager::UpdateResolution()
       const bool allowAdjust{adjustMode == ADJUST_REFRESHRATE_ALWAYS || !m_adjustedParams ||
                              !m_adjustedParams->DiffersMarginallyFrom(params)};
 
-      if (adjustMode != ADJUST_REFRESHRATE_OFF && allowAdjust && m_fps > 0.0f)
+      if (adjustMode != ADJUST_REFRESHRATE_OFF && m_fps > 0.0f)
       {
-        RESOLUTION res = CResolutionUtils::ChooseBestResolution(
-            m_fps, m_picture.iWidth, m_picture.iHeight, !m_picture.stereoMode.empty());
-        CServiceBroker::GetWinSystem()->GetGfxContext().SetVideoResolution(res, false);
-        UpdateLatencyTweak();
-        if (m_pRenderer)
-          m_pRenderer->Update();
+        const RESOLUTION res{CResolutionUtils::ChooseBestResolution(
+            m_fps, m_picture.iWidth, m_picture.iHeight, !m_picture.stereoMode.empty())};
 
-        m_adjustedParams = params;
+        if (allowAdjust)
+        {
+          CServiceBroker::GetWinSystem()->GetGfxContext().SetVideoResolution(res, false);
+          UpdateLatencyTweak();
+          if (m_pRenderer)
+            m_pRenderer->Update();
+
+          m_adjustedParams = params;
+        }
+        else
+          NotifySuppressedResolutionSwitch(res, m_adjustedParams->fps, params.fps);
       }
       m_bTriggerUpdateResolution = false;
       m_playerPort->VideoParamsChange();
