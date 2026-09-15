@@ -11,6 +11,12 @@ ifeq ($(OS),linux)
   CONFIGURE += --with-system-expat
 endif
 
+ifeq ($(NATIVE_OS), osx)
+  # The macOS 27.0 SDK declares dup3/pipe2, but they are unavailable at runtime
+  # on the deployment target, which makes posixmodule.c fail to compile.
+  CONFIGURE += ac_cv_func_dup3=no ac_cv_func_pipe2=no
+endif
+
 LIBDYLIB=$(PLATFORM)/python
 ifeq ($(NATIVE_OS), osx)
     # Case insensitive FS will add .exe to buildexe regardless of --with-suffix=no
