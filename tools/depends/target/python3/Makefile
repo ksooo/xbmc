@@ -21,9 +21,7 @@ ifeq ($(findstring apple-darwin, $(HOST)), apple-darwin)
                     ac_cv_func_posix_spawn=no ac_cv_func_posix_spawnp=no \
                     ac_cv_func_forkpty=no ac_cv_lib_util_forkpty=no \
                     ac_cv_func_getgroups=no \
-                    ac_cv_func_system=no \
-                    ac_cv_func_dup3=no \
-                    ac_cv_func_pipe2=no
+                    ac_cv_func_system=no
     export SDKROOT
   endif
   ifeq ($(OS), osx)
@@ -35,6 +33,10 @@ ifeq ($(findstring apple-darwin, $(HOST)), apple-darwin)
   # Python already handles older OSs correctly internally
   # it's the only way to override config.site's values as they come last (actually just CPPFLAGS is enough)
   EXTRA_CONFIGURE+= CFLAGS=-Wno-error=unguarded-availability-new CPPFLAGS=-Wno-error=unguarded-availability-new
+
+  # The Apple SDKs declare dup3/pipe2 from version 27.0 on, but they are
+  # unavailable at runtime on our deployment targets.
+  EXTRA_CONFIGURE+= ac_cv_func_dup3=no ac_cv_func_pipe2=no
 endif
 
 ifeq ($(OS), linux)
