@@ -442,7 +442,9 @@ unsigned int CJobManager::GetMaxWorkers(CJob::PRIORITY priority)
   if (priority == CJob::PRIORITY_LOW_PAUSABLE)
     return GetMaxPausableWorkers();
 
-  static const unsigned int max_workers = 5;
+  // Much of this work waits on a database or on the network rather than on a core, so allow more
+  // workers than a core count based limit would.
+  static const unsigned int max_workers{std::max(5u, std::thread::hardware_concurrency())};
   return max_workers - (CJob::PRIORITY_HIGH - priority);
 }
 
