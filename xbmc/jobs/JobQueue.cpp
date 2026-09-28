@@ -38,6 +38,10 @@ CJobQueue::CJobQueue(bool lifo, unsigned int jobsAtOnce, CJob::PRIORITY priority
 CJobQueue::~CJobQueue()
 {
   CancelJobs();
+
+  // A job that completed just before may still be reporting back to this queue
+  if (const auto jobManager{CServiceBroker::GetJobManager()}; jobManager)
+    jobManager->WaitForCallback(this);
 }
 
 void CJobQueue::OnJobComplete(unsigned int jobID, bool success, CJob* job)

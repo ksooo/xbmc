@@ -16,7 +16,6 @@
 #include <cassert>
 #include <chrono>
 #include <mutex>
-#include <optional>
 #include <stdexcept>
 #include <thread>
 
@@ -207,7 +206,29 @@ void CJobManager::CancelJob(unsigned int jobID)
   const auto it =
       std::ranges::find_if(m_processing, [jobID](const auto& wi) { return wi.GetId() == jobID; });
   if (it != m_processing.cend())
+  {
     it->Cancel(); // job is in progress, so only thing to do is to remove all callbacks
+    return;
+  }
+
+  // or if we're notifying its callbacks, so that those not reached yet won't be
+  const auto completion = std::ranges::find_if(m_completing, [jobID](const CCompletion& c)
+                                               { return c.item.GetId() == jobID; });
+  if (completion != m_completing.end())
+    completion->item.Cancel();
+}
+
+void CJobManager::WaitForCallback(const IJobCallback* callback)
+{
+  std::unique_lock lock(m_section);
+  m_callbackReturned.wait(lock,
+                          [this, callback]
+                          {
+                            return std::ranges::none_of(
+                                m_completing, [callback](const CCompletion& c)
+                                { return c.running == callback &&
+                                         c.thread != std::this_thread::get_id(); });
+                          });
 }
 
 void CJobManager::StartWorkers(CJob::PRIORITY priority)
@@ -363,60 +384,54 @@ bool CJobManager::OnJobProgress(unsigned int progress, unsigned int total, const
 
 void CJobManager::OnJobComplete(bool success, CJob* job)
 {
-  std::optional<CWorkItem> item = [&, this]
+  std::unique_lock lock(m_section);
+  const auto i = std::ranges::find_if(m_processing, JobFinder(job));
+  if (i == m_processing.end())
+    return;
+
+  // Move work item out of m_processing to avoid iterator invalidation
+  // when another thread modifies m_processing during callback execution
+  const auto completion{
+      m_completing.insert(m_completing.end(), {std::move(*i), std::this_thread::get_id()})};
+  m_processing.erase(i);
+  CWorkItem& item{completion->item};
+
+  if (!item.GetCallbacks().empty())
   {
-    std::unique_lock lock(m_section);
-    std::optional<CWorkItem> item;
-    auto i = std::ranges::find_if(m_processing, JobFinder(job));
-    if (i != m_processing.end())
+    assert(!m_pendingCallbacks.contains(job));
+
+    // Track pending callbacks so CJob::IsShared() can query the count.
+    // Last callback (count==1) doesn't need to copy since it's the sole owner.
+    auto& counter{
+        m_pendingCallbacks.insert_or_assign(job, item.GetCallbacks().size()).first->second};
+
+    while (IJobCallback* callback = item.PopCallback())
     {
-      // Move work item out of m_processing to avoid iterator invalidation
-      // when another thread modifies m_processing during callback execution
-      item.emplace(std::move(*i));
-      m_processing.erase(i);
-    }
-    return item;
-  }();
-
-  if (item.has_value())
-  {
-    if (!item->GetCallbacks().empty())
-    {
-      // We can safely hold a reference to the counter as we are the ones
-      // controlling the creation and deletion.
-      auto& counter = [&, this]() -> std::atomic<size_t>&
+      completion->running = callback;
+      lock.unlock();
+      try
       {
-        std::unique_lock lock(m_section);
-
-        assert(!m_pendingCallbacks.contains(job));
-
-        // Track pending callbacks so CJob::IsShared() can query the count.
-        // Last callback (count==1) doesn't need to copy since it's the sole owner.
-        return m_pendingCallbacks.insert_or_assign(job, item->GetCallbacks().size()).first->second;
-      }();
-
-      while (IJobCallback* callback = item->PopCallback())
-      {
-        try
-        {
-          callback->OnJobComplete(item->GetId(), success, job);
-        }
-        catch (...)
-        {
-          CLog::LogF(LOGERROR, "Error processing job {}", job->GetType());
-        }
-        // Update pending count for next callback
-        counter = item->GetCallbacks().size();
+        callback->OnJobComplete(item.GetId(), success, job);
       }
-
+      catch (...)
       {
-        std::unique_lock lock(m_section);
-        m_pendingCallbacks.erase(job);
+        CLog::LogF(LOGERROR, "Error processing job {}", job->GetType());
       }
+      lock.lock();
+      completion->running = nullptr;
+      m_callbackReturned.notifyAll();
+      // Update pending count for next callback
+      counter = item.GetCallbacks().size();
     }
 
-    item->FreeJob();
+    m_pendingCallbacks.erase(job);
   }
+
+  CWorkItem done{std::move(item)};
+  m_completing.erase(completion);
+  lock.unlock();
+
+  done.FreeJob();
 }
 
 size_t CJobManager::GetPendingCallbackCount(const CJob* job) const

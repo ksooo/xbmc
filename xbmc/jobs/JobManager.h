@@ -10,14 +10,17 @@
 
 #include "jobs/Job.h"
 #include "jobs/LambdaJob.h"
+#include "threads/Condition.h"
 #include "threads/CriticalSection.h"
 #include "threads/Event.h"
 
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <list>
 #include <queue>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -92,6 +95,15 @@ public:
    \sa AddJob()
    */
   void CancelJob(unsigned int jobID);
+
+  /*!
+   \brief Wait until a completion notice currently being delivered to a callback has returned.
+   Together with CancelJob() this allows a callback to be destroyed safely. Returns at once when
+   called from within that notice. Must not be called while holding a lock the callback needs.
+   \param callback the callback to wait for
+   \sa CancelJob()
+   */
+  void WaitForCallback(const IJobCallback* callback);
 
   /*!
    \brief Cancel all remaining jobs, preparing for shutdown
@@ -233,6 +245,14 @@ private:
     CJob::PRIORITY m_priority{CJob::PRIORITY::PRIORITY_LOW};
   };
 
+  //! A job whose callbacks OnJobComplete() is notifying
+  struct CCompletion
+  {
+    CWorkItem item;
+    std::thread::id thread;
+    IJobCallback* running{nullptr};
+  };
+
   /*! \brief Pop a job off the job queue and add to the processing queue ready to process
    \return the job to process, nullptr if no jobs are available
    */
@@ -268,10 +288,12 @@ private:
   std::array<JobQueue, CJob::PRIORITY_DEDICATED + 1> m_jobQueue;
   bool m_pauseJobs{false};
   Processing m_processing;
+  std::list<CCompletion> m_completing;
   Workers m_workers;
 
   mutable CCriticalSection m_section;
   CEvent m_jobEvent;
+  XbmcThreads::ConditionVariable m_callbackReturned;
   bool m_running{true};
 
   // Tracks pending callback count for jobs in completion phase, used by CJob::IsShared()

@@ -7,6 +7,7 @@
  */
 
 #include "ServiceBroker.h"
+#include "jobs/IJobCallback.h"
 #include "jobs/Job.h"
 #include "jobs/JobManager.h"
 #include "test/MtTestUtils.h"
@@ -14,6 +15,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <thread>
 
 #include <gtest/gtest.h>
 
@@ -341,4 +343,104 @@ TEST_F(TestJobManager, PausableJobsDoNotConsumeTheBudgetOfOtherPriorities)
   pausable.release = true;
   ASSERT_TRUE(poll([&pausable, pausableLimit]()
                    { return pausable.finished == static_cast<int>(pausableLimit); }));
+}
+
+namespace
+{
+//! \brief Equal to any other of its kind, so that adding another one only adds a callback
+class MergingJob : public DummyJob
+{
+public:
+  using DummyJob::DummyJob;
+
+  bool Equals(const CJob* job) const override
+  {
+    return dynamic_cast<const MergingJob*>(job) != nullptr;
+  }
+};
+
+//! \brief Holds the completion notice until released
+class BlockingCallback : public IJobCallback
+{
+public:
+  ~BlockingCallback() override
+  {
+    release = true;
+    CServiceBroker::GetJobManager()->WaitForCallback(this);
+  }
+
+  void OnJobComplete(unsigned int jobID, bool success, CJob* job) override
+  {
+    ++calls;
+    while (!release)
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
+
+  std::atomic<int> calls{0};
+  std::atomic<bool> release{false};
+};
+
+class SelfWaitingCallback : public IJobCallback
+{
+public:
+  void OnJobComplete(unsigned int jobID, bool success, CJob* job) override
+  {
+    CServiceBroker::GetJobManager()->WaitForCallback(this);
+    returned = true;
+  }
+
+  std::atomic<bool> returned{false};
+};
+} // namespace
+
+TEST_F(TestJobManager, WaitForCallbackReturnsOnceTheRunningCallbackHas)
+{
+  Flags flags;
+  BlockingCallback callback;
+  CServiceBroker::GetJobManager()->AddJob(new ReallyDumbJob(&flags), &callback);
+  ASSERT_TRUE(poll([&callback]() { return callback.calls == 1; }));
+
+  std::atomic<bool> waited{false};
+  std::thread waiter{[&callback, &waited]()
+                     {
+                       CServiceBroker::GetJobManager()->WaitForCallback(&callback);
+                       waited = true;
+                     }};
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  EXPECT_FALSE(waited);
+
+  callback.release = true;
+  waiter.join();
+  EXPECT_TRUE(waited);
+}
+
+TEST_F(TestJobManager, WaitForCallbackFromWithinTheCallbackReturns)
+{
+  Flags flags;
+  SelfWaitingCallback callback;
+  CServiceBroker::GetJobManager()->AddJob(new ReallyDumbJob(&flags), &callback);
+
+  EXPECT_TRUE(poll([&callback]() { return callback.returned.load(); }));
+}
+
+TEST_F(TestJobManager, CancelJobSkipsCallbacksNotYetNotifiedOfCompletion)
+{
+  const auto jobManager{CServiceBroker::GetJobManager()};
+  Flags flags;
+  // Callbacks are notified last added first
+  BlockingCallback notReached;
+  BlockingCallback running;
+
+  const unsigned int id{jobManager->AddJob(new MergingJob(&flags), &notReached)};
+  ASSERT_TRUE(poll([&flags]() { return flags.started.load(); }));
+  ASSERT_EQ(id, jobManager->AddJob(new MergingJob(&flags), &running));
+
+  flags.lingerAtWork = false;
+  ASSERT_TRUE(poll([&running]() { return running.calls == 1; }));
+
+  jobManager->CancelJob(id);
+  running.release = true;
+
+  EXPECT_FALSE(poll(300, [&notReached]() { return notReached.calls > 0; }));
 }
