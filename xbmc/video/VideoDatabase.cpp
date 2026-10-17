@@ -139,6 +139,14 @@ std::string GetSourcePathOfFile(const CMediaSource& source, const std::string& f
 
   return {};
 }
+
+CVariant ResumePointData(double position, double total)
+{
+  CVariant data;
+  data["resume"]["position"] = position;
+  data["resume"]["total"] = total;
+  return data;
+}
 } // unnamed namespace
 
 CVideoDatabase::FileInformation::FileInformation(std::string&& newPath,
@@ -3644,6 +3652,7 @@ void CVideoDatabase::DeleteResumeBookMark(const CFileItem& item)
   {
     std::string sql = PrepareSQL("delete from bookmark where idFile=%i and type=%i", fileID, CBookmark::RESUME);
     m_pDS->exec(sql);
+    AnnounceFileChange(fileID, "OnResumePointChanged", ResumePointData(0.0, 0.0));
 
     const MediaType content = VideoContentTypeToString(item.GetVideoContentType());
 
@@ -3957,6 +3966,10 @@ bool CVideoDatabase::AddBookMarkToFile(const std::string& strFilenameAndPath,
           static_cast<int>(type));
 
     m_pDS->exec(strSQL);
+
+    if (type == CBookmark::RESUME)
+      AnnounceFileChange(idFile, "OnResumePointChanged",
+                         ResumePointData(bookmark.timeInSeconds, bookmark.totalTimeInSeconds));
   }
   catch (...)
   {
@@ -3996,6 +4009,8 @@ void CVideoDatabase::ClearBookMarkOfFile(const std::string& strFilenameAndPath,
         strSQL=PrepareSQL("update episode set c%02d=-1 where idFile=%i and c%02d=%i", VIDEODB_ID_EPISODE_BOOKMARK, idFile, VIDEODB_ID_EPISODE_BOOKMARK, idBookmark);
         m_pDS->exec(strSQL);
       }
+      else if (type == CBookmark::RESUME)
+        AnnounceFileChange(idFile, "OnResumePointChanged", ResumePointData(0.0, 0.0));
     }
 
     m_pDS->close();
@@ -4038,6 +4053,8 @@ bool CVideoDatabase::ClearBookMarksOfFile(int idFile,
       strSQL=PrepareSQL("update episode set c%02d=-1 where idFile=%i", VIDEODB_ID_EPISODE_BOOKMARK, idFile);
       m_pDS->exec(strSQL);
     }
+    else if (type == CBookmark::RESUME)
+      AnnounceFileChange(idFile, "OnResumePointChanged", ResumePointData(0.0, 0.0));
   }
   catch (...)
   {
@@ -6713,6 +6730,7 @@ CDateTime CVideoDatabase::SetPlayCount(const CFileItem& item, int count, const C
   if (id < 0)
     return {};
 
+  const int previousCount{GetPlayCount(id)};
   // and mark as watched
   try
   {
@@ -6739,6 +6757,13 @@ CDateTime CVideoDatabase::SetPlayCount(const CFileItem& item, int count, const C
     }
 
     m_pDS->exec(strSQL);
+
+    if (count != previousCount)
+    {
+      CVariant fileData;
+      fileData["playcount"] = count;
+      AnnounceFileChange(id, "OnPlayCountChanged", fileData);
+    }
 
     // We only need to announce changes to video items in the library
     if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_iDbId > 0)
@@ -12628,6 +12653,33 @@ void CVideoDatabase::AnnounceUpdate(const std::string& content, int id)
   data["type"] = content;
   data["id"] = id;
   CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::VideoLibrary, "OnUpdate", data);
+}
+
+void CVideoDatabase::AnnounceFileChange(int idFile, const std::string& message, CVariant data)
+{
+  try
+  {
+    if (nullptr == m_pDB || nullptr == m_pDS2)
+      return;
+
+    // The caller may still be reading m_pDS
+    m_pDS2->query(PrepareSQL("SELECT strPath, strFilename FROM files "
+                             "JOIN path ON files.idPath = path.idPath WHERE idFile = %i",
+                             idFile));
+    if (!m_pDS2->eof())
+    {
+      std::string file;
+      ConstructPath(file, m_pDS2->fv("strPath").get_asString(),
+                    m_pDS2->fv("strFilename").get_asString());
+      data["file"] = file;
+      CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::Files, message, data);
+    }
+    m_pDS2->close();
+  }
+  catch (...)
+  {
+    CLog::LogF(LOGERROR, "failed for file {}", idFile);
+  }
 }
 
 bool CVideoDatabase::GetItemsForPath(const std::string& content,
