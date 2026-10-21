@@ -311,6 +311,43 @@ TEST_F(TestCharsetConverter, utf8logicalToVisualBiDi)
   EXPECT_STREQ(refstra2.c_str(), varstra1.c_str());
 }
 
+TEST_F(TestCharsetConverter, utf8logicalToVisualBiDi_KeepsEmojiSequences)
+{
+  // man ZWJ woman, black flag with tags for England
+  const std::string family = "\xF0\x9F\x91\xA8\xE2\x80\x8D\xF0\x9F\x91\xA9";
+  const std::string england = "\xF0\x9F\x8F\xB4\xF3\xA0\x81\xA7\xF3\xA0\x81\xA2\xF3\xA0\x81\xA5"
+                              "\xF3\xA0\x81\xAE\xF3\xA0\x81\xA7\xF3\xA0\x81\xBF";
+  varstra1.clear();
+  g_charsetConverter.utf8logicalToVisualBiDi(family + " " + england, varstra1);
+  EXPECT_EQ(family + " " + england, varstra1);
+}
+
+TEST_F(TestCharsetConverter, utf8logicalToVisualBiDi_RemovesBidiMarks)
+{
+  varstra1.clear();
+  g_charsetConverter.utf8logicalToVisualBiDi("a\xE2\x80\x8E"
+                                             "b",
+                                             varstra1);
+  EXPECT_EQ("ab", varstra1);
+}
+
+TEST_F(TestCharsetConverter, utf32logicalToVisualBiDi_KeepsEmojiSequencesInRtlText)
+{
+  // woman, skin tone, ZWJ, laptop after Hebrew text
+  const std::u32string emoji = U"\x1F469\x1F3FD\x200D\x1F4BB";
+  std::u32string visual;
+  g_charsetConverter.utf32logicalToVisualBiDi(U"\x5E9\x5DC\x5D5\x5DD " + emoji, visual);
+  EXPECT_NE(std::u32string::npos, visual.find(emoji));
+}
+
+TEST_F(TestCharsetConverter, utf32logicalToVisualBiDi_ReordersJoinedRtlLetters)
+{
+  // alef, ZWJ, bet
+  std::u32string visual;
+  g_charsetConverter.utf32logicalToVisualBiDi(U"\x5D0\x200D\x5D1", visual);
+  EXPECT_EQ(U"\x5D1\x200D\x5D0", visual);
+}
+
 //! @todo Resolve correct input/output for this function
 // TEST_F(TestCharsetConverter, utf32ToStringCharset)
 // {
