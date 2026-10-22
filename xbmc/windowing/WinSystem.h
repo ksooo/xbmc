@@ -129,6 +129,11 @@ public:
   virtual bool Restore() { return false; }
   virtual bool Hide() { return false; }
   virtual bool Show(bool raise = true) { return false; }
+  /*! \brief Hide the window for good because the application is exiting.
+   Only implemented where relaunching the application meanwhile is handled.
+   \return true if the window was hidden
+   */
+  virtual bool HideOnExit() { return false; }
 
   // videosync
   virtual std::unique_ptr<CVideoSync> GetVideoSync(CVideoReferenceClock* clock) { return nullptr; }

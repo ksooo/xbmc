@@ -10,4 +10,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface XBMCDelegate : NSObject<NSApplicationDelegate>
+//! Set once the window has been hidden for exiting. Launching the app from
+//! then on relaunches it after it has exited.
+@property(nonatomic) BOOL exiting;
 @end

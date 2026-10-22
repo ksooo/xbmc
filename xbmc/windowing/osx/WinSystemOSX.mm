@@ -37,6 +37,7 @@
 #include "windowing/osx/WinEventsOSX.h"
 
 #include "platform/darwin/osx/CocoaInterface.h"
+#import "platform/darwin/osx/XBMCApplication.h"
 #include "platform/darwin/osx/powermanagement/CocoaPowerSyscall.h"
 
 #include <array>
@@ -850,6 +851,22 @@ bool CWinSystemOSX::Hide()
   {
     dispatch_sync(dispatch_get_main_queue(), ^{
       [NSApplication.sharedApplication hide:nil];
+    });
+  }
+  return true;
+}
+
+bool CWinSystemOSX::HideOnExit()
+{
+  UnblankDisplays(m_lastDisplayNr);
+
+  @autoreleasepool
+  {
+    dispatch_sync(dispatch_get_main_queue(), ^{
+      // Unhiding, e.g. on a relaunch attempt, must not bring the window back
+      [m_appWindow orderOut:nil];
+      [NSApplication.sharedApplication hide:nil];
+      ((XBMCDelegate*)NSApplication.sharedApplication.delegate).exiting = YES;
     });
   }
   return true;

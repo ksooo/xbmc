@@ -1660,7 +1660,9 @@ bool CApplication::Stop(int exitCode)
   if (!CXBMCApp::Get().Stop(exitCode))
     return false;
 #else
-  ShowExitNotice();
+  CWinSystemBase* winSystem = CServiceBroker::GetWinSystem();
+  if (!winSystem || !winSystem->HideOnExit())
+    ShowExitNotice();
 #endif
 
   CLog::Log(LOGINFO, "Stopping the application...");

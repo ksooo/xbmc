@@ -70,6 +70,8 @@ static NSDictionary* _windowMenu = @{
 {
   //! Whether AppKit is waiting for the deferred reply to applicationShouldTerminate:.
   BOOL m_terminationPending;
+  //! Whether the app was launched again while exiting.
+  BOOL m_relaunchRequested;
 }
 
 // Set the working directory to the .app's parent directory
@@ -168,23 +170,52 @@ static NSDictionary* _windowMenu = @{
                                          object:xbmcThread
                                           queue:[NSOperationQueue mainQueue]
                                      usingBlock:^(NSNotification* note) {
-                                       if (self->m_terminationPending)
-                                       {
-                                         // Replying completes the termination AppKit started;
-                                         // an extra terminate: would abort it via forced exit.
-                                         self->m_terminationPending = NO;
-                                         [NSApp replyToApplicationShouldTerminate:YES];
-                                       }
-                                       else
-                                       {
-                                         // Kodi quit on its own, no termination in flight.
-                                         [NSApp terminate:nil];
-                                       }
+                                       [self relaunchIfRequestedThen:^{
+                                         if (self->m_terminationPending)
+                                         {
+                                           // Replying completes the termination AppKit started;
+                                           // an extra terminate: would abort it via forced exit.
+                                           self->m_terminationPending = NO;
+                                           [NSApp replyToApplicationShouldTerminate:YES];
+                                         }
+                                         else
+                                         {
+                                           // Kodi quit on its own, no termination in flight.
+                                           [NSApp terminate:nil];
+                                         }
+                                       }];
                                        [notifier removeObserver:obs];
                                      }];
 
   xbmcThread.name = @"XBMCMainThread";
   [xbmcThread start];
+}
+
+- (BOOL)applicationShouldHandleReopen:(NSApplication*)sender hasVisibleWindows:(BOOL)flag
+{
+  if (!self.exiting)
+    return YES;
+
+  m_relaunchRequested = YES;
+  return NO;
+}
+
+- (void)relaunchIfRequestedThen:(void (^)(void))completion
+{
+  if (!m_relaunchRequested)
+  {
+    completion();
+    return;
+  }
+
+  // Kodi has completely shut down by now, so the new instance cannot interfere with it.
+  NSWorkspaceOpenConfiguration* config = [NSWorkspaceOpenConfiguration configuration];
+  config.createsNewApplicationInstance = YES;
+  [NSWorkspace.sharedWorkspace openApplicationAtURL:NSBundle.mainBundle.bundleURL
+                                      configuration:config
+                                  completionHandler:^(NSRunningApplication* app, NSError* error) {
+                                    dispatch_async(dispatch_get_main_queue(), completion);
+                                  }];
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender

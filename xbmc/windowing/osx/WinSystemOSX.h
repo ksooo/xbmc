@@ -69,6 +69,7 @@ public:
   bool Hide() override;
   bool HasCursor() override;
   bool Show(bool raise = true) override;
+  bool HideOnExit() override;
   unsigned int GetScreenId(const std::string& screen) override;
   void MoveToScreen(unsigned int screenIdx) override;
   void OnMove(int x, int y) override;
