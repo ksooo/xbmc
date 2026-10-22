@@ -1627,6 +1627,31 @@ bool CApplication::Cleanup()
   }
 }
 
+namespace
+{
+// Nothing is rendered while the application shuts down, so the last frame
+// stays on screen for several seconds. Make that frame show a notice.
+void ShowExitNotice()
+{
+  CGUIComponent* gui = CServiceBroker::GetGUI();
+  if (!gui)
+    return;
+
+  CGUIWindowManager& windowManager = gui->GetWindowManager();
+  auto* toast = windowManager.GetWindow<CGUIDialogKaiToast>(WINDOW_DIALOG_KAI_TOAST);
+  if (!toast)
+    return;
+
+  toast->ShowImmediately("special://xbmc/media/icon256x256.png", CCompileInfo::GetAppName(),
+                         CServiceBroker::GetResourcesComponent().GetLocalizeStrings().Get(13024));
+
+  // Render only; processing messages here would re-enter the quit handling.
+  do
+    windowManager.ProcessRenderLoop(true);
+  while (toast->IsAnimating(ANIM_TYPE_WINDOW_OPEN));
+}
+} // namespace
+
 bool CApplication::Stop(int exitCode)
 {
 #if defined(TARGET_ANDROID)
@@ -1634,6 +1659,8 @@ bool CApplication::Stop(int exitCode)
   // signalled that the app shall be destroyed. See android_main() implementation.
   if (!CXBMCApp::Get().Stop(exitCode))
     return false;
+#else
+  ShowExitNotice();
 #endif
 
   CLog::Log(LOGINFO, "Stopping the application...");

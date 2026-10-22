@@ -41,12 +41,19 @@ public:
   static void QueueNotification(const std::string& aImageFile, const std::string& aCaption, const std::string& aDescription, unsigned int displayTime = TOAST_DISPLAY_TIME, bool withSound = true, unsigned int messageTime = TOAST_MESSAGE_TIME);
   bool DoWork();
 
+  /*! \brief Discard all queued notifications and show the given one right away.
+   */
+  void ShowImmediately(const std::string& imageFile,
+                       const std::string& caption,
+                       const std::string& description);
+
   bool OnMessage(CGUIMessage& message) override;
   void FrameMove() override;
   void ResetTimer();
 
 protected:
   static void AddToQueue(const std::string& aImageFile, const eMessageType eType, const std::string& aCaption, const std::string& aDescription, unsigned int displayTime, bool withSound, unsigned int messageTime);
+  bool Show(const Notification& toast);
 
   unsigned int m_timer;
 

@@ -113,46 +113,65 @@ bool CGUIDialogKaiToast::DoWork()
     m_notifications.pop();
     lock.unlock();
 
-    m_toastDisplayTime = toast.displayTime;
-    m_toastMessageTime = toast.messageTime;
-
-    std::unique_lock lock2(CServiceBroker::GetWinSystem()->GetGfxContext());
-
-    if(!Initialize())
-      return false;
-
-    SET_CONTROL_LABEL(POPUP_CAPTION_TEXT, toast.caption);
-
-    SET_CONTROL_LABEL(POPUP_NOTIFICATION_BUTTON, toast.description);
-
-    // set the appropriate icon
-    {
-      std::string icon = toast.imagefile;
-      if (icon.empty())
-      {
-        if (toast.eType == Warning)
-          icon = KODI::ART::DEFAULT::ICON_WARNING;
-        else if (toast.eType == Error)
-          icon = KODI::ART::DEFAULT::ICON_ERROR;
-        else
-          icon = KODI::ART::DEFAULT::ICON_INFO;
-      }
-      SET_CONTROL_FILENAME(POPUP_ICON, icon);
-    }
-
-    //  Play the window specific init sound for each notification queued
-    SetSound(toast.withSound);
-
-    // Activate haptics for this notification
-    CServiceBroker::GetPeripherals().OnUserNotification();
-
-    ResetTimer();
-    return true;
+    return Show(toast);
   }
 
   return false;
 }
 
+void CGUIDialogKaiToast::ShowImmediately(const std::string& imageFile,
+                                         const std::string& caption,
+                                         const std::string& description)
+{
+  {
+    std::unique_lock lock(m_critical);
+    m_notifications = {};
+  }
+
+  const Notification toast{
+      caption, description, imageFile, Default, TOAST_DISPLAY_TIME, TOAST_MESSAGE_TIME, false};
+  if (Show(toast) && !IsDialogRunning())
+    Open();
+}
+
+bool CGUIDialogKaiToast::Show(const Notification& toast)
+{
+  m_toastDisplayTime = toast.displayTime;
+  m_toastMessageTime = toast.messageTime;
+
+  std::unique_lock lock(CServiceBroker::GetWinSystem()->GetGfxContext());
+
+  if (!Initialize())
+    return false;
+
+  SET_CONTROL_LABEL(POPUP_CAPTION_TEXT, toast.caption);
+
+  SET_CONTROL_LABEL(POPUP_NOTIFICATION_BUTTON, toast.description);
+
+  // set the appropriate icon
+  {
+    std::string icon = toast.imagefile;
+    if (icon.empty())
+    {
+      if (toast.eType == Warning)
+        icon = KODI::ART::DEFAULT::ICON_WARNING;
+      else if (toast.eType == Error)
+        icon = KODI::ART::DEFAULT::ICON_ERROR;
+      else
+        icon = KODI::ART::DEFAULT::ICON_INFO;
+    }
+    SET_CONTROL_FILENAME(POPUP_ICON, icon);
+  }
+
+  //  Play the window specific init sound for each notification queued
+  SetSound(toast.withSound);
+
+  // Activate haptics for this notification
+  CServiceBroker::GetPeripherals().OnUserNotification();
+
+  ResetTimer();
+  return true;
+}
 
 void CGUIDialogKaiToast::ResetTimer()
 {

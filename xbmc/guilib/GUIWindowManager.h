@@ -126,6 +126,12 @@ public:
    */
   void FrameMove();
 
+  /*! \brief Run one iteration of the application's render loop.
+   Only has an effect on the application thread. If renderOnly is true,
+   pending messages are not processed.
+   */
+  bool ProcessRenderLoop(bool renderOnly);
+
   /*! \brief Return whether the window manager is initialized.
    The window manager is initialized on skin load - if the skin isn't yet loaded,
    no windows should be able to be initialized.
@@ -282,8 +288,6 @@ private:
    * \param force True to ignore checks which refuses opening the window, otherwise false
    */
   void ActivateWindow_Internal(int windowID, const std::vector<std::string> &params, bool swappingWindows, bool force = false);
-
-  bool ProcessRenderLoop(bool renderOnly);
 
   bool HandleAction(const CAction &action) const;
 

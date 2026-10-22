@@ -6497,7 +6497,12 @@ msgctxt "#13023"
 msgid "Successfully removed storage device"
 msgstr ""
 
-#empty strings from id 13024 to 13025
+#: xbmc/application/Application.cpp
+msgctxt "#13024"
+msgid "Exiting..."
+msgstr ""
+
+#empty string with id 13025
 
 #: system/settings/settings.xml
 msgctxt "#13026"
