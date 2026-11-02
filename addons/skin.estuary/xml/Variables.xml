@@ -43,6 +43,14 @@
 		<value condition="String.IsEmpty(Player.Icon) + VideoPlayer.Content(livetv)">DefaultTVShows.png</value>
 		<value>$INFO[Player.Icon]</value>
 	</variable>
+	<variable name="CompactMusicInfoArtVar">
+		<value condition="MusicPlayer.Content(livetv)">$INFO[Player.Icon]</value>
+		<value>$INFO[MusicPlayer.Cover]</value>
+	</variable>
+	<variable name="CompactMusicInfoTitleVar">
+		<value condition="MusicPlayer.Content(livetv) + !String.IsEmpty(MusicPlayer.Title)">$INFO[MusicPlayer.Title]</value>
+		<value>$INFO[Player.Title]</value>
+	</variable>
 	<variable name="ShiftThumbVar">
 		<value condition="!String.IsEmpty(Listitem.Art(poster))">$INFO[Listitem.Art(poster)]</value>
 		<value condition="ListItem.IsParentFolder">DefaultFolderBackSquare.png</value>

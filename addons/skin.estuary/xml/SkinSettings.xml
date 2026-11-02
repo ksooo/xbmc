@@ -335,6 +335,12 @@
 					<onclick>Skin.SetNumeric(OSDAutoCloseTime)</onclick>
 					<enable>Skin.HasSetting(OSDAutoClose)</enable>
 				</control>
+				<control type="radiobutton" id="628">
+					<label>$LOCALIZE[31178]</label>
+					<include>DefaultSettingButton</include>
+					<selected>Skin.HasSetting(ShowCompactMusicInfo)</selected>
+					<onclick>Skin.ToggleSetting(ShowCompactMusicInfo)</onclick>
+				</control>
 			</control>
 			<control type="image">
 				<description>Dialog Header image</description>
