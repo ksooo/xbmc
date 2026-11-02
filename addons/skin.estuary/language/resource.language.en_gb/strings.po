@@ -889,7 +889,13 @@ msgctxt "#31177"
 msgid "Choose weather icon pack"
 msgstr ""
 
-#empty strings from id 31178 to 31596
+#: /xml/SkinSettings.xml
+#. Setting to show a compact info panel while music plays in fullscreen
+msgctxt "#31178"
+msgid "Show compact info panel for fullscreen music"
+msgstr ""
+
+#empty strings from id 31179 to 31596
 
 #: /xml/Includes_SettingsDialog.xml
 #. Button to select Player Process Info window
