@@ -145,5 +145,86 @@
 				</control>
 			</control>
 		</control>
+		<control type="group">
+			<visible>Skin.HasSetting(ShowCompactMusicInfo)</visible>
+			<visible>Player.HasAudio</visible>
+			<visible>!Player.ShowInfo + !Window.IsVisible(seekbar) + !Window.IsVisible(musicosd) + !Window.IsVisible(pvrosdchannels) + !Window.IsVisible(pvrchannelguide)</visible>
+			<animation effect="fade" time="300" condition="Player.HasAudio">VisibleChange</animation>
+			<centerleft>50%</centerleft>
+			<bottom>20</bottom>
+			<width>1000</width>
+			<height>240</height>
+			<control type="image">
+				<width>1000</width>
+				<height>240</height>
+				<texture border="21" colordiffuse="A0FFFFFF">dialogs/dialog-bg.png</texture>
+			</control>
+			<control type="image">
+				<left>40</left>
+				<top>40</top>
+				<width>160</width>
+				<height>160</height>
+				<aspectratio>keep</aspectratio>
+				<fadetime>400</fadetime>
+				<texture fallback="DefaultAlbumCover.png">$VAR[CompactMusicInfoArtVar]</texture>
+			</control>
+			<control type="grouplist">
+				<left>230</left>
+				<top>40</top>
+				<width>730</width>
+				<height>160</height>
+				<orientation>vertical</orientation>
+				<align>center</align>
+				<itemgap>0</itemgap>
+				<control type="label">
+					<width>730</width>
+					<height>50</height>
+					<aligny>center</aligny>
+					<font>font37</font>
+					<label>[B]$VAR[CompactMusicInfoTitleVar][/B]</label>
+					<scroll>true</scroll>
+				</control>
+				<control type="label">
+					<width>730</width>
+					<height>45</height>
+					<aligny>center</aligny>
+					<font>font32</font>
+					<label>$INFO[MusicPlayer.Artist]</label>
+					<scroll>true</scroll>
+					<visible>!String.IsEmpty(MusicPlayer.Artist)</visible>
+				</control>
+				<control type="label">
+					<width>730</width>
+					<height>45</height>
+					<aligny>center</aligny>
+					<font>font32</font>
+					<label>$INFO[MusicPlayer.ChannelName]</label>
+					<scroll>true</scroll>
+					<visible>String.IsEmpty(MusicPlayer.Artist) + MusicPlayer.Content(livetv) + !String.IsEmpty(MusicPlayer.Title) + !String.IsEqual(MusicPlayer.Title,MusicPlayer.ChannelName)</visible>
+				</control>
+				<control type="group">
+					<width>730</width>
+					<height>65</height>
+					<visible>!MusicPlayer.Content(livetv) + !String.IsEmpty(Player.Duration)</visible>
+					<control type="label">
+						<top>10</top>
+						<width>730</width>
+						<height>35</height>
+						<align>right</align>
+						<aligny>center</aligny>
+						<font>font12</font>
+						<label>$INFO[Player.Time]$INFO[Player.Duration, / ]</label>
+					</control>
+					<control type="progress">
+						<top>53</top>
+						<width>730</width>
+						<height>12</height>
+						<info>Player.Progress</info>
+						<texturebg border="3" colordiffuse="60FFFFFF">colors/white50.png</texturebg>
+						<midtexture colordiffuse="button_focus">colors/white.png</midtexture>
+					</control>
+				</control>
+			</control>
+		</control>
 	</controls>
 </window>
