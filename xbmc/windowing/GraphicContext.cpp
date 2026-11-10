@@ -312,6 +312,15 @@ const CRect CGraphicContext::GetViewWindow() const
     rect.x2 -= info.guiInsets.right;
     rect.y2 -= info.guiInsets.bottom;
 #endif
+    if (!m_bCalibrating && !m_fullScreenVideoWindow.IsEmpty())
+    {
+      const float width = rect.Width();
+      const float height = rect.Height();
+      return CRect(rect.x1 + m_fullScreenVideoWindow.x1 * width,
+                   rect.y1 + m_fullScreenVideoWindow.y1 * height,
+                   rect.x1 + m_fullScreenVideoWindow.x2 * width,
+                   rect.y1 + m_fullScreenVideoWindow.y2 * height);
+    }
     return rect;
   }
   return m_videoRect;
@@ -323,6 +332,12 @@ void CGraphicContext::SetViewWindow(float left, float top, float right, float bo
   m_videoRect.y1 = ScaleFinalYCoord(left, top);
   m_videoRect.x2 = ScaleFinalXCoord(right, bottom);
   m_videoRect.y2 = ScaleFinalYCoord(right, bottom);
+}
+
+void CGraphicContext::SetFullScreenVideoWindow(const CRect& fraction)
+{
+  std::unique_lock lock(*this);
+  m_fullScreenVideoWindow = fraction;
 }
 
 void CGraphicContext::SetFullScreenVideo(bool bOnOff)
