@@ -13,3 +13,9 @@ applied (see `cmake/scripts/common/HbbTVPolyfill.cmake`).
 * `playerpage.html`, `iframe.js`: the broadband player page the polyfill loads from
   `orb://player`.
 * `dash.all.min.js`: dash.js (BSD-3-Clause) as modified by ORB for the player page.
+
+Kodi's own files:
+
+* `kodioverlay.html`: Kodi's own page in a second view above the application, as Kodi cannot
+  draw there. It shows an HbbTV watermark while an application runs, and on request a panel
+  offering the keys of the application's key set for input devices that lack them.

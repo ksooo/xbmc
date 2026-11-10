@@ -195,6 +195,14 @@
 						<onclick>ActivateWindow(Teletext)</onclick>
 						<visible>VideoPlayer.HasTeletext</visible>
 					</control>
+					<control type="radiobutton" id="70049">
+						<include content="OSDButton">
+							<param name="texture" value="osd/fullscreen/buttons/hbbtv.png"/>
+						</include>
+						<onclick>Dialog.Close(VideoOSD)</onclick>
+						<onclick>PVR.HbbTVLaunch()</onclick>
+						<visible>PVR.HasHbbTVApp</visible>
+					</control>
 					<control type="radiobutton" id="70046">
 						<include content="OSDButton">
 							<param name="texture" value="osd/fullscreen/buttons/streams.png"/>
