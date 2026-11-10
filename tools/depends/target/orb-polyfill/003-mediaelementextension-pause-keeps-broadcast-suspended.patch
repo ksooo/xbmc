@@ -1,0 +1,30 @@
+diff --git a/src/extensions/mediaelementextension.js b/src/extensions/mediaelementextension.js
+index d350703..547ffaa 100644
+--- a/src/extensions/mediaelementextension.js
++++ b/src/extensions/mediaelementextension.js
+@@ -422,9 +422,8 @@ hbbtv.objects.MediaElementExtension = (function() {
+         prototype.pause = function() {
+             const p = privates.get(this);
+             p.videoDummy.paused = true;
+-            try {
+-                hbbtv.objects.VideoBroadcast.notifyBroadbandAvInUse(false);
+-            } catch (e) {}
++            // A paused player keeps its picture, so the broadcast stays suspended until the
++            // media ends or is unloaded.
+             p.iframeProxy.callObserverMethod(MEDIA_PROXY_ID, 'pause', Array.from(arguments));
+         };
+ 
+@@ -676,13 +675,6 @@ hbbtv.objects.MediaElementExtension = (function() {
+                 try {
+                     hbbtv.objects.VideoBroadcast.notifyBroadbandAvInUse(false);
+                 } catch (x) {}
+-            } else if (e.type === 'pause' && this.paused) {
+-                // Only the app's pause() sets videoDummy.paused. dash.js MSE
+-                // pause/emptied during setSource must not release decoders
+-                // (A.2.4.1 / ERRATA0720).
+-                try {
+-                    hbbtv.objects.VideoBroadcast.notifyBroadbandAvInUse(false);
+-                } catch (x) {}
+             }
+             parent.dispatchEvent(e);
+         };

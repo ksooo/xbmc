@@ -6,6 +6,7 @@ xbmc/pvr/epg            pvr/epg
 xbmc/pvr/filesystem     pvr/filesystem
 xbmc/pvr/guilib         pvr/guilib
 xbmc/pvr/guilib/guiinfo pvr/guilib/guiinfo
+xbmc/pvr/guilib/hbbtv   pvr/guilib/hbbtv
 xbmc/pvr/hbbtv          pvr/hbbtv
 xbmc/pvr/providers      pvr/providers
 xbmc/pvr/recordings     pvr/recordings

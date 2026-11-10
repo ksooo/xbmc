@@ -94,6 +94,12 @@ public:
   const CRect &GetScissors() const;
   const CRect GetViewWindow() const;
   void SetViewWindow(float left, float top, float right, float bottom);
+  /*!
+   * \brief Restrict fullscreen video to a part of the screen, e.g. for interactive
+   * applications that scale the broadcast.
+   * \param fraction Rectangle in 0..1 screen fractions. Empty rectangle removes the restriction.
+   */
+  void SetFullScreenVideoWindow(const CRect& fraction);
   bool IsCalibrating() const;
   void SetCalibrating(bool bOnOff);
   void ResetOverscan(RESOLUTION res, OVERSCAN &overscan);
@@ -230,6 +236,7 @@ protected:
   int m_iScreenWidth = 720;
   std::string m_strMediaDir;
   CRect m_videoRect;
+  CRect m_fullScreenVideoWindow; // screen fractions, empty if unused
   bool m_bFullScreenRoot = true;
   bool m_bFullScreenVideo = false;
   bool m_bCalibrating = false;

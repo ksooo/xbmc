@@ -379,6 +379,10 @@ add_custom_command(OUTPUT ${CORE_BUILD_DIR}/xbmc/CompileInfo.cpp
                    DEPENDS ${CMAKE_SOURCE_DIR}/version.txt
                            ${CMAKE_SOURCE_DIR}/xbmc/CompileInfo.cpp.in)
 list(APPEND install_data ${ADDON_INSTALL_DATA})
+# The polyfill is only needed where an HbbTV application engine exists.
+if(CORE_SYSTEM_NAME STREQUAL osx OR CORE_SYSTEM_NAME STREQUAL android)
+  include(cmake/scripts/common/HbbTVPolyfill.cmake)
+endif()
 add_library(compileinfo OBJECT ${CORE_BUILD_DIR}/xbmc/CompileInfo.cpp)
 set_target_properties(compileinfo PROPERTIES FOLDER "Build Utilities")
 target_compile_options(compileinfo PRIVATE ${SYSTEM_DEFINES} ${ARCH_DEFINES})
@@ -476,6 +480,9 @@ core_add_optional_subdirs_from_filelist(${CMAKE_SOURCE_DIR}/cmake/treedata/optio
 # DEPLIBS: system libraries for linking
 target_link_libraries(lib${APP_NAME_LC} PUBLIC ${core_DEPENDS} ${SYSTEM_LDFLAGS} ${DEPLIBS} ${CMAKE_DL_LIBS})
 core_target_link_libraries(lib${APP_NAME_LC})
+if(TARGET hbbtv-polyfill)
+  add_dependencies(lib${APP_NAME_LC} hbbtv-polyfill)
+endif()
 set_target_properties(lib${APP_NAME_LC} PROPERTIES PROJECT_LABEL "xbmc")
 source_group_by_folder(lib${APP_NAME_LC} RELATIVE ${CMAKE_SOURCE_DIR}/xbmc)
 if(WIN32)
