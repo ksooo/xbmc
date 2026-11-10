@@ -18,6 +18,7 @@
 #include "guilib/guiinfo/GUIInfoLabels.h"
 #include "pvr/PVRManager.h"
 #include "pvr/guilib/PVRGUIActionsTimers.h"
+#include "pvr/hbbtv/PVRHbbTV.h"
 #include "pvr/windows/GUIWindowPVRGuide.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
@@ -213,6 +214,28 @@ int EpgGridControl(const std::vector<std::string>& params)
 /// \table_end
 ///
 
+/*! \brief Open an HbbTV application on top of the playing channel.
+ *  \param params The parameters
+ *  \details params[0] = URL of the application (optional). Without it, the autostart
+ *  application signalled by the playing channel is opened.
+ */
+static int HbbTVLaunch(const std::vector<std::string>& params)
+{
+  auto& hbbtv = CServiceBroker::GetPVRManager().Get<PVR::CPVRHbbTV>();
+  const bool started =
+      params.empty() ? hbbtv.LaunchAutostartApplication() : hbbtv.LaunchApplication(params[0]);
+  return started ? 0 : -1;
+}
+
+/*! \brief Close the running HbbTV application, if any.
+ *  \param params (ignored)
+ */
+static int HbbTVClose(const std::vector<std::string>& params)
+{
+  CServiceBroker::GetPVRManager().Get<PVR::CPVRHbbTV>().CloseApplication();
+  return 0;
+}
+
 CBuiltins::CommandMap CPVRBuiltins::GetOperations() const
 {
   return {
@@ -220,5 +243,7 @@ CBuiltins::CommandMap CPVRBuiltins::GetOperations() const
            {"pvr.togglerecordplayingchannel", {"Toggle recording on playing channel", 0, ToggleRecordPlayingChannel}},
            {"pvr.seekpercentage",             {"Performs a seek to the given percentage in timeshift buffer", 1, SeekPercentage}},
            {"pvr.epggridcontrol",             {"Control PVR Guide window's EPG grid", 1, EpgGridControl}},
+           {"pvr.hbbtvlaunch",                {"Open the HbbTV application of the playing channel", 0, HbbTVLaunch}},
+           {"pvr.hbbtvclose",                 {"Close the running HbbTV application", 0, HbbTVClose}},
          };
 }

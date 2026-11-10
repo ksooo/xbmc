@@ -2113,6 +2113,22 @@
           </dependencies>
         </setting>
       </group>
+      <group id="4" label="29998">
+        <requirement>HAS_HBBTV</requirement>
+        <setting id="pvrplayback.enablehbbtv" type="boolean" label="29996" help="29997">
+          <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="pvrplayback.autostarthbbtv" type="boolean" label="39220" help="39221">
+          <level>1</level>
+          <default>false</default>
+          <dependencies>
+            <dependency type="enable" setting="pvrplayback.enablehbbtv">true</dependency>
+          </dependencies>
+          <control type="toggle" />
+        </setting>
+      </group>
     </category>
     <category id="pvrrecord" label="19043" help="36233">
       <group id="1" label="128">
