@@ -32,6 +32,7 @@
 #include "pvr/guilib/PVRGUIChannelIconUpdater.h"
 #include "pvr/guilib/PVRGUIProgressHandler.h"
 #include "pvr/guilib/guiinfo/PVRGUIInfo.h"
+#include "pvr/hbbtv/PVRHbbTV.h"
 #include "pvr/providers/PVRProvider.h"
 #include "pvr/providers/PVRProviders.h"
 #include "pvr/recordings/PVRRecording.h"
@@ -495,6 +496,9 @@ void CPVRManager::Process()
     return;
   }
 
+  // The warm-up stalls the GUI on some platforms. Get it done before the startup progress shows.
+  Get<CPVRHbbTV>().PrepareEngine(true);
+
   // Wait for at least one client to come up and load/update data
   UpdateComponents(ManagerState::STATE_STARTING);
 
@@ -862,6 +866,12 @@ void CPVRManager::OnPlaybackStarted(const CFileItem& item)
   m_playbackState->OnPlaybackStarted(item);
   Get<PVR::GUI::Channels>().OnPlaybackStarted(item);
   m_epgContainer->OnPlaybackStarted();
+  Get<CPVRHbbTV>().OnPlaybackStarted();
+}
+
+void CPVRManager::OnAVStarted()
+{
+  Get<CPVRHbbTV>().OnAVStarted();
 }
 
 void CPVRManager::OnPlaybackStopped(const CFileItem& item)

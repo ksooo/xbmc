@@ -739,6 +739,7 @@ bool CApplicationMessageHandling::OnMessage(const CGUIMessage& message)
       CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::Player, "OnAVStart",
                                                          m_app.CurrentFileItemPtr(), param);
       m_app.m_playerEvent.Set();
+      CServiceBroker::GetPVRManager().OnAVStarted();
 #ifdef HAS_PYTHON
       // informs python script currently running playback has started
       // (does nothing if python is not loaded)

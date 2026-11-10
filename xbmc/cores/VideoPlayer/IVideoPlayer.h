@@ -20,6 +20,7 @@
 #define VideoPlayer_TELETEXT 4
 #define VideoPlayer_RDS      5
 #define VideoPlayer_ID3 6
+#define VideoPlayer_AIT 7
 
 class CDVDMsg;
 class CDVDStreamInfo;

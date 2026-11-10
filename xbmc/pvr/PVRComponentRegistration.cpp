@@ -17,6 +17,7 @@
 #include "pvr/guilib/PVRGUIActionsRecordings.h"
 #include "pvr/guilib/PVRGUIActionsTimers.h"
 #include "pvr/guilib/PVRGUIActionsUtils.h"
+#include "pvr/hbbtv/PVRHbbTV.h"
 
 #include <memory>
 
@@ -33,6 +34,7 @@ CPVRComponentRegistration::CPVRComponentRegistration()
   RegisterComponent(std::make_shared<CPVRGUIActionsRecordings>());
   RegisterComponent(std::make_shared<CPVRGUIActionsTimers>());
   RegisterComponent(std::make_shared<CPVRGUIActionsUtils>());
+  RegisterComponent(std::make_shared<CPVRHbbTV>());
 }
 
 CPVRComponentRegistration::~CPVRComponentRegistration()

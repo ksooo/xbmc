@@ -739,6 +739,7 @@ void CVideoPlayer::CreatePlayers()
   m_VideoPlayerTeletext = std::make_unique<CDVDTeletextData>(*m_processInfo);
   m_VideoPlayerRadioRDS = std::make_unique<CDVDRadioRDSData>(*m_processInfo);
   m_VideoPlayerAudioID3 = std::make_unique<CVideoPlayerAudioID3>(*m_processInfo);
+  m_VideoPlayerAIT = std::make_unique<CVideoPlayerAIT>(*m_processInfo);
   m_players_created = true;
 }
 
@@ -753,6 +754,7 @@ void CVideoPlayer::DestroyPlayers()
   m_VideoPlayerTeletext.reset();
   m_VideoPlayerRadioRDS.reset();
   m_VideoPlayerAudioID3.reset();
+  m_VideoPlayerAIT.reset();
 
   m_players_created = false;
 }
@@ -766,6 +768,7 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
     m_CurrentTeletext(StreamType::TELETEXT, VideoPlayer_TELETEXT),
     m_CurrentRadioRDS(StreamType::RADIO_RDS, VideoPlayer_RDS),
     m_CurrentAudioID3(StreamType::AUDIO_ID3, VideoPlayer_ID3),
+    m_CurrentAIT(StreamType::AIT, VideoPlayer_AIT),
     m_messenger("player"),
     m_outboundEvents(std::make_unique<CJobQueue>(false, 1, CJob::PRIORITY_NORMAL)),
     m_pInputStream(nullptr),
@@ -916,6 +919,7 @@ void CVideoPlayer::OnStartup()
   m_CurrentTeletext.Clear();
   m_CurrentRadioRDS.Clear();
   m_CurrentAudioID3.Clear();
+  m_CurrentAIT.Clear();
 
   UTILS::FONT::ClearTemporaryFonts();
 }
@@ -1213,6 +1217,19 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
   if (!valid)
     CloseStream(m_CurrentAudioID3, false);
 
+  // open AIT stream
+  valid = false;
+  for (const auto& stream : m_SelectionStreams.Get(StreamType::AIT))
+  {
+    if (OpenStream(m_CurrentAIT, stream.demuxerId, stream.id, stream.source))
+    {
+      valid = true;
+      break;
+    }
+  }
+  if (!valid)
+    CloseStream(m_CurrentAIT, false);
+
   // disable demux streams
   if (NETWORK::IsRemote(m_item) && m_pDemuxer)
   {
@@ -1222,7 +1239,8 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
       {
         if (stream.id != m_CurrentVideo.id && stream.id != m_CurrentAudio.id &&
             stream.id != m_CurrentSubtitle.id && stream.id != m_CurrentTeletext.id &&
-            stream.id != m_CurrentRadioRDS.id && stream.id != m_CurrentAudioID3.id)
+            stream.id != m_CurrentRadioRDS.id && stream.id != m_CurrentAudioID3.id &&
+            stream.id != m_CurrentAIT.id)
         {
           m_pDemuxer->EnableStream(stream.demuxerId, stream.id, false);
         }
@@ -1437,6 +1455,7 @@ void CVideoPlayer::Prepare()
   m_CurrentTeletext.hint.Clear();
   m_CurrentRadioRDS.hint.Clear();
   m_CurrentAudioID3.hint.Clear();
+  m_CurrentAIT.hint.Clear();
   m_SpeedState.Reset(DVD_NOPTS_VALUE);
   m_offset_pts = 0;
   m_CurrentAudio.lastdts = DVD_NOPTS_VALUE;
@@ -1803,6 +1822,7 @@ void CVideoPlayer::Process()
       m_CurrentTeletext.inited = false;
       m_CurrentRadioRDS.inited = false;
       m_CurrentAudioID3.inited = false;
+      m_CurrentAIT.inited = false;
 
       // if we are caching, start playing it again
       SetCaching(CACHESTATE_DONE);
@@ -1828,6 +1848,7 @@ void CVideoPlayer::Process()
     CheckBetterStream(m_CurrentTeletext, pStream);
     CheckBetterStream(m_CurrentRadioRDS, pStream);
     CheckBetterStream(m_CurrentAudioID3, pStream);
+    CheckBetterStream(m_CurrentAIT, pStream);
 
     // demux video stream
     if (CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(CSettings::SETTING_SUBTITLES_PARSECAPTIONS) && CheckIsCurrent(m_CurrentVideo, pStream, pPacket))
@@ -1911,6 +1932,8 @@ void CVideoPlayer::ProcessPacket(CDemuxStream* pStream, DemuxPacket* pPacket)
     ProcessRadioRDSData(pStream, pPacket);
   else if (CheckIsCurrent(m_CurrentAudioID3, pStream, pPacket))
     ProcessAudioID3Data(pStream, pPacket);
+  else if (CheckIsCurrent(m_CurrentAIT, pStream, pPacket))
+    ProcessAITData(pStream, pPacket);
   else
   {
     CDVDDemuxUtils::FreeDemuxPacket(pPacket); // free it since we won't do anything with it
@@ -2063,6 +2086,22 @@ void CVideoPlayer::ProcessAudioID3Data(CDemuxStream* pStream, DemuxPacket* pPack
     drop = true;
 
   m_VideoPlayerAudioID3->SendMessage(std::make_shared<CDVDMsgDemuxerPacket>(pPacket, drop));
+}
+
+void CVideoPlayer::ProcessAITData(CDemuxStream* pStream, DemuxPacket* pPacket)
+{
+  CheckStreamChanges(m_CurrentAIT, pStream);
+
+  UpdateTimestamps(m_CurrentAIT, pPacket);
+
+  bool drop = false;
+  if (CheckPlayerInit(m_CurrentAIT))
+    drop = true;
+
+  if (CheckSceneSkip(m_CurrentAIT))
+    drop = true;
+
+  m_VideoPlayerAIT->SendMessage(std::make_shared<CDVDMsgDemuxerPacket>(pPacket, drop));
 }
 
 CacheInfo CVideoPlayer::GetCachingTimes()
@@ -2551,6 +2590,8 @@ bool CVideoPlayer::CheckPlayerInit(CCurrentStream& current)
         m_CurrentRadioRDS.startpts = current.dts;
       if (m_CurrentAudioID3.startpts != DVD_NOPTS_VALUE)
         m_CurrentAudioID3.startpts = current.dts;
+      if (m_CurrentAIT.startpts != DVD_NOPTS_VALUE)
+        m_CurrentAIT.startpts = current.dts;
     }
 
     if(current.dts < current.startpts)
@@ -2970,6 +3011,8 @@ IDVDStreamPlayer* CVideoPlayer::GetStreamPlayer(unsigned int target)
     return m_VideoPlayerRadioRDS.get();
   if (target == VideoPlayer_ID3)
     return m_VideoPlayerAudioID3.get();
+  if (target == VideoPlayer_AIT)
+    return m_VideoPlayerAIT.get();
   return NULL;
 }
 
@@ -3021,6 +3064,7 @@ void CVideoPlayer::OnExit()
   CloseStream(m_CurrentTeletext,!m_bAbortRequest);
   CloseStream(m_CurrentRadioRDS, !m_bAbortRequest);
   CloseStream(m_CurrentAudioID3, !m_bAbortRequest);
+  CloseStream(m_CurrentAIT, !m_bAbortRequest);
   // the generalization principle was abused for subtitle player. actually it is not a stream player like
   // video and audio. subtitle player does not run on its own thread, hence waitForBuffers makes
   // no sense here. waitForBuffers is abused to clear subtitle overlays (false clears them)
@@ -4450,6 +4494,9 @@ bool CVideoPlayer::OpenStream(CCurrentStream& current, int64_t demuxerId, int iS
     case StreamType::AUDIO_ID3:
       res = OpenAudioID3Stream(hint);
       break;
+    case StreamType::AIT:
+      res = OpenAITStream(hint);
+      break;
     default:
       res = false;
       break;
@@ -4738,6 +4785,24 @@ bool CVideoPlayer::OpenAudioID3Stream(CDVDStreamInfo& hint)
     return false;
 
   if (m_CurrentAudioID3.id < 0 || m_CurrentAudioID3.hint != hint)
+  {
+    if (!player->OpenStream(hint))
+      return false;
+  }
+
+  return true;
+}
+
+bool CVideoPlayer::OpenAITStream(CDVDStreamInfo& hint)
+{
+  if (!m_VideoPlayerAIT->CheckStream(hint))
+    return false;
+
+  IDVDStreamPlayer* player = GetStreamPlayer(m_CurrentAIT.player);
+  if (player == nullptr)
+    return false;
+
+  if (m_CurrentAIT.id < 0 || m_CurrentAIT.hint != hint)
   {
     if (!player->OpenStream(hint))
       return false;

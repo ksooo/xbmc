@@ -230,6 +230,11 @@ public:
   void OnPlaybackStarted(const CFileItem& item);
 
   /*!
+   * @brief Inform PVR manager that audio and video of the playing item are in sync.
+   */
+  void OnAVStarted();
+
+  /*!
    * @brief Inform PVR manager that playback of an item was stopped due to user interaction.
    * @param item The item that stopped to play.
    */
