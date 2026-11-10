@@ -352,7 +352,10 @@ DemuxPacket* CDVDDemuxClient::Read()
     }
   }
 
-  if (!IsVideoReady())
+  // AIT sections are sent once right after the stream start and must not be dropped while
+  // the video stream still waits for its extradata.
+  const CDemuxStream* stream = GetStream(m_packet->iStreamId);
+  if (!IsVideoReady() && !(stream && stream->type == StreamType::AIT))
   {
     CDVDDemuxUtils::FreeDemuxPacket(m_packet.release());
     DemuxPacket *pPacket = CDVDDemuxUtils::AllocateDemuxPacket(0);
@@ -612,6 +615,30 @@ void CDVDDemuxClient::SetStreamProps(CDemuxStream *stream, std::map<int, std::sh
 
     map[stream->uniqueId] = streamID3;
     toStream = streamID3;
+  }
+  else if (stream->type == StreamType::AIT)
+  {
+    CDemuxStreamAIT* source = dynamic_cast<CDemuxStreamAIT*>(stream);
+
+    if (!source)
+    {
+      CLog::Log(LOGERROR, "CDVDDemuxClient::RequestStream - invalid AIT stream with id {}",
+                stream->uniqueId);
+      DisposeStreams();
+      return;
+    }
+
+    std::shared_ptr<CDemuxStreamClientInternalTpl<CDemuxStreamAIT>> streamAIT;
+    if (currentStream)
+      streamAIT =
+          std::dynamic_pointer_cast<CDemuxStreamClientInternalTpl<CDemuxStreamAIT>>(currentStream);
+    if (!streamAIT || streamAIT->codec != source->codec)
+    {
+      streamAIT = std::make_shared<CDemuxStreamClientInternalTpl<CDemuxStreamAIT>>();
+    }
+
+    map[stream->uniqueId] = streamAIT;
+    toStream = streamAIT;
   }
   else
   {

@@ -2624,6 +2624,12 @@ private:
     tmp.codec_type = PVR_CODEC_TYPE_ID3;
     tmp.codec_id = AV_CODEC_ID_NONE;
     m_lookup.try_emplace("ID3", tmp);
+
+    // AIT sections are parsed by Kodi itself.
+    tmp.codec_type = PVR_CODEC_TYPE_AIT;
+    tmp.codec_id = AV_CODEC_ID_NONE;
+    m_lookup.try_emplace("AIT", tmp);
+    m_lookup.try_emplace("HBBTV", tmp);
   }
 
   std::map<std::string, PVR_CODEC, std::less<>> m_lookup;
