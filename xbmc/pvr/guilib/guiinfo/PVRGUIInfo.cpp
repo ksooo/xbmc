@@ -34,6 +34,7 @@
 #include "pvr/epg/EpgSearchFilter.h"
 #include "pvr/guilib/PVRGUIActionsChannels.h"
 #include "pvr/guilib/PVRGUIActionsEPG.h"
+#include "pvr/hbbtv/PVRHbbTV.h"
 #include "pvr/providers/PVRProvider.h"
 #include "pvr/providers/PVRProviders.h"
 #include "pvr/recordings/PVRRecording.h"
@@ -1293,6 +1294,12 @@ bool CPVRGUIInfo::GetPVRLabel(const CFileItem* item,
     case PVR_BACKEND_NAME:
       CharInfoBackendName(strValue);
       return true;
+    case PVR_HBBTV_APP_NAME:
+    {
+      const auto app = CServiceBroker::GetPVRManager().Get<CPVRHbbTV>().GetAutostartApplication();
+      strValue = app ? app->name : "";
+      return true;
+    }
     case PVR_BACKEND_VERSION:
       CharInfoBackendVersion(strValue);
       return true;
@@ -1966,6 +1973,9 @@ bool CPVRGUIInfo::GetPVRBool(const CGUIInfo& info, bool& bValue) const
       return true;
     case PVR_IS_PLAYING_TV:
       bValue = m_bIsPlayingTV;
+      return true;
+    case PVR_HAS_HBBTV_APP:
+      bValue = CServiceBroker::GetPVRManager().Get<CPVRHbbTV>().HasApplications();
       return true;
     case PVR_IS_PLAYING_RADIO:
       bValue = m_bIsPlayingRadio;

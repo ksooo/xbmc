@@ -669,6 +669,7 @@ constexpr uint32_t PVR_IS_PLAYING_EPGTAG             = PVR_CONDITIONS_START + 16
 constexpr uint32_t PVR_CAN_RECORD_PLAYING_CHANNEL    = PVR_CONDITIONS_START + 17;
 constexpr uint32_t PVR_IS_RECORDING_PLAYING_CHANNEL  = PVR_CONDITIONS_START + 18;
 constexpr uint32_t PVR_IS_PLAYING_ACTIVE_RECORDING   = PVR_CONDITIONS_START + 19;
+constexpr uint32_t PVR_HAS_HBBTV_APP                 = PVR_CONDITIONS_START + 20;
 
 constexpr uint32_t PVR_STRINGS_START                 = 1200;
 constexpr uint32_t PVR_NEXT_RECORDING_CHANNEL        = PVR_STRINGS_START;
@@ -746,6 +747,7 @@ constexpr uint32_t PVR_BACKEND_PROVIDERS             = PVR_STRINGS_START + 74;
 constexpr uint32_t PVR_BACKEND_CHANNEL_GROUPS        = PVR_STRINGS_START + 75;
 constexpr uint32_t PVR_CLIENT_NAME                   = PVR_STRINGS_START + 76;
 constexpr uint32_t PVR_INSTANCE_NAME                 = PVR_STRINGS_START + 77;
+constexpr uint32_t PVR_HBBTV_APP_NAME                = PVR_STRINGS_START + 78;
 
 constexpr uint32_t PVR_INTS_START                    = 1300;
 constexpr uint32_t PVR_CLIENT_COUNT                  = PVR_INTS_START;

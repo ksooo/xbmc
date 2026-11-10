@@ -17740,7 +17740,22 @@ msgctxt "#29995"
 msgid "{0:s} (Disc {1:s})"
 msgstr ""
 
-#empty strings from id 29996 to 33000
+#. Setting label: evaluate HbbTV application signalling of live TV and radio channels
+msgctxt "#29996"
+msgid "Enable HbbTV applications"
+msgstr ""
+
+#. Setting help text for "Enable HbbTV applications"
+msgctxt "#29997"
+msgid "Interactive applications signalled by the broadcaster can be started while watching live TV or listening to live radio."
+msgstr ""
+
+#. Settings group title: HbbTV related settings of PVR playback
+msgctxt "#29998"
+msgid "HbbTV"
+msgstr ""
+
+#empty strings from id 29999 to 33000
 #strings 30000 thru 30999 reserved for plug-ins and plug-in settings
 #strings 31000 thru 31999 reserved for skins
 #strings 32000 thru 32999 reserved for scripts
@@ -25278,7 +25293,19 @@ msgctxt "#39219"
 msgid "Use the system Dolby Vision extensions to correctly display Dolby Vision profile 5, 7 (excludes FEL reconstruction), 8 and 10 video."
 msgstr ""
 
-#empty strings from id 39220 to 39899
+#. Setting label: start the HbbTV autostart application when switching to a channel
+#: system/settings/settings.xml
+msgctxt "#39220"
+msgid "Start HbbTV applications automatically"
+msgstr ""
+
+#. Help text for setting "Start HbbTV applications automatically" of label #39220
+#: system/settings/settings.xml
+msgctxt "#39221"
+msgid "Start the broadcaster's application whenever a channel signals one, like a TV set does. Every channel switch then contacts the broadcaster's server."
+msgstr ""
+
+#empty strings from id 39222 to 39899
 
 #. List formatting: pattern used to join a list of exactly two items, e.g. "A and B"
 #. STR_LIST_AND_TWO
