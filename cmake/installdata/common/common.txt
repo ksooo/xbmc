@@ -3,6 +3,7 @@ sounds/*
 system/addon-manifest.xml
 system/colors.xml
 system/dialogcolors.xml
+system/hbbtv/*
 system/keyboardlayouts/*
 system/keymaps/*
 system/language-subtag-registry.txt
