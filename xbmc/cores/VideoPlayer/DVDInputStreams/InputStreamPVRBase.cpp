@@ -343,6 +343,19 @@ void CInputStreamPVRBase::UpdateStreamMap()
 
       dStream = std::move(streamAudioID3);
     }
+    else if (stream.iCodecType == PVR_CODEC_TYPE_AIT &&
+             CServiceBroker::GetSettingsComponent()->GetSettings()->GetBool(
+                 CSettings::SETTING_PVRPLAYBACK_ENABLEHBBTV))
+    {
+      std::shared_ptr<CDemuxStreamAIT> streamAIT;
+
+      if (dStream)
+        streamAIT = std::dynamic_pointer_cast<CDemuxStreamAIT>(dStream);
+      if (!streamAIT)
+        streamAIT = std::make_shared<CDemuxStreamAIT>();
+
+      dStream = std::move(streamAIT);
+    }
     else
       dStream = std::make_shared<CDemuxStream>();
 

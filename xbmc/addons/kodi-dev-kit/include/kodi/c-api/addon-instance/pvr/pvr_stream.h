@@ -81,6 +81,11 @@ extern "C"
     /// @brief To identify @ref cpp_kodi_addon_pvr_Defs_Stream_PVRStreamProperties as Audio ID3 tags.
     PVR_CODEC_TYPE_ID3,
 
+    /// @brief To identify @ref cpp_kodi_addon_pvr_Defs_Stream_PVRStreamProperties as DVB
+    /// Application Information Table (AIT) sections, e.g. for HbbTV signalling. Packets carry
+    /// the raw transport stream payload of the AIT PID.
+    PVR_CODEC_TYPE_AIT,
+
     PVR_CODEC_TYPE_NB
   } PVR_CODEC_TYPE;
   ///@}
