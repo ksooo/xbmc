@@ -1,0 +1,818 @@
+package @APP_PACKAGE@;
+
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeProvider;
+import android.webkit.ConsoleMessage;
+import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
+import android.webkit.JsPromptResult;
+import android.webkit.JsResult;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
+
+import org.json.JSONObject;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * HbbTV application overlay: a transparent WebView in its own window above Kodi's surfaces,
+ * with Kodi's own page (kodioverlay.html) on top. The static entry points may be called from
+ * any thread; the views live on the UI thread. Keys the application does not take are handed
+ * back to Kodi through the native side.
+ */
+public class XBMCHbbTVView extends WebView
+{
+  private static final String ACCEPT_HEADER =
+      "application/vnd.hbbtv.xhtml+xml,application/xhtml+xml,text/html;q=0.9,*/*;q=0.8";
+  private static final String BRIDGE_PROMPT = "__orb_bridge__";
+  private static final String ORB_PLAYER_URL = "orb://player";
+  private static final String KODI_OVERLAY_PAGE = "kodioverlay.html";
+  private static final String REMOTE_KEYS_INTERFACE = "kodiRemoteKeys";
+  private static final int REMOTE_KEYS_EXIT = -1; // see kodioverlay.html
+
+  // HbbTV applications are authored for a 1280x720 graphics plane.
+  private static final int APP_PLANE_WIDTH = 1280;
+  private static final int APP_PLANE_HEIGHT = 720;
+  private static final long WARMUP_TIMEOUT_MS = 5000;
+
+  // Same threshold as Kodi's own long press detection.
+  private static final int LONG_PRESS_MS = 250;
+
+  // HbbTV virtual key codes
+  private static final int VK_ENTER = 13;
+  private static final int VK_LEFT = 37;
+  private static final int VK_UP = 38;
+  private static final int VK_RIGHT = 39;
+  private static final int VK_DOWN = 40;
+  private static final int VK_PLAY_PAUSE = 402;
+  private static final int VK_RED = 403;
+  private static final int VK_GREEN = 404;
+  private static final int VK_YELLOW = 405;
+  private static final int VK_BLUE = 406;
+  private static final int VK_REWIND = 412;
+  private static final int VK_STOP = 413;
+  private static final int VK_FAST_FWD = 417;
+  private static final int VK_BACK = 461;
+
+  // Linux input event code KEY_ENTER, which Chromium maps to the DOM code "Enter".
+  private static final int SCANCODE_ENTER = 28;
+
+  private static native String _request(String json);
+  private static native boolean _acceptsKey(int virtualKey);
+  private static native boolean _isTextInputActive();
+  private static native String _keyEventScript(int virtualKey, String type);
+  private static native void _onNewDocument();
+  private static native void _onActive(boolean active);
+  private static native void _onExit();
+  private static native String _remoteKeysScript();
+  private static native void _forwardKey(int keyCode, boolean up);
+  private static native void _log(String message);
+  private static native void _logConsole(String message, boolean error);
+  private static native String _userAgent();
+
+  // The views run on their own thread, so their stalls, e.g. while the WebView's code is paged
+  // in, do not hold up Kodi's frame callbacks on the main thread.
+  private static final Handler sHandler = createHandler();
+  private static XBMCHbbTVView sView = null;
+  private static CountDownLatch sWarmup = null;
+  // Built by the warm-up for the first application, so its launch does not stall the video.
+  private static XBMCHbbTVView sSpareView = null;
+  private static String sPolyfillDir = null;
+  private static String sPolyfill = null;
+  private static String sPlayerPage = null;
+  private static String sIframeScript = null;
+  private static String sDashScript = null;
+
+  private boolean mRemoteKeysShown = false;
+  private KeyEvent mPendingSelect = null;
+  private int mPendingSelectSerial = 0;
+  private final String mUserAgent = _userAgent();
+  private FrameLayout mContainer;
+  private WebView mKodiView;
+  private WindowManager.LayoutParams mLayout;
+  private Rect mDisplay;
+
+  private static Handler createHandler()
+  {
+    HandlerThread thread = new HandlerThread("HbbTV");
+    thread.start();
+    return new Handler(thread.getLooper());
+  }
+
+  public static void prepare(final String polyfillDir, boolean wait)
+  {
+    CountDownLatch warmup;
+    synchronized (XBMCHbbTVView.class)
+    {
+      if (sWarmup == null)
+      {
+        sWarmup = new CountDownLatch(1);
+        startWarmup(polyfillDir);
+      }
+      warmup = sWarmup;
+    }
+    if (!wait)
+      return;
+    try
+    {
+      warmup.await(WARMUP_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+    }
+    catch (InterruptedException e)
+    {
+    }
+  }
+
+  private static void startWarmup(final String polyfillDir)
+  {
+    new Thread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        loadPolyfillFiles(polyfillDir);
+      }
+    }).start();
+
+    // Two steps, so the UI thread draws frames in between.
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        _log("starting WebView runtime");
+        sSpareView = new XBMCHbbTVView(Main.MainActivity);
+      }
+    });
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        sSpareView.createWindow(Main.MainActivity, polyfillDir);
+        sWarmup.countDown();
+      }
+    });
+  }
+
+  public static void launch(final String url, final String polyfillDir)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView != null)
+          sView.destroyView();
+        loadPolyfillFiles(polyfillDir);
+        sView = takeSpareView(polyfillDir);
+        sView.attach();
+        sView.loadApplication(url);
+      }
+    });
+  }
+
+  public static void close()
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView == null)
+          return;
+        _log("closing application");
+        sView.destroyView();
+        sView = null;
+      }
+    });
+  }
+
+  public static void load(final String url)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView != null)
+          sView.loadApplication(url);
+      }
+    });
+  }
+
+  public static void show(final boolean visible)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView == null)
+          return;
+        // Only the application view: Kodi's page stays, and with it the watermark.
+        sView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+      }
+    });
+  }
+
+  public static void evaluate(final String script)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView != null)
+          sView.evaluateJavascript(script, null);
+      }
+    });
+  }
+
+  public static void sendKey(final int virtualKey)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView == null)
+          return;
+        sView.dispatchKey(virtualKey, "keydown");
+        sView.dispatchKey(virtualKey, "keyup");
+      }
+    });
+  }
+
+  // The view built by the warm-up, unless the display changed since.
+  private static XBMCHbbTVView takeSpareView(String polyfillDir)
+  {
+    XBMCHbbTVView view = sSpareView;
+    sSpareView = null;
+    if (view != null && view.mDisplay.equals(Main.MainActivity.getDisplayRect()))
+      return view;
+    if (view != null)
+      view.destroyWebViews();
+    view = new XBMCHbbTVView(Main.MainActivity);
+    view.createWindow(Main.MainActivity, polyfillDir);
+    return view;
+  }
+
+  private XBMCHbbTVView(Main activity)
+  {
+    super(activity);
+
+    setBackgroundColor(Color.TRANSPARENT);
+    setFocusable(true);
+    setFocusableInTouchMode(true);
+
+    WebSettings settings = getSettings();
+    settings.setJavaScriptEnabled(true);
+    settings.setDomStorageEnabled(true);
+    settings.setMediaPlaybackRequiresUserGesture(false);
+    settings.setUserAgentString(mUserAgent);
+    settings.setUseWideViewPort(true);
+    settings.setLoadWithOverviewMode(false);
+    settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+    setWebChromeClient(new ChromeClient());
+    setWebViewClient(new ViewClient());
+  }
+
+  // With an accessibility service enabled, which many Android TV launchers and key remappers
+  // do, building the page's accessibility tree on first focus stalled Kodi's video.
+  @Override
+  public AccessibilityNodeProvider getAccessibilityNodeProvider()
+  {
+    return null;
+  }
+
+  private void createWindow(Main activity, String polyfillDir)
+  {
+    // The 1280x720 application plane is the largest 16:9 area centred on the display, like a
+    // full screen video. Kodi's bridge maps video rectangles with the same geometry.
+    Rect display = activity.getDisplayRect();
+    mDisplay = display;
+    float scale = Math.min(display.width() / (float) APP_PLANE_WIDTH,
+                           display.height() / (float) APP_PLANE_HEIGHT);
+    int planeWidth = Math.round(APP_PLANE_WIDTH * scale);
+    int planeHeight = Math.round(APP_PLANE_HEIGHT * scale);
+    setInitialScale(Math.round(scale * 100));
+
+    mKodiView = createKodiView(activity, polyfillDir, scale);
+
+    // The window covers the whole display, so Kodi's page can use the screen's corners.
+    mContainer = new FrameLayout(activity)
+    {
+      @Override
+      public boolean dispatchKeyEvent(KeyEvent event)
+      {
+        return handleKeyEvent(event);
+      }
+    };
+    FrameLayout.LayoutParams plane = new FrameLayout.LayoutParams(planeWidth, planeHeight);
+    plane.leftMargin = (display.width() - planeWidth) / 2;
+    plane.topMargin = (display.height() - planeHeight) / 2;
+    mContainer.addView(this, plane);
+    mContainer.addView(mKodiView, new FrameLayout.LayoutParams(
+        FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+    WindowManager.LayoutParams layout = new WindowManager.LayoutParams(display.width(),
+        display.height(),
+        WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
+        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+            | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+            | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+        PixelFormat.TRANSLUCENT);
+    layout.gravity = Gravity.TOP | Gravity.START;
+    mLayout = layout;
+  }
+
+  private void attach()
+  {
+    mLayout.token = Main.MainActivity.getWindow().getDecorView().getWindowToken();
+    Main.MainActivity.getWindowManager().addView(mContainer, mLayout);
+    requestFocus();
+    _onActive(true);
+  }
+
+  private void destroyView()
+  {
+    _onActive(false);
+    Main.MainActivity.getWindowManager().removeView(mContainer);
+    stopLoading();
+    destroyWebViews();
+  }
+
+  private void destroyWebViews()
+  {
+    destroy();
+    mKodiView.removeJavascriptInterface(REMOTE_KEYS_INTERFACE);
+    mKodiView.destroy();
+  }
+
+  // Kodi's own page above the application, covering the whole display.
+  private WebView createKodiView(Main activity, String polyfillDir, float scale)
+  {
+    WebView view = new WebView(activity);
+    view.setBackgroundColor(Color.TRANSPARENT);
+    view.setFocusable(false);
+    view.getSettings().setJavaScriptEnabled(true);
+    view.getSettings().setAllowFileAccess(true);
+    view.setInitialScale(Math.round(scale * 100));
+    view.addJavascriptInterface(new RemoteKeysInterface(), REMOTE_KEYS_INTERFACE);
+    view.loadUrl(Paths.get(polyfillDir, KODI_OVERLAY_PAGE).toUri().toString());
+    return view;
+  }
+
+  private void showRemoteKeys()
+  {
+    mKodiView.evaluateJavascript(_remoteKeysScript(), null);
+    mRemoteKeysShown = true;
+  }
+
+  private void loadApplication(String url)
+  {
+    _log("loading '" + url + "'");
+    loadUrl(url);
+  }
+
+  private void dispatchKey(int virtualKey, String type)
+  {
+    evaluateJavascript(_keyEventScript(virtualKey, type), null);
+  }
+
+  // All keys of the window arrive here, whichever view has the focus.
+  private boolean handleKeyEvent(KeyEvent event)
+  {
+    final int action = event.getAction();
+    if (action != KeyEvent.ACTION_DOWN && action != KeyEvent.ACTION_UP)
+      return true;
+
+    final boolean down = action == KeyEvent.ACTION_DOWN;
+    final int virtualKey = virtualKeyFor(event.getKeyCode());
+
+    if (_isTextInputActive())
+    {
+      forwardToKodi(event);
+      return true;
+    }
+
+    // The exit key of a TV remote ends the application, like on a TV set.
+    if (event.getKeyCode() == KeyEvent.KEYCODE_ESCAPE)
+    {
+      if (down && event.getRepeatCount() == 0)
+        _onExit();
+      return true;
+    }
+
+    if (mRemoteKeysShown)
+    {
+      // Repeats of select come from the press that opened the panel.
+      if (virtualKey != 0 && !(virtualKey == VK_ENTER && event.getRepeatCount() > 0))
+        mKodiView.evaluateJavascript(_keyEventScript(virtualKey, down ? "keydown" : "keyup"),
+                                     null);
+      return true;
+    }
+
+    // TV remotes have no separate exit key: Back ends the application unless it asked for
+    // navigation keys, in which case it is VK_BACK for the application.
+    if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && !_acceptsKey(VK_BACK))
+    {
+      if (down && event.getRepeatCount() == 0)
+        _onExit();
+      return true;
+    }
+
+    // Select: a short press is delivered on release, holding it shows the remote keys.
+    if (virtualKey == VK_ENTER)
+    {
+      if (event.getRepeatCount() > 0)
+        return true;
+
+      if (down)
+      {
+        mPendingSelect = event;
+        final int serial = ++mPendingSelectSerial;
+        sHandler.postDelayed(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            if (serial != mPendingSelectSerial || mPendingSelect == null)
+              return;
+            mPendingSelect = null;
+            showRemoteKeys();
+          }
+        }, LONG_PRESS_MS);
+        return true;
+      }
+
+      KeyEvent pending = mPendingSelect;
+      mPendingSelect = null;
+      ++mPendingSelectSerial;
+      if (pending != null)
+      {
+        deliverKey(pending, virtualKey);
+        deliverKey(event, virtualKey);
+      }
+      return true;
+    }
+
+    deliverKey(event, virtualKey);
+    return true;
+  }
+
+  // Hands the event to the application or, for the few keys Kodi keeps, to Kodi.
+  private void deliverKey(KeyEvent event, int virtualKey)
+  {
+    final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+    final boolean accepted = virtualKey != 0 && _acceptsKey(virtualKey);
+    if (down)
+      _log("key " + event.getKeyCode() + " -> VK " + virtualKey
+           + (accepted ? " forwarded to application" : " not taken by the application"));
+
+    if (accepted)
+    {
+      // Arrows, Enter and digits carry the same code in the browser and in HbbTV, so the real
+      // event can go through. The other keys only exist as HbbTV codes.
+      final boolean sameCode = virtualKey == VK_ENTER
+          || (virtualKey >= VK_LEFT && virtualKey <= VK_DOWN)
+          || (virtualKey >= '0' && virtualKey <= '9');
+      if (sameCode)
+      {
+        // The select key of a remote carries no character, so the page would see a keydown
+        // without the keypress a keyboard's Enter produces. Hand it over as Enter, with the
+        // scan code of an Enter key: without one the page sees an empty 'code' and the
+        // polyfill replaces the event by an untrusted copy that activates no button.
+        if (virtualKey == VK_ENTER && event.getKeyCode() != KeyEvent.KEYCODE_ENTER)
+          event = new KeyEvent(event.getDownTime(), event.getEventTime(), event.getAction(),
+                               KeyEvent.KEYCODE_ENTER, event.getRepeatCount(),
+                               event.getMetaState(), event.getDeviceId(), SCANCODE_ENTER,
+                               event.getFlags(), event.getSource());
+        dispatchKeyEvent(event);
+      }
+      else
+        dispatchKey(virtualKey, down ? "keydown" : "keyup");
+      return;
+    }
+
+    // Like a TV set, keys the application did not ask for stay with Kodi.
+    forwardToKodi(event);
+  }
+
+  private static void forwardToKodi(KeyEvent event)
+  {
+    _forwardKey(event.getKeyCode(), event.getAction() == KeyEvent.ACTION_UP);
+  }
+
+  // Maps a key to the HbbTV VK_* code the polyfill's KeyEvent expects, 0 if unmapped.
+  private static int virtualKeyFor(int keyCode)
+  {
+    switch (keyCode)
+    {
+      case KeyEvent.KEYCODE_DPAD_LEFT:
+        return VK_LEFT;
+      case KeyEvent.KEYCODE_DPAD_UP:
+        return VK_UP;
+      case KeyEvent.KEYCODE_DPAD_RIGHT:
+        return VK_RIGHT;
+      case KeyEvent.KEYCODE_DPAD_DOWN:
+        return VK_DOWN;
+      case KeyEvent.KEYCODE_DPAD_CENTER:
+      case KeyEvent.KEYCODE_ENTER:
+      case KeyEvent.KEYCODE_NUMPAD_ENTER:
+        return VK_ENTER;
+      case KeyEvent.KEYCODE_BACK:
+      case KeyEvent.KEYCODE_DEL:
+        return VK_BACK;
+      case KeyEvent.KEYCODE_PROG_RED:
+      case KeyEvent.KEYCODE_R:
+        return VK_RED;
+      case KeyEvent.KEYCODE_PROG_GREEN:
+      case KeyEvent.KEYCODE_G:
+        return VK_GREEN;
+      case KeyEvent.KEYCODE_PROG_YELLOW:
+      case KeyEvent.KEYCODE_Y:
+        return VK_YELLOW;
+      case KeyEvent.KEYCODE_PROG_BLUE:
+      case KeyEvent.KEYCODE_B:
+        return VK_BLUE;
+      case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+      case KeyEvent.KEYCODE_MEDIA_PLAY:
+      case KeyEvent.KEYCODE_MEDIA_PAUSE:
+        return VK_PLAY_PAUSE;
+      case KeyEvent.KEYCODE_MEDIA_STOP:
+        return VK_STOP;
+      case KeyEvent.KEYCODE_MEDIA_REWIND:
+        return VK_REWIND;
+      case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+        return VK_FAST_FWD;
+      default:
+        if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9)
+          return '0' + keyCode - KeyEvent.KEYCODE_0;
+        return 0;
+    }
+  }
+
+  private static String loadPolyfillFile(String dir, String name)
+  {
+    try
+    {
+      return new String(Files.readAllBytes(Paths.get(dir, name)), StandardCharsets.UTF_8);
+    }
+    catch (Exception e)
+    {
+      _log("cannot load '" + name + "' from '" + dir + "': " + e);
+      return null;
+    }
+  }
+
+  private static synchronized void loadPolyfillFiles(String dir)
+  {
+    if (dir.equals(sPolyfillDir))
+      return;
+    sPolyfill = loadPolyfillFile(dir, "hbbtv.js");
+    sPlayerPage = loadPolyfillFile(dir, "playerpage.html");
+    sIframeScript = loadPolyfillFile(dir, "iframe.js");
+    sDashScript = loadPolyfillFile(dir, "dash.all.min.js");
+    sPolyfillDir = dir;
+  }
+
+  private static String tokenScript(String url) throws Exception
+  {
+    // Uri also handles the polyfill's own orb:// scheme.
+    Uri parsed = Uri.parse(url);
+    String origin = parsed.getScheme() + "://" + parsed.getHost()
+                    + (parsed.getPort() != -1 ? ":" + parsed.getPort() : "");
+    JSONObject token = new JSONObject();
+    token.put("appId", 1);
+    token.put("uri", url);
+    token.put("origin", origin);
+    return "document.token=" + token + ";\n";
+  }
+
+  // Serves the polyfill's internal player page. The polyfill loads broadband media in an
+  // iframe with this page, which hosts the actual video element.
+  private WebResourceResponse playerPage(String url)
+  {
+    if (sPlayerPage == null || sIframeScript == null || sDashScript == null)
+      return null;
+
+    try
+    {
+      String injection = "<head><script>//<![CDATA[\n" + tokenScript(url) + sIframeScript + "\n"
+                         + sDashScript + "\n//]]></script>";
+      String document = sPlayerPage.replace("<head>", injection);
+      return new WebResourceResponse("text/html", "UTF-8",
+                                     new ByteArrayInputStream(document.getBytes(StandardCharsets.UTF_8)));
+    }
+    catch (Exception e)
+    {
+      _log("cannot serve player page: " + e);
+      return null;
+    }
+  }
+
+  // Fetches the application document and injects the polyfill, as ORB does on Android. This
+  // also turns application/vnd.hbbtv.xhtml+xml, which the WebView refuses, into XHTML.
+  private WebResourceResponse fetchDocument(String url)
+  {
+    if (sPolyfill == null)
+      return null;
+
+    try
+    {
+      HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+      connection.setRequestProperty("User-Agent", mUserAgent);
+      connection.setRequestProperty("Accept", ACCEPT_HEADER);
+      String cookies = CookieManager.getInstance().getCookie(url);
+      if (cookies != null)
+        connection.setRequestProperty("Cookie", cookies);
+
+      ByteArrayOutputStream body = new ByteArrayOutputStream();
+      try (InputStream in = connection.getInputStream())
+      {
+        byte[] buffer = new byte[16384];
+        int read;
+        while ((read = in.read(buffer)) > 0)
+          body.write(buffer, 0, read);
+      }
+
+      List<String> setCookies = connection.getHeaderFields().get("Set-Cookie");
+      if (setCookies != null)
+        for (String cookie : setCookies)
+          CookieManager.getInstance().setCookie(connection.getURL().toString(), cookie);
+
+      // A response served for a redirected request keeps the requested URL, so relative
+      // links would resolve against the wrong location. Navigate to the final URL instead,
+      // which comes through here again.
+      String finalUrl = connection.getURL().toString();
+      if (!finalUrl.equals(url))
+      {
+        String redirect = "<script>location.replace(" + JSONObject.quote(finalUrl) + ");</script>";
+        return new WebResourceResponse("text/html", "UTF-8",
+                                       new ByteArrayInputStream(redirect.getBytes(StandardCharsets.UTF_8)));
+      }
+
+      String mimeType = "text/html";
+      String charset = "UTF-8";
+      String contentType = connection.getContentType();
+      if (contentType != null)
+      {
+        String[] parts = contentType.split(";");
+        mimeType = parts[0].trim();
+        for (int i = 1; i < parts.length; ++i)
+        {
+          String part = parts[i].trim();
+          if (part.toLowerCase().startsWith("charset="))
+            charset = part.substring(8).replace("\"", "");
+        }
+      }
+      if (mimeType.equals("application/vnd.hbbtv.xhtml+xml"))
+        mimeType = "application/xhtml+xml";
+
+      // CDATA keeps the script intact in XHTML documents.
+      String document = new String(body.toByteArray(), charset);
+      // Without it, the layout viewport is the view size in device independent pixels and only
+      // the visual viewport is scaled to the application plane.
+      String injection = "<meta name=\"viewport\" content=\"width=" + APP_PLANE_WIDTH + "\"/>"
+          + "<script>//<![CDATA[\n" + screenScript() + tokenScript(url) + sPolyfill
+          + "\n//]]></script>";
+      Matcher head = Pattern.compile("<head[^>]*>", Pattern.CASE_INSENSITIVE).matcher(document);
+      if (head.find())
+        document = document.substring(0, head.end()) + injection + document.substring(head.end());
+      else
+        document = injection + document;
+
+      _log("serving '" + url + "' as " + mimeType);
+      return new WebResourceResponse(mimeType, charset,
+                                     new ByteArrayInputStream(document.getBytes(charset)));
+    }
+    catch (Exception e)
+    {
+      _log("fetching '" + url + "' failed: " + e);
+      return null;
+    }
+  }
+
+  // Applications size full screen content by the screen, which on a TV is the application
+  // plane. The WebView reports the display in device independent pixels instead.
+  private static String screenScript()
+  {
+    return "[['width'," + APP_PLANE_WIDTH + "],['height'," + APP_PLANE_HEIGHT + "],"
+        + "['availWidth'," + APP_PLANE_WIDTH + "],['availHeight'," + APP_PLANE_HEIGHT + "]]"
+        + ".forEach(function(p){Object.defineProperty(screen,p[0],{get:function(){return p[1];}});});\n";
+  }
+
+  private class ViewClient extends WebViewClient
+  {
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request)
+    {
+      if (!"GET".equals(request.getMethod()))
+        return null;
+      String url = request.getUrl().toString();
+      if (url.startsWith(ORB_PLAYER_URL))
+        return playerPage(url);
+      if (!request.isForMainFrame())
+        return null;
+      return fetchDocument(url);
+    }
+
+    @Override
+    public void onPageStarted(WebView view, String url, Bitmap favicon)
+    {
+      // A new document starts with the broadcast in full screen until it asks otherwise.
+      _onNewDocument();
+    }
+
+    @Override
+    public void onPageFinished(WebView view, String url)
+    {
+      _log("loaded '" + url + "'");
+    }
+  }
+
+  // Kodi's page reports the chosen HbbTV VK_* code, 0 if the panel was closed without a choice.
+  private class RemoteKeysInterface
+  {
+    @JavascriptInterface
+    public void post(final int virtualKey)
+    {
+      sHandler.post(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          if (sView != XBMCHbbTVView.this)
+            return;
+          mRemoteKeysShown = false;
+          if (virtualKey == REMOTE_KEYS_EXIT)
+            _onExit();
+          else if (virtualKey != 0)
+          {
+            dispatchKey(virtualKey, "keydown");
+            dispatchKey(virtualKey, "keyup");
+          }
+        }
+      });
+    }
+  }
+
+  private class ChromeClient extends WebChromeClient
+  {
+    @Override
+    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue,
+                              JsPromptResult result)
+    {
+      if (BRIDGE_PROMPT.equals(message))
+        result.confirm(_request(defaultValue));
+      else
+        result.cancel();
+      return true;
+    }
+
+    @Override
+    public boolean onJsAlert(WebView view, String url, String message, JsResult result)
+    {
+      _log("alert: " + message);
+      result.confirm();
+      return true;
+    }
+
+    @Override
+    public boolean onConsoleMessage(ConsoleMessage message)
+    {
+      _logConsole(message.message() + " @ " + message.sourceId() + ":" + message.lineNumber(),
+                  message.messageLevel() == ConsoleMessage.MessageLevel.ERROR);
+      return true;
+    }
+  }
+}

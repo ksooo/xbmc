@@ -5,6 +5,7 @@ set(SOURCES android_main.cpp
             AndroidTouch.cpp
             EventLoop.cpp
             JNIMainActivity.cpp
+            JNIXBMCHbbTVView.cpp
             JNIXBMCMainView.cpp
             JNIXBMCMediaSession.cpp
             JNIXBMCVideoView.cpp
@@ -30,6 +31,7 @@ set(HEADERS AndroidJoyStick.h
             EventLoop.h
             IActivityHandler.h
             JNIMainActivity.h
+            JNIXBMCHbbTVView.h
             JNIXBMCMainView.h
             JNIXBMCMediaSession.h
             JNIXBMCVideoView.h
