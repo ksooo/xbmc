@@ -53,7 +53,8 @@ enum class StreamType
   SUBTITLE, // subtitle stream
   TELETEXT, // Teletext data stream
   RADIO_RDS, // Radio RDS data stream
-  AUDIO_ID3 // Audio ID3 data stream
+  AUDIO_ID3, // Audio ID3 data stream
+  AIT // DVB Application Information Table sections
 };
 
 template<>
@@ -88,6 +89,8 @@ private:
         return "radio rds"sv;
       case AUDIO_ID3:
         return "audio id3"sv;
+      case AIT:
+        return "ait"sv;
     }
     throw std::invalid_argument("no streamtype string found");
   }
@@ -223,6 +226,12 @@ class CDemuxStreamRadioRDS : public CDemuxStream
 {
 public:
   CDemuxStreamRadioRDS() : CDemuxStream(StreamType::RADIO_RDS) {}
+};
+
+class CDemuxStreamAIT : public CDemuxStream
+{
+public:
+  CDemuxStreamAIT() : CDemuxStream(StreamType::AIT) {}
 };
 
 class CDVDDemux
