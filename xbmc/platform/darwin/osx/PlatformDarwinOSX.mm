@@ -16,6 +16,7 @@
 #endif
 
 #include "platform/darwin/DarwinUtils.h"
+#include "platform/darwin/osx/HbbTVWebView.h"
 #include "platform/darwin/osx/powermanagement/CocoaPowerSyscall.h"
 
 #include <stdlib.h>
@@ -50,5 +51,6 @@ bool CPlatformDarwinOSX::InitStageOne()
 
 bool CPlatformDarwinOSX::InitStageTwo()
 {
+  CHbbTVEngineOSX::Register();
   return true;
 }

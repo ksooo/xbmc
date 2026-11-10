@@ -412,6 +412,10 @@ void CSettingConditions::Initialize()
 #ifdef TARGET_DARWIN_TVOS
   m_simpleConditions.emplace("have_tvos");
 #endif
+  // Platforms with an HbbTV application engine
+#if defined(TARGET_DARWIN_OSX)
+  m_simpleConditions.emplace("has_hbbtv");
+#endif
 #if defined(TARGET_WINDOWS)
   m_simpleConditions.emplace("has_dx");
   m_simpleConditions.emplace("hasdxva2");

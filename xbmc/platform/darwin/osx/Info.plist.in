@@ -40,5 +40,11 @@
 	<string>Used for speech recognition</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Used for intercepting media keys</string>
+	<!-- HbbTV: broadcasters deliver applications over plain http -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

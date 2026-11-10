@@ -56,7 +56,7 @@ list(APPEND DEPLIBS "-framework DiskArbitration" "-framework IOKit"
                     "-framework CoreGraphics" "-framework CoreMedia"
                     "-framework VideoToolbox" "-framework Security"
                     "-framework GameController" "-framework Speech"
-                    "-framework AVFoundation")
+                    "-framework AVFoundation" "-framework WebKit")
 
 set(CMAKE_XCODE_ATTRIBUTE_CLANG_LINK_OBJC_RUNTIME OFF)
 

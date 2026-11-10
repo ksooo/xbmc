@@ -14,6 +14,7 @@
 #include "input/actions/ActionIDs.h"
 #include "input/mouse/MouseStat.h"
 #include "messaging/ApplicationMessenger.h"
+#include "platform/darwin/osx/HbbTVWebView.h"
 #include "utils/log.h"
 
 #include <mutex>
@@ -334,6 +335,12 @@
     // handle keyboard events and transform them into the xbmc event world
     case NSEventTypeKeyUp:
     {
+      if (CHbbTVWebView::HandleKeyEvent(nsEvent))
+      {
+        passEvent = false;
+        break;
+      }
+
       newEvent = [self keyPressEvent:nsEvent];
       newEvent.type = XBMC_KEYUP;
 
@@ -343,6 +350,12 @@
     }
     case NSEventTypeKeyDown:
     {
+      if (CHbbTVWebView::HandleKeyEvent(nsEvent))
+      {
+        passEvent = false;
+        break;
+      }
+
       newEvent = [self keyPressEvent:nsEvent];
       newEvent.type = XBMC_KEYDOWN;
 
