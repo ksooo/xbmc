@@ -40,6 +40,10 @@ public:
   //! Script that dispatches a key event with the given HbbTV VK_* code to the focused element.
   static std::string KeyEventScript(int virtualKey, const std::string& type);
 
+  //! Script that shows the remote keys of Kodi's overlay page (kodioverlay.html) with the keys of
+  //! the application's key set and a button that ends the application.
+  static std::string RemoteKeysScript();
+
   //! User-Agent for the application's requests, ending with the given browser engine product.
   static std::string UserAgent(const std::string& engine);
 

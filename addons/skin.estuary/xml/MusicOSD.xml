@@ -163,6 +163,14 @@
 					<onclick>ActivateWindow(PVRRadioRDSInfo)</onclick>
 					<visible>MusicPlayer.Content(LiveTV) + RDS.HasRadiotext</visible>
 				</control>
+				<control type="radiobutton" id="70049">
+					<include content="OSDButton">
+						<param name="texture" value="osd/fullscreen/buttons/hbbtv.png"/>
+					</include>
+					<onclick>Dialog.Close(MusicOSD)</onclick>
+					<onclick>PVR.HbbTVLaunch()</onclick>
+					<visible>PVR.HasHbbTVApp</visible>
+				</control>
 				<control type="radiobutton" id="70051">
 					<include content="OSDButton">
 						<param name="texture" value="osd/fullscreen/buttons/playlist.png"/>

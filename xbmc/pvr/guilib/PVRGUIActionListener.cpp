@@ -29,6 +29,7 @@
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "pvr/guilib/PVRGUIActionsChannels.h"
 #include "pvr/guilib/PVRGUIActionsDatabase.h"
+#include "pvr/guilib/PVRGUIActionsHbbTV.h"
 #include "pvr/guilib/PVRGUIActionsPlayback.h"
 #include "pvr/guilib/PVRGUIActionsTimers.h"
 #include "resources/LocalizeStrings.h"
@@ -108,6 +109,19 @@ bool CPVRGUIActionListener::OnAction(const CAction& action)
 
   switch (action.GetID())
   {
+    case ACTION_TELETEXT_RED:
+    case ACTION_TELETEXT_GREEN:
+    case ACTION_TELETEXT_YELLOW:
+    case ACTION_TELETEXT_BLUE:
+    {
+      // Only reached if no window or dialog consumed the action, e.g. the teletext.
+      if (!CServiceBroker::GetGUI()->GetWindowManager().IsWindowActive(WINDOW_FULLSCREEN_VIDEO) &&
+          !CServiceBroker::GetGUI()->GetWindowManager().IsWindowActive(WINDOW_VISUALISATION))
+        return false;
+
+      return CServiceBroker::GetPVRManager().Get<PVR::GUI::HbbTV>().OnColourKey(action.GetID());
+    }
+
     case ACTION_PVR_PLAY:
     case ACTION_PVR_PLAY_TV:
     case ACTION_PVR_PLAY_RADIO:

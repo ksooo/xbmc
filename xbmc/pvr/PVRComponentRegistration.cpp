@@ -11,6 +11,7 @@
 #include "pvr/guilib/PVRGUIActionsChannels.h"
 #include "pvr/guilib/PVRGUIActionsDatabase.h"
 #include "pvr/guilib/PVRGUIActionsEPG.h"
+#include "pvr/guilib/PVRGUIActionsHbbTV.h"
 #include "pvr/guilib/PVRGUIActionsParentalControl.h"
 #include "pvr/guilib/PVRGUIActionsPlayback.h"
 #include "pvr/guilib/PVRGUIActionsPowerManagement.h"
@@ -28,6 +29,7 @@ CPVRComponentRegistration::CPVRComponentRegistration()
   RegisterComponent(std::make_shared<CPVRGUIActionsChannels>());
   RegisterComponent(std::make_shared<CPVRGUIActionsDatabase>());
   RegisterComponent(std::make_shared<CPVRGUIActionsEPG>());
+  RegisterComponent(std::make_shared<CPVRGUIActionsHbbTV>());
   RegisterComponent(std::make_shared<CPVRGUIActionsParentalControl>());
   RegisterComponent(std::make_shared<CPVRGUIActionsPlayback>());
   RegisterComponent(std::make_shared<CPVRGUIActionsPowerManagement>());

@@ -25305,7 +25305,14 @@ msgctxt "#39221"
 msgid "Start the broadcaster's application whenever a channel signals one, like a TV set does. Every channel switch then contacts the broadcaster's server."
 msgstr ""
 
-#empty strings from id 39222 to 39899
+#. Label of the button in the HbbTV remote keys panel that ends the running HbbTV application.
+#. Use the label of the Exit key on remote controls, which usually stays untranslated.
+#: xbmc/pvr/guilib/hbbtv/PVRGUIHbbTVBridge.cpp
+msgctxt "#39222"
+msgid "EXIT"
+msgstr ""
+
+#empty strings from id 39223 to 39899
 
 #. List formatting: pattern used to join a list of exactly two items, e.g. "A and B"
 #. STR_LIST_AND_TWO

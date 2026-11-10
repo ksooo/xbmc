@@ -378,6 +378,7 @@
 		<value condition="Control.HasFocus(70046)">$LOCALIZE[13392]</value>
 		<value condition="Control.HasFocus(70047)">$LOCALIZE[36501]</value>
 		<value condition="Control.HasFocus(70048)">$LOCALIZE[5]</value>
+		<value condition="Control.HasFocus(70049)">$LOCALIZE[29998]</value>
 		<value condition="Control.HasFocus(70050)">$LOCALIZE[29900]</value>
 		<value condition="Control.HasFocus(70051)">$LOCALIZE[31066]</value>
 		<value condition="Control.HasFocus(70052)">$LOCALIZE[31033]$INFO[MusicPlayer.UserRating, : ]</value>
@@ -952,8 +953,8 @@
 		<value>FFFFFFFF</value>
 	</variable>
 	<variable name="MediaVideoPropVar">
-		<value condition="VideoPlayer.IsStereoscopic + Window.IsActive(fullscreenvideo)">3D$INFO[VideoPlayer.VideoResolution, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoResolutionTypeVar, ]$VAR[VideoHDRTypeVar, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoCodecVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[VideoPlayer.VideoAspect, [COLOR border_alpha]&#8226;[/COLOR] ,:1]</value>
-		<value condition="Window.IsActive(fullscreenvideo)">$INFO[VideoPlayer.VideoResolution]$VAR[VideoResolutionTypeVar, ]$VAR[VideoHDRTypeVar, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoCodecVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[VideoPlayer.VideoAspect, [COLOR border_alpha]&#8226;[/COLOR] ,:1]</value>
+		<value condition="VideoPlayer.IsStereoscopic + Window.IsActive(fullscreenvideo)">$VAR[HbbTVFlagVar,, [COLOR border_alpha]&#8226;[/COLOR] ]3D$INFO[VideoPlayer.VideoResolution, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoResolutionTypeVar, ]$VAR[VideoHDRTypeVar, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoCodecVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[VideoPlayer.VideoAspect, [COLOR border_alpha]&#8226;[/COLOR] ,:1]</value>
+		<value condition="Window.IsActive(fullscreenvideo)">$VAR[HbbTVFlagVar,, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[VideoPlayer.VideoResolution]$VAR[VideoResolutionTypeVar, ]$VAR[VideoHDRTypeVar, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoCodecVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[VideoPlayer.VideoAspect, [COLOR border_alpha]&#8226;[/COLOR] ,:1]</value>
 		<value condition="ListItem.IsStereoscopic">3D$INFO[ListItem.VideoResolution, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoResolutionTypeVar, ]$VAR[VideoHDRType1Var, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoHDRType2Var, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoCodecVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[ListItem.VideoAspect, [COLOR border_alpha]&#8226;[/COLOR] ,:1]</value>
 		<value>$INFO[ListItem.VideoResolution]$VAR[VideoResolutionTypeVar, ]$VAR[VideoHDRType1Var, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoHDRType2Var, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[VideoCodecVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[ListItem.VideoAspect, [COLOR border_alpha]&#8226;[/COLOR] ,:1]</value>
 	</variable>
@@ -972,8 +973,8 @@
 		<value condition="!String.IsEqual(ListItem.SubtitleLanguage,und)">$INFO[ListItem.SubtitleLanguage]</value>
 	</variable>
 	<variable name="MediaMusicPropVar">
-		<value condition="RDS.HasRDS + Window.IsActive(visualisation)">RDS$VAR[AudioCodecFlagVar, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[AudioChannelsVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[MusicPlayer.SampleRate, [COLOR border_alpha]&#8226;[/COLOR] ,kHz]$INFO[MusicPlayer.BitRate, [COLOR border_alpha]&#8226;[/COLOR] ,kbps]$VAR[MusicBitsPerSampleVar, [COLOR border_alpha]&#8226;[/COLOR] ,bit]$VAR[MusicBMPVar, [COLOR border_alpha]&#8226;[/COLOR] ,bmp]</value>
-		<value condition="Window.IsActive(visualisation)">$VAR[AudioCodecFlagVar]$VAR[AudioChannelsVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[MusicPlayer.SampleRate, [COLOR border_alpha]&#8226;[/COLOR] ,kHz]$INFO[MusicPlayer.BitRate, [COLOR border_alpha]&#8226;[/COLOR] ,kbps]$VAR[MusicBitsPerSampleVar, [COLOR border_alpha]&#8226;[/COLOR] , bit]$VAR[MusicBMPVar, [COLOR border_alpha]&#8226;[/COLOR] ,bmp]</value>
+		<value condition="RDS.HasRDS + Window.IsActive(visualisation)">RDS$VAR[HbbTVFlagVar, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[AudioCodecFlagVar, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[AudioChannelsVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[MusicPlayer.SampleRate, [COLOR border_alpha]&#8226;[/COLOR] ,kHz]$INFO[MusicPlayer.BitRate, [COLOR border_alpha]&#8226;[/COLOR] ,kbps]$VAR[MusicBitsPerSampleVar, [COLOR border_alpha]&#8226;[/COLOR] ,bit]$VAR[MusicBMPVar, [COLOR border_alpha]&#8226;[/COLOR] ,bmp]</value>
+		<value condition="Window.IsActive(visualisation)">$VAR[HbbTVFlagVar,, [COLOR border_alpha]&#8226;[/COLOR] ]$VAR[AudioCodecFlagVar]$VAR[AudioChannelsVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[MusicPlayer.SampleRate, [COLOR border_alpha]&#8226;[/COLOR] ,kHz]$INFO[MusicPlayer.BitRate, [COLOR border_alpha]&#8226;[/COLOR] ,kbps]$VAR[MusicBitsPerSampleVar, [COLOR border_alpha]&#8226;[/COLOR] , bit]$VAR[MusicBMPVar, [COLOR border_alpha]&#8226;[/COLOR] ,bmp]</value>
 		<value>$INFO[ListItem.FileExtension]$VAR[AudioChannelsVar, [COLOR border_alpha]&#8226;[/COLOR] ]$INFO[ListItem.Samplerate, [COLOR border_alpha]&#8226;[/COLOR] ,kHz]$INFO[ListItem.BitRate, [COLOR border_alpha]&#8226;[/COLOR] ,kbps]$VAR[MusicBitsPerSampleVar, [COLOR border_alpha]&#8226;[/COLOR] ,bit]$VAR[MusicBMPVar, [COLOR border_alpha]&#8226;[/COLOR] ,bmp]</value>
 	</variable>
 	<variable name="MusicBitsPerSampleVar">
@@ -983,5 +984,8 @@
 	<variable name="MusicBMPVar">
 		<value condition="Window.IsActive(visualisation) + !String.IsEmpty(MusicPlayer.BMP)">$INFO[MusicPlayer.BMP]</value>
 		<value condition="!String.IsEmpty(ListItem.BMP)">$INFO[ListItem.BMP]</value>
+	</variable>
+	<variable name="HbbTVFlagVar">
+		<value condition="PVR.HasHbbTVApp">HbbTV</value>
 	</variable>
 </includes>

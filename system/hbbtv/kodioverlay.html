@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<!--
+  Copyright (C) 2026 Team Kodi
+  This file is part of Kodi - https://kodi.tv
+
+  SPDX-License-Identifier: GPL-2.0-or-later
+  See LICENSES/README.md for more information.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    font-family: sans-serif;
+  }
+  #watermark {
+    position: absolute;
+    left: 64px;
+    bottom: 36px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  }
+  #panel {
+    position: absolute;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 28px;
+    border-radius: 16px;
+    background: rgba(16, 16, 16, 0.85);
+  }
+  #panel.shown {
+    display: flex;
+    animation: fadein 150ms ease-out;
+  }
+  @keyframes fadein {
+    from { opacity: 0; }
+  }
+  .row {
+    display: flex;
+    gap: 14px;
+  }
+  .key {
+    box-sizing: border-box;
+    width: 64px;
+    height: 64px;
+    border: 3px solid transparent;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 30px;
+    transition: transform 100ms;
+  }
+  .key.wide {
+    width: auto;
+    padding: 0 24px;
+    font-size: 24px;
+  }
+  .key.focused {
+    border-color: #fff;
+    transform: scale(1.08);
+  }
+  .colour {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+  }
+  svg {
+    width: 30px;
+    height: 30px;
+    fill: #fff;
+  }
+</style>
+</head>
+<body>
+<div id="watermark">HbbTV</div>
+<div id="panel"></div>
+<script>
+  "use strict";
+
+  // HbbTV key set bits (Keyset.RED etc.) and VK_* codes.
+  const RED = 0x1, GREEN = 0x2, YELLOW = 0x4, BLUE = 0x8, VCR = 0x20, NUMERIC = 0x100;
+
+  // Reported instead of a key code to end the application.
+  const EXIT = -1;
+
+  const ICONS = {
+    412: "M11 6v12L2 12zM22 6v12l-9-6z", // rewind
+    415: "M7 5v14l12-7z", // play
+    19: "M6 5h4v14H6zM14 5h4v14h-4z", // pause
+    413: "M6 6h12v12H6z", // stop
+    417: "M2 6v12l9-6zM13 6v12l9-6z", // fast forward
+  };
+
+  const LAYOUT = [
+    [
+      { code: 403, set: RED, colour: "#e53935" },
+      { code: 404, set: GREEN, colour: "#43a047" },
+      { code: 405, set: YELLOW, colour: "#fdd835" },
+      { code: 406, set: BLUE, colour: "#1e88e5" },
+    ],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => ({ code: 48 + d, set: NUMERIC, label: String(d) })),
+    [412, 415, 19, 413, 417].map((code) => ({ code: code, set: VCR })),
+  ];
+
+  const panel = document.getElementById("panel");
+  let rows = []; // shown keys per shown row: {code, element}
+  let row = 0;
+  let column = 0;
+
+  function post(code) {
+    if (window.webkit && window.webkit.messageHandlers.kodiRemoteKeys)
+      window.webkit.messageHandlers.kodiRemoteKeys.postMessage(code);
+    else if (window.kodiRemoteKeys)
+      window.kodiRemoteKeys.post(code);
+  }
+
+  function createKey(key) {
+    const element = document.createElement("div");
+    element.className = key.wide ? "key wide" : "key";
+    if (key.colour) {
+      const dot = document.createElement("div");
+      dot.className = "colour";
+      dot.style.background = key.colour;
+      element.appendChild(dot);
+    } else if (key.label) {
+      element.textContent = key.label;
+    } else {
+      element.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + ICONS[key.code] + '"/></svg>';
+    }
+    return element;
+  }
+
+  function focus(newRow, newColumn) {
+    rows[row][column].element.classList.remove("focused");
+    row = newRow;
+    column = newColumn;
+    rows[row][column].element.classList.add("focused");
+  }
+
+  function close(code) {
+    panel.classList.remove("shown");
+    post(code);
+  }
+
+  // Called by Kodi with the key set of the running application and the exit button's label.
+  function showRemoteKeys(keySet, exitLabel) {
+    panel.textContent = "";
+    rows = [];
+    const keyRows = LAYOUT.map((layoutRow) => layoutRow.filter((key) => keySet & key.set));
+    keyRows[0].push({ code: EXIT, label: exitLabel, wide: true });
+    for (const keys of keyRows) {
+      if (keys.length === 0)
+        continue;
+      const rowElement = document.createElement("div");
+      rowElement.className = "row";
+      rows.push(keys.map((key) => {
+        const element = createKey(key);
+        rowElement.appendChild(element);
+        return { code: key.code, element: element };
+      }));
+      panel.appendChild(rowElement);
+    }
+    row = 0;
+    column = 0;
+    focus(0, 0);
+    panel.classList.add("shown");
+  }
+
+  function centre(key) {
+    const rect = key.element.getBoundingClientRect();
+    return rect.left + rect.width / 2;
+  }
+
+  function moveVertically(down) {
+    // Keys differ in width, so the target row's key nearest to the focused one is picked.
+    const target = (row + (down ? 1 : rows.length - 1)) % rows.length;
+    const x = centre(rows[row][column]);
+    let index = 0;
+    rows[target].forEach((key, i) => {
+      if (Math.abs(centre(key) - x) < Math.abs(centre(rows[target][index]) - x))
+        index = i;
+    });
+    focus(target, index);
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (!panel.classList.contains("shown"))
+      return;
+    event.preventDefault();
+    switch (event.keyCode) {
+      case 37: // left
+        focus(row, (column + rows[row].length - 1) % rows[row].length);
+        break;
+      case 39: // right
+        focus(row, (column + 1) % rows[row].length);
+        break;
+      case 38: // up
+        moveVertically(false);
+        break;
+      case 40: // down
+        moveVertically(true);
+        break;
+      case 13: // enter
+        // Repeats come from the press that is still held after opening the panel.
+        if (!event.repeat)
+          close(rows[row][column].code);
+        break;
+      case 8: // backspace
+      case 461: // VK_BACK
+        close(0);
+        break;
+      default:
+        // A key the panel offers, pressed on the remote, is chosen directly.
+        if (!event.repeat && rows.some((keys) => keys.some((key) => key.code === event.keyCode)))
+          close(event.keyCode);
+        break;
+    }
+  });
+</script>
+</body>
+</html>

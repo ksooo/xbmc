@@ -699,6 +699,15 @@ std::string CPVRGUIHbbTVBridge::KeyEventScript(int virtualKey, const std::string
       type, virtualKey, virtualKey);
 }
 
+std::string CPVRGUIHbbTVBridge::RemoteKeysScript()
+{
+  std::string exitLabel;
+  CJSONVariantWriter::Write(
+      CVariant{CServiceBroker::GetResourcesComponent().GetLocalizeStrings().Get(39222)}, // Exit
+      exitLabel, true);
+  return StringUtils::Format("showRemoteKeys({},{})", s_keySet, exitLabel);
+}
+
 std::string CPVRGUIHbbTVBridge::UserAgent(const std::string& engine)
 {
   // HbbTV token: (capabilities;vendor;model;software version;hardware version;family)

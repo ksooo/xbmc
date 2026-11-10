@@ -782,6 +782,11 @@
       <channel_down>ChannelDown</channel_down>
       <period mod="longpress">ChannelNumberSeparator</period>
       <numpadperiod>ChannelNumberSeparator</numpadperiod>
+      <red>Red</red>
+      <green>Green</green>
+      <yellow>Yellow</yellow>
+      <blue>Blue</blue>
+      <w>PVR.HbbTVLaunch()</w>
     </keyboard>
   </FullscreenLiveTV>
   <FullscreenRadio>
@@ -804,6 +809,11 @@
       <channel_down>ChannelDown</channel_down>
       <period mod="longpress">ChannelNumberSeparator</period>
       <numpadperiod>ChannelNumberSeparator</numpadperiod>
+      <red>Red</red>
+      <green>Green</green>
+      <yellow>Yellow</yellow>
+      <blue>Blue</blue>
+      <w>PVR.HbbTVLaunch()</w>
     </keyboard>
   </FullscreenRadio>
   <FullscreenLiveTvPreview>
