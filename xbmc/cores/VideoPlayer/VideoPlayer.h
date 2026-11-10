@@ -13,6 +13,7 @@
 #include "Edl.h"
 #include "FileItem.h"
 #include "IVideoPlayer.h"
+#include "VideoPlayerAIT.h"
 #include "VideoPlayerAudioID3.h"
 #include "VideoPlayerRadioRDS.h"
 #include "VideoPlayerSubtitle.h"
@@ -437,6 +438,7 @@ protected:
   bool OpenTeletextStream(CDVDStreamInfo& hint);
   bool OpenRadioRDSStream(CDVDStreamInfo& hint);
   bool OpenAudioID3Stream(CDVDStreamInfo& hint);
+  bool OpenAITStream(CDVDStreamInfo& hint);
 
   /** \brief Switches forced subtitles to forced subtitles matching the language of the current audio track.
   *          If these are not available, subtitles are disabled.
@@ -453,6 +455,7 @@ protected:
   void ProcessTeletextData(CDemuxStream* pStream, DemuxPacket* pPacket);
   void ProcessRadioRDSData(CDemuxStream* pStream, DemuxPacket* pPacket);
   void ProcessAudioID3Data(CDemuxStream* pStream, DemuxPacket* pPacket);
+  void ProcessAITData(CDemuxStream* pStream, DemuxPacket* pPacket);
 
   int  AddSubtitleFile(const std::string& filename, const std::string& subfilename = "");
 
@@ -598,6 +601,7 @@ protected:
   CCurrentStream m_CurrentTeletext;
   CCurrentStream m_CurrentRadioRDS;
   CCurrentStream m_CurrentAudioID3;
+  CCurrentStream m_CurrentAIT;
 
   CSelectionStreams m_SelectionStreams;
   std::vector<ProgramInfo> m_programs;
@@ -643,6 +647,7 @@ protected:
   std::unique_ptr<CDVDTeletextData> m_VideoPlayerTeletext;
   std::unique_ptr<CDVDRadioRDSData> m_VideoPlayerRadioRDS;
   std::unique_ptr<CVideoPlayerAudioID3> m_VideoPlayerAudioID3;
+  std::unique_ptr<CVideoPlayerAIT> m_VideoPlayerAIT;
 
   CDVDClock m_clock;
   CDVDOverlayContainer m_overlayContainer;

@@ -238,6 +238,8 @@ public:
   static constexpr auto SETTING_PVRPLAYBACK_DELAYMARKLASTWATCHED =
       "pvrplayback.delaymarklastwatched";
   static constexpr auto SETTING_PVRPLAYBACK_FPS = "pvrplayback.fps";
+  static constexpr auto SETTING_PVRPLAYBACK_ENABLEHBBTV = "pvrplayback.enablehbbtv";
+  static constexpr auto SETTING_PVRPLAYBACK_AUTOSTARTHBBTV = "pvrplayback.autostarthbbtv";
   static constexpr auto SETTING_PVRPLAYBACK_AUTOPLAYNEXTPROGRAMME =
       "pvrplayback.autoplaynextprogramme";
   static constexpr auto SETTING_PVRRECORD_INSTANTRECORDACTION = "pvrrecord.instantrecordaction";
