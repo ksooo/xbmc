@@ -1493,6 +1493,9 @@ void CXBMCApp::onAudioFocusChange(int focusChange)
   android_printf("Audio Focus changed: %d", focusChange);
   if (focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS)
   {
+    if (m_ignoreAudioFocusLoss)
+      return;
+
     if ((m_playback_state & PLAYBACK_STATE_PLAYING))
     {
       if (m_playback_state & PLAYBACK_STATE_CANNOT_PAUSE)

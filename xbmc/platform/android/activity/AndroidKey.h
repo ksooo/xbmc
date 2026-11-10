@@ -24,6 +24,9 @@ public:
   static void SetHandleSearchKeys(bool enable) { m_handleSearchKeys = enable; }
   static void XBMC_Key(uint32_t code, uint16_t key, uint16_t modifiers, uint16_t unicode, bool up);
 
+  //! XBMCK_* key for an Android key code, XBMCK_UNKNOWN if there is none.
+  static uint16_t TranslateKeyCode(int32_t keycode);
+
 protected:
   static bool m_handleMediaKeys;
   static bool m_handleSearchKeys;

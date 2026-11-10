@@ -15,6 +15,7 @@
 #include "platform/android/activity/JNIXBMCConnectivityManagerNetworkCallback.h"
 #include "platform/android/activity/JNIXBMCDisplayManagerDisplayListener.h"
 #include "platform/android/activity/JNIXBMCFile.h"
+#include "platform/android/activity/JNIXBMCHbbTVView.h"
 #include "platform/android/activity/JNIXBMCJsonHandler.h"
 #include "platform/android/activity/JNIXBMCMainView.h"
 #include "platform/android/activity/JNIXBMCMediaSession.h"
@@ -121,6 +122,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   CJNIXBMCConnectivityManagerNetworkCallback::RegisterNatives(env);
   CJNIXBMCDisplayManagerDisplayListener::RegisterNatives(env);
   CJNIXBMCFile::RegisterNatives(env);
+  CJNIXBMCHbbTVView::RegisterNatives(env);
   CJNIXBMCJsonHandler::RegisterNatives(env);
   CJNIXBMCMainView::RegisterNatives(env);
   CJNIXBMCMediaSession::RegisterNatives(env);

@@ -181,6 +181,32 @@ static KeyMap SearchkeyMap[] = {
 bool CAndroidKey::m_handleMediaKeys = true;
 bool CAndroidKey::m_handleSearchKeys = false;
 
+uint16_t CAndroidKey::TranslateKeyCode(int32_t keycode)
+{
+  for (const auto& entry : keyMap)
+  {
+    if (keycode == entry.nativeKey)
+      return entry.xbmcKey;
+  }
+  if (m_handleMediaKeys)
+  {
+    for (const auto& entry : MediakeyMap)
+    {
+      if (keycode == entry.nativeKey)
+        return entry.xbmcKey;
+    }
+  }
+  if (m_handleSearchKeys)
+  {
+    for (const auto& entry : SearchkeyMap)
+    {
+      if (keycode == entry.nativeKey)
+        return entry.xbmcKey;
+    }
+  }
+  return XBMCK_UNKNOWN;
+}
+
 bool CAndroidKey::onKeyboardEvent(AInputEvent *event)
 {
   if (event == NULL)
@@ -201,39 +227,7 @@ bool CAndroidKey::onKeyboardEvent(AInputEvent *event)
   if (map)
     unicode = map.get(keycode, state);
 
-  // Check if we got some special key
-  uint16_t sym = XBMCK_UNKNOWN;
-  for (unsigned int index = 0; index < sizeof(keyMap) / sizeof(KeyMap); index++)
-  {
-    if (keycode == keyMap[index].nativeKey)
-    {
-      sym = keyMap[index].xbmcKey;
-      break;
-    }
-  }
-  if (sym == XBMCK_UNKNOWN && m_handleMediaKeys)
-  {
-    for (unsigned int index = 0; index < sizeof(MediakeyMap) / sizeof(KeyMap); index++)
-    {
-      if (keycode == MediakeyMap[index].nativeKey)
-      {
-        sym = MediakeyMap[index].xbmcKey;
-        break;
-      }
-    }
-  }
-
-  if (sym == XBMCK_UNKNOWN && m_handleSearchKeys)
-  {
-    for (unsigned int index = 0; index < sizeof(SearchkeyMap) / sizeof(KeyMap); index++)
-    {
-      if (keycode == SearchkeyMap[index].nativeKey)
-      {
-        sym = SearchkeyMap[index].xbmcKey;
-        break;
-      }
-    }
-  }
+  const uint16_t sym = TranslateKeyCode(keycode);
 
   // check if this is a key we don't want to handle
   if (sym == XBMCK_LAST || sym == XBMCK_UNKNOWN)
