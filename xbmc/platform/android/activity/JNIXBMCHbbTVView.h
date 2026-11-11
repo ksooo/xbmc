@@ -36,6 +36,7 @@ public:
   void RunScript(const std::string& script) override;
   bool GetContentSize(float& width, float& height) const override;
   void SendKey(int virtualKey) override;
+  void SetOpacity(float opacity, int fadeMs) override;
 
 private:
   static jstring _request(JNIEnv* env, jclass clazz, jstring json);

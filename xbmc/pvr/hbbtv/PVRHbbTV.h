@@ -56,6 +56,9 @@ public:
 
   //! Deliver an HbbTV virtual key code (VK_*) to the running application.
   virtual void SendKey(int virtualKey) = 0;
+
+  //! Fade the application to the given opacity (0 to 1) within the given time.
+  virtual void SetOpacity(float opacity, int fadeMs) = 0;
 };
 
 /*!

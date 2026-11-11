@@ -25,9 +25,14 @@ public:
    */
   bool OnColourKey(int actionId) const;
 
+  //! Dim the running application while a notification is shown. Call once per frame.
+  void UpdateApplicationOpacity();
+
 private:
   CPVRGUIActionsHbbTV(const CPVRGUIActionsHbbTV&) = delete;
   CPVRGUIActionsHbbTV const& operator=(CPVRGUIActionsHbbTV const&) = delete;
+
+  bool m_dimmed{false};
 };
 
 namespace GUI

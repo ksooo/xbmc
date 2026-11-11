@@ -1,5 +1,6 @@
 package @APP_PACKAGE@;
 
+import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -109,6 +110,7 @@ public class XBMCHbbTVView extends WebView
   private static String sPlayerPage = null;
   private static String sIframeScript = null;
   private static String sDashScript = null;
+  private static float sOpacity = 1.0f;
 
   private boolean mRemoteKeysShown = false;
   private KeyEvent mPendingSelect = null;
@@ -118,6 +120,7 @@ public class XBMCHbbTVView extends WebView
   private WebView mKodiView;
   private WindowManager.LayoutParams mLayout;
   private Rect mDisplay;
+  private ValueAnimator mOpacityAnimator = null;
 
   private static Handler createHandler()
   {
@@ -270,6 +273,20 @@ public class XBMCHbbTVView extends WebView
     });
   }
 
+  public static void setOpacity(final double opacity, final int fadeMs)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        sOpacity = (float) opacity;
+        if (sView != null)
+          sView.fadeTo(sOpacity, fadeMs);
+      }
+    });
+  }
+
   // The view built by the warm-up, unless the display changed since.
   private static XBMCHbbTVView takeSpareView(String polyfillDir)
   {
@@ -357,6 +374,7 @@ public class XBMCHbbTVView extends WebView
   private void attach()
   {
     mLayout.token = Main.MainActivity.getWindow().getDecorView().getWindowToken();
+    mLayout.alpha = sOpacity;
     Main.MainActivity.getWindowManager().addView(mContainer, mLayout);
     requestFocus();
     _onActive(true);
@@ -364,6 +382,8 @@ public class XBMCHbbTVView extends WebView
 
   private void destroyView()
   {
+    if (mOpacityAnimator != null)
+      mOpacityAnimator.cancel();
     _onActive(false);
     Main.MainActivity.getWindowManager().removeView(mContainer);
     stopLoading();
@@ -395,6 +415,25 @@ public class XBMCHbbTVView extends WebView
   {
     mKodiView.evaluateJavascript(_remoteKeysScript(), null);
     mRemoteKeysShown = true;
+  }
+
+  // Window opacity, applied by the compositor regardless of how the WebView draws.
+  private void fadeTo(float opacity, int fadeMs)
+  {
+    if (mOpacityAnimator != null)
+      mOpacityAnimator.cancel();
+    mOpacityAnimator = ValueAnimator.ofFloat(mLayout.alpha, opacity);
+    mOpacityAnimator.setDuration(fadeMs);
+    mOpacityAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
+    {
+      @Override
+      public void onAnimationUpdate(ValueAnimator animator)
+      {
+        mLayout.alpha = (float) animator.getAnimatedValue();
+        Main.MainActivity.getWindowManager().updateViewLayout(mContainer, mLayout);
+      }
+    });
+    mOpacityAnimator.start();
   }
 
   private void loadApplication(String url)
