@@ -55,6 +55,9 @@ public:
   static bool GetContentSize(float& width, float& height);
 
   static void SetVisible(bool visible);
+
+  //! Fade the overlay to the given opacity within the given time.
+  static void SetOpacity(float opacity, int fadeMs);
 };
 
 //! Engine registration for the PVR HbbTV component.
@@ -75,4 +78,8 @@ public:
     return CHbbTVWebView::GetContentSize(width, height);
   }
   void SendKey(int virtualKey) override { CHbbTVWebView::SendKey(virtualKey); }
+  void SetOpacity(float opacity, int fadeMs) override
+  {
+    CHbbTVWebView::SetOpacity(opacity, fadeMs);
+  }
 };

@@ -126,6 +126,11 @@ void CJNIXBMCHbbTVView::SendKey(int virtualKey)
   CallView("sendKey", "(I)V", static_cast<jint>(virtualKey));
 }
 
+void CJNIXBMCHbbTVView::SetOpacity(float opacity, int fadeMs)
+{
+  CallView("setOpacity", "(DI)V", static_cast<jdouble>(opacity), static_cast<jint>(fadeMs));
+}
+
 jstring CJNIXBMCHbbTVView::_request(JNIEnv* env, jclass clazz, jstring json)
 {
   const std::string response =

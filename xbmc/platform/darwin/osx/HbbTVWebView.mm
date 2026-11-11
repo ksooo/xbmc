@@ -624,6 +624,7 @@ NSEvent* g_pendingSelect = nil; // select key held down, not yet delivered
 uint64_t g_pendingSelectSerial = 0;
 bool g_replaying = false;
 NSTimeInterval g_forwardedKeyDown = 0; // timestamp of the last key down given to the view
+CGFloat g_opacity = 1.0;
 
 // Hand the event to the application if it asked for the key, like a TV set does. Returns false
 // if Kodi should see the event.
@@ -695,6 +696,7 @@ void CHbbTVWebView::Launch(const std::string& url)
       return;
     }
     g_view = [[KodiHbbTVView alloc] initWithParent:parent url:nsUrl];
+    g_view.window.alphaValue = g_opacity;
   });
 }
 
@@ -831,6 +833,21 @@ void CHbbTVWebView::SetVisible(bool visible)
       // Keys go to Kodi while the application is hidden.
       [g_view.parent makeKeyWindow];
     }
+  });
+}
+
+void CHbbTVWebView::SetOpacity(float opacity, int fadeMs)
+{
+  const CGFloat alpha = static_cast<CGFloat>(opacity);
+  const NSTimeInterval duration = fadeMs / 1000.0;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    g_opacity = alpha;
+    if (!g_view)
+      return;
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext* context) {
+      context.duration = duration;
+      g_view.window.animator.alphaValue = alpha;
+    }];
   });
 }
 

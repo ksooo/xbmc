@@ -22,6 +22,8 @@
 #include "input/actions/Action.h"
 #include "input/actions/ActionIDs.h"
 #include "input/mouse/MouseEvent.h"
+#include "pvr/PVRManager.h"
+#include "pvr/guilib/PVRGUIActionsHbbTV.h"
 #include "resources/LocalizeStrings.h"
 #include "resources/ResourcesComponent.h"
 #include "settings/AdvancedSettings.h"
@@ -297,6 +299,8 @@ void CGUIWindowFullScreen::FrameMove()
   const auto appPlayer = components.GetComponent<CApplicationPlayer>();
   if (!appPlayer->HasPlayer())
     return;
+
+  CServiceBroker::GetPVRManager().Get<PVR::GUI::HbbTV>().UpdateApplicationOpacity();
 
   //----------------------
   // ViewMode Information

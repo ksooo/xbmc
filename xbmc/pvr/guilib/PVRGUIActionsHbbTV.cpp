@@ -9,6 +9,9 @@
 #include "PVRGUIActionsHbbTV.h"
 
 #include "ServiceBroker.h"
+#include "guilib/GUIComponent.h"
+#include "guilib/GUIWindowManager.h"
+#include "guilib/WindowIDs.h"
 #include "input/actions/ActionIDs.h"
 #include "pvr/PVRManager.h"
 #include "pvr/hbbtv/PVRHbbTV.h"
@@ -22,6 +25,11 @@ constexpr int VK_RED = 403;
 constexpr int VK_GREEN = 404;
 constexpr int VK_YELLOW = 405;
 constexpr int VK_BLUE = 406;
+
+// Kodi draws its GUI beneath the application, so a notification shows through the dimmed
+// application only.
+constexpr float DIMMED_OPACITY = 0.3f;
+constexpr int DIM_FADE_MS = 200;
 
 // HbbTV VK_* code of a colour key action, 0 for other actions.
 int VirtualKeyForAction(int actionId)
@@ -60,4 +68,20 @@ bool CPVRGUIActionsHbbTV::OnColourKey(int actionId) const
     return true;
   }
   return virtualKey == VK_RED && HbbTVComponent().LaunchAutostartApplication();
+}
+
+void CPVRGUIActionsHbbTV::UpdateApplicationOpacity()
+{
+  const auto engine = HbbTVComponent().GetEngine();
+  if (!engine)
+    return;
+
+  const CGUIWindow* toast =
+      CServiceBroker::GetGUI()->GetWindowManager().GetWindow(WINDOW_DIALOG_KAI_TOAST);
+  const bool dimmed = engine->IsRunning() && toast && toast->IsDialogRunning();
+  if (dimmed != m_dimmed)
+  {
+    m_dimmed = dimmed;
+    engine->SetOpacity(dimmed ? DIMMED_OPACITY : 1.0f, DIM_FADE_MS);
+  }
 }
