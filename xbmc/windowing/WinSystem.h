@@ -81,6 +81,20 @@ public:
   virtual bool SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool blankOtherDisplays) = 0;
   virtual void SetDirtyRegions(const CDirtyRegionList& dirtyRegionsList) {}
   virtual int GetBufferAge() { return 2; }
+  /*!
+   * \brief Redirect GUI rendering to a layer the platform shows above its own windows on top
+   * of Kodi, e.g. an HbbTV application.
+   * \return true if redirected, EndTopLayer must be called then
+   */
+  virtual bool BeginTopLayer() { return false; }
+  virtual void EndTopLayer() {}
+  /*!
+   * \brief Render to the window again while GUI rendering is redirected, e.g. to draw the
+   * video beneath the layer.
+   * \return true if rendering was redirected, ResumeTopLayer must be called then
+   */
+  virtual bool SuspendTopLayer() { return false; }
+  virtual void ResumeTopLayer() {}
   //! \brief Bits per color channel of the presented output.
   virtual int GetOutputBitDepth() const { return 8; }
   virtual bool MoveWindow(int topLeft, int topRight){return false;}

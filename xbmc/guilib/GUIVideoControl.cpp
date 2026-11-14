@@ -89,8 +89,17 @@ void CGUIVideoControl::Render()
 
     KODI::UTILS::COLOR::Color alpha =
         CServiceBroker::GetWinSystem()->GetGfxContext().MergeAlpha(0xFF000000) >> 24;
-    // The HDR composite also draws the video behind the GUI, so it needs the same hole.
-    if (appPlayer->IsRenderingVideoLayer() || CServiceBroker::GetWinSystem()->IsHdrComposite())
+    // With the GUI redirected to the top layer, the video goes to the window beneath and
+    // the layer gets a hole for it.
+    const bool guiLayer = !appPlayer->IsRenderingVideoLayer() &&
+                          CServiceBroker::GetWinSystem()->SuspendTopLayer();
+    if (guiLayer)
+    {
+      appPlayer->Render(false, alpha);
+      CServiceBroker::GetWinSystem()->ResumeTopLayer();
+    }
+
+    if (appPlayer->IsRenderingVideoLayer() || CServiceBroker::GetWinSystem()->IsHdrComposite() || guiLayer)
     {
       CRect old = CServiceBroker::GetWinSystem()->GetGfxContext().GetScissors();
       CRect region = GetRenderRegion();

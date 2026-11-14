@@ -5,9 +5,11 @@ set(HEADERS RenderSystem.h
 
 if(TARGET ${APP_NAME_LC}::OpenGl OR TARGET ${APP_NAME_LC}::OpenGLES)
   list(APPEND SOURCES GLExtensions.cpp
-                      MatrixGL.cpp)
+                      MatrixGL.cpp
+                      TopLayerGL.cpp)
   list(APPEND HEADERS GLExtensions.h
-                      MatrixGL.h)
+                      MatrixGL.h
+                      TopLayerGL.h)
 
   if(ARCH MATCHES arm AND ENABLE_NEON)
     list(APPEND SOURCES MatrixGL.neon.cpp)

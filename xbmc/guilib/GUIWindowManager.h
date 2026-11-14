@@ -15,6 +15,7 @@
 #include "guilib/WindowIDs.h"
 #include "messaging/IMessageTarget.h"
 
+#include <atomic>
 #include <list>
 #include <memory>
 #include <unordered_map>
@@ -219,6 +220,12 @@ public:
   int GetActiveWindow() const;
   int GetActiveWindowOrDialog() const;
   bool HasModalDialog(bool ignoreClosing) const;
+
+  /*!
+   * \brief The window presenting the playing media if it takes the input: it is the active
+   * window and no modal dialog is open. WINDOW_INVALID otherwise. Can be called from any thread.
+   */
+  int GetMediaWindowWithInput() const { return m_mediaWindowWithInput; }
   bool HasVisibleModalDialog() const;
   bool IsDialogTopmost(int id, bool modal = false) const;
   bool IsDialogTopmost(const std::string &xmlFile, bool modal = false) const;
@@ -301,6 +308,7 @@ private:
 
   int  m_iNested;
   bool m_initialized;
+  std::atomic<int> m_mediaWindowWithInput{WINDOW_INVALID};
   mutable bool m_touchGestureActive{false};
   mutable bool m_inhibitTouchGestureEvents{false};
 
