@@ -1291,7 +1291,14 @@ void CGUIWindowManager::Process(unsigned int currentTime)
 
   m_dirtyregions.clear();
 
-  CGUIWindow* pWindow = GetWindow(GetActiveWindow());
+  const int activeWindow = GetActiveWindow();
+  m_mediaWindowWithInput =
+      (activeWindow == WINDOW_FULLSCREEN_VIDEO || activeWindow == WINDOW_VISUALISATION) &&
+              !HasModalDialog(true)
+          ? activeWindow
+          : WINDOW_INVALID;
+
+  CGUIWindow* pWindow = GetWindow(activeWindow);
   if (pWindow)
     pWindow->DoProcess(currentTime, m_dirtyregions);
 
@@ -1355,10 +1362,20 @@ void CGUIWindowManager::RenderPass() const
 
 void CGUIWindowManager::RenderPassSingle() const
 {
-  CGUIWindow* pWindow = GetWindow(GetActiveWindow());
+  // The GUI goes to the top layer if there is one, e.g. above an HbbTV application. Only the
+  // window presenting the playing media stays beneath it.
+  CWinSystemBase* winSystem = CServiceBroker::GetWinSystem();
+  const int activeWindow = GetActiveWindow();
+  const bool mediaWindow =
+      activeWindow == WINDOW_FULLSCREEN_VIDEO || activeWindow == WINDOW_VISUALISATION;
+  bool topLayer = false;
+
+  CGUIWindow* pWindow = GetWindow(activeWindow);
   if (pWindow)
   {
     pWindow->ClearBackground();
+    if (!mediaWindow)
+      topLayer = winSystem->BeginTopLayer();
     pWindow->DoRender();
   }
 
@@ -1366,18 +1383,33 @@ void CGUIWindowManager::RenderPassSingle() const
   auto renderList = m_activeDialogs;
   stable_sort(renderList.begin(), renderList.end(), RenderOrderSortFunction);
 
+  if (!topLayer)
+    topLayer = winSystem->BeginTopLayer();
+
   for (const auto& window : renderList)
   {
     if (window->IsDialogRunning())
       window->DoRender();
   }
+
+  if (topLayer)
+    winSystem->EndTopLayer();
 }
 
 void CGUIWindowManager::RenderPassDual() const
 {
-  CGUIWindow* pWindow = GetWindow(GetActiveWindow());
+  // The GUI goes to the top layer if there is one, e.g. above an HbbTV application. Only the
+  // window presenting the playing media stays beneath it.
+  CWinSystemBase* winSystem = CServiceBroker::GetWinSystem();
+  const int activeWindow = GetActiveWindow();
+
+  CGUIWindow* pWindow = GetWindow(activeWindow);
   if (pWindow)
     pWindow->ClearBackground();
+
+  const bool topLayer = winSystem->BeginTopLayer();
+  const bool windowBeneath = topLayer && (activeWindow == WINDOW_FULLSCREEN_VIDEO ||
+                                          activeWindow == WINDOW_VISUALISATION);
 
   auto renderList = m_activeDialogs;
   stable_sort(renderList.begin(), renderList.end(), RenderOrderSortFunction);
@@ -1390,6 +1422,9 @@ void CGUIWindowManager::RenderPassDual() const
       (*it)->DoRender();
   }
 
+  if (windowBeneath)
+    winSystem->SuspendTopLayer();
+
   if (pWindow)
     pWindow->DoRender();
 
@@ -1400,11 +1435,17 @@ void CGUIWindowManager::RenderPassDual() const
     pWindow->DoRender();
   }
 
+  if (windowBeneath)
+    winSystem->ResumeTopLayer();
+
   for (const auto& window : renderList)
   {
     if (window->IsDialogRunning())
       window->DoRender();
   }
+
+  if (topLayer)
+    winSystem->EndTopLayer();
 }
 
 void CGUIWindowManager::RenderEx() const
