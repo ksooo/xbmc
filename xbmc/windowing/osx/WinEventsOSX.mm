@@ -67,3 +67,8 @@ void CWinEventsOSX::SendInputEvent(NSEvent* nsEvent)
 {
   [m_eventsImplWrapper->callbackClass ProcessInputEvent:nsEvent];
 }
+
+XBMC_keysym CWinEventsOSX::TranslateKeyEvent(NSEvent* nsEvent)
+{
+  return [m_eventsImplWrapper->callbackClass keyPressEvent:nsEvent].key.keysym;
+}

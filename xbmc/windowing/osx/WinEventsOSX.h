@@ -33,6 +33,7 @@ public:
   void signalMouseEntered();
   void signalMouseExited();
   void SendInputEvent(NSEvent* nsEvent);
+  XBMC_keysym TranslateKeyEvent(NSEvent* nsEvent);
 
 private:
   std::unique_ptr<CWinEventsOSXImplWrapper> m_eventsImplWrapper;

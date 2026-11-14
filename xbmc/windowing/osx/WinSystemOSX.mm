@@ -1411,3 +1411,8 @@ void CWinSystemOSX::SendInputEvent(NSEvent* nsEvent)
 {
   m_winEvents->SendInputEvent(nsEvent);
 }
+
+XBMC_keysym CWinSystemOSX::TranslateKeyEvent(NSEvent* nsEvent)
+{
+  return m_winEvents->TranslateKeyEvent(nsEvent);
+}
