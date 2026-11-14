@@ -12,6 +12,7 @@
 #include "threads/SystemClock.h"
 #include "threads/Timer.h"
 #include "windowing/WinSystem.h"
+#include "windowing/XBMC_events.h"
 
 #include <memory>
 #include <optional>
@@ -110,6 +111,7 @@ public:
   void signalMouseEntered();
   void signalMouseExited();
   void SendInputEvent(NSEvent* nsEvent);
+  XBMC_keysym TranslateKeyEvent(NSEvent* nsEvent);
 
 protected:
   std::unique_ptr<KODI::WINDOWING::IOSScreenSaver> GetOSScreenSaverImpl() override;
