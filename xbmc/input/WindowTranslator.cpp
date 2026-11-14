@@ -58,6 +58,7 @@ const CWindowTranslator::WindowMapByName CWindowTranslator::WindowMappingByName 
     {"pvrupdateprogress", WINDOW_DIALOG_PVR_UPDATE_PROGRESS},
     {"pvrosdchannels", WINDOW_DIALOG_PVR_OSD_CHANNELS},
     {"pvrchannelguide", WINDOW_DIALOG_PVR_CHANNEL_GUIDE},
+    {"pvrremotekeys", WINDOW_DIALOG_PVR_REMOTE_KEYS},
     {"pvrosdguide", WINDOW_DIALOG_PVR_CHANNEL_GUIDE}, // backward compatibility to v17
     {"pvrosdteletext", WINDOW_DIALOG_OSD_TELETEXT},
     {"systeminfo", WINDOW_SYSTEM_INFORMATION},

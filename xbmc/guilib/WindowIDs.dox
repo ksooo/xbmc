@@ -94,6 +94,7 @@ This page shows the window names, the window definition, the window ID and the s
 | PVRRadioRDSInfo         | WINDOW_DIALOG_PVR_RADIO_RDS_INFO     | 10610     | DialogPVRRadioRDSInfo.xml           |                                    |
 | PVRRecordingSettings    | WINDOW_DIALOG_PVR_RECORDING_SETTING  | 10611     | DialogSettings.xml                  |                                    |
 |                         | WINDOW_DIALOG_PVR_CLIENT_PRIORITIES  | 10612     | DialogSettings.xml                  |                                    |
+| PVRRemoteKeys           | WINDOW_DIALOG_PVR_REMOTE_KEYS        | 10614     | DialogPVRRemoteKeys.xml             |                                    |
 | TVChannels              | WINDOW_TV_CHANNELS                   | 10700     | MyPVRChannels.xml                   |                                    |
 | TVRecordings            | WINDOW_TV_RECORDINGS                 | 10701     | MyPVRRecordings.xml                 |                                    |
 | TVGuide                 | WINDOW_TV_GUIDE                      | 10702     | MyPVRGuide.xml                      |                                    |
