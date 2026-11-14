@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window type="dialog" id="1111">
+	<visible>PVR.IsHbbTVAppRunning + [Window.IsActive(fullscreenvideo) | Window.IsActive(visualisation)]</visible>
+	<depth>DepthOSD</depth>
+	<zorder>0</zorder>
+	<controls>
+		<control type="label">
+			<left>96</left>
+			<bottom>50</bottom>
+			<width>300</width>
+			<height>40</height>
+			<label>HbbTV</label>
+			<font>font30_title</font>
+			<textcolor>99FFFFFF</textcolor>
+			<shadowcolor>CC000000</shadowcolor>
+		</control>
+	</controls>
+</window>

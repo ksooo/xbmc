@@ -1977,6 +1977,9 @@ bool CPVRGUIInfo::GetPVRBool(const CGUIInfo& info, bool& bValue) const
     case PVR_HAS_HBBTV_APP:
       bValue = CServiceBroker::GetPVRManager().Get<CPVRHbbTV>().HasApplications();
       return true;
+    case PVR_IS_HBBTV_APP_RUNNING:
+      bValue = CServiceBroker::GetPVRManager().Get<CPVRHbbTV>().IsApplicationRunning();
+      return true;
     case PVR_IS_PLAYING_RADIO:
       bValue = m_bIsPlayingRadio;
       return true;

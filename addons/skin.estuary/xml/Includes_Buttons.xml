@@ -18,6 +18,63 @@
 		<radioposx>1</radioposx>
 		<radioposy>0</radioposy>
 	</include>
+	<include name="ColourKeyButton">
+		<definition>
+			<control type="radiobutton" id="$PARAM[id]">
+				<width>76</width>
+				<height>76</height>
+				<label></label>
+				<font></font>
+				<texturefocus border="20">osd/fullscreen/buttons/key-fo.png</texturefocus>
+				<texturenofocus border="20" colordiffuse="1FFFFFFF">osd/fullscreen/buttons/key-nofo.png</texturenofocus>
+				<textureradioonfocus colordiffuse="$PARAM[colour]">osd/fullscreen/buttons/button-fo.png</textureradioonfocus>
+				<textureradioonnofocus colordiffuse="$PARAM[colour]">osd/fullscreen/buttons/button-fo.png</textureradioonnofocus>
+				<textureradioofffocus colordiffuse="$PARAM[colour]">osd/fullscreen/buttons/button-fo.png</textureradioofffocus>
+				<textureradiooffnofocus colordiffuse="$PARAM[colour]">osd/fullscreen/buttons/button-fo.png</textureradiooffnofocus>
+				<radiowidth>44</radiowidth>
+				<radioheight>44</radioheight>
+				<radioposx>16</radioposx>
+				<radioposy>16</radioposy>
+				<animation center="38,38" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+			</control>
+		</definition>
+	</include>
+	<include name="RemoteKeyLabelButton">
+		<definition>
+			<control type="button" id="$PARAM[id]">
+				<width>76</width>
+				<height>76</height>
+				<label>$NUMBER[$PARAM[label]]</label>
+				<font>font37</font>
+				<align>center</align>
+				<aligny>center</aligny>
+				<texturefocus border="20">osd/fullscreen/buttons/key-fo.png</texturefocus>
+				<texturenofocus border="20" colordiffuse="1FFFFFFF">osd/fullscreen/buttons/key-nofo.png</texturenofocus>
+				<animation center="38,38" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+			</control>
+		</definition>
+	</include>
+	<include name="RemoteKeyIconButton">
+		<definition>
+			<control type="radiobutton" id="$PARAM[id]">
+				<width>76</width>
+				<height>76</height>
+				<label></label>
+				<font></font>
+				<texturefocus border="20">osd/fullscreen/buttons/key-fo.png</texturefocus>
+				<texturenofocus border="20" colordiffuse="1FFFFFFF">osd/fullscreen/buttons/key-nofo.png</texturenofocus>
+				<textureradioonfocus>$PARAM[texture]</textureradioonfocus>
+				<textureradioonnofocus>$PARAM[texture]</textureradioonnofocus>
+				<textureradioofffocus>$PARAM[texture]</textureradioofffocus>
+				<textureradiooffnofocus>$PARAM[texture]</textureradiooffnofocus>
+				<radiowidth>74</radiowidth>
+				<radioheight>74</radioheight>
+				<radioposx>1</radioposx>
+				<radioposy>0</radioposy>
+				<animation center="38,38" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+			</control>
+		</definition>
+	</include>
 	<include name="InfoDialogMetadata">
 		<param name="onclick_condition">false</param>
 		<param name="onclick">noop</param>

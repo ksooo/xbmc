@@ -567,6 +567,14 @@
       <teletext>Back</teletext>
     </remote>
   </Teletext>
+  <PVRRemoteKeys>
+    <remote>
+      <red>Red</red>
+      <green>Green</green>
+      <yellow>Yellow</yellow>
+      <blue>Blue</blue>
+    </remote>
+  </PVRRemoteKeys>
   <FullscreenLiveTV>
     <remote>
       <left>StepBack</left>
@@ -575,6 +583,10 @@
       <down>Down</down>
       <pageplus>ChannelUp</pageplus>
       <pageminus>ChannelDown</pageminus>
+      <red>Red</red>
+      <green>Green</green>
+      <yellow>Yellow</yellow>
+      <blue>Blue</blue>
     </remote>
   </FullscreenLiveTV>
   <FullscreenRadio>
@@ -585,6 +597,10 @@
       <down>Down</down>
       <pageplus>ChannelUp</pageplus>
       <pageminus>ChannelDown</pageminus>
+      <red>Red</red>
+      <green>Green</green>
+      <yellow>Yellow</yellow>
+      <blue>Blue</blue>
     </remote>
   </FullscreenRadio>
   <FullscreenLiveTvPreview>

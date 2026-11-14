@@ -8,6 +8,7 @@ set(SOURCES GUIDialogPVRChannelManager.cpp
             GUIDialogPVRRadioRDSInfo.cpp
             GUIDialogPVRRecordingInfo.cpp
             GUIDialogPVRRecordingSettings.cpp
+            GUIDialogPVRRemoteKeys.cpp
             GUIDialogPVRTimerSettings.cpp
             GUIDialogPVRClientPriorities.cpp
             GUIDialogPVRItemsViewBase.cpp)
@@ -22,6 +23,7 @@ set(HEADERS GUIDialogPVRChannelManager.h
             GUIDialogPVRRadioRDSInfo.h
             GUIDialogPVRRecordingInfo.h
             GUIDialogPVRRecordingSettings.h
+            GUIDialogPVRRemoteKeys.h
             GUIDialogPVRTimerSettings.h
             GUIDialogPVRClientPriorities.h
             GUIDialogPVRItemsViewBase.h)

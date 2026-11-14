@@ -132,6 +132,7 @@ constexpr int MAX_BUFFER_AGE = 10;
 #include "pvr/dialogs/GUIDialogPVRRadioRDSInfo.h"
 #include "pvr/dialogs/GUIDialogPVRRecordingInfo.h"
 #include "pvr/dialogs/GUIDialogPVRRecordingSettings.h"
+#include "pvr/dialogs/GUIDialogPVRRemoteKeys.h"
 #include "pvr/dialogs/GUIDialogPVRTimerSettings.h"
 #include "pvr/windows/GUIWindowPVRChannels.h"
 #include "pvr/windows/GUIWindowPVRGuide.h"
@@ -325,6 +326,7 @@ void CGUIWindowManager::CreateWindows()
   Add(new CGUIDialogPVRRecordingSettings);
   Add(new CGUIDialogPVRClientPriorities);
   Add(new CGUIDialogPVRGuideControls);
+  Add(new CGUIDialogPVRRemoteKeys);
 
   Add(new CGUIDialogSelect);
   Add(new CGUIDialogColorPicker);
@@ -462,6 +464,7 @@ bool CGUIWindowManager::DestroyWindows()
     DestroyWindow(WINDOW_DIALOG_PVR_RECORDING_SETTING);
     DestroyWindow(WINDOW_DIALOG_PVR_CLIENT_PRIORITIES);
     DestroyWindow(WINDOW_DIALOG_PVR_GUIDE_CONTROLS);
+    DestroyWindow(WINDOW_DIALOG_PVR_REMOTE_KEYS);
 
     DestroyWindow(WINDOW_DIALOG_TEXT_VIEWER);
 #ifdef HAS_OPTICAL_DRIVE

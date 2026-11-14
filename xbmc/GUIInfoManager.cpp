@@ -9283,6 +9283,14 @@ constexpr std::array<InfoMap, 7> playlist = {{
 ///     @skinning_v23 **[New Boolean Condition]** \link PVR_HasHbbTVApp `PVR.HasHbbTVApp`\endlink
 ///     <p>
 ///   }
+///   \table_row3{   <b>`PVR.IsHbbTVAppRunning`</b>,
+///                  \anchor PVR_IsHbbTVAppRunning
+///                  _boolean_,
+///     @return **True** if an interactive (HbbTV) application is running.
+///     <p><hr>
+///     @skinning_v23 **[New Boolean Condition]** \link PVR_IsHbbTVAppRunning `PVR.IsHbbTVAppRunning`\endlink
+///     <p>
+///   }
 ///   \table_row3{   <b>`PVR.HbbTVAppName`</b>,
 ///                  \anchor PVR_HbbTVAppName
 ///                  _string_,
@@ -9296,7 +9304,7 @@ constexpr std::array<InfoMap, 7> playlist = {{
 ///
 /// -----------------------------------------------------------------------------
 // clang-format off
-constexpr std::array<InfoMap, 84> pvr = {{
+constexpr std::array<InfoMap, 85> pvr = {{
     {"isrecording",                   PVR_IS_RECORDING},
     {"hastimer",                      PVR_HAS_TIMER},
     {"hastvchannels",                 PVR_HAS_TV_CHANNELS},
@@ -9380,6 +9388,7 @@ constexpr std::array<InfoMap, 84> pvr = {{
     {"clientname",                    PVR_CLIENT_NAME},
     {"instancename",                  PVR_INSTANCE_NAME},
     {"hashbbtvapp",                   PVR_HAS_HBBTV_APP},
+    {"ishbbtvapprunning",             PVR_IS_HBBTV_APP_RUNNING},
     {"hbbtvappname",                  PVR_HBBTV_APP_NAME},
 }};
 // clang-format on
