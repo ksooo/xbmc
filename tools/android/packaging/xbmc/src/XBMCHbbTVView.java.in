@@ -1,0 +1,593 @@
+package @APP_PACKAGE@;
+
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeProvider;
+import android.webkit.ConsoleMessage;
+import android.webkit.CookieManager;
+import android.webkit.JsPromptResult;
+import android.webkit.JsResult;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
+
+import org.json.JSONObject;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * HbbTV application overlay: a transparent WebView in its own window above Kodi's surfaces,
+ * with a surface for Kodi's GUI on top. The static entry points may be called from any
+ * thread; the views live on their own thread. Keys the application does not take are handed
+ * back to Kodi through the native side.
+ */
+public class XBMCHbbTVView extends WebView
+{
+  private static final String BRIDGE_PROMPT = "__orb_bridge__";
+  private static final String ORB_PLAYER_URL = "orb://player";
+
+  // HbbTV applications are authored for a 1280x720 graphics plane.
+  private static final int APP_PLANE_WIDTH = 1280;
+  private static final int APP_PLANE_HEIGHT = 720;
+  private static final long WARMUP_TIMEOUT_MS = 5000;
+
+  // Same threshold as Kodi's own long press detection.
+  private static final int LONG_PRESS_MS = 250;
+
+  // HbbTV virtual key code of the select key
+  private static final int VK_ENTER = 13;
+
+  // Results of _routeKey, the values of CPVRGUIHbbTVKeyRouter::Target
+  private static final int KEY_TARGET_APPLICATION = 0;
+  private static final int KEY_TARGET_APPLICATION_VIRTUAL = 1;
+  private static final int KEY_TARGET_KODI = 2;
+  private static final int KEY_TARGET_NONE = 3;
+  private static final int KEY_TARGET_HOLD = 4;
+
+  // Linux input event code KEY_ENTER, which Chromium maps to the DOM code "Enter".
+  private static final int SCANCODE_ENTER = 28;
+
+  private static native String _request(String json);
+  private static native byte[] _polyfillScript(String url);
+  private static native byte[] _playerPage(String url);
+  // Returns {String url, String mimeType, String charset, byte[] body, String[] cookies}, null
+  // if the document cannot be fetched.
+  private static native Object[] _fetchDocument(String url, String cookies);
+  private static native String _keyEventScript(int virtualKey, String type);
+  private static native void _onNewDocument();
+  private static native void _onActive(boolean active);
+  private static native int _virtualKeyFor(int keyCode);
+  private static native int _routeKey(int keyCode, int metaState, boolean down, boolean repeat);
+  private static native void _onKeyHeld();
+  private static native void _forwardKey(int keyCode, int metaState, boolean up);
+  private static native void _setTopLayerSurface(Surface surface);
+  private static native void _log(String message);
+  private static native void _logConsole(String message, boolean error);
+  private static native String _userAgent();
+
+  // The views run on their own thread, so their stalls, e.g. while the WebView's code is paged
+  // in, do not hold up Kodi's frame callbacks on the main thread.
+  private static final Handler sHandler = createHandler();
+  private static XBMCHbbTVView sView = null;
+  private static CountDownLatch sWarmup = null;
+  // Built by the warm-up for the first application, so its launch does not stall the video.
+  private static XBMCHbbTVView sSpareView = null;
+
+  // Key down kept until its release or until the key counts as held.
+  private KeyEvent mPendingKey = null;
+  private final String mUserAgent = _userAgent();
+  private FrameLayout mContainer;
+  private WindowManager.LayoutParams mLayout;
+  private Rect mDisplay;
+
+  private static Handler createHandler()
+  {
+    HandlerThread thread = new HandlerThread("HbbTV");
+    thread.start();
+    return new Handler(thread.getLooper());
+  }
+
+  public static void prepare(boolean wait)
+  {
+    CountDownLatch warmup;
+    synchronized (XBMCHbbTVView.class)
+    {
+      if (sWarmup == null)
+      {
+        sWarmup = new CountDownLatch(1);
+        startWarmup();
+      }
+      warmup = sWarmup;
+    }
+    if (!wait)
+      return;
+    try
+    {
+      warmup.await(WARMUP_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+    }
+    catch (InterruptedException e)
+    {
+    }
+  }
+
+  private static void startWarmup()
+  {
+    // Two steps, so the UI thread draws frames in between.
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        _log("starting WebView runtime");
+        sSpareView = new XBMCHbbTVView(Main.MainActivity);
+      }
+    });
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        sSpareView.createWindow(Main.MainActivity);
+        sWarmup.countDown();
+      }
+    });
+  }
+
+  public static void launch(final String url)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView != null)
+          sView.destroyView();
+        sView = takeSpareView();
+        sView.attach();
+        sView.loadApplication(url);
+      }
+    });
+  }
+
+  public static void close()
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView == null)
+          return;
+        _log("closing application");
+        sView.destroyView();
+        sView = null;
+      }
+    });
+  }
+
+  public static void load(final String url)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView != null)
+          sView.loadApplication(url);
+      }
+    });
+  }
+
+  public static void show(final boolean visible)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView == null)
+          return;
+        // Only the application view: Kodi's GUI above it stays.
+        sView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+      }
+    });
+  }
+
+  public static void evaluate(final String script)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView != null)
+          sView.evaluateJavascript(script, null);
+      }
+    });
+  }
+
+  public static void sendKey(final int virtualKey)
+  {
+    sHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (sView == null)
+          return;
+        sView.dispatchKey(virtualKey, "keydown");
+        sView.dispatchKey(virtualKey, "keyup");
+      }
+    });
+  }
+
+  // The view built by the warm-up, unless the display changed since.
+  private static XBMCHbbTVView takeSpareView()
+  {
+    XBMCHbbTVView view = sSpareView;
+    sSpareView = null;
+    if (view != null && view.mDisplay.equals(Main.MainActivity.getDisplayRect()))
+      return view;
+    if (view != null)
+      view.destroy();
+    view = new XBMCHbbTVView(Main.MainActivity);
+    view.createWindow(Main.MainActivity);
+    return view;
+  }
+
+  private XBMCHbbTVView(Main activity)
+  {
+    super(activity);
+
+    setBackgroundColor(Color.TRANSPARENT);
+    setFocusable(true);
+    setFocusableInTouchMode(true);
+
+    WebSettings settings = getSettings();
+    settings.setJavaScriptEnabled(true);
+    settings.setDomStorageEnabled(true);
+    settings.setMediaPlaybackRequiresUserGesture(false);
+    settings.setUserAgentString(mUserAgent);
+    settings.setUseWideViewPort(true);
+    settings.setLoadWithOverviewMode(false);
+    settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+    setWebChromeClient(new ChromeClient());
+    setWebViewClient(new ViewClient());
+  }
+
+  // With an accessibility service enabled, which many Android TV launchers and key remappers
+  // do, building the page's accessibility tree on first focus stalled Kodi's video.
+  @Override
+  public AccessibilityNodeProvider getAccessibilityNodeProvider()
+  {
+    return null;
+  }
+
+  private void createWindow(Main activity)
+  {
+    // The 1280x720 application plane is the largest 16:9 area centred on the display, like a
+    // full screen video. Kodi's bridge maps video rectangles with the same geometry.
+    Rect display = activity.getDisplayRect();
+    mDisplay = display;
+    float scale = Math.min(display.width() / (float) APP_PLANE_WIDTH,
+                           display.height() / (float) APP_PLANE_HEIGHT);
+    int planeWidth = Math.round(APP_PLANE_WIDTH * scale);
+    int planeHeight = Math.round(APP_PLANE_HEIGHT * scale);
+    setInitialScale(Math.round(scale * 100));
+
+    // The window covers the whole display, like Kodi's GUI shown above the application.
+    mContainer = new FrameLayout(activity)
+    {
+      @Override
+      public boolean dispatchKeyEvent(KeyEvent event)
+      {
+        return handleKeyEvent(event);
+      }
+    };
+    FrameLayout.LayoutParams plane = new FrameLayout.LayoutParams(planeWidth, planeHeight);
+    plane.leftMargin = (display.width() - planeWidth) / 2;
+    plane.topMargin = (display.height() - planeHeight) / 2;
+    mContainer.addView(this, plane);
+    mContainer.addView(createTopLayerView(activity), new FrameLayout.LayoutParams(
+        FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+    WindowManager.LayoutParams layout = new WindowManager.LayoutParams(display.width(),
+        display.height(),
+        WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
+        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+            | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+            | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+        PixelFormat.TRANSLUCENT);
+    layout.gravity = Gravity.TOP | Gravity.START;
+    mLayout = layout;
+  }
+
+  private void attach()
+  {
+    mLayout.token = Main.MainActivity.getWindow().getDecorView().getWindowToken();
+    Main.MainActivity.getWindowManager().addView(mContainer, mLayout);
+    requestFocus();
+    _onActive(true);
+  }
+
+  private void destroyView()
+  {
+    _onActive(false);
+    Main.MainActivity.getWindowManager().removeView(mContainer);
+    stopLoading();
+    destroy();
+  }
+
+  // Kodi renders its GUI into this surface, shown above the application.
+  private SurfaceView createTopLayerView(Main activity)
+  {
+    SurfaceView view = new SurfaceView(activity);
+    view.setZOrderOnTop(true);
+    view.getHolder().setFormat(PixelFormat.TRANSPARENT);
+    view.getHolder().addCallback(new SurfaceHolder.Callback()
+    {
+      @Override
+      public void surfaceCreated(SurfaceHolder holder)
+      {
+        _setTopLayerSurface(holder.getSurface());
+      }
+
+      @Override
+      public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+      {
+      }
+
+      @Override
+      public void surfaceDestroyed(SurfaceHolder holder)
+      {
+        _setTopLayerSurface(null);
+      }
+    });
+    return view;
+  }
+
+  private void loadApplication(String url)
+  {
+    _log("loading '" + url + "'");
+    loadUrl(url);
+  }
+
+  private void dispatchKey(int virtualKey, String type)
+  {
+    evaluateJavascript(_keyEventScript(virtualKey, type), null);
+  }
+
+  // All keys of the window arrive here, whichever view has the focus.
+  private boolean handleKeyEvent(KeyEvent event)
+  {
+    final int action = event.getAction();
+    if (action != KeyEvent.ACTION_DOWN && action != KeyEvent.ACTION_UP)
+      return true;
+
+    final boolean down = action == KeyEvent.ACTION_DOWN;
+    final int keyCode = event.getKeyCode();
+    final int virtualKey = _virtualKeyFor(keyCode);
+    final int target = _routeKey(keyCode, event.getMetaState(), down, event.getRepeatCount() > 0);
+    if (target == KEY_TARGET_NONE)
+      return true;
+
+    if (target == KEY_TARGET_HOLD)
+    {
+      final KeyEvent held = event;
+      mPendingKey = held;
+      sHandler.postDelayed(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          if (mPendingKey != held)
+            return;
+          mPendingKey = null;
+          _onKeyHeld();
+        }
+      }, LONG_PRESS_MS);
+      return true;
+    }
+
+    // A key that was kept until its release goes first.
+    if (!down && mPendingKey != null && mPendingKey.getKeyCode() == keyCode)
+    {
+      final KeyEvent pending = mPendingKey;
+      mPendingKey = null;
+      deliverKey(pending, virtualKey, target);
+    }
+    deliverKey(event, virtualKey, target);
+    return true;
+  }
+
+  private void deliverKey(KeyEvent event, int virtualKey, int target)
+  {
+    final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+    if (target != KEY_TARGET_KODI)
+    {
+      if (target == KEY_TARGET_APPLICATION)
+      {
+        // The select key of a remote carries no character, so the page would see a keydown
+        // without the keypress a keyboard's Enter produces. Hand it over as Enter, with the
+        // scan code of an Enter key: without one the page sees an empty 'code' and the
+        // polyfill replaces the event by an untrusted copy that activates no button.
+        if (virtualKey == VK_ENTER && event.getKeyCode() != KeyEvent.KEYCODE_ENTER)
+          event = new KeyEvent(event.getDownTime(), event.getEventTime(), event.getAction(),
+                               KeyEvent.KEYCODE_ENTER, event.getRepeatCount(),
+                               event.getMetaState(), event.getDeviceId(), SCANCODE_ENTER,
+                               event.getFlags(), event.getSource());
+        dispatchKeyEvent(event);
+      }
+      else
+        dispatchKey(virtualKey, down ? "keydown" : "keyup");
+      return;
+    }
+
+    // Like a TV set, keys the application did not ask for stay with Kodi.
+    _forwardKey(event.getKeyCode(), event.getMetaState(), !down);
+  }
+
+  // Serves the polyfill's internal player page. The polyfill loads broadband media in an
+  // iframe with this page, which hosts the actual video element.
+  private WebResourceResponse playerPage(String url)
+  {
+    final byte[] page = _playerPage(url);
+    if (page == null)
+      return null;
+    return new WebResourceResponse("text/html", "UTF-8", new ByteArrayInputStream(page));
+  }
+
+  // Fetches the application document and injects the polyfill, as ORB does on Android. This
+  // also turns application/vnd.hbbtv.xhtml+xml, which the WebView refuses, into XHTML.
+  private WebResourceResponse fetchDocument(String url)
+  {
+    final byte[] polyfill = _polyfillScript(url);
+    if (polyfill == null)
+      return null;
+
+    try
+    {
+      // Kodi's HTTP client fetches the document. It shares the WebView's cookies in both
+      // directions.
+      final String cookies = CookieManager.getInstance().getCookie(url);
+      final Object[] fetched = _fetchDocument(url, cookies != null ? cookies : "");
+      if (fetched == null)
+        return null;
+
+      final String finalUrl = (String) fetched[0];
+      final String mimeType = (String) fetched[1];
+      final String charset = (String) fetched[2];
+      final byte[] body = (byte[]) fetched[3];
+      for (String cookie : (String[]) fetched[4])
+        CookieManager.getInstance().setCookie(finalUrl, cookie);
+
+      // A response served for a redirected request keeps the requested URL, so relative
+      // links would resolve against the wrong location. Navigate to the final URL instead,
+      // which comes through here again.
+      if (!finalUrl.equals(url))
+      {
+        String redirect = "<script>location.replace(" + JSONObject.quote(finalUrl) + ");</script>";
+        return new WebResourceResponse("text/html", "UTF-8",
+                                       new ByteArrayInputStream(redirect.getBytes(StandardCharsets.UTF_8)));
+      }
+
+      // CDATA keeps the script intact in XHTML documents.
+      String document = new String(body, charset);
+      // Without it, the layout viewport is the view size in device independent pixels and only
+      // the visual viewport is scaled to the application plane.
+      String injection = "<meta name=\"viewport\" content=\"width=" + APP_PLANE_WIDTH + "\"/>"
+          + "<script>//<![CDATA[\n" + screenScript()
+          + new String(polyfill, StandardCharsets.UTF_8) + "\n//]]></script>";
+      Matcher head = Pattern.compile("<head[^>]*>", Pattern.CASE_INSENSITIVE).matcher(document);
+      if (head.find())
+        document = document.substring(0, head.end()) + injection + document.substring(head.end());
+      else
+        document = injection + document;
+
+      _log("serving '" + url + "' as " + mimeType);
+      return new WebResourceResponse(mimeType, charset,
+                                     new ByteArrayInputStream(document.getBytes(charset)));
+    }
+    catch (Exception e)
+    {
+      _log("fetching '" + url + "' failed: " + e);
+      return null;
+    }
+  }
+
+  // Applications size full screen content by the screen, which on a TV is the application
+  // plane. The WebView reports the display in device independent pixels instead.
+  private static String screenScript()
+  {
+    return "[['width'," + APP_PLANE_WIDTH + "],['height'," + APP_PLANE_HEIGHT + "],"
+        + "['availWidth'," + APP_PLANE_WIDTH + "],['availHeight'," + APP_PLANE_HEIGHT + "]]"
+        + ".forEach(function(p){Object.defineProperty(screen,p[0],{get:function(){return p[1];}});});\n";
+  }
+
+  private class ViewClient extends WebViewClient
+  {
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request)
+    {
+      if (!"GET".equals(request.getMethod()))
+        return null;
+      String url = request.getUrl().toString();
+      if (url.startsWith(ORB_PLAYER_URL))
+        return playerPage(url);
+      if (!request.isForMainFrame())
+        return null;
+      return fetchDocument(url);
+    }
+
+    @Override
+    public void onPageStarted(WebView view, String url, Bitmap favicon)
+    {
+      // A new document starts with the broadcast in full screen until it asks otherwise.
+      _onNewDocument();
+    }
+
+    @Override
+    public void onPageFinished(WebView view, String url)
+    {
+      _log("loaded '" + url + "'");
+    }
+  }
+
+  private class ChromeClient extends WebChromeClient
+  {
+    @Override
+    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue,
+                              JsPromptResult result)
+    {
+      if (BRIDGE_PROMPT.equals(message))
+        result.confirm(_request(defaultValue));
+      else
+        result.cancel();
+      return true;
+    }
+
+    @Override
+    public boolean onJsAlert(WebView view, String url, String message, JsResult result)
+    {
+      _log("alert: " + message);
+      result.confirm();
+      return true;
+    }
+
+    @Override
+    public boolean onConsoleMessage(ConsoleMessage message)
+    {
+      _logConsole(message.message() + " @ " + message.sourceId() + ":" + message.lineNumber(),
+                  message.messageLevel() == ConsoleMessage.MessageLevel.ERROR);
+      return true;
+    }
+
+    // Replaces the play symbol the web view shows for a video that has not started yet.
+    @Override
+    public Bitmap getDefaultVideoPoster()
+    {
+      return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+    }
+  }
+}

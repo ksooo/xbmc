@@ -18,7 +18,9 @@
 #include "platform/android/activity/XBMCApp.h"
 
 #include <memory>
+#include <mutex>
 
+#include <android/native_window.h>
 #include <unistd.h>
 
 #include "PlatformDefs.h"
@@ -136,6 +138,9 @@ void CWinSystemAndroidGLESContext::PresentRenderImpl(bool rendered)
   if (IsHdmiModeTriggered())
     SetHdmiState(true);
 
+  if (rendered)
+    PresentTopLayer();
+
   // Ignore EGL_BAD_SURFACE: It seems to happen during/after mode changes, but
   // we can't actually do anything about it
   if (rendered && !m_pGLContext.TrySwapBuffers())
@@ -214,6 +219,104 @@ bool CWinSystemAndroidGLESContext::CreateSurface()
   }
 #endif
   return true;
+}
+
+void CWinSystemAndroidGLESContext::SetTopLayerWindow(ANativeWindow* window)
+{
+  // The surface is only current while the lock is held, so it is gone when this returns.
+  std::unique_lock lock(m_topLayerLock);
+  if (m_topLayerSurface != EGL_NO_SURFACE)
+  {
+    eglDestroySurface(m_pGLContext.GetEGLDisplay(), m_topLayerSurface);
+    m_topLayerSurface = EGL_NO_SURFACE;
+  }
+  if (m_topLayerWindow)
+    ANativeWindow_release(m_topLayerWindow);
+  m_topLayerWindow = window;
+}
+
+bool CWinSystemAndroidGLESContext::BeginTopLayer()
+{
+  {
+    std::unique_lock lock(m_topLayerLock);
+    if (!m_topLayerWindow)
+      return false;
+  }
+  if (m_RenderVersionMajor < 3)
+    return false;
+
+  return m_topLayer.Begin(m_width, m_height, GetEnabledFrontToBackRendering());
+}
+
+void CWinSystemAndroidGLESContext::EndTopLayer()
+{
+  m_topLayer.End();
+}
+
+bool CWinSystemAndroidGLESContext::SuspendTopLayer()
+{
+  return m_topLayer.Suspend();
+}
+
+void CWinSystemAndroidGLESContext::ResumeTopLayer()
+{
+  m_topLayer.Resume();
+}
+
+void CWinSystemAndroidGLESContext::PresentTopLayer()
+{
+  std::unique_lock lock(m_topLayerLock);
+  if (!m_topLayerWindow)
+  {
+    if (m_topLayer.IsCreated())
+      m_topLayer.Release();
+    return;
+  }
+  if (!m_topLayer.TakeDirty())
+    return;
+
+  const EGLDisplay display = m_pGLContext.GetEGLDisplay();
+  const int width = m_topLayer.GetWidth();
+  const int height = m_topLayer.GetHeight();
+  if (m_topLayerSurface != EGL_NO_SURFACE &&
+      (m_topLayerSurfaceWidth != width || m_topLayerSurfaceHeight != height))
+  {
+    eglDestroySurface(display, m_topLayerSurface);
+    m_topLayerSurface = EGL_NO_SURFACE;
+  }
+  if (m_topLayerSurface == EGL_NO_SURFACE)
+  {
+    ANativeWindow_setBuffersGeometry(m_topLayerWindow, width, height, 0);
+    m_topLayerSurface =
+        eglCreateWindowSurface(display, m_pGLContext.GetEGLConfig(), m_topLayerWindow, nullptr);
+    if (m_topLayerSurface == EGL_NO_SURFACE)
+    {
+      CEGLUtils::Log(LOGERROR, "cannot create the top layer surface");
+      return;
+    }
+    m_topLayerSurfaceWidth = width;
+    m_topLayerSurfaceHeight = height;
+  }
+
+  if (eglMakeCurrent(display, m_topLayerSurface, m_topLayerSurface, m_pGLContext.GetEGLContext()) !=
+      EGL_TRUE)
+  {
+    CEGLUtils::Log(LOGERROR, "cannot bind the top layer surface");
+    return;
+  }
+  eglSwapInterval(display, 0);
+
+  const bool scissor = glIsEnabled(GL_SCISSOR_TEST);
+  glDisable(GL_SCISSOR_TEST);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, m_topLayer.GetFramebuffer());
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+  glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  if (scissor)
+    glEnable(GL_SCISSOR_TEST);
+  eglSwapBuffers(display, m_topLayerSurface);
+
+  m_pGLContext.BindContext();
 }
 
 bool CWinSystemAndroidGLESContext::IsHDRDisplay()

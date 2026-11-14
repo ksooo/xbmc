@@ -48,6 +48,7 @@ set(package_files strings.xml
                   src/XBMCProperties.java
                   src/XBMCVideoView.java
                   src/XBMCFile.java
+                  src/XBMCHbbTVView.java
                   src/XBMCTextureCache.java
                   src/XBMCURIUtils.java
                   src/KodiDeepLinkActivity.java
