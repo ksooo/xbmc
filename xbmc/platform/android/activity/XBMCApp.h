@@ -108,6 +108,10 @@ public:
   void onActivityResult(int requestCode, int resultCode, CJNIIntent resultData) override;
   void onVolumeChanged(int volume) override;
   virtual void onAudioFocusChange(int focusChange);
+  //! While set, losing the audio focus neither pauses nor stops playback. For views of Kodi's
+  //! own that play media alongside it and take the focus, e.g. an HbbTV application.
+  void SetIgnoreAudioFocusLoss(bool ignore) { m_ignoreAudioFocusLoss = ignore; }
+
   void doFrame(int64_t frameTimeNanos) override;
   void onVisibleBehindCanceled() override;
 
@@ -269,6 +273,7 @@ private:
   void OnWakeup();
 
   uint32_t m_playback_state{0};
+  std::atomic<bool> m_ignoreAudioFocusLoss{false};
   int64_t m_frameTimeNanos{0};
   float m_refreshRate{0.0f};
 

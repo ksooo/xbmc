@@ -15,6 +15,7 @@
 #include "utils/log.h"
 #include "windowing/android/WinSystemAndroidGLESContext.h"
 
+#include "platform/android/activity/JNIXBMCHbbTVView.h"
 #include "platform/android/activity/XBMCApp.h"
 #include "platform/android/powermanagement/AndroidPowerSyscall.h"
 #include "platform/android/storage/AndroidStorageProvider.h"
@@ -42,6 +43,15 @@ bool CPlatformAndroid::InitStageOne()
 
   CAndroidPowerSyscall::Register();
 
+  return true;
+}
+
+bool CPlatformAndroid::InitStageTwo()
+{
+  if (!CPlatformPosix::InitStageTwo())
+    return false;
+
+  jni::CJNIXBMCHbbTVView::Register();
   return true;
 }
 
