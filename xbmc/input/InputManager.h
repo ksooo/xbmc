@@ -209,6 +209,18 @@ public:
    */
   CAction GetAction(int window, const CKey& key, bool fallback = true);
 
+  /*!
+   * \brief Whether a long press of the key is mapped to an action in the window. Can be called
+   * from any thread.
+   */
+  bool HasLongpressMapping(int window, XBMC_keysym keysym) const;
+
+  /*!
+   * \brief Queue the action a long press of the key is mapped to in the window. Can be called
+   * from any thread.
+   */
+  void QueueLongpress(int window, XBMC_keysym keysym);
+
   bool TranslateCustomControllerString(int windowId,
                                        const std::string& controllerName,
                                        int buttonId,

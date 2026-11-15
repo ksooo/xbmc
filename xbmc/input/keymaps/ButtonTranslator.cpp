@@ -30,6 +30,7 @@
 #include "utils/log.h"
 
 #include <algorithm>
+#include <mutex>
 #include <utility>
 
 using namespace KODI;
@@ -38,6 +39,8 @@ using namespace KEYMAP;
 // Add the supplied device name to the list of connected devices
 bool CButtonTranslator::AddDevice(const std::string& strDevice)
 {
+  std::unique_lock lock(m_critSection);
+
   // Only add the device if it isn't already in the list
   if (m_deviceList.contains(strDevice))
     return false;
@@ -53,6 +56,8 @@ bool CButtonTranslator::AddDevice(const std::string& strDevice)
 
 bool CButtonTranslator::RemoveDevice(const std::string& strDevice)
 {
+  std::unique_lock lock(m_critSection);
+
   // Find the device
   auto it = m_deviceList.find(strDevice);
   if (it == m_deviceList.end())
@@ -69,6 +74,8 @@ bool CButtonTranslator::RemoveDevice(const std::string& strDevice)
 
 bool CButtonTranslator::Load()
 {
+  std::unique_lock lock(m_critSection);
+
   Clear();
 
   // Directories to search for keymaps. They're applied in this order,
@@ -178,6 +185,8 @@ bool CButtonTranslator::LoadKeymap(const std::string& keymapPath)
 
 CAction CButtonTranslator::GetAction(int window, const CKey& key, bool fallback)
 {
+  std::unique_lock lock(m_critSection);
+
   std::string strAction;
 
   // handle virtual windows
@@ -201,6 +210,8 @@ CAction CButtonTranslator::GetAction(int window, const CKey& key, bool fallback)
 
 bool CButtonTranslator::HasLongpressMapping(int window, const CKey& key)
 {
+  std::unique_lock lock(m_critSection);
+
   // handle virtual windows
   window = CWindowTranslator::GetVirtualWindow(window);
   return HasLongpressMapping_Internal(window, key);
@@ -364,6 +375,8 @@ void CButtonTranslator::MapWindowActions(const tinyxml2::XMLNode* pWindow, int w
 
 void CButtonTranslator::Clear()
 {
+  std::unique_lock lock(m_critSection);
+
   m_translatorMap.clear();
 
   for (auto it : m_buttonMappers)

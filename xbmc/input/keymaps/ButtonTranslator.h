@@ -10,6 +10,7 @@
 
 #include "input/actions/Action.h"
 #include "network/EventClient.h"
+#include "threads/CriticalSection.h"
 
 #include <map>
 #include <set>
@@ -36,7 +37,7 @@ class IWindowKeymap;
  *
  * \brief Singleton class to map from buttons to actions
  *
- * Warning: _not_ threadsafe!
+ * Loading the keymaps and looking up keys is threadsafe, registering mappers is not.
  */
 class CButtonTranslator
 {
@@ -104,6 +105,8 @@ private:
   bool HasLongpressMapping_Internal(int window, const CKey& key);
 
   std::map<std::string, IKeyMapper*> m_buttonMappers;
+
+  CCriticalSection m_critSection;
 };
 } // namespace KEYMAP
 } // namespace KODI
