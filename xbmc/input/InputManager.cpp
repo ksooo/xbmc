@@ -23,6 +23,7 @@
 #include "input/cec/ICecInputProvider.h"
 #include "input/keyboard/Key.h"
 #include "input/keyboard/KeyboardEasterEgg.h"
+#include "input/keyboard/KeyboardTypes.h"
 #include "input/keyboard/XBMC_vkeys.h"
 #include "input/keyboard/interfaces/IKeyboardDriverHandler.h"
 #include "input/keymaps/ButtonTranslator.h"
@@ -931,6 +932,19 @@ const KEYMAP::IKeymapEnvironment* CInputManager::KeymapEnvironment() const
 CAction CInputManager::GetAction(int window, const CKey& key, bool fallback /* = true */)
 {
   return m_buttonTranslator->GetAction(window, key, fallback);
+}
+
+bool CInputManager::HasLongpressMapping(int window, XBMC_keysym keysym) const
+{
+  return m_buttonTranslator->HasLongpressMapping(window,
+                                                 KEYBOARD::CKeyboardStat().TranslateKey(keysym));
+}
+
+void CInputManager::QueueLongpress(int window, XBMC_keysym keysym)
+{
+  const CKey key = KEYBOARD::CKeyboardStat().TranslateKey(keysym);
+  QueueAction(m_buttonTranslator->GetAction(
+      window, CKey(key.GetButtonCode() | CKey::MODIFIER_LONG, KEYBOARD::KEY_HOLD_TRESHOLD)));
 }
 
 bool CInputManager::TranslateCustomControllerString(int windowId,
