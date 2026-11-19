@@ -21,6 +21,7 @@ set(SOURCES android_main.cpp
             JNIXBMCSpeechRecognitionListener.cpp
             JNIXBMCConnectivityManagerNetworkCallback.cpp
             JNIXBMCBroadcastReceiver.cpp
+            JNIXBMCMediaCodecCallback.cpp
             ${NDKROOT}/sources/android/native_app_glue/android_native_app_glue.c)
 
 set(HEADERS AndroidJoyStick.h
@@ -46,6 +47,7 @@ set(HEADERS AndroidJoyStick.h
             JNIXBMCSpeechRecognitionListener.h
             JNIXBMCConnectivityManagerNetworkCallback.h
             JNIXBMCBroadcastReceiver.h
+            JNIXBMCMediaCodecCallback.h
             XBMCApp.h)
 
 set_source_files_properties(${NDKROOT}/sources/android/native_app_glue/android_native_app_glue.c PROPERTIES
